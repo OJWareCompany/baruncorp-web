@@ -15,14 +15,14 @@ type Story = StoryObj<typeof Button>;
 // More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
 export const Primary: Story = {
   args: {
-    variant: "default",
-    children: "Text",
+    variant: "primary",
+    children: "Button",
   },
 };
 
-export const Destructive: Story = {
+export const Outline: Story = {
   args: {
-    variant: "destructive",
-    children: "Text",
+    variant: "outline",
+    children: "Button",
   },
 };
