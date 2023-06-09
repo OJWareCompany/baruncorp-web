@@ -21,10 +21,11 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, error = false, ...props }, ref) => {
+  ({ className, type, defaultValue, error = false, ...props }, ref) => {
     return (
       <input
         type={type}
+        defaultValue={defaultValue}
         className={cn(inputVariants({ error, className }))}
         ref={ref}
         {...props}
