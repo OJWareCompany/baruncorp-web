@@ -9,8 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          "border border-primary bg-primary text-primary-foreground hover:bg-primary/90",
+        primary: "bg-primary text-primary-foreground hover:bg-primary/90",
         outline:
           "border border-input hover:bg-accent hover:text-accent-foreground",
       },
@@ -29,7 +28,7 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   variant?: "primary" | "outline";
   size?: "default";
-  fullWidth: boolean;
+  fullWidth?: boolean;
   asChild?: boolean;
 }
 
