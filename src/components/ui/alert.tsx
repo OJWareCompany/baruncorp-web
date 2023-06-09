@@ -1,7 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
@@ -20,7 +19,7 @@ const alertVariants = cva(
   }
 );
 
-const AlertWrapper = React.forwardRef<
+const Alert = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
 >(({ className, variant, ...props }, ref) => (
@@ -31,7 +30,7 @@ const AlertWrapper = React.forwardRef<
     {...props}
   />
 ));
-AlertWrapper.displayName = "Alert";
+Alert.displayName = "Alert";
 
 const AlertTitle = React.forwardRef<
   HTMLParagraphElement,
@@ -57,20 +56,4 @@ const AlertDescription = React.forwardRef<
 ));
 AlertDescription.displayName = "AlertDescription";
 
-interface Props {
-  title: string;
-  description?: string;
-  error?: boolean;
-}
-
-function Alert({ title, description, error = false }: Props) {
-  return (
-    <AlertWrapper variant={error ? "destructive" : "default"}>
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{description}</AlertDescription>
-    </AlertWrapper>
-  );
-}
-
-export { Alert };
+export { Alert, AlertTitle, AlertDescription };
