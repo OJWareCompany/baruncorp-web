@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 
 import { VariantProps, cva } from "class-variance-authority";
+import { Input, InputProps } from "./input";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
@@ -141,7 +142,11 @@ const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
-  const { formDescriptionId } = useFormField();
+  const { formDescriptionId, error } = useFormField();
+
+  if (Boolean(error)) {
+    return null;
+  }
 
   return (
     <p
@@ -159,9 +164,8 @@ const FormMessage = React.forwardRef<
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message) : children;
 
-  if (!body) {
+  if (!Boolean(error)) {
     return null;
   }
 
@@ -172,11 +176,20 @@ const FormMessage = React.forwardRef<
       className={cn("text-sm font-medium text-destructive", className)}
       {...props}
     >
-      {body}
+      {error?.message}
     </p>
   );
 });
 FormMessage.displayName = "FormMessage";
+
+const InputField = React.forwardRef<HTMLInputElement, InputProps>(
+  (props: InputProps, ref) => {
+    const { error } = useFormField();
+
+    return <Input ref={ref} {...props} error={Boolean(error)} />;
+  }
+);
+InputField.displayName = "InputField";
 
 export {
   useFormField,
@@ -187,4 +200,5 @@ export {
   FormDescription,
   FormMessage,
   FormField,
+  InputField,
 };
