@@ -7,9 +7,9 @@ interface Props {
   required?: boolean;
   disabled?: boolean;
   type?: string;
-  placeholder: string;
+  placeholder?: string;
   defaultValue?: string;
-  description: string;
+  description?: string;
   errorMessage?: string;
 }
 
