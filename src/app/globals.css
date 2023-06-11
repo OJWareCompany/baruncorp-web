@@ -79,3 +79,28 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+/* typography: https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes */
+@layer components {
+  .h1 {
+    @apply font-extrabold	text-5xl;
+  }
+  .h2 {
+    @apply font-semibold text-3xl;
+  }
+  .h3 {
+    @apply font-semibold text-2xl;
+  }
+  .h4 {
+    @apply font-semibold text-xl;
+  }
+  .p {
+    @apply font-normal text-base;
+  }
+  .sm {
+    @apply font-normal text-sm;
+  }
+  .sm-500 {
+    @apply font-medium text-sm;
+  }
+}
