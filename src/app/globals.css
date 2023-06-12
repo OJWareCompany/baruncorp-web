@@ -103,4 +103,7 @@
   .sm-500 {
     @apply font-medium text-sm;
   }
+  .muted {
+    @apply text-sm text-muted-foreground;
+  }
 }
