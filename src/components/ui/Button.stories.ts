@@ -26,3 +26,10 @@ export const Outline: Story = {
     children: "Button",
   },
 };
+
+export const Ghost: Story = {
+  args: {
+    variant: "ghost",
+    children: "Button",
+  },
+};
