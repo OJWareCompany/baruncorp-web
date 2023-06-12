@@ -37,12 +37,12 @@ export default function Header() {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
-            <Link href="/my-preferences">
-              <DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/my-preferences">
                 <UserCog2 className="mr-2 h-4 w-4" />
                 <span>My Preferences</span>
-              </DropdownMenuItem>
-            </Link>
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleSignOutButtonClick}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sign Out</span>
