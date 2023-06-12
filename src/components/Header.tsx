@@ -1,71 +1,53 @@
-import React from "react";
+"use client";
 
-import { Button } from "./Button";
-import "./header.css";
+import { LogOut, UserCog2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-type User = {
-  name: string;
-};
+export default function Header() {
+  const router = useRouter();
 
-interface HeaderProps {
-  user?: User;
-  onLogin: () => void;
-  onLogout: () => void;
-  onCreateAccount: () => void;
+  const handleSignOutButtonClick = () => {
+    // TODO: 인증 관련 로직 필요
+
+    router.push("/sign-in");
+  };
+
+  return (
+    <header className="px-6 h-16 flex items-center justify-between">
+      <h1 className="h2">Barun Corp</h1>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild={true}>
+          <div className="flex gap-2 items-center cursor-pointer">
+            <Avatar>
+              <AvatarFallback>El</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="p">Elon Musk</span>
+              <span className="muted">elonmusk@tesla.com</span>
+            </div>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          <Link href="/my-preferences">
+            <DropdownMenuItem>
+              <UserCog2 className="mr-2 h-4 w-4" />
+              <span>My Preferences</span>
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuItem onClick={handleSignOutButtonClick}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sign Out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </header>
+  );
 }
-
-export const Header = ({
-  user,
-  onLogin,
-  onLogout,
-  onCreateAccount,
-}: HeaderProps) => (
-  <header>
-    <div className="storybook-header">
-      <div>
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g fill="none" fillRule="evenodd">
-            <path
-              d="M10 0h12a10 10 0 0110 10v12a10 10 0 01-10 10H10A10 10 0 010 22V10A10 10 0 0110 0z"
-              fill="#FFF"
-            />
-            <path
-              d="M5.3 10.6l10.4 6v11.1l-10.4-6v-11zm11.4-6.2l9.7 5.5-9.7 5.6V4.4z"
-              fill="#555AB9"
-            />
-            <path
-              d="M27.2 10.6v11.2l-10.5 6V16.5l10.5-6zM15.7 4.4v11L6 10l9.7-5.5z"
-              fill="#91BAF8"
-            />
-          </g>
-        </svg>
-        <h1>Acme</h1>
-      </div>
-      <div>
-        {user ? (
-          <>
-            <span className="welcome">
-              Welcome, <b>{user.name}</b>!
-            </span>
-            <Button size="small" onClick={onLogout} label="Log out" />
-          </>
-        ) : (
-          <>
-            <Button size="small" onClick={onLogin} label="Log in" />
-            <Button
-              primary
-              size="small"
-              onClick={onCreateAccount}
-              label="Sign up"
-            />
-          </>
-        )}
-      </div>
-    </div>
-  </header>
-);
