@@ -12,6 +12,7 @@ const buttonVariants = cva(
         primary: "bg-primary text-primary-foreground hover:bg-primary/90",
         outline:
           "border border-input hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
       },
       size: {
         default: "h-10 py-2 px-4",
@@ -26,9 +27,6 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  variant?: "primary" | "outline";
-  size?: "default";
-  fullWidth?: boolean;
   asChild?: boolean;
 }
 
