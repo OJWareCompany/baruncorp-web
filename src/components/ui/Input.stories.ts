@@ -32,13 +32,6 @@ export const ReadOnly: Story = {
   },
 };
 
-export const Error: Story = {
-  args: {
-    defaultValue: "Input",
-    error: true,
-  },
-};
-
 export const Disabled: Story = {
   args: {
     value: "Input Placeholder",

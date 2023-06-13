@@ -11,9 +11,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  InputField,
 } from "./form";
 import { Button } from "./button";
+import { Input } from "./input";
 
 const formSchema = z.object({
   username: z.string().min(2).max(50),
@@ -50,15 +50,17 @@ const FormWithHooks = (
         <FormField
           control={form.control}
           name="username"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <InputField placeholder="shadcn" {...field} />
+                <Input placeholder="shadcn" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
+              {!fieldState.error && (
+                <FormDescription>
+                  This is your public display name.
+                </FormDescription>
+              )}
               <FormMessage />
             </FormItem>
           )}
