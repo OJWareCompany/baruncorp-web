@@ -102,12 +102,16 @@ const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   FormLabelProps
 >(({ className, required, ...props }, ref) => {
-  const { formItemId } = useFormField();
+  const { error, formItemId } = useFormField();
 
   return (
     <Label
       ref={ref}
-      className={cn(formLabelVariants({ required }), className)}
+      className={cn(
+        error && "text-destructive",
+        formLabelVariants({ required }),
+        className
+      )}
       htmlFor={formItemId}
       {...props}
     />
@@ -142,11 +146,7 @@ const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
-  const { formDescriptionId, error } = useFormField();
-
-  if (Boolean(error)) {
-    return null;
-  }
+  const { formDescriptionId } = useFormField();
 
   return (
     <p
@@ -176,20 +176,11 @@ const FormMessage = React.forwardRef<
       className={cn("text-sm font-medium text-destructive", className)}
       {...props}
     >
-      {error?.message}
+      {error?.message ?? "Something went wrong"}
     </p>
   );
 });
 FormMessage.displayName = "FormMessage";
-
-const InputField = React.forwardRef<HTMLInputElement, InputProps>(
-  (props: InputProps, ref) => {
-    const { error } = useFormField();
-
-    return <Input ref={ref} {...props} error={Boolean(error)} />;
-  }
-);
-InputField.displayName = "InputField";
 
 export {
   useFormField,
@@ -200,5 +191,4 @@ export {
   FormDescription,
   FormMessage,
   FormField,
-  InputField,
 };
