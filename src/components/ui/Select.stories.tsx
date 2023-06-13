@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Inter } from "next/font/google";
 import {
   Select,
   SelectContent,
@@ -9,8 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
-
-const inter = Inter({ subsets: ["latin"] });
 
 const meta: Meta<typeof Select> = {
   title: "Example/Select",
@@ -27,7 +24,7 @@ export const Defualt: Story = {
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a fruit" />
       </SelectTrigger>
-      <SelectContent className={inter.className}>
+      <SelectContent>
         <SelectGroup>
           <SelectLabel>Fruits</SelectLabel>
           <SelectItem value="apple">Apple</SelectItem>
@@ -47,7 +44,7 @@ export const Filled: Story = {
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a fruit" />
       </SelectTrigger>
-      <SelectContent className={inter.className}>
+      <SelectContent>
         <SelectGroup>
           <SelectLabel>Fruits</SelectLabel>
           <SelectItem value="apple">Apple</SelectItem>
@@ -67,7 +64,7 @@ export const Disabled: Story = {
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a fruit" />
       </SelectTrigger>
-      <SelectContent className={inter.className}>
+      <SelectContent>
         <SelectGroup>
           <SelectLabel>Fruits</SelectLabel>
           <SelectItem value="apple">Apple</SelectItem>

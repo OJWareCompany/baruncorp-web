@@ -3,7 +3,6 @@ import { FieldValues, UseFormReturn, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReactNode } from "react";
-import { Inter } from "next/font/google";
 import {
   Form,
   FormControl,
@@ -23,8 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./select";
-
-const inter = Inter({ subsets: ["latin"] });
 
 const formSchema = z.object({
   fruit: z.union([
@@ -72,7 +69,7 @@ const FormWithHooks = (
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select a fruit" />
                   </SelectTrigger>
-                  <SelectContent className={inter.className}>
+                  <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Fruits</SelectLabel>
                       <SelectItem value="apple">Apple</SelectItem>
