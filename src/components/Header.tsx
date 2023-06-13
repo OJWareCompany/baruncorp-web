@@ -2,7 +2,7 @@
 
 import { LogOut, User2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -15,12 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function Header() {
-  const router = useRouter();
+  const { data: session } = useSession();
 
   const handleSignOutButtonClick = () => {
     // TODO: 인증 관련 로직 필요
-
-    router.push("/sign-in");
+    signOut({
+      redirect: true,
+      callbackUrl: "/signin",
+    });
   };
 
   return (
@@ -31,16 +33,20 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant={"ghost"} className="relative h-8 w-8 rounded-full">
               <Avatar className="h-9 w-9">
-                <AvatarFallback>El</AvatarFallback>
+                <AvatarFallback>
+                  {session?.user.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-1">
-                <span className="sm-500 leading-none">Elon Musk</span>
+                <span className="sm-500 leading-none">
+                  {session?.user.name}
+                </span>
                 <span className="text-xs leading-none text-muted-foreground">
-                  elonmusk@tesla.com
+                  {session?.user.email}
                 </span>
               </div>
             </DropdownMenuLabel>
