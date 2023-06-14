@@ -51,7 +51,7 @@ export default function SigninPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "ejsvk3284@kakao.com",
-      password: "1q2w3e4r1!AA",
+      password: "WkdWkdaos123!",
     },
   });
 
