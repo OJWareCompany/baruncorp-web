@@ -62,7 +62,7 @@ export default function SignupPage() {
     if (email.split("@")[0] === password) {
       setLoading(false);
       form.control.setError("password", {
-        message: "Email ID cannot be a password.",
+        message: "Password cannot be a email address",
       });
       return;
     }
