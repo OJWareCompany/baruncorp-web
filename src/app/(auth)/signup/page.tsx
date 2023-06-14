@@ -68,13 +68,7 @@ export default function SignupPage() {
       return;
     }
 
-    /**
-     * TODO 회원가입 API 연동
-     * - 성공 -> 로그인 페이지로 이동
-     * - 실패 -> 서버에서 내려주는 에러 메시지 보여주기
-     */
     const signup = new Promise((resolve) => {
-      console.log(form);
       setTimeout(() => {
         resolve({
           result: values.email === "oj@kakao.com" ? "success" : "fail",
@@ -94,18 +88,18 @@ export default function SignupPage() {
 
   return (
     <>
-      <Alert
-        variant="destructive"
-        className={`fixed w-96 top-8 left-2/4 translate-x-[-50%] ${
-          !error && "invisible"
-        }`}
-      >
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Invalid code</AlertTitle>
-        <AlertDescription>
-          Please check your mail again or contact the Barun corp staff.
-        </AlertDescription>
-      </Alert>
+      {error && (
+        <Alert
+          variant="destructive"
+          className={`fixed w-96 top-8 left-2/4 translate-x-[-50%]`}
+        >
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Invalid code</AlertTitle>
+          <AlertDescription>
+            Please check your mail again or contact the Barun corp staff.
+          </AlertDescription>
+        </Alert>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -189,6 +183,10 @@ export default function SignupPage() {
             variant="outline"
             fullWidth={true}
             disabled={loading}
+            onClick={() => {
+              if (loading) return;
+              router.push("/signin");
+            }}
           >
             {loading ? (
               <>
@@ -196,7 +194,7 @@ export default function SignupPage() {
                 Please wait
               </>
             ) : (
-              <Link href="/signin">Sign in</Link>
+              "Sign in"
             )}
           </Button>
         </form>

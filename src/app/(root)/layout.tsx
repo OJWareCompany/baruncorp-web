@@ -13,7 +13,6 @@ export default async function Layout({
 
   return (
     <>
-      {/* <pre>{JSON.stringify(session, null, 2)}</pre> */}
       <Header />
       <main className="container py-8">{children}</main>
     </>

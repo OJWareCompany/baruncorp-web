@@ -68,9 +68,8 @@ export default function SigninPage() {
       const result: any = await signIn("credentials", {
         email,
         password,
-        redirect: false, // https://next-auth.js.org/getting-started/client#using-the-redirect-false-option
+        redirect: false,
       });
-      console.log(result);
       const { error } = result;
       if (error) {
         setError(true);
@@ -96,16 +95,16 @@ export default function SigninPage() {
 
   return (
     <>
-      <Alert
-        variant="destructive"
-        className={`fixed w-96 top-8 left-2/4 translate-x-[-50%] ${
-          !error && "invisible"
-        }`}
-      >
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>{errorMessage.title}</AlertTitle>
-        <AlertDescription>{errorMessage.description}</AlertDescription>
-      </Alert>
+      {error && (
+        <Alert
+          variant="destructive"
+          className={`fixed w-96 top-8 left-2/4 translate-x-[-50%]`}
+        >
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>{errorMessage.title}</AlertTitle>
+          <AlertDescription>{errorMessage.description}</AlertDescription>
+        </Alert>
+      )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
