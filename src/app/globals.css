@@ -83,25 +83,25 @@
 /* typography: https://tailwindcss.com/docs/adding-custom-styles#adding-component-classes */
 @layer components {
   .h1 {
-    @apply font-extrabold	text-5xl;
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
   }
   .h2 {
-    @apply font-semibold text-3xl;
+    @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0;
   }
   .h3 {
-    @apply font-semibold text-2xl;
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight;
   }
   .h4 {
-    @apply font-semibold text-xl;
+    @apply scroll-m-20 text-xl font-semibold tracking-tight;
   }
   .p {
-    @apply font-normal text-base;
+    @apply leading-7 [&:not(:first-child)]:mt-6;
+  }
+  .lg {
+    @apply text-lg font-semibold;
   }
   .sm {
-    @apply font-normal text-sm;
-  }
-  .sm-500 {
-    @apply font-medium text-sm;
+    @apply text-sm font-medium leading-none;
   }
   .muted {
     @apply text-sm text-muted-foreground;

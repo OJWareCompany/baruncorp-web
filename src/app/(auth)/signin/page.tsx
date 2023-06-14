@@ -61,7 +61,7 @@ export default function SigninPage() {
     const { email, password } = values;
     if (email.split("@")[0] === password) {
       form.control.setError("password", {
-        message: "이메일 아이디는 비밀번호가 될 수 없습니다.",
+        message: "Password cannot be a email address",
       });
     } else {
       const result: any = await signIn("credentials", {
@@ -88,8 +88,8 @@ export default function SigninPage() {
       } else {
         router.push("/");
       }
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
