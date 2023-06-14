@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hook/use-toast";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -83,6 +84,7 @@ export default function SignupPage() {
     signup.then((resolve: any) => {
       if (resolve.result === "success") {
         router.push("/signin");
+        toast({ title: "Sign up is complete." });
       } else {
         setLoading(false);
         setError(true);

@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hook/use-toast";
 
 const formSchema = z.object({
   email: z
@@ -87,6 +88,7 @@ export default function SigninPage() {
         });
       } else {
         router.push("/");
+        toast({ title: "Sign in is complete." });
       }
       setLoading(false);
     }
