@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        name: {
+        email: {
           label: "email",
           type: "email",
         },
@@ -27,7 +27,12 @@ export const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials, req) {
-        const { email, password } = credentials as any;
+        if (!credentials) {
+          // TODO: crendentails 없을 때 처리 필요
+          return;
+        }
+
+        const { email, password } = credentials;
 
         /**
          * TODO Backend API Integration
