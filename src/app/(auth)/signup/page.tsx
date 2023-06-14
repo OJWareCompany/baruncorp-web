@@ -48,18 +48,20 @@ export default function SignupPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      code: "",
+      email: "ejsvk3284@kakao.com",
+      password: "WkdWkdaos123!",
+      firstName: "Chris",
+      lastName: "Kim",
+      code: "test",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setError(false);
     setLoading(true);
-    const { email, password } = values;
+
+    const { email, password, code, firstName, lastName } = values;
+
     if (email.split("@")[0] === password) {
       setLoading(false);
       form.control.setError("password", {
@@ -68,22 +70,27 @@ export default function SignupPage() {
       return;
     }
 
-    const signup = new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          result: values.email === "oj@kakao.com" ? "success" : "fail",
-        });
-      }, 2500);
-    });
-    signup.then((resolve: any) => {
-      if (resolve.result === "success") {
-        router.push("/signin");
-        toast({ title: "Sign up is complete." });
-      } else {
-        setLoading(false);
-        setError(true);
-      }
-    });
+    fetch("http://192.168.1.19:3000/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, code, firstName, lastName }),
+      mode: "no-cors",
+    })
+      .then((response) => {
+        console.log(response);
+        if (response.ok) {
+          router.push("/signin");
+          toast({ title: "Sign up is complete." });
+        } else {
+          setLoading(false);
+          setError(true);
+        }
+      })
+      .catch((error) => {
+        // 서버가 터지는 에러에 대해 어떻게 처리할 것인지 논의 필요
+        // 예를 들면 서버에서도 예상치 못한 에러가 발생하여 터지는 경우.. 서버에서 에러를 발생시키는 클라이언트에서 catch로 잡을 수 있는지 확인 필요
+        console.error(error);
+      });
   }
 
   return (

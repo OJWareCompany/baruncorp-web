@@ -32,31 +32,21 @@ export const authOptions: NextAuthOptions = {
           return;
         }
 
-        const { email, password } = credentials;
+        const res = await fetch("http://192.168.1.19:3000/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
+        });
 
-        /**
-         * TODO Backend API Integration
-         */
-
-        /**
-         * TODO Error Message Setting from Backend Server
-         */
-
-        if (email === "ejsvk3284@kakao.com") {
-          throw new Error("Invalid email address or password");
+        if (res.ok) {
+          const result = await res.json();
+          return {
+            ...credentials,
+            accessToken: result.accessToken,
+            name: "elon",
+          } as any;
         }
-
-        if (email === "ejsvk3284@kakao.co") {
-          const user: any = {
-            email: "ejsvk3284@kakao.com",
-            name: "sangwon",
-            jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-          };
-          // any를 사용한 이유는 authrize 함수에서 리턴해야 하는게 Awaitable<User | null> 타입인데 여기서 User 타입을 내가 커스텀할 수 있는지 찾아봐야함...
-          return user;
-        } else {
-          return null;
-        }
+        return null;
       },
     }),
   ],
@@ -68,7 +58,7 @@ export const authOptions: NextAuthOptions = {
     },
     // https://next-auth.js.org/configuration/callbacks#session-callback
     async session({ session, token }) {
-      session.user.jwt = token.jwt as string;
+      session.user.accessToken = token.accessToken as string;
       return session;
     },
   },
