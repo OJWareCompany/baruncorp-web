@@ -105,7 +105,7 @@ export default function SigninPage() {
       {errorMessage && (
         <Alert
           variant="destructive"
-          className={`fixed w-96 top-8 left-2/4 translate-x-[-50%]`}
+          className={`fixed w-96 top-8 left-2/4 translate-x-[-50%] bg-background`}
         >
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>{errorMessage.title}</AlertTitle>
