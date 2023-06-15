@@ -74,7 +74,6 @@ export default function SignupPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, code, firstName, lastName }),
-      mode: "no-cors",
     })
       .then((response) => {
         console.log(response);
