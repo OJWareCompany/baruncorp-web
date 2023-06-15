@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 export type Payment = {
+  firstName: string;
   id: string;
   amount: number;
   status: "backlog" | "todo" | "in progress" | "done" | "canceled";
@@ -15,12 +16,14 @@ export type Payment = {
 
 export const payments: Payment[] = [
   {
+    firstName: "yunwoo",
     id: "728ed52f",
     amount: 100,
     status: "backlog",
     email: "m@example.com",
   },
   {
+    firstName: "elon",
     id: "489e1d42",
     amount: 125,
     status: "todo",
