@@ -6,8 +6,6 @@ import * as z from "zod";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -179,7 +177,11 @@ export default function SignupPage() {
                     className="absolute right-3"
                     onClick={() => setShowPassword((prev) => !prev)}
                   >
-                    {showPassword ? <Eye /> : <EyeOff />}
+                    {showPassword ? (
+                      <Eye className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <EyeOff className="h-5 w-5 text-muted-foreground" />
+                    )}
                   </button>
                 </div>
                 <FormMessage />
@@ -205,7 +207,11 @@ export default function SignupPage() {
                     className="absolute right-3"
                     onClick={() => setShowPasswordConfirm((prev) => !prev)}
                   >
-                    {showPasswordConfirm ? <Eye /> : <EyeOff />}
+                    {showPasswordConfirm ? (
+                      <Eye className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <EyeOff className="h-5 w-5 text-muted-foreground" />
+                    )}
                   </button>
                 </div>
                 <FormMessage />
