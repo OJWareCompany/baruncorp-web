@@ -5,8 +5,9 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hook/use-toast";
+import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -36,15 +38,23 @@ const formSchema = z.object({
       message:
         "Password should be at least 12 characters with uppercase, lowercase, numbers and special characters(!@#$%^&+=)",
     }),
-  passwordConfirm: z.string().trim(),
-  code: z.string().trim().length(6, { message: "Code is 6 length" }),
+  passwordConfirm: z
+    .string()
+    .trim()
+    .min(1, { message: "Password confirm is required" })
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&+=])(?!.*\s).{12,}$/, {
+      message:
+        "Password confirm should be at least 12 characters with uppercase, lowercase, numbers and special characters(!@#$%^&+=)",
+    }),
+  code: z.string().trim().length(6, { message: "Code shoule be 6 characters" }),
 });
 
 export default function SignupPage() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<{
+    title: string;
+    description?: string;
+  } | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,14 +74,14 @@ export default function SignupPage() {
   } = form;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setError(false);
+    setErrorMessage(null);
 
     const { email, password, passwordConfirm, code, firstName, lastName } =
       values;
 
     if (password !== passwordConfirm) {
       control.setError("passwordConfirm", {
-        message: "Password confirmation does not match. Please re-enter.",
+        message: "Password does not match",
       });
       return;
     }
@@ -88,33 +98,40 @@ export default function SignupPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, code, firstName, lastName }),
     })
-      .then((response) => {
-        if (!response.ok) {
-          setError(true);
-          return;
-        }
+      .then(async (response) => {
+        if (!response.ok) throw response;
         router.push("/signin");
         toast({ title: "Sign up is complete." });
       })
-      .catch((error) => {
-        // 서버가 터지는 에러에 대해 어떻게 처리할 것인지 논의 필요
-        // 예를 들면 서버에서도 예상치 못한 에러가 발생하여 터지는 경우.. 서버에서 에러를 발생시키는 클라이언트에서 catch로 잡을 수 있는지 확인 필요
-        console.log("🚀 ~ file: page.tsx:89 ~ onSubmit ~ error:", error);
+      .catch(async (errorResponse) => {
+        const { statusCode } = await errorResponse.json();
+        if (statusCode === 404) {
+          setErrorMessage({
+            title: "Invalid code",
+            description:
+              "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.",
+          });
+          return;
+        }
+
+        setErrorMessage({
+          title: "Server error",
+          description:
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
+        });
       });
   }
 
   return (
     <>
-      {error && (
+      {errorMessage && (
         <Alert
           variant="destructive"
-          className={`fixed w-96 top-8 left-2/4 translate-x-[-50%]`}
+          className={`fixed w-96 top-8 left-2/4 translate-x-[-50%] bg-background`}
         >
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Invalid code</AlertTitle>
-          <AlertDescription>
-            Please check your mail again or contact the Barun corp staff.
-          </AlertDescription>
+          <AlertTitle>{errorMessage.title}</AlertTitle>
+          <AlertDescription>{errorMessage.description}</AlertDescription>
         </Alert>
       )}
       <Form {...form}>
@@ -164,26 +181,9 @@ export default function SignupPage() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel required={true}>Password</FormLabel>
-                <div className="flex relative items-center">
-                  <FormControl>
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      {...field}
-                      className="pr-10"
-                    ></Input>
-                  </FormControl>
-                  <button
-                    type="button"
-                    className="absolute right-3"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? (
-                      <Eye className="h-5 w-5 text-muted-foreground" />
-                    ) : (
-                      <EyeOff className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </button>
-                </div>
+                <FormControl>
+                  <Input type="password" {...field}></Input>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -194,26 +194,9 @@ export default function SignupPage() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel required={true}>Password Confirm</FormLabel>
-                <div className="flex relative items-center">
-                  <FormControl>
-                    <Input
-                      type={showPasswordConfirm ? "text" : "password"}
-                      {...field}
-                      className="pr-10"
-                    ></Input>
-                  </FormControl>
-                  <button
-                    type="button"
-                    className="absolute right-3"
-                    onClick={() => setShowPasswordConfirm((prev) => !prev)}
-                  >
-                    {showPasswordConfirm ? (
-                      <Eye className="h-5 w-5 text-muted-foreground" />
-                    ) : (
-                      <EyeOff className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </button>
-                </div>
+                <FormControl>
+                  <Input type="password" {...field}></Input>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -241,13 +224,13 @@ export default function SignupPage() {
               "Submit"
             )}
           </Button>
-          <div className="border border-input" />
+          <Separator />
           <Button
             type="button"
             variant="outline"
             fullWidth={true}
             disabled={isSubmitting}
-            onClick={() => router.push("/signin")}
+            asChild={!isSubmitting}
           >
             {isSubmitting ? (
               <>
@@ -255,7 +238,7 @@ export default function SignupPage() {
                 Please wait
               </>
             ) : (
-              "Sign in"
+              <Link href="/signin">Sign in</Link>
             )}
           </Button>
         </form>
