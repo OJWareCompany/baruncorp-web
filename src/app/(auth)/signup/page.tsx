@@ -70,7 +70,7 @@ export default function SignupPage() {
       return;
     }
 
-    fetch("http://192.168.1.19:3000/auth/signup", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, code, firstName, lastName }),

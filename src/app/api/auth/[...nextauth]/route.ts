@@ -32,11 +32,14 @@ export const authOptions: NextAuthOptions = {
           return;
         }
 
-        const res = await fetch("http://192.168.1.19:3000/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentials),
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(credentials),
+          }
+        );
 
         if (res.ok) {
           const result = await res.json();

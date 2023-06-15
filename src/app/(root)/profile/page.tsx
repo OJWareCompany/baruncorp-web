@@ -64,7 +64,7 @@ export default function ProfilePage() {
     if (status !== "authenticated") return;
 
     // TODO 세부적인 에러 핸들링 필요
-    fetch("http://192.168.1.19:3000/users/profile", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile`, {
       headers: {
         Authorization: `Bearer ${session?.user.accessToken}`,
       },
@@ -89,7 +89,7 @@ export default function ProfilePage() {
       return;
 
     // TODO 세부적인 에러 핸들링 필요
-    await fetch("http://192.168.1.19:3000/users/profile", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${session?.user.accessToken}`,
