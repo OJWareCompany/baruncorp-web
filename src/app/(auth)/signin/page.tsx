@@ -26,26 +26,24 @@ const formSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, { message: "Email is required" })
-    .email({ message: "Email Address is not correct" }),
+    .min(1, { message: "Email Address is required" })
+    .email({ message: "Format of email address is incorrect" }),
   password: z
     .string()
     .trim()
     .min(1, { message: "Password is required" })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!])(?!.*\s).{12,}$/, {
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&+=])(?!.*\s).{12,}$/, {
       message:
-        "Minimum 12 characters with at least 1 number, uppercase, and lowercase letter, special characters",
+        "Password should be at least 12 characters with uppercase, lowercase, numbers and special characters(!@#$%^&+=)",
     }),
 });
 
 export default function SigninPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState({
-    title: "",
-    description: "",
-  });
+  const [errorMessage, setErrorMessage] = useState<{
+    title: string;
+    description?: string;
+  } | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,61 +52,72 @@ export default function SigninPage() {
       password: "WkdWkdaos123!",
     },
   });
+  const {
+    control,
+    formState: { isSubmitting },
+    handleSubmit,
+  } = form;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true);
-    setError(false);
+    setErrorMessage(null);
 
     const { email, password } = values;
     if (email.split("@")[0] === password) {
-      form.control.setError("password", {
+      control.setError("password", {
         message: "Password cannot be a email address",
       });
-    } else {
-      const result: any = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-      const { error } = result;
-      if (error) {
-        setError(true);
-        setErrorMessage(() => {
-          return {
-            title:
-              error === "CredentialsSignin"
-                ? "Server error"
-                : "Invalid email address or password",
-            description:
-              error === "CredentialsSignin"
-                ? "This is a temporary. Please try again in a momentarily. Or contact the Barun Corp manager."
-                : "",
-          };
-        });
-      } else {
-        router.push("/");
-        toast({ title: "Sign in is complete." });
-      }
-      setLoading(false);
+      return;
     }
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+    if (result == null) {
+      setErrorMessage({ title: "Something went wrong" });
+      return;
+    }
+
+    const { error } = result;
+    if (error == null) {
+      router.push("/");
+      toast({ title: "Sign in is complete." });
+      return;
+    }
+
+    if (error === "CredentialsSignin") {
+      setErrorMessage({
+        title: "Server error",
+        description:
+          "This is a temporary. Please try again in a momentarily. Or contact the Barun Corp manager.",
+      });
+      return;
+    }
+
+    setErrorMessage({
+      title: "Invalid email address or password",
+    });
   }
 
   return (
     <>
-      {error && (
+      {errorMessage && (
         <Alert
           variant="destructive"
           className={`fixed w-96 top-8 left-2/4 translate-x-[-50%]`}
         >
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>{errorMessage.title}</AlertTitle>
-          <AlertDescription>{errorMessage.description}</AlertDescription>
+          {errorMessage.description && (
+            <AlertDescription>{errorMessage.description}</AlertDescription>
+          )}
         </Alert>
       )}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <FormField
-            control={form.control}
+            control={control}
             name="email"
             render={({ field }) => (
               <FormItem>
@@ -121,7 +130,7 @@ export default function SigninPage() {
             )}
           />
           <FormField
-            control={form.control}
+            control={control}
             name="password"
             render={({ field }) => (
               <FormItem>
@@ -133,8 +142,8 @@ export default function SigninPage() {
               </FormItem>
             )}
           />
-          <Button type="submit" fullWidth={true} disabled={loading}>
-            {loading ? (
+          <Button type="submit" fullWidth={true} disabled={isSubmitting}>
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait
