@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -28,43 +28,58 @@ const formSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, { message: "Email is required" })
-    .email({ message: "Email Address is not correct" }),
+    .min(1, { message: "Email Address is required" })
+    .email({ message: "Format of email address is incorrect" }),
   password: z
     .string()
     .trim()
     .min(1, { message: "Password is required" })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!])(?!.*\s).{12,}$/, {
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&+=])(?!.*\s).{12,}$/, {
       message:
-        "Minimum 12 characters with at least 1 number, uppercase, and lowercase letter, special characters",
+        "Password should be at least 12 characters with uppercase, lowercase, numbers and special characters(!@#$%^&+=)",
     }),
-  code: z.string().trim().min(1, { message: "Code is required" }),
+  passwordConfirm: z.string().trim(),
+  code: z.string().trim().length(6, { message: "Code is 6 length" }),
 });
 
 export default function SignupPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [error, setError] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "ejsvk3284@kakao.com",
       password: "WkdWkdaos123!",
+      passwordConfirm: "",
       firstName: "Chris",
       lastName: "Kim",
       code: "test",
     },
   });
 
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = form;
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setError(false);
-    setLoading(true);
 
-    const { email, password, code, firstName, lastName } = values;
+    const { email, password, passwordConfirm, code, firstName, lastName } =
+      values;
+
+    if (password !== passwordConfirm) {
+      control.setError("passwordConfirm", {
+        message: "Password confirmation does not match. Please re-enter.",
+      });
+      return;
+    }
 
     if (email.split("@")[0] === password) {
-      setLoading(false);
-      form.control.setError("password", {
+      control.setError("password", {
         message: "Password cannot be a email address",
       });
       return;
@@ -76,19 +91,17 @@ export default function SignupPage() {
       body: JSON.stringify({ email, password, code, firstName, lastName }),
     })
       .then((response) => {
-        console.log(response);
-        if (response.ok) {
-          router.push("/signin");
-          toast({ title: "Sign up is complete." });
-        } else {
-          setLoading(false);
+        if (!response.ok) {
           setError(true);
+          return;
         }
+        router.push("/signin");
+        toast({ title: "Sign up is complete." });
       })
       .catch((error) => {
         // 서버가 터지는 에러에 대해 어떻게 처리할 것인지 논의 필요
         // 예를 들면 서버에서도 예상치 못한 에러가 발생하여 터지는 경우.. 서버에서 에러를 발생시키는 클라이언트에서 catch로 잡을 수 있는지 확인 필요
-        console.error(error);
+        console.log("🚀 ~ file: page.tsx:89 ~ onSubmit ~ error:", error);
       });
   }
 
@@ -107,9 +120,9 @@ export default function SignupPage() {
         </Alert>
       )}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mb-20">
           <FormField
-            control={form.control}
+            control={control}
             name="firstName"
             render={({ field }) => (
               <FormItem>
@@ -122,7 +135,7 @@ export default function SignupPage() {
             )}
           />
           <FormField
-            control={form.control}
+            control={control}
             name="lastName"
             render={({ field }) => (
               <FormItem>
@@ -135,7 +148,7 @@ export default function SignupPage() {
             )}
           />
           <FormField
-            control={form.control}
+            control={control}
             name="email"
             render={({ field }) => (
               <FormItem>
@@ -148,20 +161,59 @@ export default function SignupPage() {
             )}
           />
           <FormField
-            control={form.control}
+            control={control}
             name="password"
             render={({ field }) => (
               <FormItem>
                 <FormLabel required={true}>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" {...field} />
-                </FormControl>
+                <div className="flex relative items-center">
+                  <FormControl>
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      {...field}
+                      className="pr-10"
+                    ></Input>
+                  </FormControl>
+                  <button
+                    type="button"
+                    className="absolute right-3"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <Eye /> : <EyeOff />}
+                  </button>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
-            control={form.control}
+            control={control}
+            name="passwordConfirm"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required={true}>Password Confirm</FormLabel>
+                <div className="flex relative items-center">
+                  <FormControl>
+                    <Input
+                      type={showPasswordConfirm ? "text" : "password"}
+                      {...field}
+                      className="pr-10"
+                    ></Input>
+                  </FormControl>
+                  <button
+                    type="button"
+                    className="absolute right-3"
+                    onClick={() => setShowPasswordConfirm((prev) => !prev)}
+                  >
+                    {showPasswordConfirm ? <Eye /> : <EyeOff />}
+                  </button>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
             name="code"
             render={({ field }) => (
               <FormItem>
@@ -173,8 +225,8 @@ export default function SignupPage() {
               </FormItem>
             )}
           />
-          <Button type="submit" fullWidth={true} disabled={loading}>
-            {loading ? (
+          <Button type="submit" fullWidth={true} disabled={isSubmitting}>
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait
@@ -188,13 +240,10 @@ export default function SignupPage() {
             type="button"
             variant="outline"
             fullWidth={true}
-            disabled={loading}
-            onClick={() => {
-              if (loading) return;
-              router.push("/signin");
-            }}
+            disabled={isSubmitting}
+            onClick={() => router.push("/signin")}
           >
-            {loading ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait
