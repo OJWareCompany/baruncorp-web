@@ -4,8 +4,11 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { AxiosError, AxiosResponse } from "axios";
 import { useSession } from "next-auth/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import {
   Form,
   FormControl,
@@ -25,23 +28,19 @@ const formSchema = z.object({
   organization: z.string(),
 });
 
+interface IUsername {
+  firstName: string;
+  lastName: string;
+}
+
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  const { data: session, status: authStatus } = useSession();
+  const queryClient = useQueryClient();
   const [editable, setEditable] = useState(false);
-  const [originName, setOriginName] = useState({
-    firstName: "",
-    lastName: "",
-  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  const {
-    control,
-    formState: { isSubmitting },
-    setValue,
-    handleSubmit,
-    reset,
-  } = form;
+  const { control, setValue, handleSubmit, reset } = form;
 
   function setValues({
     email,
@@ -60,57 +59,101 @@ export default function ProfilePage() {
     setValue("organization", companyId === 1 ? "BARUN CORP" : "TESLA");
   }
 
-  useEffect(() => {
-    if (status !== "authenticated") return;
+  /**
+   * get profile query
+   */
+  const profileQuery = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      if (authStatus !== "authenticated") return;
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${session?.user.accessToken}`,
+          },
+        }
+      );
+      const profile = response.data;
+      setValues(profile);
+      return profile;
+    },
+    refetchOnWindowFocus: false,
+  });
 
-    // TODO 세부적인 에러 핸들링 필요
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile`, {
-      headers: {
-        Authorization: `Bearer ${session?.user.accessToken}`,
-      },
-    })
-      .then((response) => {
-        if (response.ok) return response.json();
-      })
-      .then((json) => {
-        const { firstName, lastName } = json;
-        setOriginName({ firstName, lastName });
-        setValues(json);
-      })
-      .catch((error) => {
-        console.log("🚀 ~ file: page.tsx:81 ~ useEffect ~ error:", error);
-        toast({ title: "occurs error", variant: "destructive" });
-      });
-  }, [status]);
+  /**
+   * update profile mutation
+   */
+  const mProfile = useMutation({
+    mutationFn: (username: IUsername) => {
+      return axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
+        username,
+        {
+          headers: {
+            Authorization: `Bearer ${session?.user.accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    },
+    onSuccess: (response: AxiosResponse) => {
+      if (response.status === 200)
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: ({ response }: AxiosError) => {
+      const { data } = response as AxiosResponse;
+      const { statusCode } = data;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+      let title = "";
+      let description = "";
+
+      switch (statusCode) {
+        case 404:
+          title = "Invalid code";
+          description =
+            "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
+          break;
+        default:
+          title = "Server error";
+          description =
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+      }
+
+      toast({ title, description, variant: "destructive" });
+    },
+  });
+
+  const { data: profile } = profileQuery;
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
     const { firstName, lastName } = values;
-    if (firstName === originName.firstName && lastName === originName.lastName)
+    if (firstName === profile.firstName && lastName === profile.lastName)
       return;
+    mProfile.mutate({ firstName, lastName });
+  }
 
-    // TODO 세부적인 에러 핸들링 필요
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/profile`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${session?.user.accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
-    })
-      .then((response) => {
-        if (response.ok) return response.json();
-      })
-      .then((json) => {
-        const { firstName, lastName } = json;
-        setOriginName({ firstName, lastName });
-        setValues(json);
-        toast({ title: "Success your profile edit." });
-        setEditable(false);
-      })
-      .catch((error) => {
-        console.log("🚀 ~ file: page.tsx:111 ~ onSubmit ~ error:", error);
-        toast({ title: "occurs error", variant: "destructive" });
-      });
+  function onReset() {
+    const { firstName, lastName } = profile;
+    reset({ firstName, lastName });
+    setEditable(false);
+  }
+
+  if (profileQuery.isError) {
+    const { response } = profileQuery.error as AxiosError;
+    const { data } = response as AxiosResponse;
+    const { statusCode } = data;
+
+    let title = "";
+    switch (statusCode) {
+      case 401:
+        title = "unauthorized";
+        break;
+      default:
+        title = "occurs error";
+    }
+
+    toast({ title, variant: "destructive" });
   }
 
   return (
@@ -174,13 +217,10 @@ export default function ProfilePage() {
             <Button
               variant="outline"
               fullWidth={true}
-              onClick={() => {
-                reset({ ...originName });
-                setEditable(false);
-              }}
-              disabled={isSubmitting}
+              onClick={onReset}
+              disabled={mProfile.isLoading}
             >
-              {isSubmitting ? (
+              {mProfile.isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Please wait
@@ -189,8 +229,12 @@ export default function ProfilePage() {
                 "Cancle"
               )}
             </Button>
-            <Button type="submit" fullWidth={true}>
-              {isSubmitting ? (
+            <Button
+              type="submit"
+              fullWidth={true}
+              disabled={mProfile.isLoading}
+            >
+              {mProfile.isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Please wait
@@ -201,11 +245,7 @@ export default function ProfilePage() {
             </Button>
           </div>
         ) : (
-          <Button
-            fullWidth={true}
-            onClick={() => setEditable(true)}
-            disabled={isSubmitting}
-          >
+          <Button fullWidth={true} onClick={() => setEditable(true)}>
             Edit
           </Button>
         )}

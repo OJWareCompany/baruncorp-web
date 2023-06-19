@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
@@ -49,8 +51,58 @@ const formSchema = z.object({
   code: z.string().trim().length(6, { message: "Code shoule be 6 characters" }),
 });
 
+interface ISignupForm {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  code: string;
+}
+
 export default function SignupPage() {
   const router = useRouter();
+
+  /**
+   * signup mutation
+   */
+  const mSignup = useMutation({
+    mutationFn: (signupForm: ISignupForm) => {
+      return axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
+        signupForm,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    },
+    onSuccess: (response: AxiosResponse) => {
+      if (response.status === 200) {
+        router.push("/signin");
+        toast({ title: "Sign up is complete." });
+      }
+    },
+    onError: ({ response }: AxiosError) => {
+      const { data } = response as AxiosResponse;
+      const { statusCode } = data;
+
+      let title = "";
+      let description = "";
+
+      switch (statusCode) {
+        case 404:
+          title = "Invalid code";
+          description =
+            "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
+          break;
+        default:
+          title = "Server error";
+          description =
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+      }
+
+      toast({ title, description, variant: "destructive" });
+    },
+  });
   const [errorMessage, setErrorMessage] = useState<{
     title: string;
     description?: string;
@@ -63,21 +115,16 @@ export default function SignupPage() {
       passwordConfirm: "",
       firstName: "Chris",
       lastName: "Kim",
-      code: "test",
+      code: "079207",
     },
   });
 
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = form;
+  const { control, handleSubmit } = form;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     setErrorMessage(null);
 
-    const { email, password, passwordConfirm, code, firstName, lastName } =
-      values;
+    const { email, password, passwordConfirm } = values;
 
     if (password !== passwordConfirm) {
       control.setError("passwordConfirm", {
@@ -93,33 +140,7 @@ export default function SignupPage() {
       return;
     }
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, code, firstName, lastName }),
-    })
-      .then(async (response) => {
-        if (!response.ok) throw response;
-        router.push("/signin");
-        toast({ title: "Sign up is complete." });
-      })
-      .catch(async (errorResponse) => {
-        const { statusCode } = await errorResponse.json();
-        if (statusCode === 404) {
-          setErrorMessage({
-            title: "Invalid code",
-            description:
-              "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.",
-          });
-          return;
-        }
-
-        setErrorMessage({
-          title: "Server error",
-          description:
-            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
-        });
-      });
+    mSignup.mutate(values);
   }
 
   return (
@@ -214,8 +235,8 @@ export default function SignupPage() {
               </FormItem>
             )}
           />
-          <Button type="submit" fullWidth={true} disabled={isSubmitting}>
-            {isSubmitting ? (
+          <Button type="submit" fullWidth={true} disabled={mSignup.isLoading}>
+            {mSignup.isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait
@@ -229,10 +250,10 @@ export default function SignupPage() {
             type="button"
             variant="outline"
             fullWidth={true}
-            disabled={isSubmitting}
-            asChild={!isSubmitting}
+            disabled={mSignup.isLoading}
+            asChild={!mSignup.isLoading}
           >
-            {isSubmitting ? (
+            {mSignup.isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait
