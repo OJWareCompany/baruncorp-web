@@ -1,3 +1,4 @@
+import axios from "axios";
 import { NextAuthOptions } from "next-auth";
 /**
  * @see https://next-auth.js.org/configuration/initialization#route-handlers-app
@@ -32,20 +33,18 @@ const authOptions: NextAuthOptions = {
           return;
         }
 
-        const res = await fetch(
+        const { data, status } = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+          credentials,
           {
-            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(credentials),
           }
         );
 
-        if (res.ok) {
-          const result = await res.json();
+        if (status) {
           return {
             ...credentials,
-            accessToken: result.accessToken,
+            accessToken: data.accessToken,
             name: "elon",
           } as any;
         }
