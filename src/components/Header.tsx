@@ -32,7 +32,6 @@ export default function Header() {
   const { data: session } = useSession();
 
   const handleSignOutButtonClick = () => {
-    // TODO: 인증 관련 로직 필요
     signOut({
       redirect: true,
       callbackUrl: "/signin",

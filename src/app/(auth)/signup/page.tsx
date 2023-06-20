@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
@@ -75,33 +75,6 @@ export default function SignupPage() {
         }
       );
     },
-    onSuccess: (response: AxiosResponse) => {
-      if (response.status === 200) {
-        router.push("/signin");
-        toast({ title: "Sign up is complete." });
-      }
-    },
-    onError: ({ response }: AxiosError) => {
-      const { data } = response as AxiosResponse;
-      const { statusCode } = data;
-
-      let title = "";
-      let description = "";
-
-      switch (statusCode) {
-        case 404:
-          title = "Invalid code";
-          description =
-            "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
-          break;
-        default:
-          title = "Server error";
-          description =
-            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-      }
-
-      toast({ title, description, variant: "destructive" });
-    },
   });
   const [errorMessage, setErrorMessage] = useState<{
     title: string;
@@ -119,9 +92,13 @@ export default function SignupPage() {
     },
   });
 
-  const { control, handleSubmit } = form;
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = form;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setErrorMessage(null);
 
     const { email, password, passwordConfirm } = values;
@@ -140,7 +117,33 @@ export default function SignupPage() {
       return;
     }
 
-    mSignup.mutate(values);
+    try {
+      const { status } = await mSignup.mutateAsync(values);
+      if (status === 200) {
+        router.push("/signin");
+        toast({ title: "Sign up is complete." });
+      }
+    } catch (error) {
+      const { response } = error as AxiosError;
+      const { statusCode } = response?.data as ResponseErrorData;
+
+      let title = "";
+      let description = "";
+
+      switch (statusCode) {
+        case 404:
+          title = "Invalid code";
+          description =
+            "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
+          break;
+        default:
+          title = "Server error";
+          description =
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+      }
+
+      toast({ title, description, variant: "destructive" });
+    }
   }
 
   return (
@@ -235,8 +238,8 @@ export default function SignupPage() {
               </FormItem>
             )}
           />
-          <Button type="submit" fullWidth={true} disabled={mSignup.isLoading}>
-            {mSignup.isLoading ? (
+          <Button type="submit" fullWidth={true} disabled={isSubmitting}>
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Please wait
@@ -246,21 +249,8 @@ export default function SignupPage() {
             )}
           </Button>
           <Separator />
-          <Button
-            type="button"
-            variant="outline"
-            fullWidth={true}
-            disabled={mSignup.isLoading}
-            asChild={!mSignup.isLoading}
-          >
-            {mSignup.isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Please wait
-              </>
-            ) : (
-              <Link href="/signin">Sign in</Link>
-            )}
+          <Button type="button" variant="outline" fullWidth={true}>
+            <Link href="/signin">Sign in</Link>
           </Button>
         </form>
       </Form>
