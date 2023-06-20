@@ -3,15 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -80,10 +77,6 @@ export default function SignupPage() {
       );
     },
   });
-  const [errorMessage, setErrorMessage] = useState<{
-    title: string;
-    description?: string;
-  } | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -103,8 +96,6 @@ export default function SignupPage() {
   } = form;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setErrorMessage(null);
-
     const { email, password, passwordConfirm } = values;
 
     if (password !== passwordConfirm) {
@@ -153,118 +144,101 @@ export default function SignupPage() {
   }
 
   return (
-    <>
-      {errorMessage && (
-        <Alert
-          variant="destructive"
-          className={`fixed w-96 top-8 left-2/4 translate-x-[-50%] bg-background`}
-        >
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{errorMessage.title}</AlertTitle>
-          <AlertDescription>{errorMessage.description}</AlertDescription>
-        </Alert>
-      )}
-      <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mb-20">
-          <FormField
-            control={control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required={true}>First Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required={true}>Last Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required={true}>Email Address</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required={true}>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" {...field}></Input>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="passwordConfirm"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required={true}>Password Confirm</FormLabel>
-                <FormControl>
-                  <Input type="password" {...field}></Input>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required={true}>Code</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" fullWidth={true} disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Please wait
-              </>
-            ) : (
-              "Submit"
-            )}
-          </Button>
-          <Separator />
-          <Button
-            type="button"
-            variant="outline"
-            fullWidth={true}
-            asChild={true}
-          >
-            <Link href="/signin">Sign in</Link>
-          </Button>
-        </form>
-      </Form>
-    </>
+    <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mb-20">
+        <FormField
+          control={control}
+          name="firstName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required={true}>First Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required={true}>Last Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required={true}>Email Address</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required={true}>Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field}></Input>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="passwordConfirm"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required={true}>Password Confirm</FormLabel>
+              <FormControl>
+                <Input type="password" {...field}></Input>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={control}
+          name="code"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required={true}>Code</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" fullWidth={true} disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Please wait
+            </>
+          ) : (
+            "Submit"
+          )}
+        </Button>
+        <Separator />
+        <Button type="button" variant="outline" fullWidth={true} asChild={true}>
+          <Link href="/signin">Sign in</Link>
+        </Button>
+      </form>
+    </Form>
   );
 }
