@@ -117,14 +117,17 @@ export default function ProfilePage() {
     if (profileQuery.isError) {
       const { response: errorResponse } = profileQuery.error;
 
-      let title = null;
+      let title = "Something went wrong";
+      let description =
+        "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-      if (errorResponse) {
-        const { statusCode } = errorResponse.data;
-        switch (statusCode) {
-        }
+      switch (errorResponse?.data.statusCode) {
+        case 500:
+          title = "Server error";
+          break;
       }
-      toast({ title: title ?? "occurs error", variant: "destructive" });
+
+      toast({ title, description, variant: "destructive" });
     }
   }, [profileQuery.isError, profileQuery.error]);
 
@@ -145,22 +148,17 @@ export default function ProfilePage() {
       .catch((error: AxiosError<ErrorResponseData>) => {
         const { response: errorResponse } = error;
 
-        let title = null;
-        let description = null;
+        let title = "Something went wrong";
+        let description =
+          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-        if (errorResponse) {
-          const { statusCode } = errorResponse.data;
-          switch (statusCode) {
-          }
+        switch (errorResponse?.data.statusCode) {
+          case 500:
+            title = "Server error";
+            break;
         }
 
-        toast({
-          title: title ?? "Server error",
-          description:
-            description ??
-            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
-          variant: "destructive",
-        });
+        toast({ title, description, variant: "destructive" });
       });
   }
 
