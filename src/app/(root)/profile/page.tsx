@@ -7,12 +7,7 @@ import * as z from "zod";
 import { useCallback, useEffect, useState } from "react";
 import { AxiosError, AxiosResponse } from "axios";
 import { useSession } from "next-auth/react";
-import {
-  UseQueryResult,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
   Form,
@@ -71,7 +66,7 @@ export default function ProfilePage() {
   /**
    * get profile query
    */
-  const profileQuery = useQuery({
+  const profileQuery = useQuery<Profile, AxiosError<ErrorResponseData>>({
     queryKey: ["profile"],
     queryFn: async () => {
       if (authStatus !== "authenticated") return; // TODO AuthGuard 적용된 이후 제거
@@ -91,8 +86,12 @@ export default function ProfilePage() {
   /**
    * update profile mutation
    */
-  const mProfile = useMutation({
-    mutationFn: (data: ProfilePatchData) => {
+  const mProfile = useMutation<
+    AxiosResponse<Profile>,
+    AxiosError<ErrorResponseData>,
+    ProfilePatchData
+  >({
+    mutationFn: (data) => {
       return axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
         data,
@@ -106,30 +105,26 @@ export default function ProfilePage() {
     },
   });
 
-  const { data: profile }: UseQueryResult<Profile> = profileQuery;
+  const { data: profile } = profileQuery;
 
   useEffect(() => {
-    if (profile) {
+    if (profileQuery.isSuccess && profile) {
       setValues(profile);
     }
   }, [profileQuery.isSuccess, profile, setValues]);
 
   useEffect(() => {
     if (profileQuery.isError) {
-      const { response } = profileQuery.error as AxiosError;
-      const { data } = response as AxiosResponse;
-      const { statusCode } = data;
+      const { response: errorResponse } = profileQuery.error;
 
-      let title = "";
-      switch (statusCode) {
-        case 401:
-          title = "unauthorized";
-          break;
-        default:
-          title = "occurs error";
+      let title = null;
+
+      if (errorResponse) {
+        const { statusCode } = errorResponse.data;
+        switch (statusCode) {
+        }
       }
-
-      toast({ title, variant: "destructive" });
+      toast({ title: title ?? "occurs error", variant: "destructive" });
     }
   }, [profileQuery.isError, profileQuery.error]);
 
@@ -139,31 +134,34 @@ export default function ProfilePage() {
       return;
     }
 
-    try {
-      const { status } = await mProfile.mutateAsync({ firstName, lastName });
-      if (status === 200) {
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
-      }
-    } catch (error) {
-      const { response } = error as AxiosError;
-      const { statusCode } = response?.data as ResponseErrorData;
-      let title = "";
-      let description = "";
+    await mProfile
+      .mutateAsync({ firstName, lastName })
+      .then((response) => {
+        const { status } = response;
+        if (status === 200) {
+          queryClient.invalidateQueries({ queryKey: ["profile"] });
+        }
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        const { response: errorResponse } = error;
 
-      switch (statusCode) {
-        case 404:
-          title = "Invalid code";
-          description =
-            "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
-          break;
-        default:
-          title = "Server error";
-          description =
-            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-      }
+        let title = null;
+        let description = null;
 
-      toast({ title, description, variant: "destructive" });
-    }
+        if (errorResponse) {
+          const { statusCode } = errorResponse.data;
+          switch (statusCode) {
+          }
+        }
+
+        toast({
+          title: title ?? "Server error",
+          description:
+            description ??
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
+          variant: "destructive",
+        });
+      });
   }
 
   function onReset() {
@@ -233,15 +231,10 @@ export default function ProfilePage() {
         />
         {editable ? (
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              fullWidth={true}
-              onClick={onReset}
-              disabled={isSubmitting}
-            >
+            <Button variant="outline" fullWidth={true} onClick={onReset}>
               Cancel
             </Button>
-            <Button type="submit" fullWidth={true} disabled={isSubmitting}>
+            <Button type="submit" fullWidth={true}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

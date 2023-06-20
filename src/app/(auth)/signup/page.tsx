@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
@@ -51,7 +51,7 @@ const formSchema = z.object({
   code: z.string().trim().length(6, { message: "Code shoule be 6 characters" }),
 });
 
-interface ISignupForm {
+interface SignupForm {
   email: string;
   password: string;
   firstName: string;
@@ -65,11 +65,15 @@ export default function SignupPage() {
   /**
    * signup mutation
    */
-  const mSignup = useMutation({
-    mutationFn: (signupForm: ISignupForm) => {
+  const mSignup = useMutation<
+    AxiosResponse,
+    AxiosError<ErrorResponseData>,
+    SignupForm
+  >({
+    mutationFn: (data) => {
       return axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
-        signupForm,
+        data,
         {
           headers: { "Content-Type": "application/json" },
         }
@@ -117,33 +121,40 @@ export default function SignupPage() {
       return;
     }
 
-    try {
-      const { status } = await mSignup.mutateAsync(values);
-      if (status === 200) {
-        router.push("/signin");
-        toast({ title: "Sign up is complete." });
-      }
-    } catch (error) {
-      const { response } = error as AxiosError;
-      const { statusCode } = response?.data as ResponseErrorData;
+    await mSignup
+      .mutateAsync(values)
+      .then((response) => {
+        const { status } = response;
+        if (status === 200) {
+          router.push("/signin");
+          toast({ title: "Sign up is complete." });
+        }
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        const { response: errorResponse } = error;
 
-      let title = "";
-      let description = "";
+        let title = null;
+        let description = null;
 
-      switch (statusCode) {
-        case 404:
-          title = "Invalid code";
-          description =
-            "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
-          break;
-        default:
-          title = "Server error";
-          description =
-            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-      }
+        if (errorResponse) {
+          const { statusCode } = errorResponse.data;
+          switch (statusCode) {
+            case 404:
+              title = "Invalid code";
+              description =
+                "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
+              break;
+          }
+        }
 
-      toast({ title, description, variant: "destructive" });
-    }
+        toast({
+          title: title ?? "Server error",
+          description:
+            description ??
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
+          variant: "destructive",
+        });
+      });
   }
 
   return (
