@@ -133,27 +133,22 @@ export default function SignupPage() {
       .catch((error: AxiosError<ErrorResponseData>) => {
         const { response: errorResponse } = error;
 
-        let title = null;
-        let description = null;
+        let title = "Something went wrong";
+        let description =
+          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-        if (errorResponse) {
-          const { statusCode } = errorResponse.data;
-          switch (statusCode) {
-            case 404:
-              title = "Invalid code";
-              description =
-                "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
-              break;
-          }
+        switch (errorResponse?.data.statusCode) {
+          case 404:
+            title = "Invalid code";
+            description =
+              "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
+            break;
+          case 500:
+            title = "Server error";
+            break;
         }
 
-        toast({
-          title: title ?? "Server error",
-          description:
-            description ??
-            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
-          variant: "destructive",
-        });
+        toast({ title, description, variant: "destructive" });
       });
   }
 
