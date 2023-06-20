@@ -260,7 +260,12 @@ export default function SignupPage() {
             )}
           </Button>
           <Separator />
-          <Button type="button" variant="outline" fullWidth={true}>
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth={true}
+            asChild={true}
+          >
             <Link href="/signin">Sign in</Link>
           </Button>
         </form>
