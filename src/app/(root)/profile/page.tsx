@@ -4,10 +4,15 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AxiosError, AxiosResponse } from "axios";
 import { useSession } from "next-auth/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  UseQueryResult,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import axios from "axios";
 import {
   Form,
@@ -28,10 +33,15 @@ const formSchema = z.object({
   organization: z.string(),
 });
 
-interface IUsername {
+interface Profile {
+  id: string;
   firstName: string;
   lastName: string;
+  email: string;
+  companyId: number;
 }
+
+interface ProfilePatchData extends Pick<Profile, "firstName" | "lastName"> {}
 
 export default function ProfilePage() {
   const { data: session, status: authStatus } = useSession();
@@ -40,24 +50,23 @@ export default function ProfilePage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  const { control, setValue, handleSubmit, reset } = form;
+  const {
+    control,
+    setValue,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = form;
 
-  function setValues({
-    email,
-    firstName,
-    lastName,
-    companyId,
-  }: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    companyId: any;
-  }) {
-    setValue("firstName", firstName);
-    setValue("lastName", lastName);
-    setValue("email", email);
-    setValue("organization", companyId === 1 ? "BARUN CORP" : "TESLA");
-  }
+  const setValues = useCallback(
+    ({ email, firstName, lastName, companyId }: Profile) => {
+      setValue("firstName", firstName);
+      setValue("lastName", lastName);
+      setValue("email", email);
+      setValue("organization", companyId === 1 ? "BARUN CORP" : "TESLA"); // TODO 서버측에서 넘겨주는 데이터 변경된 이후 다시 확인
+    },
+    [setValue]
+  );
 
   /**
    * get profile query
@@ -65,7 +74,7 @@ export default function ProfilePage() {
   const profileQuery = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      if (authStatus !== "authenticated") return;
+      if (authStatus !== "authenticated") return; // TODO AuthGuard 적용된 이후 제거
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
         {
@@ -74,9 +83,7 @@ export default function ProfilePage() {
           },
         }
       );
-      const profile = response.data;
-      setValues(profile);
-      return profile;
+      return response.data;
     },
     refetchOnWindowFocus: false,
   });
@@ -85,10 +92,10 @@ export default function ProfilePage() {
    * update profile mutation
    */
   const mProfile = useMutation({
-    mutationFn: (username: IUsername) => {
+    mutationFn: (data: ProfilePatchData) => {
       return axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
-        username,
+        data,
         {
           headers: {
             Authorization: `Bearer ${session?.user.accessToken}`,
@@ -97,14 +104,49 @@ export default function ProfilePage() {
         }
       );
     },
-    onSuccess: (response: AxiosResponse) => {
-      if (response.status === 200)
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
-    },
-    onError: ({ response }: AxiosError) => {
+  });
+
+  const { data: profile }: UseQueryResult<Profile> = profileQuery;
+
+  useEffect(() => {
+    if (profile) {
+      setValues(profile);
+    }
+  }, [profileQuery.isSuccess, profile, setValues]);
+
+  useEffect(() => {
+    if (profileQuery.isError) {
+      const { response } = profileQuery.error as AxiosError;
       const { data } = response as AxiosResponse;
       const { statusCode } = data;
 
+      let title = "";
+      switch (statusCode) {
+        case 401:
+          title = "unauthorized";
+          break;
+        default:
+          title = "occurs error";
+      }
+
+      toast({ title, variant: "destructive" });
+    }
+  }, [profileQuery.isError, profileQuery.error]);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { firstName, lastName } = values;
+    if (firstName === profile!.firstName && lastName === profile!.lastName) {
+      return;
+    }
+
+    try {
+      const { status } = await mProfile.mutateAsync({ firstName, lastName });
+      if (status === 200) {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }
+    } catch (error) {
+      const { response } = error as AxiosError;
+      const { statusCode } = response?.data as ResponseErrorData;
       let title = "";
       let description = "";
 
@@ -121,39 +163,16 @@ export default function ProfilePage() {
       }
 
       toast({ title, description, variant: "destructive" });
-    },
-  });
-
-  const { data: profile } = profileQuery;
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const { firstName, lastName } = values;
-    if (firstName === profile.firstName && lastName === profile.lastName)
-      return;
-    mProfile.mutate({ firstName, lastName });
+    }
   }
 
   function onReset() {
+    if (!profile) {
+      return;
+    }
     const { firstName, lastName } = profile;
     reset({ firstName, lastName });
     setEditable(false);
-  }
-
-  if (profileQuery.isError) {
-    const { response } = profileQuery.error as AxiosError;
-    const { data } = response as AxiosResponse;
-    const { statusCode } = data;
-
-    let title = "";
-    switch (statusCode) {
-      case 401:
-        title = "unauthorized";
-        break;
-      default:
-        title = "occurs error";
-    }
-
-    toast({ title, variant: "destructive" });
   }
 
   return (
@@ -218,23 +237,12 @@ export default function ProfilePage() {
               variant="outline"
               fullWidth={true}
               onClick={onReset}
-              disabled={mProfile.isLoading}
+              disabled={isSubmitting}
             >
-              {mProfile.isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
-                </>
-              ) : (
-                "Cancle"
-              )}
+              Cancel
             </Button>
-            <Button
-              type="submit"
-              fullWidth={true}
-              disabled={mProfile.isLoading}
-            >
-              {mProfile.isLoading ? (
+            <Button type="submit" fullWidth={true} disabled={isSubmitting}>
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Please wait

@@ -28,9 +28,8 @@ const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials, req) {
-        if (!credentials) {
-          // TODO: crendentails 없을 때 처리 필요
-          return;
+        if (credentials == null) {
+          return null;
         }
 
         const { data, status } = await axios.post(
@@ -41,12 +40,13 @@ const authOptions: NextAuthOptions = {
           }
         );
 
-        if (status) {
+        if (status === 200) {
           return {
-            ...credentials,
+            id: credentials.email,
+            email: credentials.email,
             accessToken: data.accessToken,
-            name: "elon",
-          } as any;
+            name: "elon", // TODO name 관련 처리 어떻게 할지 고려
+          };
         }
         return null;
       },
