@@ -53,37 +53,44 @@ export default function SigninPage() {
       return;
     }
 
-    const result = await signIn("credentials", {
+    const response = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
-    if (result == null) {
+
+    if (response == null) {
       toast({ title: "Something went wrong", variant: "destructive" });
       return;
     }
 
-    const { error } = result;
-    if (error == null) {
+    let { error: statusCode } = response;
+
+    if (statusCode == null) {
       router.push("/");
       toast({ title: "Sign-in complete" });
       return;
     }
 
-    if (error === "CredentialsSignin") {
+    const { success } = z
+      .number()
+      .min(400)
+      .max(499)
+      .safeParse(Number(statusCode));
+
+    if (success) {
+      toast({
+        title: "Invalid email address or password",
+        variant: "destructive",
+      });
+    } else {
       toast({
         title: "Server error",
         description:
           "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Invalid email address or password",
-      variant: "destructive",
-    });
   }
 
   return (
