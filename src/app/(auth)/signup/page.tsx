@@ -118,21 +118,21 @@ export default function SignupPage() {
         const { status } = response;
         if (status === 200) {
           router.push("/signin");
-          toast({ title: "Sign up is complete." });
+          toast({ title: "Sign-up complete" });
         }
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        const { response: errorResponse } = error;
+        const { response } = error;
 
         let title = "Something went wrong";
         let description =
           "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-        switch (errorResponse?.data.statusCode) {
+        switch (response?.data.statusCode) {
           case 404:
             title = "Invalid code";
             description =
-              "Please check your mail again. If the problem persists, please contact the Barun Corp Manager.";
+              "Please check your email again. If the problem persists, please contact the Barun Corp Manager.";
             break;
           case 500:
             title = "Server error";
