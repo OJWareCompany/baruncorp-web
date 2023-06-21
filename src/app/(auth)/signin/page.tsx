@@ -25,14 +25,7 @@ const formSchema = z.object({
     .trim()
     .min(1, { message: "Email Address is required" })
     .email({ message: "Format of email address is incorrect" }),
-  password: z
-    .string()
-    .trim()
-    .min(1, { message: "Password is required" })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&+=])(?!.*\s).{12,}$/, {
-      message:
-        "Password should be at least 12 characters with uppercase, lowercase, numbers and special characters(!@#$%^&+=)",
-    }),
+  password: z.string().trim().min(1, { message: "Password is required" }),
 });
 
 export default function SigninPage() {
@@ -73,7 +66,7 @@ export default function SigninPage() {
     const { error } = result;
     if (error == null) {
       router.push("/");
-      toast({ title: "Sign in is complete." });
+      toast({ title: "Sign-in complete" });
       return;
     }
 
@@ -81,10 +74,9 @@ export default function SigninPage() {
       toast({
         title: "Server error",
         description:
-          "This is a temporary. Please try again in a momentarily. Or contact the Barun Corp manager.",
+          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
         variant: "destructive",
       });
-
       return;
     }
 
