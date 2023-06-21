@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { NextAuthOptions } from "next-auth";
 /**
  * @see https://next-auth.js.org/configuration/initialization#route-handlers-app
@@ -32,23 +32,20 @@ const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const { data, status } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
-          credentials,
-          {
+        const response = await axios
+          .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, credentials, {
             headers: { "Content-Type": "application/json" },
-          }
-        );
+          })
+          .catch((error: AxiosError) => {
+            throw new Error(String(error.response?.status));
+          });
 
-        if (status === 200) {
-          return {
-            id: credentials.email,
-            email: credentials.email,
-            accessToken: data.accessToken,
-            name: "elon", // TODO name 관련 처리 어떻게 할지 고려
-          };
-        }
-        return null;
+        return {
+          id: credentials.email,
+          email: credentials.email,
+          accessToken: response.data.accessToken,
+          name: "elon", // TODO name 관련 처리 어떻게 할지 고려
+        };
       },
     }),
   ],
