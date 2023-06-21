@@ -37,14 +37,10 @@ const formSchema = z.object({
       message:
         "Password should be at least 12 characters with uppercase, lowercase, numbers and special characters(!@#$%^&+=)",
     }),
-  passwordConfirm: z
+  confirmPassword: z
     .string()
     .trim()
-    .min(1, { message: "Password confirm is required" })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&+=])(?!.*\s).{12,}$/, {
-      message:
-        "Password confirm should be at least 12 characters with uppercase, lowercase, numbers and special characters(!@#$%^&+=)",
-    }),
+    .min(1, { message: "Confirm Password is required" }),
   code: z.string().trim().length(6, { message: "Code shoule be 6 characters" }),
 });
 
@@ -82,7 +78,7 @@ export default function SignupPage() {
     defaultValues: {
       email: "ejsvk3284@kakao.com",
       password: "WkdWkdaos123!",
-      passwordConfirm: "",
+      confirmPassword: "",
       firstName: "Chris",
       lastName: "Kim",
       code: "079207",
@@ -96,10 +92,10 @@ export default function SignupPage() {
   } = form;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { email, password, passwordConfirm } = values;
+    const { email, password, confirmPassword } = values;
 
-    if (password !== passwordConfirm) {
-      control.setError("passwordConfirm", {
+    if (password !== confirmPassword) {
+      control.setError("confirmPassword", {
         message: "Password does not match",
       });
       return;
@@ -197,10 +193,10 @@ export default function SignupPage() {
         />
         <FormField
           control={control}
-          name="passwordConfirm"
+          name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required={true}>Password Confirm</FormLabel>
+              <FormLabel required={true}>Confirm Password</FormLabel>
               <FormControl>
                 <Input type="password" {...field}></Input>
               </FormControl>
