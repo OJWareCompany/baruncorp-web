@@ -232,15 +232,8 @@ export default function ProfilePage() {
             <Button variant="outline" fullWidth={true} onClick={onReset}>
               Cancel
             </Button>
-            <Button type="submit" fullWidth={true}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
-                </>
-              ) : (
-                "Submit"
-              )}
+            <Button type="submit" fullWidth={true} loading={isSubmitting}>
+              Submit
             </Button>
           </div>
         ) : (

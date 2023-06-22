@@ -127,15 +127,8 @@ export default function SigninPage() {
             </FormItem>
           )}
         />
-        <Button type="submit" fullWidth={true} disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Please wait
-            </>
-          ) : (
-            "Sign in"
-          )}
+        <Button type="submit" fullWidth={true} loading={isSubmitting}>
+          Sign in
         </Button>
       </form>
     </Form>
