@@ -60,7 +60,12 @@ export default function SigninPage() {
     });
 
     if (response == null) {
-      toast({ title: "Something went wrong", variant: "destructive" });
+      toast({
+        title: "Something went wrong",
+        description:
+          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
+        variant: "destructive",
+      });
       return;
     }
 
