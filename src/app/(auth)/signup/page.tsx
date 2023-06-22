@@ -217,15 +217,8 @@ export default function SignupPage() {
             </FormItem>
           )}
         />
-        <Button type="submit" fullWidth={true} disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Please wait
-            </>
-          ) : (
-            "Submit"
-          )}
+        <Button type="submit" fullWidth={true} loading={isSubmitting}>
+          Submit
         </Button>
         <Separator />
         <Button type="button" variant="outline" fullWidth={true} asChild={true}>
