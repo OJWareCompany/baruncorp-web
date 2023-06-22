@@ -4,7 +4,7 @@
 
 1. merge할 branch가 dev branch인지 확인해주세요.
 2. reviewer의 comment는 reviewer가 해결되었는지 확인한 후 직접 resolve합니다.
-3. merge는 reviewer가 approve와 동시에 합니다.
+3. merge는 reviewer의 approve 이후에, assignee가 합니다.
 4. conflict은 assignee가 해결하고, 확인이 필요한 경우에 함께 해결합니다.
 
 <br>
@@ -42,4 +42,5 @@
 ## References
 
 > 참고할 레퍼런스를 작성해주세요.
+
 - []()
