@@ -33,3 +33,31 @@ export const Ghost: Story = {
     children: "Button",
   },
 };
+
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+    children: "Button",
+  },
+};
+
+export const Small: Story = {
+  args: {
+    size: "sm",
+    children: "Button",
+  },
+};
+
+export const FullWidth: Story = {
+  args: {
+    fullWidth: true,
+    children: "Button",
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    loading: true,
+    children: "Button",
+  },
+};
