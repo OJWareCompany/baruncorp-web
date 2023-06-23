@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hook/use-toast";
+import { handleAxiosErrorWithAuth } from "@/lib/utils";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -62,7 +63,6 @@ export default function ProfilePage() {
   const profileQuery = useQuery<Profile, AxiosError<ErrorResponseData>>({
     queryKey: ["profile"],
     queryFn: async () => {
-      if (authStatus !== "authenticated") return; // TODO AuthGuard 적용된 이후 제거
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
         {
@@ -114,19 +114,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profileQuery.isError) {
-      const { response: errorResponse } = profileQuery.error;
+      handleAxiosErrorWithAuth(profileQuery.error, () => {
+        const { response: errorResponse } = profileQuery.error;
 
-      let title = "Something went wrong";
-      let description =
-        "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+        let title = "Something went wrong";
+        let description =
+          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-      switch (errorResponse?.data.statusCode) {
-        case 500:
-          title = "Server error";
-          break;
-      }
+        switch (errorResponse?.data.statusCode) {
+          case 500:
+            title = "Server error";
+            break;
+        }
 
-      toast({ title, description, variant: "destructive" });
+        toast({ title, description, variant: "destructive" });
+      });
     }
   }, [profileQuery.isError, profileQuery.error]);
 
@@ -142,19 +144,21 @@ export default function ProfilePage() {
         }
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        const { response: errorResponse } = error;
+        handleAxiosErrorWithAuth(error, () => {
+          const { response: errorResponse } = error;
 
-        let title = "Something went wrong";
-        let description =
-          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+          let title = "Something went wrong";
+          let description =
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-        switch (errorResponse?.data.statusCode) {
-          case 500:
-            title = "Server error";
-            break;
-        }
+          switch (errorResponse?.data.statusCode) {
+            case 500:
+              title = "Server error";
+              break;
+          }
 
-        toast({ title, description, variant: "destructive" });
+          toast({ title, description, variant: "destructive" });
+        });
       });
   }
 
