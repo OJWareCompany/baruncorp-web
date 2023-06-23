@@ -1,5 +1,7 @@
 interface ErrorResponseData {
-  statusCode: number;
+  errorCode: string;
   message: string;
-  error: string;
+  statusCode: number;
+  timestamp: string;
+  path: string;
 }
