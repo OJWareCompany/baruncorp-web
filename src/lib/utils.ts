@@ -23,12 +23,15 @@ export function convertCamelCaseToTitleCase(string: string) {
   );
 }
 
+/**
+ * TODO refresh 토큰 연계
+ */
 export function handleAxiosErrorWithAuth(
   error: AxiosError<ErrorResponseData>,
   callback: Function
 ) {
   if (error.response?.data.errorCode === "10005") {
-    signOut({ redirect: true });
+    signOut({ redirect: false });
     return;
   }
   callback();

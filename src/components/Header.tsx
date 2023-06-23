@@ -32,10 +32,7 @@ export default function Header() {
   const { data: session } = useSession();
 
   const handleSignOutButtonClick = () => {
-    signOut({
-      redirect: true,
-      callbackUrl: "/signin",
-    });
+    signOut({ redirect: false });
   };
 
   return (
