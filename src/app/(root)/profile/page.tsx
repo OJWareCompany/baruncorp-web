@@ -1,10 +1,9 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AxiosError, AxiosResponse } from "axios";
 import { useSession } from "next-auth/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,27 +40,21 @@ interface ProfilePatchData extends Pick<Profile, "firstName" | "lastName"> {}
 export default function ProfilePage() {
   const { data: session, status: authStatus } = useSession();
   const queryClient = useQueryClient();
-  const [editable, setEditable] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      organization: "",
+    },
   });
   const {
     control,
-    setValue,
-    handleSubmit,
     reset,
-    formState: { isSubmitting },
+    handleSubmit,
+    formState: { isSubmitting, isDirty: isEdit },
   } = form;
-
-  const setValues = useCallback(
-    ({ email, firstName, lastName, companyId }: Profile) => {
-      setValue("firstName", firstName);
-      setValue("lastName", lastName);
-      setValue("email", email);
-      setValue("organization", companyId === 1 ? "BARUN CORP" : "TESLA"); // TODO 서버측에서 넘겨주는 데이터 변경된 이후 다시 확인
-    },
-    [setValue]
-  );
 
   /**
    * get profile query
@@ -109,9 +102,15 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profileQuery.isSuccess && profile) {
-      setValues(profile);
+      const { email, firstName, lastName, companyId } = profile;
+      reset({
+        firstName,
+        lastName,
+        email,
+        organization: companyId === 1 ? "BARUN CORP" : "TESLA", // TODO 서버측에서 넘겨주는 데이터 변경된 이후 다시 확인
+      });
     }
-  }, [profileQuery.isSuccess, profile, setValues]);
+  }, [profileQuery.isSuccess, profile, reset]);
 
   useEffect(() => {
     if (profileQuery.isError) {
@@ -133,9 +132,6 @@ export default function ProfilePage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { firstName, lastName } = values;
-    if (firstName === profile!.firstName && lastName === profile!.lastName) {
-      return;
-    }
 
     await mProfile
       .mutateAsync({ firstName, lastName })
@@ -162,15 +158,6 @@ export default function ProfilePage() {
       });
   }
 
-  function onReset() {
-    if (!profile) {
-      return;
-    }
-    const { firstName, lastName } = profile;
-    reset({ firstName, lastName });
-    setEditable(false);
-  }
-
   return (
     <Form {...form}>
       <h1 className="h3 mb-4">Profile</h1>
@@ -180,9 +167,9 @@ export default function ProfilePage() {
           name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required={true}>First Name</FormLabel>
+              <FormLabel required>First Name</FormLabel>
               <FormControl>
-                <Input {...field} readOnly={!editable} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -193,9 +180,9 @@ export default function ProfilePage() {
           name="lastName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required={true}>Last Name</FormLabel>
+              <FormLabel required>Last Name</FormLabel>
               <FormControl>
-                <Input {...field} readOnly={!editable} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -206,9 +193,9 @@ export default function ProfilePage() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required={true}>Email Address</FormLabel>
+              <FormLabel>Email Address</FormLabel>
               <FormControl>
-                <Input {...field} readOnly={true} disabled={editable} />
+                <Input {...field} disabled />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -219,28 +206,22 @@ export default function ProfilePage() {
           name="organization"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required={true}>Organization</FormLabel>
+              <FormLabel>Organization</FormLabel>
               <FormControl>
-                <Input {...field} readOnly={true} disabled={editable} />
+                <Input {...field} disabled />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {editable ? (
-          <div className="flex space-x-2">
-            <Button variant="outline" fullWidth={true} onClick={onReset}>
-              Cancel
-            </Button>
-            <Button type="submit" fullWidth={true} loading={isSubmitting}>
-              Submit
-            </Button>
-          </div>
-        ) : (
-          <Button fullWidth={true} onClick={() => setEditable(true)}>
-            Edit
-          </Button>
-        )}
+        <Button
+          type="submit"
+          fullWidth
+          disabled={!isEdit}
+          loading={isSubmitting}
+        >
+          Save
+        </Button>
       </form>
     </Form>
   );
