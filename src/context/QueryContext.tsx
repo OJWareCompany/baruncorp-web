@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { isAxiosError } from "axios";
+import { signOut } from "next-auth/react";
 
 type Props = {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ function retry(failureCount: number, error: unknown) {
     return false;
   }
   if (isAxiosError(error) && error.response?.data?.errorCode === "10005") {
+    signOut({ redirect: false });
     return false;
   }
   return true;

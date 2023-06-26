@@ -19,7 +19,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hook/use-toast";
-import { handleAxiosErrorWithAuth } from "@/lib/utils";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -114,21 +113,25 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profileQuery.isError) {
-      handleAxiosErrorWithAuth(profileQuery.error, () => {
-        const { response: errorResponse } = profileQuery.error;
+      const { response: errorResponse } = profileQuery.error;
 
-        let title = "Something went wrong";
-        let description =
-          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+      let title = "Something went wrong";
+      let description =
+        "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-        switch (errorResponse?.data.statusCode) {
-          case 500:
-            title = "Server error";
-            break;
-        }
+      switch (errorResponse?.data.statusCode) {
+        case 401:
+          if (errorResponse?.data.errorCode === "10005") {
+            title = "Please sign in again";
+            description = "";
+          }
+          break;
+        case 500:
+          title = "Server error";
+          break;
+      }
 
-        toast({ title, description, variant: "destructive" });
-      });
+      toast({ title, description, variant: "destructive" });
     }
   }, [profileQuery.isError, profileQuery.error]);
 
@@ -138,27 +141,28 @@ export default function ProfilePage() {
     await mProfile
       .mutateAsync({ firstName, lastName })
       .then((response) => {
-        const { status } = response;
-        if (status === 200) {
-          queryClient.invalidateQueries({ queryKey: ["profile"] });
-        }
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        handleAxiosErrorWithAuth(error, () => {
-          const { response: errorResponse } = error;
+        const { response: errorResponse } = error;
 
-          let title = "Something went wrong";
-          let description =
-            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+        let title = "Something went wrong";
+        let description =
+          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-          switch (errorResponse?.data.statusCode) {
-            case 500:
-              title = "Server error";
-              break;
-          }
+        switch (errorResponse?.data.statusCode) {
+          case 401:
+            if (errorResponse?.data.errorCode === "10005") {
+              title = "Please sign in again";
+              description = "";
+            }
+            break;
+          case 500:
+            title = "Server error";
+            break;
+        }
 
-          toast({ title, description, variant: "destructive" });
-        });
+        toast({ title, description, variant: "destructive" });
       });
   }
 
