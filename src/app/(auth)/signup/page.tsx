@@ -20,6 +20,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hook/use-toast";
 import { Separator } from "@/components/ui/separator";
+import apiClient from "@/api";
+import { SignupReqData } from "@/types/auth";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -44,14 +46,6 @@ const formSchema = z.object({
   code: z.string().trim().length(6, { message: "Code shoule be 6 characters" }),
 });
 
-interface SignupForm {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  code: string;
-}
-
 export default function SignupPage() {
   const router = useRouter();
 
@@ -59,19 +53,19 @@ export default function SignupPage() {
    * signup mutation
    */
   const mSignup = useMutation<
-    AxiosResponse,
+    AxiosResponse<void, SignupReqData>,
     AxiosError<ErrorResponseData>,
-    SignupForm
+    SignupReqData
   >({
-    mutationFn: (data) => {
-      return axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
+    mutationFn: (data) =>
+      apiClient<void, SignupReqData>({
+        url: "/auth/signup",
+        method: "post",
         data,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
   });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

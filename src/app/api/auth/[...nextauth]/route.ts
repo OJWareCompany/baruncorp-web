@@ -6,6 +6,8 @@ import { NextAuthOptions } from "next-auth";
 
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import apiClient from "@/api";
+import { SigninReqData, SigninResData } from "@/types/auth";
 
 const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET, // https://next-auth.js.org/configuration/options#secret
@@ -32,18 +34,23 @@ const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const response = await axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, credentials, {
-            headers: { "Content-Type": "application/json" },
-          })
-          .catch((error: AxiosError) => {
-            throw new Error(String(error.response?.status));
-          });
+        const {
+          data: { accessToken },
+        } = await apiClient<SigninResData, SigninReqData>({
+          method: "post",
+          url: "/auth/login",
+          data: credentials,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).catch((error: AxiosError) => {
+          throw new Error(String(error.response?.status));
+        });
 
         return {
           id: credentials.email,
           email: credentials.email,
-          accessToken: response.data.accessToken,
+          accessToken,
           name: "elon", // TODO name 관련 처리 어떻게 할지 고려
         };
       },
