@@ -58,14 +58,15 @@ export default function SignupPage() {
     SignupReqData
   >({
     mutationFn: (data) =>
-      apiClient<void, SignupReqData>({
-        url: "/auth/signup",
-        method: "post",
+      apiClient.post<void, AxiosResponse<void>, SignupReqData>(
+        "/auth/signup",
         data,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      ),
   });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

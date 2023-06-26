@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { NextAuthOptions } from "next-auth";
 /**
  * @see https://next-auth.js.org/configuration/initialization#route-handlers-app
@@ -36,16 +36,19 @@ const authOptions: NextAuthOptions = {
 
         const {
           data: { accessToken },
-        } = await apiClient<SigninResData, SigninReqData>({
-          method: "post",
-          url: "/auth/login",
-          data: credentials,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }).catch((error: AxiosError) => {
-          throw new Error(String(error.response?.status));
-        });
+        } = await apiClient
+          .post<SigninResData, AxiosResponse<SigninResData>, SigninReqData>(
+            "/auth/login",
+            credentials,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          )
+          .catch((error: AxiosError) => {
+            throw new Error(String(error.response?.status));
+          });
 
         return {
           id: credentials.email,
