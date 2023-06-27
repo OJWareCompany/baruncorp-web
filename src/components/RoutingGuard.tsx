@@ -1,9 +1,9 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { toast } from "@/hook/use-toast";
 
 interface Props {
   children: React.ReactNode;
@@ -12,7 +12,33 @@ interface Props {
 
 export default function RoutingGuard({ children, authenticated }: Props) {
   const router = useRouter();
-  const { status } = useSession();
+  const { status, data: session } = useSession();
+
+  useEffect(() => {
+    if (!authenticated || session == null || session.isValid) {
+      return;
+    }
+
+    switch (session?.authError) {
+      case "REFRESH_TOKEN_ERROR":
+        toast({
+          title: "Expired session",
+          description: "Please sign in again.",
+          variant: "destructive",
+        });
+        break;
+      case "UNKNOWN_ERROR":
+        toast({
+          title: "Something went wrong",
+          description:
+            "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
+          variant: "destructive",
+        });
+        break;
+    }
+
+    signOut({ redirect: false });
+  }, [authenticated, session]);
 
   useEffect(() => {
     if (status === "authenticated" && !authenticated) {
@@ -25,18 +51,6 @@ export default function RoutingGuard({ children, authenticated }: Props) {
       return;
     }
   }, [authenticated, router, status]);
-
-  if (
-    status === "loading" ||
-    (status === "authenticated" && !authenticated) ||
-    (status === "unauthenticated" && authenticated)
-  ) {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <Loader2 className="h-16 w-16 animate-spin" />
-      </div>
-    );
-  }
 
   return children;
 }

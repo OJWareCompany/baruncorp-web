@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { isAxiosError } from "axios";
-import { signOut } from "next-auth/react";
 
 type Props = {
   children: React.ReactNode;
@@ -32,20 +26,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry },
   },
-  queryCache: new QueryCache({
-    onError: (error: unknown) => {
-      if (unauthorized(error)) {
-        signOut({ redirect: false });
-      }
-    },
-  }),
-  mutationCache: new MutationCache({
-    onError: (error: unknown) => {
-      if (unauthorized(error)) {
-        signOut({ redirect: false });
-      }
-    },
-  }),
 });
 
 export default function QueryContext({ children }: Props) {
