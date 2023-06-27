@@ -73,7 +73,7 @@ export default function SigninPage() {
 
     if (statusCode == null) {
       router.push("/");
-      toast({ title: "Sign-in complete" });
+      toast({ title: "Sign-in success" });
       return;
     }
 

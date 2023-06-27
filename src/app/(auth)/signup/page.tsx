@@ -107,7 +107,7 @@ export default function SignupPage() {
       .mutateAsync(values)
       .then(() => {
         router.push("/signin");
-        toast({ title: "Sign-up complete" });
+        toast({ title: "Sign-up success" });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         const { response } = error;
