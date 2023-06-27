@@ -15,3 +15,7 @@ export interface SignupReqData {
   email: string;
   code: string;
 }
+
+export interface RefreshResData {
+  accessToken: string;
+}

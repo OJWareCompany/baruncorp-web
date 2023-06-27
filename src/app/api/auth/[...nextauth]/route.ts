@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
-import { NextAuthOptions } from "next-auth";
+import { AxiosError, AxiosResponse } from "axios";
+import { NextAuthOptions, Session } from "next-auth";
 /**
  * @see https://next-auth.js.org/configuration/initialization#route-handlers-app
  */
@@ -7,7 +7,7 @@ import { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import apiClient from "@/api";
-import { SigninReqData, SigninResData } from "@/types/auth";
+import { RefreshResData, SigninReqData, SigninResData } from "@/types/auth";
 
 const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET, // https://next-auth.js.org/configuration/options#secret
@@ -35,7 +35,7 @@ const authOptions: NextAuthOptions = {
         }
 
         const {
-          data: { accessToken },
+          data: { accessToken, refreshToken },
         } = await apiClient
           .post<SigninResData, AxiosResponse<SigninResData>, SigninReqData>(
             "/auth/login",
@@ -54,21 +54,71 @@ const authOptions: NextAuthOptions = {
           id: credentials.email,
           email: credentials.email,
           accessToken,
+          refreshToken,
           name: "elon", // TODO name 관련 처리 어떻게 할지 고려
         };
       },
     }),
   ],
   callbacks: {
-    // Important: call chain (jwt -> session)
-    // https://next-auth.js.org/configuration/callbacks#jwt-callback
-    async jwt({ token, user }) {
-      return { ...token, ...user };
+    async jwt({ trigger, user, token }) {
+      if (trigger === "signIn") {
+        const { name, email, accessToken, refreshToken } = user;
+        return {
+          name,
+          email,
+          accessToken,
+          refreshToken,
+        };
+      }
+
+      let authError: Session["authError"];
+      let { accessToken } = token;
+      const { refreshToken } = token;
+
+      await apiClient
+        .get<void>("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .catch(async (error: AxiosError<ErrorResponseData>) => {
+          if (error.response?.data.errorCode === "10005") {
+            await apiClient
+              .get<RefreshResData>("/auth/refresh", {
+                headers: {
+                  Authorization: `Bearer ${refreshToken}`,
+                },
+              })
+              .then((response) => {
+                authError = "ACCESS_TOKEN_ERROR";
+                accessToken = response.data.accessToken;
+              })
+              .catch((error: AxiosError<ErrorResponseData>) => {
+                if (error.response?.data.errorCode === "10006") {
+                  authError = "REFRESH_TOKEN_ERROR";
+                  return;
+                }
+
+                authError = "UNKNOWN_ERROR";
+              });
+            return;
+          }
+
+          authError = "UNKNOWN_ERROR";
+        });
+
+      return { ...token, accessToken, authError };
     },
-    // https://next-auth.js.org/configuration/callbacks#session-callback
     async session({ session, token }) {
-      session.user.accessToken = token.accessToken as string;
-      return session;
+      const { accessToken, refreshToken, authError } = token;
+      return {
+        ...session,
+        accessToken,
+        refreshToken,
+        authError,
+        isValid: authError == null || authError === "ACCESS_TOKEN_ERROR",
+      };
     },
   },
   session: {

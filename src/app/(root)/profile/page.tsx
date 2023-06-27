@@ -38,7 +38,7 @@ interface Profile {
 interface ProfilePatchData extends Pick<Profile, "firstName" | "lastName"> {}
 
 export default function ProfilePage() {
-  const { data: session, status: authStatus } = useSession();
+  const { data: session, update } = useSession();
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,19 +60,20 @@ export default function ProfilePage() {
    * get profile query
    */
   const profileQuery = useQuery<Profile, AxiosError<ErrorResponseData>>({
-    queryKey: ["profile"],
+    queryKey: ["profile", session?.accessToken, session?.isValid],
     queryFn: async () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/users/profile`,
         {
           headers: {
-            Authorization: `Bearer ${session?.user.accessToken}`,
+            Authorization: `Bearer ${session?.accessToken}`,
           },
         }
       );
       return response.data;
     },
     refetchOnWindowFocus: false,
+    enabled: session?.accessToken != null && session.isValid,
   });
 
   /**
@@ -89,7 +90,7 @@ export default function ProfilePage() {
         data,
         {
           headers: {
-            Authorization: `Bearer ${session?.user.accessToken}`,
+            Authorization: `Bearer ${session?.accessToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -100,7 +101,7 @@ export default function ProfilePage() {
   const { data: profile } = profileQuery;
 
   useEffect(() => {
-    if (profileQuery.isSuccess && profile) {
+    if (profileQuery.isSuccess && profile && !isEdit) {
       const { email, firstName, lastName, companyId } = profile;
       reset({
         firstName,
@@ -109,57 +110,57 @@ export default function ProfilePage() {
         organization: companyId === 1 ? "BARUN CORP" : "TESLA", // TODO 서버측에서 넘겨주는 데이터 변경된 이후 다시 확인
       });
     }
-  }, [profileQuery.isSuccess, profile, reset]);
+  }, [isEdit, profile, profileQuery.isSuccess, reset]);
 
   useEffect(() => {
-    if (profileQuery.isError) {
-      const { response: errorResponse } = profileQuery.error;
-
-      let title = "Something went wrong";
-      let description =
-        "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-
-      switch (errorResponse?.data.statusCode) {
-        case 401:
-          if (errorResponse?.data.errorCode === "10005") {
-            title = "Please sign in again";
-            description = "";
-          }
-          break;
-        case 500:
-          title = "Server error";
-          break;
-      }
-
-      toast({ title, description, variant: "destructive" });
+    if (!profileQuery.isError || profileQuery.error.response?.data == null) {
+      return;
     }
-  }, [profileQuery.isError, profileQuery.error]);
+
+    if (profileQuery.error.response.data.errorCode === "10005") {
+      update();
+      return;
+    }
+
+    let title = "Something went wrong";
+    let description =
+      "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+
+    if (profileQuery.error.response.data.statusCode === 500) {
+      title = "Server error";
+    }
+
+    toast({ title, description, variant: "destructive" });
+  }, [profileQuery.isError, profileQuery.error, update, session?.authError]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { firstName, lastName } = values;
 
     await mProfile
       .mutateAsync({ firstName, lastName })
-      .then((response) => {
+      .then(() => {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
       })
-      .catch((error: AxiosError<ErrorResponseData>) => {
+      .catch(async (error: AxiosError<ErrorResponseData>) => {
         const { response: errorResponse } = error;
+        if (errorResponse?.data.errorCode === "10005") {
+          const newSession = await update();
+          if (newSession?.isValid) {
+            toast({
+              title: "Expired session",
+              description: "Please try agian.",
+              variant: "destructive",
+            });
+          }
+          return;
+        }
 
         let title = "Something went wrong";
         let description =
           "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
 
-        switch (errorResponse?.data.statusCode) {
-          case 401:
-            if (errorResponse?.data.errorCode === "10005") {
-              title = "Please sign in again";
-              description = "";
-            }
-            break;
-          case 500:
-            title = "Server error";
-            break;
+        if (errorResponse?.data.statusCode === 500) {
+          title = "Server error";
         }
 
         toast({ title, description, variant: "destructive" });
