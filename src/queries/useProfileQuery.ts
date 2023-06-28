@@ -13,7 +13,7 @@ const useProfileQuery = () => {
     queryKey: [QUERY_KEY, session?.accessToken, session?.isValid],
     queryFn: () =>
       apiClient
-        .get("/users/profile", {
+        .get<ProfileGetResDto>("/users/profile", {
           headers: {
             Authorization: `Bearer ${session?.accessToken}`,
           },

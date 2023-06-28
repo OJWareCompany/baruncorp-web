@@ -3,10 +3,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useEffect, useState } from "react";
-import { AxiosError, AxiosResponse } from "axios";
+import { useEffect } from "react";
+import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Form,
   FormControl,
@@ -30,7 +29,6 @@ const formSchema = z.object({
 
 export default function ProfilePage() {
   const { update } = useSession();
-  const [isAccessTokenError, setIsAccessTokenError] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,7 +49,7 @@ export default function ProfilePage() {
   const { mutateAsync } = usePatchProfileMutation();
 
   useEffect(() => {
-    if (!isSuccess || isAccessTokenError) {
+    if (!isSuccess) {
       return;
     }
 
@@ -62,7 +60,7 @@ export default function ProfilePage() {
       email,
       organization: companyId === 1 ? "BARUN CORP" : "TESLA", // TODO 서버측에서 넘겨주는 데이터 변경된 이후 다시 확인
     });
-  }, [isAccessTokenError, isSuccess, profile, reset]);
+  }, [isSuccess, profile, reset]);
 
   useEffect(() => {
     if (!isError || error.response == null) {
@@ -89,39 +87,41 @@ export default function ProfilePage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { firstName, lastName } = values;
 
-    setIsAccessTokenError(false);
-    await mutateAsync({ firstName, lastName }).catch(
-      async (error: AxiosError<ErrorResponseData>) => {
-        const { response } = error;
-        if (response == null) {
-          return;
-        }
-
-        const { errorCode, statusCode } = response.data;
-        if (errorCode === "10005") {
-          const newSession = await update();
-          if (newSession?.isValid) {
-            setIsAccessTokenError(true);
-            toast({
-              title: "Expired session",
-              description: "Please try agian.",
-              variant: "destructive",
-            });
-          }
-          return;
-        }
-
-        let title = "Something went wrong";
-        let description =
-          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-
-        if (statusCode === 500) {
-          title = "Server error";
-        }
-
-        toast({ title, description, variant: "destructive" });
+    await mutateAsync({
+      firstName,
+      lastName,
+    }).catch(async (error: AxiosError<ErrorResponseData>) => {
+      const { response } = error;
+      if (response == null) {
+        return;
       }
-    );
+
+      const { errorCode, statusCode } = response.data;
+      if (errorCode === "10005") {
+        const newSession = await update();
+        if (newSession == null) {
+          return;
+        }
+
+        if (newSession.isValid) {
+          await mutateAsync({
+            firstName,
+            lastName,
+          });
+        }
+        return;
+      }
+
+      let title = "Something went wrong";
+      let description =
+        "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+
+      if (statusCode === 500) {
+        title = "Server error";
+      }
+
+      toast({ title, description, variant: "destructive" });
+    });
   }
 
   return (
