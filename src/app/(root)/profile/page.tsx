@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hook/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
-import useProfileMutation from "@/queries/useProfileMutation";
+import usePatchProfileMutation from "@/queries/usePatchProfileMutation";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -48,7 +48,7 @@ export default function ProfilePage() {
   } = form;
 
   const { data: profile, isSuccess, isError, error } = useProfileQuery();
-  const { mutateAsync } = useProfileMutation();
+  const { mutateAsync } = usePatchProfileMutation();
 
   useEffect(() => {
     if (!isSuccess || isAccessTokenError) {
