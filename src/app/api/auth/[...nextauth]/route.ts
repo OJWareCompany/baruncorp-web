@@ -7,7 +7,11 @@ import { NextAuthOptions, Session } from "next-auth";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import apiClient from "@/api";
-import { RefreshResData, SigninReqData, SigninResData } from "@/types/auth";
+import {
+  RefreshGetResDto,
+  SigninPostReqDto,
+  SigninPostResDto,
+} from "@/types/dto/auth";
 
 const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET, // https://next-auth.js.org/configuration/options#secret
@@ -37,15 +41,15 @@ const authOptions: NextAuthOptions = {
         const {
           data: { accessToken, refreshToken },
         } = await apiClient
-          .post<SigninResData, AxiosResponse<SigninResData>, SigninReqData>(
-            "/auth/login",
-            credentials,
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          )
+          .post<
+            SigninPostResDto,
+            AxiosResponse<SigninPostResDto>,
+            SigninPostReqDto
+          >("/auth/login", credentials, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
           .catch((error: AxiosError) => {
             throw new Error(String(error.response?.status));
           });
@@ -85,7 +89,7 @@ const authOptions: NextAuthOptions = {
         .catch(async (error: AxiosError<ErrorResponseData>) => {
           if (error.response?.data.errorCode === "10005") {
             await apiClient
-              .get<RefreshResData>("/auth/refresh", {
+              .get<RefreshGetResDto>("/auth/refresh", {
                 headers: {
                   Authorization: `Bearer ${refreshToken}`,
                 },

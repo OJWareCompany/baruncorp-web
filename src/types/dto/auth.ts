@@ -1,14 +1,14 @@
-export interface SigninReqData {
+export interface SigninPostReqDto {
   email: string;
   password: string;
 }
 
-export interface SigninResData {
+export interface SigninPostResDto {
   accessToken: string;
   refreshToken: string;
 }
 
-export interface SignupReqData {
+export interface SignupPostReqDto {
   password: string;
   firstName: string;
   lastName: string;
@@ -16,6 +16,6 @@ export interface SignupReqData {
   code: string;
 }
 
-export interface RefreshResData {
+export interface RefreshGetResDto {
   accessToken: string;
 }
