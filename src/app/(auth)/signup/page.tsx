@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hook/use-toast";
 import { Separator } from "@/components/ui/separator";
 import apiClient from "@/api";
-import { SignupReqData } from "@/types/auth";
+import { SignupPostReqDto } from "@/types/dto/auth";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -53,12 +53,12 @@ export default function SignupPage() {
    * signup mutation
    */
   const mSignup = useMutation<
-    AxiosResponse<void, SignupReqData>,
+    AxiosResponse<void, SignupPostReqDto>,
     AxiosError<ErrorResponseData>,
-    SignupReqData
+    SignupPostReqDto
   >({
     mutationFn: (data) =>
-      apiClient.post<void, AxiosResponse<void>, SignupReqData>(
+      apiClient.post<void, AxiosResponse<void>, SignupPostReqDto>(
         "/auth/signup",
         data,
         {
