@@ -91,7 +91,6 @@ const authOptions: NextAuthOptions = {
                 },
               })
               .then((response) => {
-                authError = "ACCESS_TOKEN_ERROR";
                 accessToken = response.data.accessToken;
               })
               .catch((error: AxiosError<ErrorResponseData>) => {
@@ -117,7 +116,7 @@ const authOptions: NextAuthOptions = {
         accessToken,
         refreshToken,
         authError,
-        isValid: authError == null || authError === "ACCESS_TOKEN_ERROR",
+        isValid: authError == null,
       };
     },
   },

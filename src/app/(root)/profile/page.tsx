@@ -131,7 +131,7 @@ export default function ProfilePage() {
     }
 
     toast({ title, description, variant: "destructive" });
-  }, [profileQuery.isError, profileQuery.error, update, session?.authError]);
+  }, [profileQuery.isError, profileQuery.error, update]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { firstName, lastName } = values;

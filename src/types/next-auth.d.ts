@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import { JWT } from "next-auth/jwt";
 
-type AuthError = "ACCESS_TOKEN_ERROR" | "REFRESH_TOKEN_ERROR" | "UNKNOWN_ERROR";
+type AuthError = "REFRESH_TOKEN_ERROR" | "UNKNOWN_ERROR";
 
 declare module "next-auth" {
   interface Session {
