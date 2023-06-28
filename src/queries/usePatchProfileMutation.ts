@@ -5,7 +5,7 @@ import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
 import apiClient from "@/api";
 import { ProfilePatchReqDto } from "@/types/dto/users";
 
-const useProfileMutation = () => {
+const usePatchProfileMutation = () => {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
 
@@ -28,4 +28,4 @@ const useProfileMutation = () => {
   );
 };
 
-export default useProfileMutation;
+export default usePatchProfileMutation;
