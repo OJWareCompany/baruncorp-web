@@ -19,7 +19,9 @@ export default function RoutingGuard({ children, authenticated }: Props) {
       return;
     }
 
-    switch (session?.authError) {
+    const { authError } = session;
+
+    switch (authError) {
       case "REFRESH_TOKEN_ERROR":
         toast({
           title: "Expired session",
