@@ -45,7 +45,7 @@ const authOptions: NextAuthOptions = {
             SigninPostResDto,
             AxiosResponse<SigninPostResDto>,
             SigninPostReqDto
-          >("/auth/login", credentials, {
+          >("/auth/signin", credentials, {
             headers: {
               "Content-Type": "application/json",
             },
@@ -59,7 +59,6 @@ const authOptions: NextAuthOptions = {
           email: credentials.email,
           accessToken,
           refreshToken,
-          name: "elon", // TODO name 관련 처리 어떻게 할지 고려
         };
       },
     }),
@@ -67,9 +66,8 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ trigger, user, token }) {
       if (trigger === "signIn") {
-        const { name, email, accessToken, refreshToken } = user;
+        const { email, accessToken, refreshToken } = user;
         return {
-          name,
           email,
           accessToken,
           refreshToken,

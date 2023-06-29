@@ -10,7 +10,6 @@ declare module "next-auth" {
     authError?: AuthError;
     isValid: boolean;
     user: {
-      name: string;
       email: string;
     };
   }
