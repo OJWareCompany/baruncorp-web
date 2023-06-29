@@ -85,7 +85,7 @@ const authOptions: NextAuthOptions = {
           },
         })
         .catch(async (error: AxiosError<ErrorResponseData>) => {
-          if (error.response?.data.errorCode === "10005") {
+          if (error.response?.data.errorCode.includes("10005")) {
             await apiClient
               .get<RefreshGetResDto>("/auth/refresh", {
                 headers: {
@@ -96,7 +96,7 @@ const authOptions: NextAuthOptions = {
                 accessToken = response.data.accessToken;
               })
               .catch((error: AxiosError<ErrorResponseData>) => {
-                if (error.response?.data.errorCode === "10006") {
+                if (error.response?.data.errorCode.includes("10006")) {
                   authError = "REFRESH_TOKEN_ERROR";
                   return;
                 }

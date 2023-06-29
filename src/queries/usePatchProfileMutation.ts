@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
-import { Session } from "next-auth";
+import { AxiosError } from "axios";
 import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
-import apiClient from "@/api";
 import { ProfilePatchReqDto, ProfilePatchResDto } from "@/types/dto/users";
+import useApiClient from "@/hook/useApiClient";
 
 const usePatchProfileMutation = () => {
+  const apiClient = useApiClient();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -13,20 +13,10 @@ const usePatchProfileMutation = () => {
     AxiosError<ErrorResponseData>,
     ProfilePatchReqDto
   >(
-    async (data) => {
-      const {
-        data: { accessToken },
-      } = await axios.get<Session>("/api/auth/session");
-
-      return apiClient
-        .patch<ProfilePatchResDto>("/users/profile", data, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        })
-        .then(({ data }) => data);
-    },
+    (data) =>
+      apiClient
+        .patch<ProfilePatchResDto>("/users/profile", data)
+        .then(({ data }) => data),
     {
       onSuccess: () =>
         queryClient.invalidateQueries({ queryKey: [profileQueryKey] }),
