@@ -2,7 +2,7 @@
 
 import { LogOut, User2 } from "lucide-react";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -20,6 +20,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import useProfileQuery from "@/queries/useProfileQuery";
 
 const navItems: { name: string; pathname: string }[] = [
   { name: "People Operations", pathname: "/people-operations" },
@@ -29,7 +30,9 @@ const navItems: { name: string; pathname: string }[] = [
 ];
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: profile } = useProfileQuery();
+
+  const fullName = profile && `${profile.firstName} ${profile.lastName}`; // TODO: `GET /users/profile`의 응답이 fullName을 내려주면 개선한다.
 
   const handleSignOutButtonClick = () => {
     signOut({ redirect: false });
@@ -60,24 +63,23 @@ export default function Header() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant={"ghost"} className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-9 w-9">
-                <AvatarFallback>
-                  {/* TODO: sign in 시에 name을 어떻게 처리할지 결정된 후 리팩토링 */}
-                  YU
-                </AvatarFallback>
-              </Avatar>
-            </Button>
+            {fullName && (
+              <Button
+                variant={"ghost"}
+                className="relative h-8 w-8 rounded-full animate-in fade-in"
+              >
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback>{fullName.slice(0, 2)}</AvatarFallback>
+                </Avatar>
+              </Button>
+            )}
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col gap-1">
-                <span className="sm">
-                  {/* TODO: sign in 시에 name을 어떻게 처리할지 결정된 후 리팩토링 */}
-                  Yunwoo Ji
-                </span>
+                <span className="sm">{fullName}</span>
                 <span className="text-xs leading-none text-muted-foreground">
-                  {session?.user.email}
+                  {profile?.email}
                 </span>
               </div>
             </DropdownMenuLabel>
