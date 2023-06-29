@@ -1,5 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import {
+  DEFAULT_ERROR_TOAST_DESCRIPTION,
+  DEFAULT_ERROR_TOAST_TITLE,
+  SERVER_ERROR_TOAST_TITLE,
+} from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,4 +24,19 @@ export function convertCamelCaseToTitleCase(string: string) {
       // uppercase the first character
       .replace(/^./, (substring) => substring.toUpperCase())
   );
+}
+
+export function getTitleAndDescFromStatusCode(statusCode: number | undefined): {
+  title: string;
+  description: string;
+} {
+  let title = DEFAULT_ERROR_TOAST_TITLE;
+  if (statusCode === 500) {
+    title = SERVER_ERROR_TOAST_TITLE;
+  }
+
+  return {
+    title,
+    description: DEFAULT_ERROR_TOAST_DESCRIPTION,
+  };
 }

@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useEffect } from "react";
-import { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -16,7 +14,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hook/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
 import usePatchProfileMutation from "@/queries/usePatchProfileMutation";
 
@@ -28,7 +25,6 @@ const formSchema = z.object({
 });
 
 export default function ProfilePage() {
-  const { update } = useSession();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,7 +41,7 @@ export default function ProfilePage() {
     formState: { isSubmitting, isDirty },
   } = form;
 
-  const { data: profile, isSuccess, isError, error } = useProfileQuery();
+  const { data: profile, isSuccess } = useProfileQuery();
   const { mutateAsync } = usePatchProfileMutation();
 
   useEffect(() => {
@@ -62,65 +58,12 @@ export default function ProfilePage() {
     });
   }, [isSuccess, profile, reset]);
 
-  useEffect(() => {
-    if (!isError || error.response == null) {
-      return;
-    }
-
-    const { errorCode, statusCode } = error.response.data;
-    if (errorCode === "10005") {
-      update();
-      return;
-    }
-
-    let title = "Something went wrong";
-    let description =
-      "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-
-    if (statusCode === 500) {
-      title = "Server error";
-    }
-
-    toast({ title, description, variant: "destructive" });
-  }, [error, isError, update]);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { firstName, lastName } = values;
 
     await mutateAsync({
       firstName,
       lastName,
-    }).catch(async (error: AxiosError<ErrorResponseData>) => {
-      const { response } = error;
-      if (response == null) {
-        return;
-      }
-
-      const { errorCode, statusCode } = response.data;
-      if (errorCode === "10005") {
-        const newSession = await update();
-        if (newSession == null) {
-          return;
-        }
-
-        if (newSession.isValid) {
-          await mutateAsync({
-            firstName,
-            lastName,
-          });
-        }
-        return;
-      }
-
-      let title = "Something went wrong";
-      let description =
-        "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-
-      if (statusCode === 500) {
-        title = "Server error";
-      }
-
-      toast({ title, description, variant: "destructive" });
     });
   }
 

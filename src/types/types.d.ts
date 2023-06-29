@@ -1,5 +1,5 @@
 interface ErrorResponseData {
-  errorCode: "10005" | "10006";
+  errorCode: string[];
   message: string;
   statusCode: number;
   timestamp: string;
