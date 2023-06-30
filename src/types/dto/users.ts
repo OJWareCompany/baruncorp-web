@@ -5,6 +5,11 @@ export interface ProfileGetResDto {
   email: string;
   companyId: number;
 }
+
+export interface ProfilePatchReqDto {
+  firstName: string;
+  lastName: string;
+}
 export interface ProfilePatchResDto {
   id: string;
   firstName: string;
@@ -13,7 +18,14 @@ export interface ProfilePatchResDto {
   companyId: number;
 }
 
-export interface ProfilePatchReqDto {
-  firstName: string;
-  lastName: string;
+export interface InvitationsPostReqDto {
+  email: string;
+  organizationName: string;
+}
+
+export interface InvitationsPostResDto {
+  code: string;
+  email: string;
+  role: string;
+  organizationId: string;
 }
