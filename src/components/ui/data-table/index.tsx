@@ -1,6 +1,6 @@
 "use client";
 
-import { flexRender } from "@tanstack/react-table";
+import { TableOptions, flexRender } from "@tanstack/react-table";
 import { useState } from "react";
 import {
   ColumnFiltersState,
@@ -25,22 +25,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-}
+interface Props<TData> extends Omit<TableOptions<TData>, "getCoreRowModel"> {}
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+export function DataTable<TData>(props: Props<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
-    data,
-    columns,
+    ...props,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -101,7 +94,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={props.columns.length}
                   className="h-24 text-center"
                 >
                   No results.
