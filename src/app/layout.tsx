@@ -5,6 +5,7 @@ import QueryContext from "@/context/QueryContext";
 import { Toaster } from "@/components/Toaster";
 
 const inter = Inter({ subsets: ["latin"] });
+import "mapbox-gl/dist/mapbox-gl.css";
 
 export const metadata = {
   title: "Create Next App",

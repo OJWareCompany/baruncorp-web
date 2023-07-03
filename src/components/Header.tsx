@@ -27,6 +27,7 @@ const navItems: { name: string; pathname: string }[] = [
   { name: "Project Intake Portal", pathname: "/project-intake-portal" },
   { name: "Project Management", pathname: "/project-management" },
   { name: "Invoice", pathname: "/invoice" },
+  { name: "Common", pathname: "/common" },
 ];
 
 export default function Header() {
