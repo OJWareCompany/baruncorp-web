@@ -3,7 +3,7 @@
 import { LogOut, User2 } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -22,6 +22,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
+  NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
 import useProfileQuery from "@/queries/useProfileQuery";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,6 @@ const navItems = [
   { name: "Project Intake Portal", pathname: "/project-intake-portal" },
   { name: "Project Management", pathname: "/project-management" },
   { name: "Invoice", pathname: "/invoice" },
-  { name: "Common", pathname: "/common" },
 ];
 
 const peopleOperationsNavItems: { name: string; pathname: string }[] = [
@@ -44,6 +44,17 @@ const peopleOperationsNavItems: { name: string; pathname: string }[] = [
   },
 ];
 
+const commonNavItems: { name: string; pathname: string }[] = [
+  {
+    name: "Organizations",
+    pathname: "/common/organizations",
+  },
+  {
+    name: "Organization Creation",
+    pathname: "/common/organization-creation",
+  },
+];
+
 export default function Header() {
   const { data: profile } = useProfileQuery();
 
@@ -51,6 +62,16 @@ export default function Header() {
 
   const handleSignOutButtonClick = () => {
     signOut({ redirect: false });
+  };
+
+  const [leftOfHoveredMenu, setLeftOfHoveredMenu] = useState<number>(0);
+
+  const handleMouseEnter = (event: any) => {
+    setLeftOfHoveredMenu(event.currentTarget.getBoundingClientRect().x);
+  };
+
+  const handleMouseLeave = () => {
+    setLeftOfHoveredMenu(0);
   };
 
   return (
@@ -62,7 +83,10 @@ export default function Header() {
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
-              <NavigationMenuItem>
+              <NavigationMenuItem
+                onMouseEnter={handleMouseEnter}
+                // onMouseLeave={handleMouseLeave}
+              >
                 <NavigationMenuTrigger>People operations</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="py-2 w-48">
@@ -94,6 +118,36 @@ export default function Header() {
                   </Link>
                 </NavigationMenuItem>
               ))}
+              <NavigationMenuItem
+                onMouseEnter={handleMouseEnter}
+                // onMouseLeave={handleMouseLeave}
+              >
+                <NavigationMenuTrigger>Common</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="py-2 w-48">
+                    {commonNavItems.map((item) => (
+                      <NavigationMenuItem key={item.pathname}>
+                        <Link href={item.pathname} legacyBehavior passHref>
+                          <NavigationMenuLink
+                            className={cn(
+                              navigationMenuTriggerStyle(),
+                              "rounded-none w-full justify-start"
+                            )}
+                          >
+                            {item.name}
+                          </NavigationMenuLink>
+                        </Link>
+                      </NavigationMenuItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuViewport
+                style={{
+                  transform: `translateX(${leftOfHoveredMenu}px)`,
+                }}
+              />
             </NavigationMenuList>
           </NavigationMenu>
         </div>
