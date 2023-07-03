@@ -3,6 +3,7 @@
 import { LogOut, User2 } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import React from "react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -15,18 +16,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   NavigationMenu,
+  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import useProfileQuery from "@/queries/useProfileQuery";
+import { cn } from "@/lib/utils";
 
-const navItems: { name: string; pathname: string }[] = [
-  { name: "People Operations", pathname: "/people-operations" },
+const navItems = [
   { name: "Project Intake Portal", pathname: "/project-intake-portal" },
   { name: "Project Management", pathname: "/project-management" },
   { name: "Invoice", pathname: "/invoice" },
+];
+
+const peopleOperationsNavItems: { name: string; pathname: string }[] = [
+  {
+    name: "Users",
+    pathname: "/people-operations/users",
+  },
+  {
+    name: "Invitation",
+    pathname: "/people-operations/invitation",
+  },
 ];
 
 export default function Header() {
@@ -47,6 +61,27 @@ export default function Header() {
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>People operations</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="py-2 w-48">
+                    {peopleOperationsNavItems.map((item) => (
+                      <NavigationMenuItem key={item.pathname}>
+                        <Link href={item.pathname} legacyBehavior passHref>
+                          <NavigationMenuLink
+                            className={cn(
+                              navigationMenuTriggerStyle(),
+                              "rounded-none w-full justify-start"
+                            )}
+                          >
+                            {item.name}
+                          </NavigationMenuLink>
+                        </Link>
+                      </NavigationMenuItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
               {navItems.map((item) => (
                 <NavigationMenuItem key={item.pathname}>
                   <Link href={item.pathname} legacyBehavior passHref>
