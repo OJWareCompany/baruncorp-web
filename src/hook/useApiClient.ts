@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { isAxiosError } from "axios";
-import { useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/api";
 
 const useApiClient = () => {

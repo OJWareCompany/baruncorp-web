@@ -30,6 +30,7 @@ const navItems = [
   { name: "Project Intake Portal", pathname: "/project-intake-portal" },
   { name: "Project Management", pathname: "/project-management" },
   { name: "Invoice", pathname: "/invoice" },
+  { name: "Common", pathname: "/common" },
 ];
 
 const peopleOperationsNavItems: { name: string; pathname: string }[] = [
