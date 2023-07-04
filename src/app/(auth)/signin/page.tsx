@@ -28,15 +28,22 @@ const formSchema = z.object({
   password: z.string().trim().min(1, { message: "Password is required" }),
 });
 
+const defaultValues = {
+  email: "ejsvk3284@kakao.com",
+  password: "WkdWkdaos123!",
+};
+
+if (process.env.NODE_ENV === "production") {
+  defaultValues.email = "";
+  defaultValues.password = "";
+}
+
 export default function SigninPage() {
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "ejsvk3284@kakao.com",
-      password: "WkdWkdaos123!",
-    },
+    defaultValues,
   });
   const {
     control,

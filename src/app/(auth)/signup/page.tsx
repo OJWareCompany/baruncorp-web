@@ -46,6 +46,24 @@ const formSchema = z.object({
   code: z.string().trim().length(6, { message: "Code shoule be 6 characters" }),
 });
 
+const defaultValues = {
+  email: "ejsvk3284@kakao.com",
+  password: "WkdWkdaos123!",
+  confirmPassword: "",
+  firstName: "Chris",
+  lastName: "Kim",
+  code: "",
+};
+
+if (process.env.NODE_ENV === "production") {
+  defaultValues.email = "";
+  defaultValues.password = "";
+  defaultValues.confirmPassword = "";
+  defaultValues.firstName = "";
+  defaultValues.lastName = "";
+  defaultValues.code = "";
+}
+
 export default function SignupPage() {
   const router = useRouter();
 
@@ -70,14 +88,7 @@ export default function SignupPage() {
   });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "ejsvk3284@kakao.com",
-      password: "WkdWkdaos123!",
-      confirmPassword: "",
-      firstName: "Chris",
-      lastName: "Kim",
-      code: "079207",
-    },
+    defaultValues,
   });
 
   const {
