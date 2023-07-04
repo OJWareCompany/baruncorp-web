@@ -34,6 +34,7 @@ import {
 import usePostOrganizationMutation from "@/queries/usePostOrganizationMutation";
 import Scene from "@/components/Scene";
 import { toast } from "@/hook/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 const organizationTypes = ["client", "individual", "outsourcing"];
 
@@ -180,7 +181,7 @@ export default function Page() {
 
     await mutateAsync({ ...values })
       .then(() => {
-        router.push("/organization");
+        router.push("/common/organizations");
         toast({ title: "Organization-Creation success" });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
@@ -261,7 +262,7 @@ export default function Page() {
             <FormItem>
               <FormLabel required>Description</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Textarea {...field} className="resize-none" />
               </FormControl>
               <FormMessage />
             </FormItem>
