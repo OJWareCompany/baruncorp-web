@@ -67,7 +67,7 @@ export default function Page() {
 
   return (
     <div>
-      <h1 className="h3 mb-4">Users</h1>
+      <h1 className="h3 mb-4">Organizations</h1>
       <DataTable
         columns={columns}
         data={organizations ?? []}

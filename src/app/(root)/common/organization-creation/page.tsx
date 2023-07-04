@@ -212,7 +212,7 @@ export default function Page() {
 
   return (
     <Form {...form}>
-      <h1 className="h3 mb-4">Organization</h1>
+      <h1 className="h3 mb-4">New Organization</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-96">
         <FormField
           control={control}
