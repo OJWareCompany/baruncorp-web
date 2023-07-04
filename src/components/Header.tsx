@@ -3,7 +3,7 @@
 import { LogOut, User2 } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import React, { useState } from "react";
+import React, { SyntheticEvent, useState } from "react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -66,7 +66,7 @@ export default function Header() {
 
   const [leftOfHoveredMenu, setLeftOfHoveredMenu] = useState<number>(0);
 
-  const handleMouseEnter = (event: any) => {
+  const handleMouseEnter = (event: SyntheticEvent) => {
     setLeftOfHoveredMenu(event.currentTarget.getBoundingClientRect().x);
   };
 
