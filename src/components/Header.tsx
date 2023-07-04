@@ -53,6 +53,10 @@ const commonNavItems: { name: string; pathname: string }[] = [
     name: "Organization Creation",
     pathname: "/common/organization-creation",
   },
+  {
+    name: "Services",
+    pathname: "/common/services",
+  },
 ];
 
 export default function Header() {
@@ -70,10 +74,6 @@ export default function Header() {
     setLeftOfHoveredMenu(event.currentTarget.getBoundingClientRect().x);
   };
 
-  const handleMouseLeave = () => {
-    setLeftOfHoveredMenu(0);
-  };
-
   return (
     <header className="supports-backdrop-blur:bg-background/60 sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
@@ -83,10 +83,7 @@ export default function Header() {
           </Link>
           <NavigationMenu>
             <NavigationMenuList>
-              <NavigationMenuItem
-                onMouseEnter={handleMouseEnter}
-                // onMouseLeave={handleMouseLeave}
-              >
+              <NavigationMenuItem onMouseEnter={handleMouseEnter}>
                 <NavigationMenuTrigger>People operations</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="py-2 w-48">
@@ -118,10 +115,7 @@ export default function Header() {
                   </Link>
                 </NavigationMenuItem>
               ))}
-              <NavigationMenuItem
-                onMouseEnter={handleMouseEnter}
-                // onMouseLeave={handleMouseLeave}
-              >
+              <NavigationMenuItem onMouseEnter={handleMouseEnter}>
                 <NavigationMenuTrigger>Common</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="py-2 w-48">
