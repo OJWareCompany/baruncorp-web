@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,24 @@ import {
 import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
 import { OrganizationsGetResDto } from "@/types/dto/organizations";
 
-export const columns: ColumnDef<OrganizationsGetResDto[number]>[] = [
-  {
+type TableColumn = OrganizationsGetResDto[number] & { address: string };
+
+const columnHelper = createColumnHelper<TableColumn>();
+
+const columns = [
+  columnHelper.accessor("organizationType", { header: "Type" }),
+  columnHelper.accessor("name", { header: "Name" }),
+  columnHelper.accessor("address", { header: "Address" }),
+  columnHelper.accessor("phoneNumber", { header: "Phone" }),
+  columnHelper.accessor("email", { header: "Email" }),
+  columnHelper.accessor("description", {
+    header: "Description",
+    cell: ({ getValue }) => (
+      <span className="whitespace-pre-wrap">{getValue()}</span>
+    ),
+  }),
+  columnHelper.display({
     id: "actions",
-    header: "Actions",
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -26,54 +40,21 @@ export const columns: ColumnDef<OrganizationsGetResDto[number]>[] = [
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
+        <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <p>No Actions</p>
-            {/* <Link href={`/people-operations/users/${row.id}`}>View detail</Link> */}
+            <p>No Action</p>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "address",
-    header: "Address",
-  },
-  {
-    accessorKey: "phoneNumber",
-    header: "Phone",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
+  }),
 ];
 
 export default function Page() {
   const { data } = useOrganizationsQuery();
 
   const organizations = data?.map((org) => {
-    const {
-      street1,
-      street2,
-      city,
-      stateOrRegion,
-      postalCode,
-      country,
-      organizationType,
-    } = org;
+    const { street1, street2, city, stateOrRegion, postalCode, country } = org;
     const streetPart = [street1, street2].filter(Boolean).join(" ")?.trim();
     const cityPart = city?.trim();
     const etcPart = [stateOrRegion, postalCode, country]
@@ -81,9 +62,9 @@ export default function Page() {
       .join(" ")
       .trim();
     const address = [streetPart, cityPart, etcPart].filter(Boolean).join(", ");
-
-    return { ...org, address, type: organizationType };
+    return { ...org, address };
   });
+
   return (
     <div>
       <h1 className="h3 mb-4">Users</h1>
