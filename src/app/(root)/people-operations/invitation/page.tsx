@@ -35,12 +35,18 @@ const formSchema = z.object({
   organizationName: z.string({ required_error: "Organization is required" }),
 });
 
+const defaultValues = {
+  email: "ejsvk3284@kakao.com",
+};
+
+if (process.env.NODE_ENV === "production") {
+  defaultValues.email = "";
+}
+
 export default function Page() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-    },
+    defaultValues,
   });
   const {
     resetField,
