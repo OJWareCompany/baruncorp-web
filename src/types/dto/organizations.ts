@@ -14,12 +14,49 @@ export type OrganizationsGetResDto = {
 }[];
 
 export type MembersGetResDto = {
-  id: string; // TODO: check
+  id: string;
   lastName: string;
   firstName: string;
   fullName: string;
   email: string;
   organization: string;
-  role: string;
-  position: string;
+  position?: {
+    name: string | null;
+    description: string | null;
+    department: string | null;
+  };
+  licenses: {
+    abbreviation: string;
+    issuingCountryName: string;
+    expiryDate: string | null;
+    issuedDate: string | null;
+    priority: number;
+    type: string;
+    userName: string;
+  }[];
+  role: string | null;
 }[];
+
+// export type MemberGetResDto = {
+//   id: string;
+//   lastName: string;
+//   firstName: string;
+//   fullName: string;
+//   email: string;
+//   organization: string;
+//   position: {
+//     name: string | null;
+//     description: string | null;
+//     department: string | null;
+//   };
+//   licenses: {
+//     abbreviation: string;
+//     issuingCountryName: string;
+//     expiryDate: string | null;
+//     issuedDate: string | null;
+//     priority: number;
+//     type: string;
+//     userName: string;
+//   }[];
+//   role: string;
+// };
