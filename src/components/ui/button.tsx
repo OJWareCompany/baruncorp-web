@@ -22,6 +22,11 @@ const buttonVariants = cva(
         true: "w-full",
       },
     },
+    defaultVariants: {
+      variant: "primary",
+      size: "default",
+      fullWidth: false,
+    },
   }
 );
 

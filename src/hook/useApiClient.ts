@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { isAxiosError } from "axios";
 import apiClient from "@/api";
+import { isAxiosErrorWithErrorResponseData } from "@/lib/utils";
 
 const useApiClient = () => {
   const { data: session, update } = useSession();
@@ -24,13 +25,18 @@ const useApiClient = () => {
     const responseIntercept = apiClient.interceptors.response.use(
       (response) => response,
       async (error) => {
-        if (!isAxiosError<ErrorResponseData>(error) || error.config == null) {
+        if (
+          !isAxiosError(error) ||
+          !isAxiosErrorWithErrorResponseData(error) ||
+          error.config == null ||
+          error.response == null
+        ) {
           return Promise.reject(error);
         }
 
         const prevRequestConfig = error.config;
         if (
-          error.response?.data.errorCode.includes("10005") &&
+          error.response.data.errorCode.includes("10005") &&
           !prevRequestConfig.sent
         ) {
           prevRequestConfig.sent = true;

@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { AxiosError } from "axios";
 import {
   DEFAULT_ERROR_TOAST_DESCRIPTION,
   DEFAULT_ERROR_TOAST_TITLE,
@@ -39,4 +40,13 @@ export function getTitleAndDescFromStatusCode(statusCode: number | undefined): {
     title,
     description: DEFAULT_ERROR_TOAST_DESCRIPTION,
   };
+}
+
+export function isAxiosErrorWithErrorResponseData(
+  error: AxiosError
+): error is AxiosError<ErrorResponseData> {
+  return (
+    (error as AxiosError<ErrorResponseData>).response?.data.errorCode !==
+    undefined
+  );
 }

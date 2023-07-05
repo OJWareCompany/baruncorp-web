@@ -1,11 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
+import useProfileQuery, {
+  QUERY_KEY as profileQueryKey,
+} from "./useProfileQuery";
 import { ProfilePatchReqDto, ProfilePatchResDto } from "@/types/dto/users";
 import useApiClient from "@/hook/useApiClient";
 
-const usePatchProfileMutation = () => {
+const usePatchProfileMutation = (userId: string | undefined) => {
   const apiClient = useApiClient();
+  const { data: myProfile, isSuccess: isMyProfileQuerySuccess } =
+    useProfileQuery();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -14,12 +18,28 @@ const usePatchProfileMutation = () => {
     ProfilePatchReqDto
   >(
     (data) =>
-      apiClient
-        .patch<ProfilePatchResDto>("/users/profile", data)
-        .then(({ data }) => data),
+      userId == null
+        ? Promise.reject("userId should not be undefined.")
+        : apiClient
+            .patch<ProfilePatchResDto>(`/users/profile/${userId}`, data)
+            .then(({ data }) => data),
     {
-      onSuccess: () =>
-        queryClient.invalidateQueries({ queryKey: [profileQueryKey] }),
+      onSuccess: () => {
+        if (!isMyProfileQuerySuccess) {
+          return;
+        }
+
+        if (myProfile.id === userId) {
+          queryClient.invalidateQueries({
+            queryKey: [profileQueryKey],
+            exact: true,
+          });
+        }
+
+        queryClient.invalidateQueries({
+          queryKey: [profileQueryKey, userId],
+        });
+      },
     }
   );
 };

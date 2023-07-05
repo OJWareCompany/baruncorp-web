@@ -1,9 +1,26 @@
 export interface ProfileGetResDto {
   id: string;
-  firstName: string;
   lastName: string;
+  firstName: string;
+  fullName: string;
   email: string;
-  companyId: number;
+  organization: string;
+  position?: {
+    id: string | null;
+    name: string | null;
+    description: string | null;
+    department: string | null;
+  };
+  licenses: {
+    abbreviation: string;
+    issuingCountryName: string;
+    expiryDate: string | null;
+    issuedDate: string | null;
+    priority: number;
+    type: string;
+    userName: string;
+  }[];
+  role: string | null;
 }
 
 export interface ProfilePatchReqDto {
@@ -29,3 +46,28 @@ export interface InvitationsPostResDto {
   role: string;
   organizationId: string;
 }
+
+export type UsersGetResDto = {
+  id: string;
+  lastName: string;
+  firstName: string;
+  fullName: string;
+  email: string;
+  organization: string;
+  position?: {
+    id: string | null;
+    name: string | null;
+    description: string | null;
+    department: string | null;
+  };
+  licenses: {
+    abbreviation: string;
+    issuingCountryName: string;
+    expiryDate: string | null;
+    issuedDate: string | null;
+    priority: number;
+    type: string;
+    userName: string;
+  }[];
+  role: string | null;
+}[];

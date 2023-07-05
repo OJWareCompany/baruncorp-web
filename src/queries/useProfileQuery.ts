@@ -5,14 +5,16 @@ import useApiClient from "@/hook/useApiClient";
 
 export const QUERY_KEY = "profile";
 
-const useProfileQuery = () => {
+const useProfileQuery = (userId?: string) => {
   const apiClient = useApiClient();
 
   return useQuery<ProfileGetResDto, AxiosError<ErrorResponseData>>({
-    queryKey: [QUERY_KEY],
+    queryKey: userId ? [QUERY_KEY, userId] : [QUERY_KEY],
     queryFn: () =>
       apiClient
-        .get<ProfileGetResDto>("/users/profile")
+        .get<ProfileGetResDto>(
+          userId ? `/users/profile/${userId}` : "/users/profile"
+        )
         .then(({ data }) => data),
     refetchOnWindowFocus: false, // TODO: 이후에 모든 query에 적용할지 논의 필요
   });

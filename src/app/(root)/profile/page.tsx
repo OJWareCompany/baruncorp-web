@@ -42,19 +42,19 @@ export default function ProfilePage() {
   } = form;
 
   const { data: profile, isSuccess } = useProfileQuery();
-  const { mutateAsync } = usePatchProfileMutation();
+  const { mutateAsync } = usePatchProfileMutation(profile?.id);
 
   useEffect(() => {
     if (!isSuccess) {
       return;
     }
 
-    const { email, firstName, lastName, companyId } = profile;
+    const { email, firstName, lastName, organization } = profile;
     reset({
       firstName,
       lastName,
       email,
-      organization: companyId === 1 ? "BARUN CORP" : "TESLA", // TODO 서버측에서 넘겨주는 데이터 변경된 이후 다시 확인
+      organization,
     });
   }, [isSuccess, profile, reset]);
 
