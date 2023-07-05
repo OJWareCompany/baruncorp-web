@@ -2,10 +2,9 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import React from "react";
-import { MoreHorizontal, Pen, Trash } from "lucide-react";
+import { MoreHorizontal, Pen } from "lucide-react";
 import Link from "next/link";
 import { DataTable } from "@/components/ui/data-table";
-import { MembersGetResDto } from "@/types/dto/organizations";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import useMembersQuery from "@/queries/useMembersQuery";
+import useUsersQuery from "@/queries/useUsersQuery";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { UsersGetResDto } from "@/types/dto/users";
 
-const columnHelper = createColumnHelper<MembersGetResDto[number]>();
+const columnHelper = createColumnHelper<UsersGetResDto[number]>();
 
 const columns = [
   columnHelper.accessor("email", { header: "Email Address" }),
@@ -104,7 +104,7 @@ const columns = [
 ];
 
 export default function Page() {
-  const { data } = useMembersQuery();
+  const { data } = useUsersQuery();
 
   return (
     <div>
