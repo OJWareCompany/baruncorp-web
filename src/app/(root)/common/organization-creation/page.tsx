@@ -239,7 +239,7 @@ export default function Page() {
               <FormControl>
                 <Select {...field} onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select organization type" />
+                    <SelectValue placeholder="Select an organization type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>

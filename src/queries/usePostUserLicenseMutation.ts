@@ -2,25 +2,25 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
 import useApiClient from "@/hook/useApiClient";
-import { UserPositionPostReqDto } from "@/types/dto/departments";
+import { UserLicensePostReqDto } from "@/types/dto/departments";
 
-const usePostMemberPositionMutation = (userId: string) => {
+const usePostUserLicenseMutation = (userId: string) => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
-    UserPositionPostReqDto["positionId"]
+    Omit<UserLicensePostReqDto, "userId">
   >(
-    (positionId) => {
-      const params: UserPositionPostReqDto = {
+    (variables) => {
+      const data: UserLicensePostReqDto = {
         userId,
-        positionId,
+        ...variables,
       };
 
       return apiClient
-        .post<void>("/departments/user-position", {}, { params })
+        .post<void>("/departments/licenses", data)
         .then(({ data }) => data);
     },
     {
@@ -31,4 +31,4 @@ const usePostMemberPositionMutation = (userId: string) => {
   );
 };
 
-export default usePostMemberPositionMutation;
+export default usePostUserLicenseMutation;
