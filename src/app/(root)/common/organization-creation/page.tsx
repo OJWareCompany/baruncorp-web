@@ -322,7 +322,7 @@ export default function Page() {
                     <FormLabel required>Address</FormLabel>
                     <Input
                       {...field}
-                      placeholder="Search address"
+                      placeholder="Search for address"
                       onClick={(event) => {
                         setIsOpenPopover(true);
                         const currentTarget = event.currentTarget;

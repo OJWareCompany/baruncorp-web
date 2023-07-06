@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApiClient from "@/hook/useApiClient";
-import { ServicesGetResDto } from "@/types/dto/service";
+import { ServicesGetResDto } from "@/types/dto/departments";
 
 export const QUERY_KEY = "services";
 

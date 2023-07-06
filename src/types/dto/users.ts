@@ -11,6 +11,11 @@ export interface ProfileGetResDto {
     description: string | null;
     department: string | null;
   };
+  services: {
+    id: string;
+    name: string;
+    description: string;
+  }[];
   licenses: {
     abbreviation: string;
     issuingCountryName: string;
@@ -60,6 +65,11 @@ export type UsersGetResDto = {
     description: string | null;
     department: string | null;
   };
+  services: {
+    id: string;
+    name: string;
+    description: string;
+  }[];
   licenses: {
     abbreviation: string;
     issuingCountryName: string;

@@ -35,3 +35,19 @@ export type StatesGetResDto = {
   name: string;
   abbreviation: string;
 }[];
+
+export type ServicesGetResDto = {
+  id: string;
+  name: string;
+  description: string;
+}[];
+
+export interface UserServicePostReqDto {
+  userId: string;
+  serviceId: string;
+}
+
+export interface UserServiceDeleteReqDto {
+  userId: string;
+  serviceId: string;
+}
