@@ -1,11 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
+import useProfileQuery, {
+  QUERY_KEY as profileQueryKey,
+} from "./useProfileQuery";
 import useApiClient from "@/hook/useApiClient";
 import { UserServicePostReqDto } from "@/types/dto/departments";
 
-const usePostUserServiceMutation = (userId: string) => {
+const usePostUserServiceMutation = (userId: string | undefined) => {
   const apiClient = useApiClient();
+  const { data: myProfile, isSuccess: isMyProfileQuerySuccess } =
+    useProfileQuery();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -14,6 +18,10 @@ const usePostUserServiceMutation = (userId: string) => {
     UserServicePostReqDto["serviceId"]
   >(
     (serviceId) => {
+      if (userId == null) {
+        return Promise.reject("userId should not be undefined.");
+      }
+
       const data: UserServicePostReqDto = {
         userId,
         serviceId,
@@ -25,6 +33,16 @@ const usePostUserServiceMutation = (userId: string) => {
     },
     {
       onSuccess: () => {
+        if (!isMyProfileQuerySuccess || userId == null) {
+          return;
+        }
+
+        if (myProfile.id === userId) {
+          queryClient.invalidateQueries({
+            queryKey: [profileQueryKey, "mine"],
+          });
+        }
+
         queryClient.invalidateQueries({ queryKey: [profileQueryKey, userId] });
       },
     }

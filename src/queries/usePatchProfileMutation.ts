@@ -24,15 +24,14 @@ const usePatchProfileMutation = (userId: string | undefined) => {
             .patch<ProfilePatchResDto>(`/users/profile/${userId}`, data)
             .then(({ data }) => data),
     {
-      onSuccess: () => {
-        if (!isMyProfileQuerySuccess) {
+      onSuccess: async () => {
+        if (!isMyProfileQuerySuccess || userId == null) {
           return;
         }
 
         if (myProfile.id === userId) {
           queryClient.invalidateQueries({
-            queryKey: [profileQueryKey],
-            exact: true,
+            queryKey: [profileQueryKey, "mine"],
           });
         }
 

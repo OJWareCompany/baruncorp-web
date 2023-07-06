@@ -64,20 +64,22 @@ const formSchema = z.object({
   }),
 });
 
-export default function LicenseRegistrationDialog() {
-  const { userId } = useParams();
+interface Props {
+  userId: string | undefined;
+}
+
+export default function LicenseRegistrationDialog(props: Props) {
+  const { userId } = props;
   const { data: states } = useStatesQuery();
   const [statePopoverOpen, setStatePopoverOpen] = useState(false);
   const { mutateAsync } = usePostUserLicenseMutation(userId);
   const [open, setOpen] = useState(false);
 
-  const defaultValues: DefaultValues<z.infer<typeof formSchema>> = {
-    type: "Electrical",
-  };
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      type: "Electrical",
+    },
   });
   const {
     resetField,
@@ -252,9 +254,6 @@ export default function LicenseRegistrationDialog() {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
                         initialFocus
                       />
                     </PopoverContent>
@@ -293,9 +292,6 @@ export default function LicenseRegistrationDialog() {
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
                         initialFocus
                       />
                     </PopoverContent>

@@ -9,7 +9,7 @@ const useProfileQuery = (userId?: string) => {
   const apiClient = useApiClient();
 
   return useQuery<ProfileGetResDto, AxiosError<ErrorResponseData>>({
-    queryKey: userId ? [QUERY_KEY, userId] : [QUERY_KEY],
+    queryKey: [QUERY_KEY, userId ?? "mine"],
     queryFn: () =>
       apiClient
         .get<ProfileGetResDto>(

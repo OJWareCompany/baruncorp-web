@@ -2,8 +2,7 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
-
-import { ServicesGetResDto } from "@/types/dto/service";
+import { ServicesGetResDto } from "@/types/dto/departments";
 import useServicesQuery from "@/queries/useServicesQuery";
 import { cn } from "@/lib/utils";
 

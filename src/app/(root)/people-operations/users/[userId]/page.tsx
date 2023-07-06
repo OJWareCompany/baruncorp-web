@@ -354,7 +354,7 @@ export default function Page(props: Props) {
       <div className="space-y-2">
         <Label>Licenses</Label>
         <div className="flex gap-2 flex-wrap">
-          <LicenseRegistrationDialog />
+          <LicenseRegistrationDialog userId={userId} />
           {profile?.licenses.map((license) => {
             const { abbreviation, type, priority, issuingCountryName } =
               license;
