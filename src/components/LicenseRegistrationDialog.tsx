@@ -54,13 +54,13 @@ import usePostUserLicenseMutation from "@/queries/usePostUserLicenseMutation";
 const formSchema = z.object({
   type: z.enum(["Electrical", "Structural"]), // TODO: constants로 만들어 사용하기
   abbreviation: z.string(),
-  issuingCountryName: z.string(),
-  priority: z.string(),
+  issuingCountryName: z.string({ required_error: "State is required" }),
+  priority: z.string({ required_error: "Priority is required" }),
   issuedDate: z.date({
-    required_error: "A date of birth is required.",
+    required_error: "Issued Date is required",
   }),
   expiryDate: z.date({
-    required_error: "A date of birth is required.",
+    required_error: "Expiry Date is required",
   }),
 });
 
@@ -68,7 +68,7 @@ export default function LicenseRegistrationDialog() {
   const { userId } = useParams();
   const { data: states } = useStatesQuery();
   const [statePopoverOpen, setStatePopoverOpen] = useState(false);
-  const { mutateAsync, isSuccess } = usePostUserLicenseMutation(userId);
+  const { mutateAsync } = usePostUserLicenseMutation(userId);
   const [open, setOpen] = useState(false);
 
   const defaultValues: DefaultValues<z.infer<typeof formSchema>> = {
@@ -166,7 +166,7 @@ export default function LicenseRegistrationDialog() {
                     </PopoverTrigger>
                     <PopoverContent className="p-0" align="start">
                       <Command>
-                        <CommandInput placeholder="Search state..." />
+                        <CommandInput placeholder="Search for state" />
                         <CommandEmpty>No state found.</CommandEmpty>
                         <CommandList>
                           <CommandGroup>

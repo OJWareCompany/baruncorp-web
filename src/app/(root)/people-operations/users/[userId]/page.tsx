@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, X } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -47,6 +47,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import useDeleteUserLicenseMutation from "@/queries/useDeleteUserLicenseMutation";
 import LicenseRegistrationDialog from "@/components/LicenseRegistrationDialog";
+import useServicesQuery from "@/queries/useServicesQuery";
+import useDeleteUserServiceMutation from "@/queries/useDeleteUserServiceMutation";
+import usePostUserServiceMutation from "@/queries/usePostUserServiceMutation";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -67,14 +71,19 @@ export default function Page(props: Props) {
     params: { userId },
   } = props;
   const { data: postions } = usePositionsQuery();
+  const { data: services } = useServicesQuery();
   const { data: profile, isSuccess: isProfileQuerySuccess } =
     useProfileQuery(userId);
   const { mutateAsync } = usePatchProfileMutation(userId);
-  const { mutate: mutateForPostMemberPosition } =
+  const { mutate: mutateForPostUserPosition } =
     usePostUserPositionMutation(userId);
-  const { mutate: mutateForDeleteMemberPosition } =
+  const { mutate: mutateForPostUserService } =
+    usePostUserServiceMutation(userId);
+  const { mutate: mutateForDeleteUserPosition } =
     useDeleteUserPositionMutation(userId);
-  const { mutate: mutateForDeleteMemberLicense } =
+  const { mutate: mutateForDeleteUserService } =
+    useDeleteUserServiceMutation(userId);
+  const { mutate: mutateForDeleteUserLicense } =
     useDeleteUserLicenseMutation(userId);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -209,9 +218,9 @@ export default function Page(props: Props) {
                 <Plus className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0" align="start">
+            <PopoverContent className="p-0" align="start">
               <Command>
-                <CommandInput placeholder="Search position..." />
+                <CommandInput placeholder="Search for position" />
                 <CommandEmpty>No position found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
@@ -219,7 +228,7 @@ export default function Page(props: Props) {
                       <CommandItem
                         key={position.id}
                         onSelect={() => {
-                          mutateForPostMemberPosition(position.id);
+                          mutateForPostUserPosition(position.id);
                           setPositionPopoverOpen(false);
                         }}
                       >
@@ -239,7 +248,7 @@ export default function Page(props: Props) {
                   className="gap-1 cursor-pointer h-8 rounded-md pr-2"
                 >
                   {profile.position.name}
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4 text-muted-foreground" />
                 </Badge>
               </AlertDialogTrigger>
               <AlertDialogContent className="max-w-xs">
@@ -254,7 +263,7 @@ export default function Page(props: Props) {
                         return;
                       }
 
-                      mutateForDeleteMemberPosition(profile.position.id);
+                      mutateForDeleteUserPosition(profile.position.id);
                     }}
                   >
                     Continue
@@ -263,6 +272,83 @@ export default function Page(props: Props) {
               </AlertDialogContent>
             </AlertDialog>
           )}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Services</Label>
+        <div className="flex gap-2 flex-wrap">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant={"outline"} className="h-8 w-8 p-0">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Search for service" />
+                <CommandEmpty>No service found.</CommandEmpty>
+                <CommandList>
+                  <CommandGroup>
+                    {services?.map((service) => {
+                      const selected =
+                        profile?.services.find(
+                          (profileService) => profileService.id === service.id
+                        ) != null;
+
+                      return (
+                        <CommandItem
+                          key={service.id}
+                          onSelect={() => {
+                            if (selected) {
+                              return;
+                            }
+
+                            mutateForPostUserService(service.id);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selected ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {service.name}
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {profile?.services.map((service) => (
+            <AlertDialog key={service.name}>
+              <AlertDialogTrigger asChild>
+                <Badge
+                  variant={"secondary"}
+                  className="gap-1 cursor-pointer h-8 rounded-md pr-2 whitespace-nowrap"
+                >
+                  {service.name}
+                  <X className="h-4 w-4 text-muted-foreground" />
+                </Badge>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-xs">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      mutateForDeleteUserService(service.id);
+                    }}
+                  >
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ))}
         </div>
       </div>
       <div className="space-y-2">
@@ -281,7 +367,7 @@ export default function Page(props: Props) {
                     className="gap-1 cursor-pointer h-8 rounded-md pr-2 whitespace-nowrap"
                   >
                     {key}
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4 text-muted-foreground" />
                   </Badge>
                 </AlertDialogTrigger>
                 <AlertDialogContent className="max-w-xs">
@@ -292,7 +378,7 @@ export default function Page(props: Props) {
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => {
-                        mutateForDeleteMemberLicense({
+                        mutateForDeleteUserLicense({
                           type,
                           issuingCountryName,
                         });

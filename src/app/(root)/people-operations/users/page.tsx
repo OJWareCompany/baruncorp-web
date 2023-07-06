@@ -20,12 +20,11 @@ import { UsersGetResDto } from "@/types/dto/users";
 const columnHelper = createColumnHelper<UsersGetResDto[number]>();
 
 const columns = [
-  columnHelper.accessor("email", { header: "Email Address" }),
   columnHelper.accessor("fullName", { header: "Full Name" }),
+  columnHelper.accessor("email", { header: "Email Address" }),
   columnHelper.accessor("organization", { header: "Organization" }),
-  columnHelper.accessor((row) => row.position?.name, {
-    id: "position",
-    header: "Position",
+  columnHelper.accessor("role", {
+    header: "Role",
     cell: ({ getValue }) => {
       const value = getValue();
       return (
@@ -33,6 +32,19 @@ const columns = [
           {value ?? "-"}
         </span>
       );
+    },
+  }),
+  columnHelper.accessor((row) => row.position?.name, {
+    id: "position",
+    header: "Position",
+    cell: ({ getValue }) => {
+      const position = getValue();
+
+      if (position == null) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      return <Badge variant={"secondary"}>{position}</Badge>;
     },
   }),
   columnHelper.accessor((row) => row.licenses, {
@@ -65,14 +77,24 @@ const columns = [
       );
     },
   }),
-  columnHelper.accessor("role", {
-    header: "Role",
+  columnHelper.accessor((row) => row.services, {
+    id: "services",
+    header: "Services",
     cell: ({ getValue }) => {
-      const value = getValue();
+      const services = getValue();
+
+      if (services.length === 0) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
       return (
-        <span className={cn(value == null && "text-muted-foreground")}>
-          {value ?? "-"}
-        </span>
+        <div className="flex flex-col items-start gap-1">
+          {services.map((service) => (
+            <Badge variant={"secondary"} key={service.name}>
+              {service.name}
+            </Badge>
+          ))}
+        </div>
       );
     },
   }),
