@@ -2,25 +2,26 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
 import useApiClient from "@/hook/useApiClient";
-import { UserPositionDeleteReqDto } from "@/types/dto/departments";
+import { UserLicenseDeleteReqDto } from "@/types/dto/departments";
 
-const useDeleteMemberPositionMutation = (userId: string) => {
+const useDeleteUserLicenseMutation = (userId: string) => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
-    UserPositionDeleteReqDto["positionId"]
+    Pick<UserLicenseDeleteReqDto, "type" | "issuingCountryName">
   >(
-    (positionId) => {
-      const params: UserPositionDeleteReqDto = {
+    ({ type, issuingCountryName }) => {
+      const params: UserLicenseDeleteReqDto = {
         userId,
-        positionId,
+        type,
+        issuingCountryName,
       };
 
       return apiClient
-        .delete<void>("/departments/user-position", {
+        .delete<void>("/departments/licenses", {
           params,
         })
         .then(({ data }) => data);
@@ -33,4 +34,4 @@ const useDeleteMemberPositionMutation = (userId: string) => {
   );
 };
 
-export default useDeleteMemberPositionMutation;
+export default useDeleteUserLicenseMutation;

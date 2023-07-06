@@ -16,8 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import usePositionsQuery from "@/queries/usePositionsQuery";
-import usePostMemberPositionMutation from "@/queries/usePostMemberPositionMutation";
-import useDeleteMemberPositionMutation from "@/queries/useDeleteMemberPositionMutation";
+import usePostUserPositionMutation from "@/queries/usePostUserPositionMutation";
+import useDeleteUserPositionMutation from "@/queries/useDeleteUserPositionMutation";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import usePatchProfileMutation from "@/queries/usePatchProfileMutation";
@@ -28,6 +28,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -44,7 +45,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import useDeleteMemberLicenseMutation from "@/queries/useDeleteMemberLicenseMutation";
+import useDeleteUserLicenseMutation from "@/queries/useDeleteUserLicenseMutation";
+import LicenseRegistrationDialog from "@/components/LicenseRegistrationDialog";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -69,11 +71,11 @@ export default function Page(props: Props) {
     useProfileQuery(userId);
   const { mutateAsync } = usePatchProfileMutation(userId);
   const { mutate: mutateForPostMemberPosition } =
-    usePostMemberPositionMutation(userId);
+    usePostUserPositionMutation(userId);
   const { mutate: mutateForDeleteMemberPosition } =
-    useDeleteMemberPositionMutation(userId);
+    useDeleteUserPositionMutation(userId);
   const { mutate: mutateForDeleteMemberLicense } =
-    useDeleteMemberLicenseMutation(userId);
+    useDeleteUserLicenseMutation(userId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -193,7 +195,7 @@ export default function Page(props: Props) {
       </Form>
       <div className="space-y-2">
         <Label>Position</Label>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Popover
             open={positionPopoverOpen}
             onOpenChange={setPositionPopoverOpen}
@@ -211,19 +213,21 @@ export default function Page(props: Props) {
               <Command>
                 <CommandInput placeholder="Search position..." />
                 <CommandEmpty>No position found.</CommandEmpty>
-                <CommandGroup>
-                  {postions?.map((position) => (
-                    <CommandItem
-                      key={position.id}
-                      onSelect={() => {
-                        mutateForPostMemberPosition(position.id);
-                        setPositionPopoverOpen(false);
-                      }}
-                    >
-                      {position.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                <CommandList>
+                  <CommandGroup>
+                    {postions?.map((position) => (
+                      <CommandItem
+                        key={position.id}
+                        onSelect={() => {
+                          mutateForPostMemberPosition(position.id);
+                          setPositionPopoverOpen(false);
+                        }}
+                      >
+                        {position.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
               </Command>
             </PopoverContent>
           </Popover>
@@ -259,6 +263,48 @@ export default function Page(props: Props) {
               </AlertDialogContent>
             </AlertDialog>
           )}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Licenses</Label>
+        <div className="flex gap-2 flex-wrap">
+          <LicenseRegistrationDialog />
+          {profile?.licenses.map((license) => {
+            const { abbreviation, type, priority, issuingCountryName } =
+              license;
+            const key = `${abbreviation} / ${type} / ${priority}`;
+            return (
+              <AlertDialog key={key}>
+                <AlertDialogTrigger asChild>
+                  <Badge
+                    variant={"secondary"}
+                    className="gap-1 cursor-pointer h-8 rounded-md pr-2 whitespace-nowrap"
+                  >
+                    {key}
+                    <X className="h-4 w-4" />
+                  </Badge>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-xs">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        mutateForDeleteMemberLicense({
+                          type,
+                          issuingCountryName,
+                        });
+                      }}
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            );
+          })}
         </div>
       </div>
     </div>
