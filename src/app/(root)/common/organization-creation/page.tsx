@@ -328,24 +328,25 @@ export default function Page() {
                         const currentTarget = event.currentTarget;
                         setTimeout(() => {
                           currentTarget.focus();
-                        }, 100);
+                        }, 0);
                       }}
+                      autoComplete="off"
                     />
                   </FormItem>
                 </PopoverTrigger>
               )}
             />
             <PopoverContent
-              className="w-96"
+              className="w-96 p-1"
               side="bottom"
               onPointerDownOutside={() => setIsOpenPopover(false)}
             >
-              <div className="grid space-y-2">
+              <div className="grid space-y-1">
                 {addresses?.length > 0 ? (
                   addresses.map((address: any) => (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       className="h-auto"
                       key={address.id}
                       onClick={() => onSelectAddress(address)}
@@ -354,7 +355,7 @@ export default function Page() {
                     </Button>
                   ))
                 ) : (
-                  <p>검색 결과 없음</p>
+                  <p className="text-center py-5 text-sm">No address found.</p>
                 )}
               </div>
             </PopoverContent>
