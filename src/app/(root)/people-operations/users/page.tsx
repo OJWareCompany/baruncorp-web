@@ -47,6 +47,27 @@ const columns = [
       return <Badge variant={"secondary"}>{position}</Badge>;
     },
   }),
+  columnHelper.accessor((row) => row.services, {
+    id: "services",
+    header: "Services",
+    cell: ({ getValue }) => {
+      const services = getValue();
+
+      if (services.length === 0) {
+        return <span className="text-muted-foreground">-</span>;
+      }
+
+      return (
+        <div className="flex flex-col items-start gap-1">
+          {services.map((service) => (
+            <Badge variant={"secondary"} key={service.name}>
+              {service.name}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+  }),
   columnHelper.accessor((row) => row.licenses, {
     id: "licenses",
     header: () => (
@@ -73,27 +94,6 @@ const columns = [
               </Badge>
             );
           })}
-        </div>
-      );
-    },
-  }),
-  columnHelper.accessor((row) => row.services, {
-    id: "services",
-    header: "Services",
-    cell: ({ getValue }) => {
-      const services = getValue();
-
-      if (services.length === 0) {
-        return <span className="text-muted-foreground">-</span>;
-      }
-
-      return (
-        <div className="flex flex-col items-start gap-1">
-          {services.map((service) => (
-            <Badge variant={"secondary"} key={service.name}>
-              {service.name}
-            </Badge>
-          ))}
         </div>
       );
     },
