@@ -1,11 +1,10 @@
 import { Inter } from "next/font/google";
-import "./globals.css";
-import AuthContext from "@/context/AuthContext";
-import QueryContext from "@/context/QueryContext";
+import Providers from "./providers";
 import { Toaster } from "@/components/Toaster";
+import "mapbox-gl/dist/mapbox-gl.css";
+import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-import "mapbox-gl/dist/mapbox-gl.css";
 
 export const metadata = {
   title: "Create Next App",
@@ -20,9 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} w-full`}>
-        <AuthContext>
-          <QueryContext>{children}</QueryContext>
-        </AuthContext>
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>

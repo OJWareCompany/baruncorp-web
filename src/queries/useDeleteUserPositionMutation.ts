@@ -1,11 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
+import useProfileQuery, {
+  QUERY_KEY as profileQueryKey,
+} from "./useProfileQuery";
 import useApiClient from "@/hook/useApiClient";
 import { UserPositionDeleteReqDto } from "@/types/dto/departments";
 
-const useDeleteUserPositionMutation = (userId: string) => {
+const useDeleteUserPositionMutation = (userId: string | undefined) => {
   const apiClient = useApiClient();
+  const { data: myProfile, isSuccess: isMyProfileQuerySuccess } =
+    useProfileQuery();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -14,6 +18,10 @@ const useDeleteUserPositionMutation = (userId: string) => {
     UserPositionDeleteReqDto["positionId"]
   >(
     (positionId) => {
+      if (userId == null) {
+        return Promise.reject("userId should not be undefined.");
+      }
+
       const params: UserPositionDeleteReqDto = {
         userId,
         positionId,
@@ -27,6 +35,16 @@ const useDeleteUserPositionMutation = (userId: string) => {
     },
     {
       onSuccess: () => {
+        if (!isMyProfileQuerySuccess || userId == null) {
+          return;
+        }
+
+        if (myProfile.id === userId) {
+          queryClient.invalidateQueries({
+            queryKey: [profileQueryKey, "mine"],
+          });
+        }
+
         queryClient.invalidateQueries({ queryKey: [profileQueryKey, userId] });
       },
     }
