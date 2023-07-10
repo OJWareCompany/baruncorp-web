@@ -17,12 +17,15 @@ const usePatchProfileMutation = (userId: string | undefined) => {
     AxiosError<ErrorResponseData>,
     ProfilePatchReqDto
   >(
-    (data) =>
-      userId == null
-        ? Promise.reject("userId should not be undefined.")
-        : apiClient
-            .patch<ProfilePatchResDto>(`/users/profile/${userId}`, data)
-            .then(({ data }) => data),
+    (data) => {
+      if (userId == null) {
+        return Promise.reject("userId is undefined.");
+      }
+
+      return apiClient
+        .patch<ProfilePatchResDto>(`/users/profile/${userId}`, data)
+        .then(({ data }) => data);
+    },
     {
       onSuccess: async () => {
         if (!isMyProfileQuerySuccess || userId == null) {

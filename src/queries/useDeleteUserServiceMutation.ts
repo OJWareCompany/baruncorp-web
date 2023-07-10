@@ -19,7 +19,7 @@ const useDeleteUserServiceMutation = (userId: string | undefined) => {
   >(
     (serviceId) => {
       if (userId == null) {
-        return Promise.reject("userId should not be undefined.");
+        return Promise.reject("userId is undefined.");
       }
 
       const params: UserServiceDeleteReqDto = {

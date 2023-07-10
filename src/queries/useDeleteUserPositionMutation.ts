@@ -15,11 +15,11 @@ const useDeleteUserPositionMutation = (userId: string | undefined) => {
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
-    UserPositionDeleteReqDto["positionId"]
+    UserPositionDeleteReqDto["positionId"] | null
   >(
     (positionId) => {
-      if (userId == null) {
-        return Promise.reject("userId should not be undefined.");
+      if (userId == null || positionId == null) {
+        return Promise.reject("userId or positionId is undefined.");
       }
 
       const params: UserPositionDeleteReqDto = {

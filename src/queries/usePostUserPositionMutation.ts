@@ -19,7 +19,7 @@ const usePostUserPositionMutation = (userId: string | undefined) => {
   >(
     (positionId) => {
       if (userId == null) {
-        return Promise.reject("userId should not be undefined.");
+        return Promise.reject("userId is undefined.");
       }
 
       const params: UserPositionPostReqDto = {
