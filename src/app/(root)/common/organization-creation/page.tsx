@@ -111,32 +111,35 @@ export default function Page() {
   const debouncedAddress = useDebounce(watchAddress);
   const { data: addresses } = useAddressSearchQuery(debouncedAddress);
 
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [readOnlyOf, setReadOnlyOf] = useState({
-    street1: true,
-    street2: true,
-    city: true,
-    stateOrRegion: true,
-    postalCode: true,
-    country: true,
-  });
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
 
   const [isOpenPopover, setIsOpenPopover] = useState(false);
 
   function onSelectAddress(address: any) {
     setIsOpenPopover(false);
     setSelectedAddress(address);
+  }
 
+  let readOnlyOf = {
+    street1: true,
+    street2: true,
+    city: true,
+    stateOrRegion: true,
+    postalCode: true,
+    country: true,
+  };
+
+  if (selectedAddress != null) {
     const resource = new Map<string, string>();
 
-    address.context.forEach((element: any) => {
+    selectedAddress.context.forEach((element: any) => {
       const key = element.id.split(".")[0];
       const value = element.text;
       resource.set(key, value);
     });
 
     const valueOfAddressFields = {
-      street1: address.text ?? "",
+      street1: selectedAddress.text ?? "",
       street2: "",
       city: resource.get("place") ?? "",
       stateOrRegion: resource.get("region") ?? "",
@@ -159,14 +162,14 @@ export default function Page() {
       }
     );
 
-    setReadOnlyOf({
+    readOnlyOf = {
       street1: valueOfAddressFields.street1 !== "",
       street2: false,
       city: valueOfAddressFields.city !== "",
       stateOrRegion: valueOfAddressFields.stateOrRegion !== "",
       postalCode: valueOfAddressFields.postalCode !== "",
       country: valueOfAddressFields.country !== "",
-    });
+    };
   }
 
   const { mutateAsync } = usePostOrganizationMutation();
