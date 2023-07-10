@@ -47,8 +47,7 @@ const columns = [
       return <Badge variant={"secondary"}>{position}</Badge>;
     },
   }),
-  columnHelper.accessor((row) => row.services, {
-    id: "services",
+  columnHelper.accessor("services", {
     header: "Services",
     cell: ({ getValue }) => {
       const services = getValue();
@@ -68,8 +67,7 @@ const columns = [
       );
     },
   }),
-  columnHelper.accessor((row) => row.licenses, {
-    id: "licenses",
+  columnHelper.accessor("licenses", {
     header: () => (
       <div>
         <div>Licenses</div>
