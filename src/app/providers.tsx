@@ -12,6 +12,10 @@ import { isAxiosError } from "axios";
 import { SessionProvider } from "next-auth/react";
 import { toast } from "@/hook/use-toast";
 import { getTitleAndDescFromStatusCode } from "@/lib/utils";
+import {
+  DEFAULT_ERROR_TOAST_DESCRIPTION,
+  DEFAULT_ERROR_TOAST_TITLE,
+} from "@/lib/constants";
 
 interface Props {
   children: ReactNode;
@@ -24,6 +28,12 @@ export default function Providers({ children }: Props) {
         queryCache: new QueryCache({
           onError: async (error) => {
             if (!isAxiosError<ErrorResponseData>(error)) {
+              console.error(error);
+              toast({
+                title: DEFAULT_ERROR_TOAST_TITLE,
+                description: DEFAULT_ERROR_TOAST_DESCRIPTION,
+                variant: "destructive",
+              });
               return;
             }
 
@@ -41,6 +51,12 @@ export default function Providers({ children }: Props) {
         mutationCache: new MutationCache({
           onError: async (error) => {
             if (!isAxiosError<ErrorResponseData>(error)) {
+              console.error(error);
+              toast({
+                title: DEFAULT_ERROR_TOAST_TITLE,
+                description: DEFAULT_ERROR_TOAST_DESCRIPTION,
+                variant: "destructive",
+              });
               return;
             }
 

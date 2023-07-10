@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useParams } from "next/navigation";
 import { ProfileGetResDto } from "@/types/dto/users";
 import useApiClient from "@/hook/useApiClient";
 
@@ -21,3 +22,9 @@ const useProfileQuery = (userId?: string) => {
 };
 
 export default useProfileQuery;
+
+export const useProfileQueryWithParams = () => {
+  const { userId } = useParams() as { userId: string | undefined };
+
+  return useProfileQuery(userId);
+};

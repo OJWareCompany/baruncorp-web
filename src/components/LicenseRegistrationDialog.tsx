@@ -2,11 +2,10 @@
 
 import { CalendarIcon, Check, ChevronsUpDown, Plus } from "lucide-react";
 import * as z from "zod";
-import { useForm, DefaultValues } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { format } from "date-fns";
-import { useParams } from "next/navigation";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
@@ -50,6 +49,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import usePostUserLicenseMutation from "@/queries/usePostUserLicenseMutation";
+import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 
 const formSchema = z.object({
   type: z.enum(["Electrical", "Structural"]), // TODO: constants로 만들어 사용하기
@@ -64,15 +64,11 @@ const formSchema = z.object({
   }),
 });
 
-interface Props {
-  userId: string | undefined;
-}
-
-export default function LicenseRegistrationDialog(props: Props) {
-  const { userId } = props;
+export default function LicenseRegistrationDialog() {
+  const { data: profile } = useProfileQueryWithParams();
   const { data: states } = useStatesQuery();
   const [statePopoverOpen, setStatePopoverOpen] = useState(false);
-  const { mutateAsync } = usePostUserLicenseMutation(userId);
+  const { mutateAsync } = usePostUserLicenseMutation(profile?.id);
   const [open, setOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -243,7 +239,7 @@ export default function LicenseRegistrationDialog(props: Props) {
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
-                            <span>Pick a date</span>
+                            <span>Pick an issued date</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -281,7 +277,7 @@ export default function LicenseRegistrationDialog(props: Props) {
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
-                            <span>Pick a date</span>
+                            <span>Pick an expiry date</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
