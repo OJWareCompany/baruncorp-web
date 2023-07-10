@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { DefaultValues, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -36,34 +36,6 @@ import Scene from "@/components/Scene";
 import { toast } from "@/hook/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 
-const defaultValues = {
-  name: "tesla",
-  description: "tesla go to the moon~!",
-  phoneNumber: "01028541434",
-  email: "ejsvk3284@kakao.com",
-  address: "",
-  street1: "",
-  street2: "",
-  city: "",
-  stateOrRegion: "",
-  postalCode: "",
-  country: "",
-};
-
-if (process.env.NODE_ENV === "production") {
-  defaultValues.name = "";
-  defaultValues.description = "";
-  defaultValues.phoneNumber = "";
-  defaultValues.email = "";
-  defaultValues.address = "";
-  defaultValues.street1 = "";
-  defaultValues.street2 = "";
-  defaultValues.city = "";
-  defaultValues.stateOrRegion = "";
-  defaultValues.postalCode = "";
-  defaultValues.country = "";
-}
-
 const organizationTypes = ["client", "individual", "outsourcing"];
 
 const formSchema = z.object({
@@ -90,9 +62,28 @@ const formSchema = z.object({
   country: z.string(),
 });
 
+type FieldValues = z.infer<typeof formSchema>;
+
+let defaultValues: DefaultValues<FieldValues>;
+if (process.env.NODE_ENV === "development") {
+  defaultValues = {
+    name: "tesla",
+    description: "tesla go to the moon~!",
+    phoneNumber: "01028541434",
+    email: "ejsvk3284@kakao.com",
+    address: "",
+    street1: "",
+    street2: "",
+    city: "",
+    stateOrRegion: "",
+    postalCode: "",
+    country: "",
+  };
+}
+
 export default function Page() {
   const router = useRouter();
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
