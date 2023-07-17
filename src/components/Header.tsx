@@ -16,6 +16,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useProfileQuery from "@/queries/useProfileQuery";
 
+const projectManagementNavItems: { name: string; pathname: string }[] = [
+  {
+    name: "AHJs",
+    pathname: "/project-management/ahjs",
+  },
+];
+
 const peopleOperationsNavItems: { name: string; pathname: string }[] = [
   {
     name: "Users",
@@ -57,6 +64,20 @@ export default function Header() {
             <h1 className="h3 pointer-events-none">Barun Corp.</h1>
           </Link>
           <nav>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={"ghost"}>Project Management</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {projectManagementNavItems.map((item) => (
+                  <DropdownMenuItem asChild key={item.pathname}>
+                    <Link href={item.pathname}>
+                      <span>{item.name}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant={"ghost"}>People Opertaions</Button>
