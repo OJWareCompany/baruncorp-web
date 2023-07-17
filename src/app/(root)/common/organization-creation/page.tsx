@@ -90,13 +90,11 @@ export default function Page() {
 
   const {
     control,
-    resetField,
+    setValue,
     watch,
     handleSubmit,
     formState: { isSubmitting },
   } = form;
-
-  const watchType = watch("organizationType");
 
   const watchAddress = watch("address");
   const debouncedAddress = useDebounce(watchAddress);
@@ -106,9 +104,45 @@ export default function Page() {
 
   const [isOpenPopover, setIsOpenPopover] = useState(false);
 
+  function getAddressFieldMap(address: any) {
+    const resource = new Map<string, string>();
+
+    address.context.forEach((element: any) => {
+      const key = element.id.split(".")[0];
+      const value = element.text;
+      resource.set(key, value);
+    });
+
+    return {
+      street1: address.text ?? "",
+      street2: "",
+      city: resource.get("place") ?? "",
+      stateOrRegion: resource.get("region") ?? "",
+      postalCode: resource.get("postcode") ?? "",
+      country: resource.get("country") ?? "",
+    };
+  }
+
   function onSelectAddress(address: any) {
     setIsOpenPopover(false);
     setSelectedAddress(address);
+
+    const addressFieldMap = getAddressFieldMap(address);
+
+    Object.entries(addressFieldMap).forEach(
+      ([key, value]: [string, string]) => {
+        setValue(
+          key as
+            | "street1"
+            | "street2"
+            | "city"
+            | "stateOrRegion"
+            | "postalCode"
+            | "country",
+          value
+        );
+      }
+    );
   }
 
   let readOnlyOf = {
@@ -121,51 +155,21 @@ export default function Page() {
   };
 
   if (selectedAddress != null) {
-    const resource = new Map<string, string>();
-
-    selectedAddress.context.forEach((element: any) => {
-      const key = element.id.split(".")[0];
-      const value = element.text;
-      resource.set(key, value);
-    });
-
-    const valueOfAddressFields = {
-      street1: selectedAddress.text ?? "",
-      street2: "",
-      city: resource.get("place") ?? "",
-      stateOrRegion: resource.get("region") ?? "",
-      postalCode: resource.get("postcode") ?? "",
-      country: resource.get("country") ?? "",
-    };
-
-    Object.entries(valueOfAddressFields).forEach(
-      ([key, value]: [string, string]) => {
-        resetField(
-          key as
-            | "street1"
-            | "street2"
-            | "city"
-            | "stateOrRegion"
-            | "postalCode"
-            | "country",
-          { defaultValue: value }
-        );
-      }
-    );
+    const addressFieldMap = getAddressFieldMap(selectedAddress);
 
     readOnlyOf = {
-      street1: valueOfAddressFields.street1 !== "",
+      street1: addressFieldMap.street1 !== "",
       street2: false,
-      city: valueOfAddressFields.city !== "",
-      stateOrRegion: valueOfAddressFields.stateOrRegion !== "",
-      postalCode: valueOfAddressFields.postalCode !== "",
-      country: valueOfAddressFields.country !== "",
+      city: addressFieldMap.city !== "",
+      stateOrRegion: addressFieldMap.stateOrRegion !== "",
+      postalCode: addressFieldMap.postalCode !== "",
+      country: addressFieldMap.country !== "",
     };
   }
 
   const { mutateAsync } = usePostOrganizationMutation();
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FieldValues) {
     const { street1, postalCode, country } = values;
     if (street1 === "") {
       toast({
