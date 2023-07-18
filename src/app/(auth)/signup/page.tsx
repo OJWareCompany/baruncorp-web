@@ -22,6 +22,7 @@ import { toast } from "@/hook/use-toast";
 import { Separator } from "@/components/ui/separator";
 import apiClient from "@/api";
 import { SignupPostReqDto } from "@/types/dto/auth";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -191,7 +192,7 @@ export default function SignupPage() {
             <FormItem>
               <FormLabel required={true}>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field}></Input>
+                <PasswordInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
