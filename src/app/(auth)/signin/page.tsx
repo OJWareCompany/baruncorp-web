@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hook/use-toast";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const formSchema = z.object({
   email: z
@@ -126,7 +127,7 @@ export default function SigninPage() {
             <FormItem>
               <FormLabel required={true}>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <PasswordInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
