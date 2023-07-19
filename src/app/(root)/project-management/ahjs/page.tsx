@@ -13,14 +13,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-type TableColumn = AhjsGetResDto[number];
+type TableColumn = AhjsGetResDto["items"][number];
 
 const columnHelper = createColumnHelper<TableColumn>();
 
 const columns = [
   columnHelper.accessor("name", { header: "Name" }),
-  columnHelper.accessor("modifiedBy", { header: "Modified By" }),
+  columnHelper.accessor("fullAhjName", { header: "Full AHJ Name" }),
+  columnHelper.accessor("createdAt", {
+    header: "Created At",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return (
+        <span className={cn(!value && "text-muted-foreground")}>
+          {!value ? "-" : value}
+        </span>
+      );
+    },
+  }),
+  columnHelper.accessor("modifiedAt", {
+    header: "Modified At",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return (
+        <span className={cn(!value && "text-muted-foreground")}>
+          {!value ? "-" : value}
+        </span>
+      );
+    },
+  }),
   columnHelper.display({
     id: "actions",
     cell: ({ row }) => (
@@ -44,14 +67,14 @@ const columns = [
 ];
 
 export default function Page() {
-  const { data: ahjs } = useAhjsQuery();
+  const { data } = useAhjsQuery();
   return (
     <div>
       <h1 className="h3 mb-4">AHJs</h1>
       <DataTable
         columns={columns}
-        data={ahjs ?? []}
-        getRowId={(originalRow) => originalRow.id}
+        data={data?.items ?? []}
+        getRowId={(originalRow) => originalRow.geoId}
       />
     </div>
   );
