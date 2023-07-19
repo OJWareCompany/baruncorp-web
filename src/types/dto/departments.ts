@@ -32,8 +32,12 @@ export interface UserLicenseDeleteReqDto {
 }
 
 export type StatesGetResDto = {
-  name: string;
+  stateName: string;
   abbreviation: string;
+  geoId: string;
+  stateCode: null;
+  ansiCode: null;
+  stateLongName: null;
 }[];
 
 export type ServicesGetResDto = {

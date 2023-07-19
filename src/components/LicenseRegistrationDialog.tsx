@@ -170,11 +170,11 @@ export default function LicenseRegistrationDialog() {
                           <CommandGroup>
                             {states?.map((state) => (
                               <CommandItem
-                                key={state.name}
+                                key={state.stateName}
                                 onSelect={() => {
                                   form.setValue(
                                     "issuingCountryName",
-                                    state.name,
+                                    state.stateName,
                                     {
                                       shouldValidate: true,
                                     }
@@ -190,12 +190,12 @@ export default function LicenseRegistrationDialog() {
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    field.value === state.name
+                                    field.value === state.stateName
                                       ? "opacity-100"
                                       : "opacity-0"
                                   )}
                                 />
-                                {state.name.toLowerCase()}
+                                {state.stateName.toLowerCase()}
                               </CommandItem>
                             ))}
                           </CommandGroup>
