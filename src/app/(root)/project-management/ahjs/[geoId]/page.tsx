@@ -35,14 +35,9 @@ import {
 } from "@/types/dto/ahjs";
 import { usePutAhjMutation } from "@/queries/usePutAhjMutation";
 
-function pickFields<T, K extends keyof T>(
-  obj: T,
-  textKeys: K[],
-  selectKeys: K[]
-): Pick<T, K> {
+function pickFields<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
   const copy: { [P in keyof T]?: T[P] | "" } = {};
-  textKeys.forEach((key) => (copy[key] = obj[key] ?? ""));
-  selectKeys.forEach((key) => (copy[key] = obj[key] ?? undefined));
+  keys.forEach((key) => (copy[key] = obj[key] ?? ""));
   return copy as Pick<T, K>;
 }
 
@@ -240,31 +235,37 @@ export default function Page() {
     }
 
     // TODO as 사용안하도록 리팩토링
-    const generalFieldObject = pickFields(
-      ahj.general,
-      ["name", "website", "generalNotes", "buildingCodes"],
-      ["specificFormRequired"]
-    ) as GeneralFieldObject;
+    const generalFieldObject = pickFields(ahj.general, [
+      "name",
+      "website",
+      "generalNotes",
+      "buildingCodes",
+      "specificFormRequired",
+    ]) as GeneralFieldObject;
 
-    const designFieldObject = pickFields(
-      ahj.design,
-      ["fireSetBack", "utilityNotes", "designNotes", "deratedAmpacity"],
-      ["pvMeterRequired", "acDisconnectRequired", "centerFed120Percent"]
-    ) as DesignFieldObject;
+    const designFieldObject = pickFields(ahj.design, [
+      "fireSetBack",
+      "utilityNotes",
+      "designNotes",
+      "deratedAmpacity",
+      "pvMeterRequired",
+      "acDisconnectRequired",
+      "centerFed120Percent",
+    ]) as DesignFieldObject;
 
-    const engineeringFieldObject = pickFields(
-      ahj.engineering,
-      ["windSpeed", "snowLoadGround", "snowLoadFlatRoof", "ofWetStamps"],
-      [
-        "iebcAccepted",
-        "structuralObservationRequired",
-        "windUpliftCalculationRequired",
-        "wetStampsRequired",
-        "digitalSignatureType",
-        "windExposure",
-        "wetStampSize",
-      ]
-    ) as EngineeringFieldObject;
+    const engineeringFieldObject = pickFields(ahj.engineering, [
+      "windSpeed",
+      "snowLoadGround",
+      "snowLoadFlatRoof",
+      "ofWetStamps",
+      "iebcAccepted",
+      "structuralObservationRequired",
+      "windUpliftCalculationRequired",
+      "wetStampsRequired",
+      "digitalSignatureType",
+      "windExposure",
+      "wetStampSize",
+    ]) as EngineeringFieldObject;
     engineeringFieldObject.engineeringNotes =
       ahj.engineering.engineeringNotes ?? "";
 
@@ -272,14 +273,13 @@ export default function Page() {
       electricalNotes: ahj.electricalEngineering.electricalNotes ?? "",
     } as ElectricalEngineeringFieldObject;
 
-    const defaultValues = {
+    reset({
+      ...defaultValues,
       ...generalFieldObject,
       ...designFieldObject,
       ...engineeringFieldObject,
       ...electricalEngineeringFieldObject,
-    };
-
-    reset(defaultValues);
+    });
   }, [isAhjQuerySuccess, ahj, reset]);
 
   async function onSubmit(values: FieldValues) {
