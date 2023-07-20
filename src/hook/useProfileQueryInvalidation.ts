@@ -3,12 +3,14 @@ import useProfileQuery, {
   QUERY_KEY as profileQueryKey,
 } from "@/queries/useProfileQuery";
 
-export default function useProfileQueryInvalidation() {
+export default function useProfileQueryInvalidation(
+  userId: string | undefined
+) {
   const { data: myProfile, isSuccess: isMyProfileQuerySuccess } =
     useProfileQuery();
   const queryClient = useQueryClient();
 
-  const invalidate = (userId: string | undefined) => {
+  const invalidate = () => {
     if (!isMyProfileQuerySuccess || userId == null) {
       return;
     }
