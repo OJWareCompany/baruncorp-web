@@ -6,7 +6,7 @@ import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
 const usePatchProfileMutation = (userId: string | undefined) => {
   const apiClient = useApiClient();
-  const invalidate = useProfileQueryInvalidation();
+  const invalidate = useProfileQueryInvalidation(userId);
 
   return useMutation<
     ProfilePatchResDto,
@@ -23,7 +23,7 @@ const usePatchProfileMutation = (userId: string | undefined) => {
         .then(({ data }) => data);
     },
     {
-      onSuccess: () => invalidate(userId),
+      onSuccess: () => invalidate(),
     }
   );
 };

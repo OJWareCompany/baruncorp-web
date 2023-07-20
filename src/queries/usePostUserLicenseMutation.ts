@@ -6,7 +6,7 @@ import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
 const usePostUserLicenseMutation = (userId: string | undefined) => {
   const apiClient = useApiClient();
-  const invalidate = useProfileQueryInvalidation();
+  const invalidate = useProfileQueryInvalidation(userId);
 
   return useMutation<
     void,
@@ -28,7 +28,7 @@ const usePostUserLicenseMutation = (userId: string | undefined) => {
         .then(({ data }) => data);
     },
     {
-      onSuccess: () => invalidate(userId),
+      onSuccess: () => invalidate(),
     }
   );
 };
