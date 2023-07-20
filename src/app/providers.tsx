@@ -25,6 +25,11 @@ export default function Providers({ children }: Props) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+          },
+        },
         queryCache: new QueryCache({
           onError: async (error) => {
             if (!isAxiosError<ErrorResponseData>(error)) {

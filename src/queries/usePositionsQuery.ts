@@ -14,7 +14,6 @@ const usePositionsQuery = () => {
       apiClient
         .get<PositionsGetResDto>("/departments/positions")
         .then(({ data }) => data),
-    refetchOnWindowFocus: false, // TODO: 이후에 모든 query에 적용할지 논의 필요
   });
 };
 

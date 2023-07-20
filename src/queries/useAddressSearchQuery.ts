@@ -18,7 +18,6 @@ const useAddressSearchQuery = (address: string) => {
       const response = await client.get(`${address}.json`);
       return response.data.features;
     },
-    refetchOnWindowFocus: false,
     enabled: address?.length >= 3,
   });
 };
