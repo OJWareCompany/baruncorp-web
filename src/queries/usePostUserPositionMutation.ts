@@ -1,16 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import useProfileQuery, {
-  QUERY_KEY as profileQueryKey,
-} from "./useProfileQuery";
 import useApiClient from "@/hook/useApiClient";
 import { UserPositionPostReqDto } from "@/types/dto/departments";
+import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
 const usePostUserPositionMutation = (userId: string | undefined) => {
   const apiClient = useApiClient();
-  const { data: myProfile, isSuccess: isMyProfileQuerySuccess } =
-    useProfileQuery();
-  const queryClient = useQueryClient();
+  const invalidate = useProfileQueryInvalidation();
 
   return useMutation<
     void,
@@ -33,17 +29,7 @@ const usePostUserPositionMutation = (userId: string | undefined) => {
     },
     {
       onSuccess: () => {
-        if (!isMyProfileQuerySuccess || userId == null) {
-          return;
-        }
-
-        if (myProfile.id === userId) {
-          queryClient.invalidateQueries({
-            queryKey: [profileQueryKey, "mine"],
-          });
-        }
-
-        queryClient.invalidateQueries({ queryKey: [profileQueryKey, userId] });
+        invalidate(userId);
       },
     }
   );
