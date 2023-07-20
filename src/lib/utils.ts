@@ -6,6 +6,7 @@ import {
   DEFAULT_ERROR_TOAST_TITLE,
   SERVER_ERROR_TOAST_TITLE,
 } from "./constants";
+import { Feature } from "@/types/dto/mapbox/places";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -51,10 +52,10 @@ export function isAxiosErrorWithErrorResponseData(
   );
 }
 
-export function getAddressFieldMap(address: any) {
+export function getAddressFieldMap(address: Feature) {
   const resource = new Map<string, string>();
 
-  address.context.forEach((element: any) => {
+  address.context.forEach((element) => {
     const key = element.id.split(".")[0];
     const value = element.text;
     resource.set(key, value);

@@ -36,6 +36,7 @@ import Scene from "@/components/Scene";
 import { toast } from "@/hook/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { getAddressFieldMap } from "@/lib/utils";
+import { Feature } from "@/types/dto/mapbox/places";
 
 const organizationTypes = ["client", "individual", "outsourcing"];
 
@@ -126,11 +127,11 @@ export default function Page() {
   const debouncedAddress = useDebounce(watchAddress);
   const { data: addresses } = useAddressSearchQuery(debouncedAddress);
 
-  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [selectedAddress, setSelectedAddress] = useState<Feature | null>();
 
   const [isOpenPopover, setIsOpenPopover] = useState(false);
 
-  function onSelectAddress(address: any) {
+  function onSelectAddress(address: Feature) {
     setIsOpenPopover(false);
     setSelectedAddress(address);
 
@@ -312,8 +313,8 @@ export default function Page() {
               onPointerDownOutside={() => setIsOpenPopover(false)}
             >
               <div className="grid space-y-1">
-                {addresses?.length > 0 ? (
-                  addresses.map((address: any) => (
+                {addresses ? (
+                  addresses.map((address: Feature) => (
                     <Button
                       type="button"
                       variant="ghost"
@@ -332,9 +333,7 @@ export default function Page() {
           </Popover>
 
           {selectedAddress && (
-            <Scene
-              coordinates={(selectedAddress as any).geometry.coordinates}
-            />
+            <Scene coordinates={selectedAddress.geometry.coordinates} />
           )}
 
           <FormField
