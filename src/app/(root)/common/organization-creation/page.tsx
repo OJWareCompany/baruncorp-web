@@ -35,6 +35,7 @@ import usePostOrganizationMutation from "@/queries/usePostOrganizationMutation";
 import Scene from "@/components/Scene";
 import { toast } from "@/hook/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { getAddressFieldMap } from "@/lib/utils";
 
 const organizationTypes = ["client", "individual", "outsourcing"];
 
@@ -129,25 +130,6 @@ export default function Page() {
 
   const [isOpenPopover, setIsOpenPopover] = useState(false);
 
-  function getAddressFieldMap(address: any) {
-    const resource = new Map<string, string>();
-
-    address.context.forEach((element: any) => {
-      const key = element.id.split(".")[0];
-      const value = element.text;
-      resource.set(key, value);
-    });
-
-    return {
-      street1: address.text ?? "",
-      street2: "",
-      city: resource.get("place") ?? "",
-      stateOrRegion: resource.get("region") ?? "",
-      postalCode: resource.get("postcode") ?? "",
-      country: resource.get("country") ?? "",
-    };
-  }
-
   function onSelectAddress(address: any) {
     setIsOpenPopover(false);
     setSelectedAddress(address);
@@ -205,17 +187,9 @@ export default function Page() {
         let description =
           "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
         switch (response?.data.statusCode) {
-          case 404:
-            title = "Invalid code";
-            description =
-              "Please check your email again. If the problem persists, please contact the Barun Corp Manager.";
-            break;
           case 409:
             title = response?.data.message[0];
             description = "";
-            break;
-          case 500:
-            title = "Server error";
             break;
         }
         toast({ title, description, variant: "destructive" });
