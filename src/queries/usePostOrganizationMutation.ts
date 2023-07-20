@@ -2,20 +2,20 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApiClient from "@/hook/useApiClient";
 import {
-  OrganizationPostResDto,
-  OrganizationPostReqDto,
-} from "@/types/dto/organization";
+  OrganizationsPostResDto,
+  OrganizationsPostReqDto,
+} from "@/types/dto/organizations";
 
 const usePostOrganizationMutation = () => {
   const apiClient = useApiClient();
 
   return useMutation<
-    OrganizationPostResDto,
+    OrganizationsPostResDto,
     AxiosError<ErrorResponseData>,
-    OrganizationPostReqDto
+    OrganizationsPostReqDto
   >((data) =>
     apiClient
-      .post<OrganizationPostResDto>("/organizations", data)
+      .post<OrganizationsPostResDto>("/organizations", data)
       .then(({ data }) => data)
   );
 };

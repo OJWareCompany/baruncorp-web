@@ -13,12 +13,12 @@ const client = axios.create({
 
 const useAddressSearchQuery = (address: string) => {
   return useQuery<any, AxiosError>({
-    queryKey: ["mapbox.plaecs", address],
+    queryKey: ["mapbox.places", address],
     queryFn: async () => {
       const response = await client.get(`${address}.json`);
       return response.data.features;
     },
-    enabled: address?.length >= 3,
+    enabled: address?.length >= 1,
   });
 };
 

@@ -50,3 +50,22 @@ export function isAxiosErrorWithErrorResponseData(
     undefined
   );
 }
+
+export function getAddressFieldMap(address: any) {
+  const resource = new Map<string, string>();
+
+  address.context.forEach((element: any) => {
+    const key = element.id.split(".")[0];
+    const value = element.text;
+    resource.set(key, value);
+  });
+
+  return {
+    street1: address.text ?? "",
+    street2: "",
+    city: resource.get("place") ?? "",
+    stateOrRegion: resource.get("region") ?? "",
+    postalCode: resource.get("postcode") ?? "",
+    country: resource.get("country") ?? "",
+  };
+}
