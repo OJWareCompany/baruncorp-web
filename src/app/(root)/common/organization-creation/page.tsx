@@ -53,13 +53,36 @@ const formSchema = z.object({
     .trim()
     .min(1, { message: "Email Address is required" })
     .email({ message: "Format of email address is incorrect" }),
-  address: z.string(),
-  street1: z.string(),
-  street2: z.string(),
-  city: z.string(),
-  stateOrRegion: z.string(),
-  postalCode: z.string(),
-  country: z.string(),
+  addressForm: z
+    .object({
+      address: z.string(),
+      street1: z.string(),
+      street2: z.string(),
+      city: z.string(),
+      stateOrRegion: z.string(),
+      postalCode: z.string(),
+      country: z.string(),
+    })
+    .refine(
+      (data) => {
+        const { street1, country } = data;
+        return street1 !== "" || country !== "";
+      },
+      (data) => {
+        const { street1, country } = data;
+        const errorAddressFields = [];
+        if (street1 === "") {
+          errorAddressFields.push("Street1");
+        }
+        if (country === "") {
+          errorAddressFields.push("Country");
+        }
+        return {
+          message: errorAddressFields.join(", ") + " is required",
+          path: ["country"],
+        };
+      }
+    ),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -71,13 +94,15 @@ if (process.env.NODE_ENV === "development") {
     description: "tesla go to the moon~!",
     phoneNumber: "01028541434",
     email: "ejsvk3284@kakao.com",
-    address: "",
-    street1: "",
-    street2: "",
-    city: "",
-    stateOrRegion: "",
-    postalCode: "",
-    country: "",
+    addressForm: {
+      address: "",
+      street1: "",
+      street2: "",
+      city: "",
+      stateOrRegion: "",
+      postalCode: "",
+      country: "",
+    },
   };
 }
 
@@ -96,7 +121,7 @@ export default function Page() {
     formState: { isSubmitting },
   } = form;
 
-  const watchAddress = watch("address");
+  const watchAddress = watch("addressForm.address");
   const debouncedAddress = useDebounce(watchAddress);
   const { data: addresses } = useAddressSearchQuery(debouncedAddress);
 
@@ -131,16 +156,15 @@ export default function Page() {
 
     Object.entries(addressFieldMap).forEach(
       ([key, value]: [string, string]) => {
-        setValue(
-          key as
-            | "street1"
-            | "street2"
-            | "city"
-            | "stateOrRegion"
-            | "postalCode"
-            | "country",
-          value
-        );
+        const addressKey = `addressForm.${key}` as
+          | "addressForm.street1"
+          | "addressForm.street2"
+          | "addressForm.city"
+          | "addressForm.stateOrRegion"
+          | "addressForm.postalCode"
+          | "addressForm.country";
+
+        setValue(addressKey, value);
       }
     );
   }
@@ -170,41 +194,16 @@ export default function Page() {
   const { mutateAsync } = usePostOrganizationMutation();
 
   async function onSubmit(values: FieldValues) {
-    const { street1, postalCode, country } = values;
-    if (street1 === "") {
-      toast({
-        title: "Street1 is required",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (postalCode.length !== 5) {
-      toast({
-        title: "Unvalid Postal Code",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (country === "") {
-      toast({
-        title: "Country is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    await mutateAsync({ ...values })
+    await mutateAsync({ ...values, ...values.addressForm })
       .then(() => {
         router.push("/common/organizations");
         toast({ title: "Organization-Creation success" });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         const { response } = error;
-
         let title = "Something went wrong";
         let description =
           "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
-
         switch (response?.data.statusCode) {
           case 404:
             title = "Invalid code";
@@ -219,7 +218,6 @@ export default function Page() {
             title = "Server error";
             break;
         }
-
         toast({ title, description, variant: "destructive" });
       });
   }
@@ -313,7 +311,7 @@ export default function Page() {
           <Popover open={isOpenPopover}>
             <FormField
               control={control}
-              name="address"
+              name="addressForm.address"
               render={({ field }) => (
                 <PopoverTrigger asChild>
                   <FormItem>
@@ -367,7 +365,7 @@ export default function Page() {
 
           <FormField
             control={control}
-            name="street1"
+            name="addressForm.street1"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -377,14 +375,13 @@ export default function Page() {
                     placeholder="Street1"
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
 
           <FormField
             control={control}
-            name="street2"
+            name="addressForm.street2"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -399,7 +396,7 @@ export default function Page() {
           />
           <FormField
             control={control}
-            name="city"
+            name="addressForm.city"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -414,7 +411,7 @@ export default function Page() {
           />
           <FormField
             control={control}
-            name="stateOrRegion"
+            name="addressForm.stateOrRegion"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -429,7 +426,7 @@ export default function Page() {
           />
           <FormField
             control={control}
-            name="postalCode"
+            name="addressForm.postalCode"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -439,13 +436,12 @@ export default function Page() {
                     placeholder="Postal Code"
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={control}
-            name="country"
+            name="addressForm.country"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
