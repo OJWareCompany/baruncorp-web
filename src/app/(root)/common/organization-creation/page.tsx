@@ -3,7 +3,7 @@
 import { DefaultValues, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import {
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useAddressSearchQuery from "@/queries/useAddressSearchQuery";
-import useDebounce from "@/hook/useDebounce";
+import { useDebounceWithHandler } from "@/hook/useDebounce";
 import {
   Popover,
   PopoverTrigger,
@@ -37,6 +37,13 @@ import { toast } from "@/hook/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { getAddressFieldMap } from "@/lib/utils";
 import { Feature } from "@/types/dto/mapbox/places";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
 
 const organizationTypes = ["client", "individual", "outsourcing"];
 
@@ -64,24 +71,46 @@ const formSchema = z.object({
       stateOrRegion: z.string(),
       postalCode: z.string(),
       country: z.string(),
+      errorMessage: z.string(),
     })
     .refine(
       (data) => {
-        const { street1, country } = data;
-        return street1 !== "" || country !== "";
+        const { street1, street2, city, stateOrRegion, postalCode, country } =
+          data;
+        const isError = ![
+          street1,
+          street2,
+          city,
+          stateOrRegion,
+          postalCode,
+          country,
+        ].some((value) => value.trim() === "");
+        return isError;
       },
       (data) => {
-        const { street1, country } = data;
-        const errorAddressFields = [];
-        if (street1 === "") {
-          errorAddressFields.push("Street1");
+        const { errorMessage, address, ...addressForm } = data;
+
+        let errorField = "";
+        for (let field in addressForm) {
+          if (
+            addressForm[
+              field as
+                | "street1"
+                | "street2"
+                | "city"
+                | "stateOrRegion"
+                | "postalCode"
+                | "country"
+            ] === ""
+          ) {
+            errorField = field;
+            break;
+          }
         }
-        if (country === "") {
-          errorAddressFields.push("Country");
-        }
+
         return {
-          message: errorAddressFields.join(", ") + " is required",
-          path: ["country"],
+          message: `${errorField} is required`,
+          path: ["errorMessage"],
         };
       }
     ),
@@ -104,6 +133,7 @@ if (process.env.NODE_ENV === "development") {
       stateOrRegion: "",
       postalCode: "",
       country: "",
+      errorMessage: "",
     },
   };
 }
@@ -118,22 +148,27 @@ export default function Page() {
   const {
     control,
     setValue,
-    watch,
     handleSubmit,
+    clearErrors,
     formState: { isSubmitting },
   } = form;
 
-  const watchAddress = watch("addressForm.address");
-  const debouncedAddress = useDebounce(watchAddress);
+  const addressInputRef = useRef(null);
+  const {
+    debounced: debouncedAddress,
+    onValueChange: onAddressValueChange,
+    clear: clearAddressDebounced,
+  } = useDebounceWithHandler();
   const { data: addresses } = useAddressSearchQuery(debouncedAddress);
 
   const [selectedAddress, setSelectedAddress] = useState<Feature | null>();
 
-  const [isOpenPopover, setIsOpenPopover] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   function onSelectAddress(address: Feature) {
-    setIsOpenPopover(false);
     setSelectedAddress(address);
+
+    clearErrors("addressForm.errorMessage");
 
     const addressFieldMap = getAddressFieldMap(address);
 
@@ -283,53 +318,52 @@ export default function Page() {
         />
 
         <div className="space-y-2">
-          <Popover open={isOpenPopover}>
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <FormField
               control={control}
               name="addressForm.address"
-              render={({ field }) => (
-                <PopoverTrigger asChild>
-                  <FormItem>
-                    <FormLabel required>Address</FormLabel>
-                    <Input
-                      {...field}
-                      placeholder="Search for address"
-                      onClick={(event) => {
-                        setIsOpenPopover(true);
-                        const currentTarget = event.currentTarget;
-                        setTimeout(() => {
-                          currentTarget.focus();
-                        }, 0);
-                      }}
-                      autoComplete="off"
-                    />
-                  </FormItem>
-                </PopoverTrigger>
+              render={() => (
+                <FormItem>
+                  <FormLabel required>Address</FormLabel>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" fullWidth>
+                      Select address
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-96 p-0"
+                    onPointerDownOutside={clearAddressDebounced}
+                    align="start"
+                  >
+                    <Command>
+                      <CommandInput
+                        placeholder="Search for address"
+                        ref={addressInputRef}
+                        onValueChange={onAddressValueChange}
+                      />
+                      <CommandEmpty>No address found.</CommandEmpty>
+                      <CommandGroup
+                        className={`${
+                          (!addresses || addresses.length === 0) && "p-0"
+                        }`}
+                      >
+                        {addresses?.map((address: Feature) => (
+                          <CommandItem
+                            key={address.id}
+                            onSelect={() => {
+                              onSelectAddress(address);
+                              setPopoverOpen(false);
+                            }}
+                          >
+                            {address.place_name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </FormItem>
               )}
             />
-            <PopoverContent
-              className="w-96 p-1"
-              side="bottom"
-              onPointerDownOutside={() => setIsOpenPopover(false)}
-            >
-              <div className="grid space-y-1">
-                {addresses ? (
-                  addresses.map((address: Feature) => (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="h-auto"
-                      key={address.id}
-                      onClick={() => onSelectAddress(address)}
-                    >
-                      {address.place_name}
-                    </Button>
-                  ))
-                ) : (
-                  <p className="text-center py-5 text-sm">No address found.</p>
-                )}
-              </div>
-            </PopoverContent>
           </Popover>
 
           {selectedAddress && (
@@ -427,6 +461,11 @@ export default function Page() {
                 <FormMessage />
               </FormItem>
             )}
+          />
+          <FormField
+            control={control}
+            name="addressForm.errorMessage"
+            render={() => <FormMessage />}
           />
           <Button type="submit" fullWidth loading={isSubmitting}>
             Create
