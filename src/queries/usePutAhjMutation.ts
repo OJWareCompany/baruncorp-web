@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { QUERY_KEY } from "./useAhjQuery";
+import { QUERY_KEY as ahjQueryKey } from "./useAhjQuery";
 import useApiClient from "@/hook/useApiClient";
 import { AhjPutReqDto } from "@/types/dto/ahjs";
 
@@ -17,7 +17,7 @@ export const usePutAhjMutation = (geoId: string) => {
     {
       onSuccess: async () => {
         queryClient.invalidateQueries({
-          queryKey: [QUERY_KEY, geoId],
+          queryKey: [ahjQueryKey, geoId],
         });
       },
     }

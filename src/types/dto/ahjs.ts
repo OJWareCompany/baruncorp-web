@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export type AhjsGetResDto = {
   pageSize: number;
   totalCount: number;
@@ -12,56 +14,72 @@ export type AhjsGetResDto = {
   }[];
 };
 
-export type CommonOption = "Yes" | "No" | "See Notes";
-export type DigitalSignatureType = "Certified" | "Signed";
-export type WindExposure = "B" | "C" | "D" | "See Notes";
-export type WetStampSize =
-  | "ANSI A (8.5x11 INCH)"
-  | "ANSI B (11x17 INCH)"
-  | "ANSI C (22x34 INCH)"
-  | "ANSI D (24x36 INCH)"
-  | "See Notes";
+export const SelectOptionEnum = z.enum(["No", "Yes", "See Notes"]);
+type SelectOption = z.infer<typeof SelectOptionEnum>;
 
-export interface General {
-  name?: string;
-  type?: string;
-  website?: string;
-  specificFormRequired?: CommonOption;
-  generalNotes?: string;
-  buildingCodes?: string;
-  modifiedBy?: string;
-  createdAt?: string;
-  modifiedAt?: string;
+export const ANSIEnum = z.enum([
+  "ANSI A (8.5x11 INCH)",
+  "ANSI B (11x17 INCH)",
+  "ANSI D (22x34 INCH)",
+  "ARCH D (24x36 INCH)",
+  "See Notes",
+]);
+type ANSI = z.infer<typeof ANSIEnum>;
+
+export const WindExposureEnum = z.enum(["B", "C", "D", "See Notes"]);
+type WindExposure = z.infer<typeof WindExposureEnum>;
+
+export const DigitalSignatureTypeEnum = z.enum(["Certified", "Signed"]);
+type DigitalSignatureType = z.infer<typeof DigitalSignatureTypeEnum>;
+
+export const TypesEnum = z.enum([
+  "STATE",
+  "COUNTY",
+  "COUNTY SUBDIVISIONS",
+  "PLACE",
+]);
+type Types = z.infer<typeof TypesEnum>;
+
+interface General {
+  name: string;
+  website: string | null;
+  specificFormRequired: SelectOption | null;
+  generalNotes: string | null;
+  buildingCodes: string | null;
+  updatedBy: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  type: Types | null;
 }
 
-export interface Design {
-  fireSetBack?: string;
-  utilityNotes?: string;
-  designNotes?: string;
-  pvMeterRequired?: CommonOption;
-  acDisconnectRequired?: CommonOption;
-  centerFed120Percent?: CommonOption;
-  deratedAmpacity?: string;
+interface Design {
+  fireSetBack: string | null;
+  utilityNotes: string | null;
+  designNotes: string | null;
+  pvMeterRequired: SelectOption | null;
+  acDisconnectRequired: SelectOption | null;
+  centerFed120Percent: SelectOption | null;
+  deratedAmpacity: string | null;
 }
 
-export interface Engineering {
-  engineeringNotes?: string;
-  iebcAccepted?: CommonOption;
-  structuralObservationRequired?: CommonOption;
-  windUpliftCalculationRequired?: CommonOption;
-  wetStampsRequired?: CommonOption;
-  digitalSignatureType?: DigitalSignatureType;
-  windExposure?: WindExposure;
-  wetStampSize?: WetStampSize;
-  windSpeed?: string;
-  snowLoadGround?: string;
-  snowLoadFlatRoof?: string;
-  snowLoadSlopedRoof?: string; // 퀵베이스 상에서 ahj form에는 존재하지 않음 (테이블 ui에 존재)
-  ofWetStamps?: string;
+interface Engineering {
+  engineeringNotes: string | null;
+  iebcAccepted: SelectOption | null;
+  structuralObservationRequired: SelectOption | null;
+  windUpliftCalculationRequired: SelectOption | null;
+  wetStampsRequired: SelectOption | null;
+  digitalSignatureType: DigitalSignatureType | null;
+  windExposure: WindExposure | null;
+  wetStampSize: ANSI | null;
+  windSpeed: string | null;
+  snowLoadGround: string | null;
+  snowLoadFlatRoof: string | null;
+  snowLoadSlopedRoof: string | null;
+  ofWetStamps: string | null;
 }
 
-export interface ElectricalEngineering {
-  electricalNotes?: string;
+interface ElectricalEngineering {
+  electricalNotes: string | null;
 }
 
 export interface AhjGetResDto {
@@ -73,8 +91,11 @@ export interface AhjGetResDto {
 }
 
 export interface AhjPutReqDto {
-  general: General;
+  general: Omit<
+    General,
+    "name" | "createdAt" | "updatedBy" | "updatedAt" | "type"
+  >;
   design: Design;
-  engineering: Engineering;
+  engineering: Omit<Engineering, "snowLoadSlopedRoof">;
   electricalEngineering: ElectricalEngineering;
 }
