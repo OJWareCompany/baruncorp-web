@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function useDebounce(value: string, delay: number = 500) {
   const [debounced, setDebounced] = useState(value);
@@ -13,21 +13,21 @@ export default function useDebounce(value: string, delay: number = 500) {
 
 export function useDebounceWithHandler(delay: number = 500) {
   const [debounced, setDebounced] = useState("");
-  let debounceTimer: number | null = null;
+  const debounceTimer = useRef<number | null>(null);
 
   const onValueChange = (value: string) => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
 
-    debounceTimer = window.setTimeout(() => {
+    debounceTimer.current = window.setTimeout(() => {
       setDebounced(value);
     }, delay);
   };
 
   const clear = () => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
     setDebounced("");
   };
