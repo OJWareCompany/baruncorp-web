@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
+import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
 import {
   Form,
   FormControl,
@@ -36,7 +37,7 @@ import Scene from "@/components/Scene";
 import { toast } from "@/hook/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { getAddressFieldMap } from "@/lib/utils";
-import { Feature } from "@/types/dto/mapbox/places";
+
 import {
   Command,
   CommandEmpty,
@@ -161,11 +162,12 @@ export default function Page() {
   } = useDebounceWithHandler();
   const { data: addresses } = useAddressSearchQuery(debouncedAddress);
 
-  const [selectedAddress, setSelectedAddress] = useState<Feature | null>();
+  const [selectedAddress, setSelectedAddress] =
+    useState<GeocodeFeature | null>();
 
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  function onSelectAddress(address: Feature) {
+  function onSelectAddress(address: GeocodeFeature) {
     setSelectedAddress(address);
 
     clearErrors("addressForm.errorMessage");
@@ -347,7 +349,7 @@ export default function Page() {
                           (!addresses || addresses.length === 0) && "p-0"
                         }`}
                       >
-                        {addresses?.map((address: Feature) => (
+                        {addresses?.map((address: GeocodeFeature) => (
                           <CommandItem
                             key={address.id}
                             onSelect={() => {
@@ -367,7 +369,12 @@ export default function Page() {
           </Popover>
 
           {selectedAddress && (
-            <Scene coordinates={selectedAddress.geometry.coordinates} />
+            <Scene
+              coordinates={[
+                selectedAddress.geometry.coordinates[0],
+                selectedAddress.geometry.coordinates[1],
+              ]}
+            />
           )}
 
           <FormField

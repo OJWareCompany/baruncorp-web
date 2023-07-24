@@ -53,6 +53,9 @@ dependencies:
   '@tanstack/react-table':
     specifier: ^8.9.2
     version: 8.9.2(react-dom@18.2.0)(react@18.2.0)
+  '@types/mapbox__mapbox-sdk':
+    specifier: ^0.13.4
+    version: 0.13.4
   '@types/node':
     specifier: 20.2.5
     version: 20.2.5
@@ -6315,6 +6318,20 @@ packages:
   /@types/lodash@4.14.195:
     resolution: {integrity: sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==}
     dev: true
+
+  /@types/mapbox-gl@2.7.12:
+    resolution: {integrity: sha512-aEMMOWlSTn2lp0liLqHsI/vAkV8858mkhn4fFYZELdLO1o6PEKCkkUfQ/GBp603Xfc3xmasLZsoELJBbje+atw==}
+    dependencies:
+      '@types/geojson': 7946.0.10
+    dev: false
+
+  /@types/mapbox__mapbox-sdk@0.13.4:
+    resolution: {integrity: sha512-J4/7uKNo1uc4+xgjbOKFkZxNmlPbpsITcvhn3nXncTZtdGDOmJENfcDEpiRJRBIlnKMGeXy4fxVuEg+i0I3YWA==}
+    dependencies:
+      '@types/geojson': 7946.0.10
+      '@types/mapbox-gl': 2.7.12
+      '@types/node': 20.2.5
+    dev: false
 
   /@types/mdx@2.0.5:
     resolution: {integrity: sha512-76CqzuD6Q7LC+AtbPqrvD9AqsN0k8bsYo2bM2J8pmNldP1aIPAbzUQ7QbobyXL4eLr1wK5x8FZFe8eF/ubRuBg==}

@@ -1,12 +1,12 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { AxiosError } from "axios";
+import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
 import {
   DEFAULT_ERROR_TOAST_DESCRIPTION,
   DEFAULT_ERROR_TOAST_TITLE,
   SERVER_ERROR_TOAST_TITLE,
 } from "./constants";
-import { Feature } from "@/types/dto/mapbox/places";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -52,7 +52,7 @@ export function isAxiosErrorWithErrorResponseData(
   );
 }
 
-export function getAddressFieldMap(address: Feature) {
+export function getAddressFieldMap(address: GeocodeFeature) {
   const resource = new Map<string, string>();
 
   address.context.forEach((element) => {

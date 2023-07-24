@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { MapboxPlacesGetResDto } from "@/types/dto/mapbox/places";
+import { MapboxPlacesGetResDto } from "@/types/dto/mapbox";
 
 const client = axios.create({
   baseURL: "https://api.mapbox.com/geocoding/v5/mapbox.places",
