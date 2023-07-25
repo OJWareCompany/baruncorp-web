@@ -3,7 +3,7 @@
 import { DefaultValues, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useAddressSearchQuery from "@/queries/useAddressSearchQuery";
-import { useDebounceWithHandler } from "@/hook/useDebounce";
 import {
   Popover,
   PopoverTrigger,
@@ -38,6 +37,7 @@ import Scene from "@/components/Scene";
 import { toast } from "@/hook/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { getAddressFieldMap } from "@/lib/utils";
+import useDebounce from "@/hook/useDebounce";
 
 const organizationTypes = ["client", "individual", "outsourcing"];
 
@@ -58,7 +58,6 @@ const formSchema = z.object({
     .email({ message: "Format of email address is incorrect" }),
   addressForm: z
     .object({
-      address: z.string(),
       street1: z.string(),
       street2: z.string(),
       city: z.string(),
@@ -82,7 +81,7 @@ const formSchema = z.object({
         return isError;
       },
       (data) => {
-        const { errorMessage, address, ...addressForm } = data;
+        const { errorMessage, ...addressForm } = data;
 
         let errorField = "";
         for (let field in addressForm) {
@@ -120,7 +119,6 @@ if (process.env.NODE_ENV === "development") {
     phoneNumber: "01028541434",
     email: "ejsvk3284@kakao.com",
     addressForm: {
-      address: "",
       street1: "",
       street2: "",
       city: "",
@@ -147,18 +145,15 @@ export default function Page() {
     formState: { isSubmitting },
   } = form;
 
-  const {
-    debounced: debouncedAddress,
-    onValueChange: onAddressValueChange,
-    clear: clearAddressDebounced,
-  } = useDebounceWithHandler();
-  const { data: addresses } = useAddressSearchQuery(debouncedAddress);
-  const addressInputRef = useRef<HTMLInputElement | null>(null);
-  const [isAddressTyping, setIsAddressTyping] = useState(false);
+  const [addressInputValue, setAddressInputValue] = useState("");
 
-  useEffect(() => {
-    setIsAddressTyping(false);
-  }, [addresses]);
+  const {
+    debouncedValue: debouncedAddress,
+    isDebouncing,
+    clear: clearAddressDebounced,
+  } = useDebounce(addressInputValue);
+  const { data: addresses, isFetching } =
+    useAddressSearchQuery(debouncedAddress);
 
   const [selectedAddress, setSelectedAddress] = useState<GeocodeFeature | null>(
     null
@@ -320,57 +315,40 @@ export default function Page() {
 
         <div className="space-y-2">
           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-            <FormField
-              control={control}
-              name="addressForm.address"
-              render={() => (
-                <FormItem>
-                  <FormLabel required>Address</FormLabel>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" fullWidth>
-                      Select address
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-96 p-0"
-                    onPointerDownOutside={clearAddressDebounced}
-                    align="start"
-                  >
-                    <div className="flex items-center border-b px-3">
-                      <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                      <label htmlFor="search-input" />
-                      <input
-                        id="search-input"
-                        type="text"
-                        className="w-full py-3 text-sm outline-none placeholder:text-muted-foreground"
-                        placeholder="Search for address"
-                        ref={addressInputRef}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          onAddressValueChange(value);
+            <FormItem>
+              <FormLabel required>Address</FormLabel>
+              <PopoverTrigger asChild>
+                <Button variant="outline" fullWidth>
+                  Select address
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-96 p-0"
+                onPointerDownOutside={clearAddressDebounced}
+                align="start"
+              >
+                <div className="flex items-center border-b px-3">
+                  <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                  <label htmlFor="search-input" />
+                  <input
+                    id="search-input"
+                    type="text"
+                    className="w-full py-3 text-sm outline-none placeholder:text-muted-foreground"
+                    placeholder="Search for address"
+                    onChange={(event) => {
+                      setAddressInputValue(event.target.value);
+                    }}
+                    autoComplete="off"
+                    aria-autocomplete="list"
+                  />
+                </div>
 
-                          // 사용자가 타이핑을 시작한 경우 => isAddressTyping을 true로 값 변경
-                          if (!isAddressTyping) {
-                            setIsAddressTyping(true);
-                            return;
-                          }
-
-                          // 타이핑 중인데 value가 empty string인 경우 => isAddressTyping을 false로 값 변경
-                          if (isAddressTyping && value === "") {
-                            setIsAddressTyping(false);
-                          }
-                        }}
-                        autoComplete="off"
-                        aria-autocomplete="list"
-                      />
-                    </div>
-
-                    {isAddressTyping ? (
-                      <Loader2 className="my-6 mx-auto h-6 w-6 animate-spin" />
-                    ) : addressInputRef.current &&
-                      addressInputRef.current.value !== "" &&
-                      addresses &&
-                      addresses.length > 0 ? (
+                {(isDebouncing || isFetching) && (
+                  <Loader2 className="my-6 mx-auto h-6 w-6 animate-spin" />
+                )}
+                {!isDebouncing && !isFetching && (
+                  <>
+                    {addresses && addresses.length > 0 && (
                       <div className="overflow-hidden p-1">
                         {addresses.map((address: GeocodeFeature) => (
                           <div
@@ -385,15 +363,16 @@ export default function Page() {
                           </div>
                         ))}
                       </div>
-                    ) : (
+                    )}
+                    {(!addresses || (addresses && addresses.length === 0)) && (
                       <div className="py-6 text-center text-sm">
                         No address found.
                       </div>
                     )}
-                  </PopoverContent>
-                </FormItem>
-              )}
-            />
+                  </>
+                )}
+              </PopoverContent>
+            </FormItem>
           </Popover>
 
           {selectedAddress && (

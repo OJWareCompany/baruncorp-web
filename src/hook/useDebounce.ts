@@ -1,40 +1,29 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import useIsFirstRender from "./useIsFirstRender";
 
 export default function useDebounce(value: string, delay: number = 500) {
-  const [debounced, setDebounced] = useState(value);
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+  const isFirstRender = useIsFirstRender();
 
   useEffect(() => {
-    const handler = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-
-  return debounced;
-}
-
-export function useDebounceWithHandler(delay: number = 500) {
-  const [debounced, setDebounced] = useState("");
-  const debounceTimer = useRef<number | null>(null);
-
-  const onValueChange = (value: string) => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
+    if (isFirstRender) {
+      return;
     }
 
-    debounceTimer.current = window.setTimeout(() => {
-      setDebounced(value);
+    setIsDebouncing(true);
+
+    const handler = setTimeout(() => {
+      setIsDebouncing(false);
+      setDebouncedValue(value);
     }, delay);
-  };
+
+    return () => clearTimeout(handler);
+  }, [value, delay, isFirstRender]);
 
   const clear = () => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-    setDebounced("");
+    setDebouncedValue("");
   };
 
-  return {
-    debounced,
-    onValueChange,
-    clear,
-  };
+  return { debouncedValue, isDebouncing, clear };
 }
