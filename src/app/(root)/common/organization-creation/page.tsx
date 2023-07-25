@@ -147,11 +147,8 @@ export default function Page() {
 
   const [addressInputValue, setAddressInputValue] = useState("");
 
-  const {
-    debouncedValue: debouncedAddress,
-    isDebouncing,
-    clear: clearAddressDebounced,
-  } = useDebounce(addressInputValue);
+  const { debouncedValue: debouncedAddress, isDebouncing } =
+    useDebounce(addressInputValue);
   const { data: addresses, isFetching } =
     useAddressSearchQuery(debouncedAddress);
 
@@ -226,6 +223,37 @@ export default function Page() {
         }
         toast({ title, description, variant: "destructive" });
       });
+  }
+
+  function getAddressesElement() {
+    if (addressInputValue === "") {
+      return <div className="py-6 text-center text-sm">No address found.</div>;
+    }
+
+    if (isDebouncing || isFetching || addresses == null) {
+      return <Loader2 className="my-6 mx-auto h-6 w-6 animate-spin" />;
+    }
+
+    if (addresses.length === 0) {
+      return <div className="py-6 text-center text-sm">No address found.</div>;
+    }
+
+    return (
+      <div className="overflow-hidden p-1">
+        {addresses.map((address: GeocodeFeature) => (
+          <div
+            key={address.id}
+            onClick={() => {
+              onSelectAddress(address);
+              setPopoverOpen(false);
+            }}
+            className="cursor-pointer rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+          >
+            {address.place_name}
+          </div>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -319,12 +347,14 @@ export default function Page() {
               <FormLabel required>Address</FormLabel>
               <PopoverTrigger asChild>
                 <Button variant="outline" fullWidth>
-                  Select address
+                  Search for address
                 </Button>
               </PopoverTrigger>
               <PopoverContent
                 className="w-96 p-0"
-                onPointerDownOutside={clearAddressDebounced}
+                onPointerDownOutside={() => {
+                  setAddressInputValue("");
+                }}
                 align="start"
               >
                 <div className="flex items-center border-b px-3">
@@ -342,35 +372,7 @@ export default function Page() {
                     aria-autocomplete="list"
                   />
                 </div>
-
-                {(isDebouncing || isFetching) && (
-                  <Loader2 className="my-6 mx-auto h-6 w-6 animate-spin" />
-                )}
-                {!isDebouncing && !isFetching && (
-                  <>
-                    {addresses && addresses.length > 0 && (
-                      <div className="overflow-hidden p-1">
-                        {addresses.map((address: GeocodeFeature) => (
-                          <div
-                            key={address.id}
-                            onClick={() => {
-                              onSelectAddress(address);
-                              setPopoverOpen(false);
-                            }}
-                            className="cursor-pointer rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
-                          >
-                            {address.place_name}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {(!addresses || (addresses && addresses.length === 0)) && (
-                      <div className="py-6 text-center text-sm">
-                        No address found.
-                      </div>
-                    )}
-                  </>
-                )}
+                {getAddressesElement()}
               </PopoverContent>
             </FormItem>
           </Popover>

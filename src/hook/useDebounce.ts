@@ -1,18 +1,13 @@
-import { useState, useEffect } from "react";
-import useIsFirstRender from "./useIsFirstRender";
+import { useState, useEffect, useRef } from "react";
 
-export default function useDebounce(value: string, delay: number = 500) {
+export default function useDebounce(value: string, delay: number = 3000) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   const [isDebouncing, setIsDebouncing] = useState(false);
-  const isFirstRender = useIsFirstRender();
+  const isInitialRef = useRef(true);
 
   useEffect(() => {
-    if (isFirstRender) {
-      return;
-    }
-
-    if (value === "") {
-      clear();
+    if (isInitialRef.current) {
+      isInitialRef.current = false;
       return;
     }
 
@@ -23,13 +18,10 @@ export default function useDebounce(value: string, delay: number = 500) {
       setDebouncedValue(value);
     }, delay);
 
-    return () => clearTimeout(handler);
-  }, [value, delay, isFirstRender]);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
 
-  const clear = () => {
-    setDebouncedValue("");
-    setIsDebouncing(false);
-  };
-
-  return { debouncedValue, isDebouncing, clear };
+  return { debouncedValue, isDebouncing };
 }
