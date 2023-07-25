@@ -11,6 +11,11 @@ export default function useDebounce(value: string, delay: number = 500) {
       return;
     }
 
+    if (value === "") {
+      clear();
+      return;
+    }
+
     setIsDebouncing(true);
 
     const handler = setTimeout(() => {
@@ -23,6 +28,7 @@ export default function useDebounce(value: string, delay: number = 500) {
 
   const clear = () => {
     setDebouncedValue("");
+    setIsDebouncing(false);
   };
 
   return { debouncedValue, isDebouncing, clear };
