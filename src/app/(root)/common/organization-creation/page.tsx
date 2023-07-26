@@ -57,28 +57,22 @@ const formSchema = z.object({
     .min(1, { message: "Email Address is required" })
     .email({ message: "Format of email address is incorrect" }),
   /**
-   * @description AddressForm Validation Rule
-   * - AddressForm의 필드 리스트 및 우선 순위 (높은순)
-   *    1. street1
-   *    2. street2
-   *    3. city
-   *    4. stateOrRegion
-   *    5. postalCode
-   *    6. country
-   * - AddressForm의 Validation 결과가 success 되기 위해서는 필드들(street1, street2, city, stateOrRegion, postalCode, country)이 모두 empty string이 아닌 string 이여야 한다.
-   * - Create 버튼 클릭 시, 채워지지 않은 주소 필드 중 가장 우선 순위가 높은 필드의 이름을 베이스로 다음의 에러 메시지를 표시한다. "{Field} is required"
-   * - 특정 필드에 대한 에러 메시지가 표시된 상황에서 어느 필드든 값을 입력할 시 자동으로 revalidation이 수행되며 에러 메시지가 업데이트(사리지거나 혹은 변경)된다.
+   * @description AddressForm에서 validation 실패 시 표시되는 필드의 에러 메시지 우선 순위 (높은 순)
+   * 1. street1
+   * 2. street2
+   * 3. city
+   * 4. stateOrRegion
+   * 5. postalCode
+   * 6. country
    */
   addressForm: z.object({
     address: z.string(),
-    street1: z.string().min(1, { message: "street1 is required" }),
-    street2: z.string().min(1, { message: "street2 is required" }),
-    city: z.string().min(1, { message: "city required" }),
-    stateOrRegion: z
-      .string()
-      .min(1, { message: "state or region is required" }),
-    postalCode: z.string().min(1, { message: "postal code is required" }),
-    country: z.string().min(1, { message: "country is required" }),
+    street1: z.string().min(1, { message: "Street1 is required" }),
+    street2: z.string().min(1, { message: "Street2 is required" }),
+    city: z.string().min(1, { message: "City required" }),
+    stateOrRegion: z.string().min(1, { message: "State / Region is required" }),
+    postalCode: z.string().min(1, { message: "Postal Code is required" }),
+    country: z.string().min(1, { message: "Country is required" }),
   }),
 });
 
@@ -113,6 +107,7 @@ export default function Page() {
     control,
     setValue,
     handleSubmit,
+    clearErrors,
     formState: { isSubmitting, errors },
   } = form;
 
@@ -215,6 +210,7 @@ export default function Page() {
             key={address.id}
             onClick={() => {
               onSelectAddress(address);
+              clearErrors("addressForm");
               setPopoverOpen(false);
             }}
             className="cursor-pointer rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
@@ -226,21 +222,21 @@ export default function Page() {
     );
   }
 
-  let errorMessage = "";
+  let addressFormErrorMessage = "";
   if (errors.addressForm) {
     const addressForm = errors.addressForm;
     if (addressForm.street1) {
-      errorMessage = addressForm.street1.message ?? "";
+      addressFormErrorMessage = addressForm.street1.message ?? "";
     } else if (addressForm.street2) {
-      errorMessage = addressForm.street2.message ?? "";
+      addressFormErrorMessage = addressForm.street2.message ?? "";
     } else if (addressForm.city) {
-      errorMessage = addressForm.city.message ?? "";
+      addressFormErrorMessage = addressForm.city.message ?? "";
     } else if (addressForm.stateOrRegion) {
-      errorMessage = addressForm.stateOrRegion.message ?? "";
+      addressFormErrorMessage = addressForm.stateOrRegion.message ?? "";
     } else if (addressForm.postalCode) {
-      errorMessage = addressForm.postalCode.message ?? "";
+      addressFormErrorMessage = addressForm.postalCode.message ?? "";
     } else if (addressForm.country) {
-      errorMessage = addressForm.country.message ?? "";
+      addressFormErrorMessage = addressForm.country.message ?? "";
     }
   }
 
@@ -464,7 +460,11 @@ export default function Page() {
               </FormItem>
             )}
           />
-          <p className="text-sm font-medium text-destructive">{errorMessage}</p>
+          {addressFormErrorMessage && (
+            <p className="text-sm font-medium text-destructive">
+              {addressFormErrorMessage}
+            </p>
+          )}
           <Button type="submit" fullWidth loading={isSubmitting}>
             Create
           </Button>
