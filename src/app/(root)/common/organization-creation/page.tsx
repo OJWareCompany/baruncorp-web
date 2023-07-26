@@ -56,6 +56,19 @@ const formSchema = z.object({
     .trim()
     .min(1, { message: "Email Address is required" })
     .email({ message: "Format of email address is incorrect" }),
+  /**
+   * @description AddressForm Validation Rule
+   * - AddressForm의 필드 리스트 및 우선 순위 (높은순)
+   *    1. street1
+   *    2. street2
+   *    3. city
+   *    4. stateOrRegion
+   *    5. postalCode
+   *    6. country
+   * - AddressForm의 Validation 결과가 success 되기 위해서는 필드들(street1, street2, city, stateOrRegion, postalCode, country)이 모두 empty string이 아닌 string 이여야 한다.
+   * - 주소 검색 및 선택 시, 자동으로 채워지지 않은 필드 중 가장 우선 순위가 높은 필드의 이름을 베이스로 다음의 에러 메시지를 표시한다. "{Field} is required"
+   * - 특정 필드에 대한 에러 메시지가 표시된 상황에서 어느 필드든 값을 입력할 시 자동으로 revalidation이 수행되며 에러 메시지가 업데이트(사리지거나 혹은 변경)된다.
+   */
   addressForm: z
     .object({
       street1: z.string(),
