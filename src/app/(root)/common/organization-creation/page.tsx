@@ -66,60 +66,20 @@ const formSchema = z.object({
    *    5. postalCode
    *    6. country
    * - AddressForm의 Validation 결과가 success 되기 위해서는 필드들(street1, street2, city, stateOrRegion, postalCode, country)이 모두 empty string이 아닌 string 이여야 한다.
-   * - 주소 검색 및 선택 시, 자동으로 채워지지 않은 필드 중 가장 우선 순위가 높은 필드의 이름을 베이스로 다음의 에러 메시지를 표시한다. "{Field} is required"
+   * - Create 버튼 클릭 시, 채워지지 않은 주소 필드 중 가장 우선 순위가 높은 필드의 이름을 베이스로 다음의 에러 메시지를 표시한다. "{Field} is required"
    * - 특정 필드에 대한 에러 메시지가 표시된 상황에서 어느 필드든 값을 입력할 시 자동으로 revalidation이 수행되며 에러 메시지가 업데이트(사리지거나 혹은 변경)된다.
    */
-  addressForm: z
-    .object({
-      street1: z.string(),
-      street2: z.string(),
-      city: z.string(),
-      stateOrRegion: z.string(),
-      postalCode: z.string(),
-      country: z.string(),
-      errorMessage: z.string(),
-    })
-    .refine(
-      (data) => {
-        const { street1, street2, city, stateOrRegion, postalCode, country } =
-          data;
-        const isError = ![
-          street1,
-          street2,
-          city,
-          stateOrRegion,
-          postalCode,
-          country,
-        ].some((value) => value.trim() === "");
-        return isError;
-      },
-      (data) => {
-        const { errorMessage, ...addressForm } = data;
-
-        let errorField = "";
-        for (let field in addressForm) {
-          if (
-            addressForm[
-              field as
-                | "street1"
-                | "street2"
-                | "city"
-                | "stateOrRegion"
-                | "postalCode"
-                | "country"
-            ] === ""
-          ) {
-            errorField = field;
-            break;
-          }
-        }
-
-        return {
-          message: `${errorField} is required`,
-          path: ["errorMessage"],
-        };
-      }
-    ),
+  addressForm: z.object({
+    address: z.string(),
+    street1: z.string().min(1, { message: "street1 is required" }),
+    street2: z.string().min(1, { message: "street2 is required" }),
+    city: z.string().min(1, { message: "city required" }),
+    stateOrRegion: z
+      .string()
+      .min(1, { message: "state or region is required" }),
+    postalCode: z.string().min(1, { message: "postal code is required" }),
+    country: z.string().min(1, { message: "country is required" }),
+  }),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -138,7 +98,6 @@ if (process.env.NODE_ENV === "development") {
       stateOrRegion: "",
       postalCode: "",
       country: "",
-      errorMessage: "",
     },
   };
 }
@@ -154,9 +113,7 @@ export default function Page() {
     control,
     setValue,
     handleSubmit,
-    clearErrors,
-    trigger,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = form;
 
   const [addressInputValue, setAddressInputValue] = useState("");
@@ -175,8 +132,6 @@ export default function Page() {
 
   function onSelectAddress(address: GeocodeFeature) {
     setSelectedAddress(address);
-
-    clearErrors("addressForm.errorMessage");
 
     const addressFieldMap = getAddressFieldMap(address);
 
@@ -269,6 +224,24 @@ export default function Page() {
         ))}
       </div>
     );
+  }
+
+  let errorMessage = "";
+  if (errors.addressForm) {
+    const addressForm = errors.addressForm;
+    if (addressForm.street1) {
+      errorMessage = addressForm.street1.message ?? "";
+    } else if (addressForm.street2) {
+      errorMessage = addressForm.street2.message ?? "";
+    } else if (addressForm.city) {
+      errorMessage = addressForm.city.message ?? "";
+    } else if (addressForm.stateOrRegion) {
+      errorMessage = addressForm.stateOrRegion.message ?? "";
+    } else if (addressForm.postalCode) {
+      errorMessage = addressForm.postalCode.message ?? "";
+    } else if (addressForm.country) {
+      errorMessage = addressForm.country.message ?? "";
+    }
   }
 
   return (
@@ -411,10 +384,6 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["street1"]}
                     placeholder="Street1"
-                    onChange={(event) => {
-                      setValue("addressForm.street1", event.target.value);
-                      trigger("addressForm");
-                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -430,10 +399,6 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["street2"]}
                     placeholder="Street2"
-                    onChange={(event) => {
-                      setValue("addressForm.street2", event.target.value);
-                      trigger("addressForm");
-                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -449,10 +414,6 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["city"]}
                     placeholder="City"
-                    onChange={(event) => {
-                      setValue("addressForm.city", event.target.value);
-                      trigger("addressForm");
-                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -468,10 +429,6 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["stateOrRegion"]}
                     placeholder="State / Region"
-                    onChange={(event) => {
-                      setValue("addressForm.stateOrRegion", event.target.value);
-                      trigger("addressForm");
-                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -487,10 +444,6 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["postalCode"]}
                     placeholder="Postal Code"
-                    onChange={(event) => {
-                      setValue("addressForm.postalCode", event.target.value);
-                      trigger("addressForm");
-                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -506,21 +459,12 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["country"]}
                     placeholder="Country"
-                    onChange={(event) => {
-                      setValue("addressForm.country", event.target.value);
-                      trigger("addressForm");
-                    }}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name="addressForm.errorMessage"
-            render={() => <FormMessage />}
-          />
+          <p className="text-sm font-medium text-destructive">{errorMessage}</p>
           <Button type="submit" fullWidth loading={isSubmitting}>
             Create
           </Button>
