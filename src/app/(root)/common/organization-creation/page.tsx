@@ -146,17 +146,18 @@ export default function Page() {
   } = form;
 
   const [addressInputValue, setAddressInputValue] = useState("");
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
-  const { debouncedValue: debouncedAddress, isDebouncing } =
-    useDebounce(addressInputValue);
+  const { debouncedValue: debouncedAddress, isDebouncing } = useDebounce(
+    addressInputValue,
+    popoverOpen
+  );
   const { data: addresses, isFetching } =
     useAddressSearchQuery(debouncedAddress);
 
   const [selectedAddress, setSelectedAddress] = useState<GeocodeFeature | null>(
     null
   );
-
-  const [popoverOpen, setPopoverOpen] = useState(false);
 
   function onSelectAddress(address: GeocodeFeature) {
     setSelectedAddress(address);
