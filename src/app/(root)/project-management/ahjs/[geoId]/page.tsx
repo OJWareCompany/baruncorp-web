@@ -3,8 +3,26 @@
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { ReactNode, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { createColumnHelper } from "@tanstack/react-table";
+import { Eye, MoreHorizontal } from "lucide-react";
+import {
+  ANSIEnumWithEmptyString,
+  DigitalSignatureTypeEnumWithEmptyString,
+  SelectOptionEnumWithEmptyString,
+  WindExposureEnumWithEmptyString,
+  schemaToConvertFromANSIWithEmptyStringToNullableANSI,
+  schemaToConvertFromDigitalSignatureTypeWithEmptyStringToNullableDigitalSignatureType,
+  schemaToConvertFromNullishANSIToANSIWithEmptyString,
+  schemaToConvertFromNullishDigitalSignatureTypeToDigitalSignatureTypeWithEmptyString,
+  schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString,
+  schemaToConvertFromNullishStringToString,
+  schemaToConvertFromNullishWindExposureToWindExposureWithEmptyString,
+  schemaToConvertFromSelectOptionWithEmptyStringToNullableSelectOption,
+  schemaToConvertFromStringToNullableString,
+  schemaToConvertFromWindExposureWithEmptyStringToNullableWindExposure,
+} from "./constants";
 import {
   Form,
   FormControl,
@@ -30,73 +48,20 @@ import {
   WindExposureEnum,
   ANSIEnum,
   AhjPutReqDto,
+  AhjHistoriesGetResDto,
 } from "@/types/dto/ahjs";
 import { usePutAhjMutation } from "@/queries/usePutAhjMutation";
-
-const SelectOptionEnumWithEmptyString = SelectOptionEnum.or(z.literal("")); // "No" | "Yes" | "See Notes" | ""
-const DigitalSignatureTypeEnumWithEmptyString = DigitalSignatureTypeEnum.or(
-  z.literal("")
-); // "Certified" | "Signed" | ""
-const WindExposureEnumWithEmptyString = WindExposureEnum.or(z.literal("")); // "See Notes" | "B" | "C" | "D" | ""
-const ANSIEnumWithEmptyString = ANSIEnum.or(z.literal("")); // "See Notes" | "ANSI A (8.5x11 INCH)" | "ANSI B (11x17 INCH)" | "ANSI D (22x34 INCH)" | "ARCH D (24x36 INCH)" | ""
-
-/**
- * undefined => ""
- * null => ""
- * 3 => "3"
- * "" => ""
- * "  " => ""
- * "  abc  " => "abc"
- * "abc" => "abc"
- */
-const schemaToConvertFromNullishStringToString = z.coerce
-  .string()
-  .trim()
-  .nullish()
-  .transform((v) => v ?? "");
-
-/**
- * "" => null
- * "  " => null
- * "  abc  " => "abc"
- * "abc" => "abc"
- */
-const schemaToConvertFromStringToNullableString = z
-  .string()
-  .trim()
-  .transform((v) => (v === "" ? null : v));
-
-// "No" | "Yes" | "See Notes" | null => "No" | "Yes" | "See Notes" | ""
-const schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString =
-  SelectOptionEnum.nullish().transform((v) => v ?? "");
-// "No" | "Yes" | "See Notes" | "" => "No" | "Yes" | "See Notes" | null
-const schemaToConvertFromSelectOptionWithEmptyStringToNullableSelectOption =
-  SelectOptionEnumWithEmptyString.transform((v) => (v === "" ? null : v));
-
-// "Certified" | "Signed" | null => "Certified" | "Signed" | ""
-const schemaToConvertFromNullishDigitalSignatureTypeToDigitalSignatureTypeWithEmptyString =
-  DigitalSignatureTypeEnum.nullish().transform((v) => v ?? "");
-// "Certified" | "Signed" | "" => "Certified" | "Signed" | null
-const schemaToConvertFromDigitalSignatureTypeWithEmptyStringToNullableDigitalSignatureType =
-  DigitalSignatureTypeEnumWithEmptyString.transform((v) =>
-    v === "" ? null : v
-  );
-
-// "See Notes" | "B" | "C" | "D" | null => "See Notes" | "B" | "C" | "D" | ""
-const schemaToConvertFromNullishWindExposureToWindExposureWithEmptyString =
-  WindExposureEnum.nullish().transform((v) => v ?? "");
-// "See Notes" | "B" | "C" | "D" | "" => "See Notes" | "B" | "C" | "D" | null
-const schemaToConvertFromWindExposureWithEmptyStringToNullableWindExposure =
-  WindExposureEnumWithEmptyString.transform((v) => (v === "" ? null : v));
-
-// "See Notes" | "ANSI A (8.5x11 INCH)" | "ANSI B (11x17 INCH)" | "ANSI D (22x34 INCH)" | "ARCH D (24x36 INCH)" | null
-// => "See Notes" | "ANSI A (8.5x11 INCH)" | "ANSI B (11x17 INCH)" | "ANSI D (22x34 INCH)" | "ARCH D (24x36 INCH)" | ""
-const schemaToConvertFromNullishANSIToANSIWithEmptyString =
-  ANSIEnum.nullish().transform((v) => v ?? "");
-// "See Notes" | "ANSI A (8.5x11 INCH)" | "ANSI B (11x17 INCH)" | "ANSI D (22x34 INCH)" | "ARCH D (24x36 INCH)" | ""
-// => "See Notes" | "ANSI A (8.5x11 INCH)" | "ANSI B (11x17 INCH)" | "ANSI D (22x34 INCH)" | "ARCH D (24x36 INCH)" | null
-const schemaToConvertFromANSIWithEmptyStringToNullableANSI =
-  ANSIEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+import { DataTable } from "@/components/ui/data-table";
+import useAhjHistoriesQuery from "@/queries/useAhjHistoriesQuery";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import AhjHistorySheet from "@/app/(root)/project-management/ahjs/[geoId]/components/AhjHistorySheet";
+import FieldsRowContainer from "@/components/FieldsRowContainer";
 
 const formSchema = z.object({
   // general
@@ -145,6 +110,9 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
+const columnHelper =
+  createColumnHelper<AhjHistoriesGetResDto["items"][number]>();
+
 export default function Page() {
   const { geoId } = useParams() as { geoId: string };
   const {
@@ -154,6 +122,11 @@ export default function Page() {
   } = useAhjQuery(geoId);
 
   const { mutateAsync } = usePutAhjMutation(geoId);
+  const { data: ahjHistories } = useAhjHistoriesQuery(geoId);
+  const [ahjHistorySheetState, setAhjHistorySheetState] = useState<{
+    id?: string;
+    open: boolean;
+  }>({ open: false });
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -436,523 +409,589 @@ export default function Page() {
       electricalEngineering,
     });
   }
+  const columns = [
+    columnHelper.accessor("updatedBy", {
+      header: "Updated By",
+      cell: ({ getValue }) => {
+        const value = getValue();
+        return <span>{value ?? "System"}</span>;
+      },
+    }),
+    columnHelper.accessor("updatedAt", {
+      header: "Updated At",
+      cell: ({ getValue }) => {
+        const value = getValue();
+        return (
+          <span className={cn(value == null && "text-muted-foreground")}>
+            {value ?? "-"}
+          </span>
+        );
+      },
+    }),
+    columnHelper.display({
+      id: "actions",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => {
+                setAhjHistorySheetState({ open: true, id: row.id });
+              }}
+            >
+              <Eye className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              View
+            </DropdownMenuItem>
+            {/* <DropdownMenuItem>
+              <Trash className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Delete
+            </DropdownMenuItem> */}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    }),
+  ];
 
   return (
-    <Form {...form}>
-      <h1 className="h3 mb-4">AHJ</h1>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
-        {/* General */}
-        <h1 className="h4 mb-2">General</h1>
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="general.name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input {...field} readOnly />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="general.website"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Website</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="general.specificFormRequired"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Specific Form Required?</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
+    <div className="space-y-8">
+      <div>
+        <h1 className="h3 mb-4">AHJ</h1>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 w-full"
+          >
+            {/* General */}
+            <h2 className="h4 mb-2">General</h2>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="general.name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} readOnly />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="general.website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="general.specificFormRequired"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Specific Form Required?</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
 
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="general.buildingCodes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Building Codes</FormLabel>
-                <FormControl>
-                  <Textarea {...field} className="resize-none" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="general.generalNotes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>General Notes</FormLabel>
-                <FormControl>
-                  <Textarea {...field} className="resize-none" />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="general.buildingCodes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Building Codes</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="resize-none" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="general.generalNotes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>General Notes</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} className="resize-none" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
 
-        {/* Design */}
-        <h1 className="h4 mb-2">Design</h1>
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="design.pvMeterRequired"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>PV Meter Required?</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="design.acDisconnectRequired"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>AC Disconnect Required?</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="design.centerFed120Percent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Center Fed 120%</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="design.deratedAmpacity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Derated Ampacity</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
-        <FormField
-          control={control}
-          name="design.fireSetBack"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fire Setback</FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-none" />
-              </FormControl>
-            </FormItem>
-          )}
+            {/* Design */}
+            <h2 className="h4 mb-2">Design</h2>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="design.pvMeterRequired"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PV Meter Required?</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="design.acDisconnectRequired"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>AC Disconnect Required?</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="design.centerFed120Percent"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Center Fed 120%</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="design.deratedAmpacity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Derated Ampacity</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
+            <FormField
+              control={control}
+              name="design.fireSetBack"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fire Setback</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-none" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="design.utilityNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Utility Notes</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-none" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="design.designNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Design Notes</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-none" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Structural Engineering */}
+            <h2 className="h4 mb-2">Structural Engineering</h2>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="engineering.iebcAccepted"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>IEBC Accepted?</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="engineering.structuralObservationRequired"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Structural Observation Required?</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="engineering.digitalSignatureType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Digital Signature Type</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an digital signature type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {DigitalSignatureTypeEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="engineering.windUpliftCalculationRequired"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Uplift Calculation Required?</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="engineering.windSpeed"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Speed (mph)</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="engineering.windExposure"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wind Exposure</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an wind exposure" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {WindExposureEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="engineering.snowLoadGround"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Snow Load Ground (psf)</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="engineering.snowLoadFlatRoof"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Snow Load Flat Roof (psf)</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="engineering.wetStampsRequired"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wet Stamp Required?</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {SelectOptionEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="engineering.ofWetStamps"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel># of Wet Stamps</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="engineering.wetStampSize"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wet Stamp Size</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an wet stamp size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {ANSIEnum.options.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
+            <FormField
+              control={control}
+              name="engineering.engineeringNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Engineering Notes</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-none" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Electrical Engineering */}
+            <h2 className="h4 mb-2">Electrical Engineering</h2>
+            <FormField
+              control={control}
+              name="electricalEngineering.electricalNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Engineering Notes</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} className="resize-none" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Last Modified */}
+            <h2 className="h4 mb-2">Last Modified</h2>
+            <FieldsRowContainer>
+              <FormField
+                control={control}
+                name="general.updatedBy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Modified By</FormLabel>
+                    <FormControl>
+                      <Input {...field} readOnly />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="general.updatedAt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date Modified</FormLabel>
+                    <FormControl>
+                      <Input {...field} readOnly />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </FieldsRowContainer>
+
+            <Button
+              type="submit"
+              fullWidth
+              disabled={!isDirty}
+              loading={isSubmitting}
+            >
+              Save
+            </Button>
+          </form>
+        </Form>
+      </div>
+      <div>
+        <h1 className="h3 mb-4">History</h1>
+        <DataTable
+          columns={columns}
+          data={ahjHistories?.items.reverse() ?? []}
+          getRowId={(originalRow) => String(originalRow.id)}
         />
-        <FormField
-          control={control}
-          name="design.utilityNotes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Utility Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-none" />
-              </FormControl>
-            </FormItem>
-          )}
+        <AhjHistorySheet
+          {...ahjHistorySheetState}
+          onOpenChange={(open) => {
+            if (!open) {
+              setAhjHistorySheetState({ open });
+            }
+          }}
         />
-        <FormField
-          control={control}
-          name="design.designNotes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Design Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-none" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {/* Structural Engineering */}
-        <h1 className="h4 mb-2">Structural Engineering</h1>
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="engineering.iebcAccepted"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>IEBC Accepted?</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="engineering.structuralObservationRequired"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Structural Observation Required?</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="engineering.digitalSignatureType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Digital Signature Type</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an digital signature type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {DigitalSignatureTypeEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="engineering.windUpliftCalculationRequired"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Wind Uplift Calculation Required?</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="engineering.windSpeed"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Wind Speed (mph)</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="engineering.windExposure"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Wind Exposure</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an wind exposure" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {WindExposureEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="engineering.snowLoadGround"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Snow Load Ground (psf)</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="engineering.snowLoadFlatRoof"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Snow Load Flat Roof (psf)</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="engineering.wetStampsRequired"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Wet Stamp Required?</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {SelectOptionEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="engineering.ofWetStamps"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel># of Wet Stamps</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="engineering.wetStampSize"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Wet Stamp Size</FormLabel>
-                <FormControl>
-                  <Select {...field} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an wet stamp size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {ANSIEnum.options.map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
-        <FormField
-          control={control}
-          name="engineering.engineeringNotes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Engineering Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-none" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {/* Electrical Engineering */}
-        <h1 className="h4 mb-2">Electrical Engineering</h1>
-        <FormField
-          control={control}
-          name="electricalEngineering.electricalNotes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Engineering Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} className="resize-none" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        {/* Last Modified */}
-        <h1 className="h4 mb-2">Last Modified</h1>
-        <FieldsRowWrapper>
-          <FormField
-            control={control}
-            name="general.updatedBy"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Last Modified By</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="general.updatedAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date Modified</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </FieldsRowWrapper>
-
-        <Button
-          type="submit"
-          fullWidth
-          disabled={!isDirty}
-          loading={isSubmitting}
-        >
-          Save
-        </Button>
-      </form>
-    </Form>
+      </div>
+    </div>
   );
-}
-
-function FieldsRowWrapper({ children }: { children: ReactNode }) {
-  return <div className="flex space-x-4 [&>*]:w-full">{children}</div>;
 }

@@ -82,7 +82,6 @@ interface ElectricalEngineering {
 }
 
 export interface AhjGetResDto {
-  id: string;
   general: General;
   design: Design;
   engineering: Engineering;
@@ -96,5 +95,27 @@ export interface AhjPutReqDto {
   >;
   design: Design;
   engineering: Omit<Engineering, "snowLoadSlopedRoof">;
+  electricalEngineering: ElectricalEngineering;
+}
+
+export interface AhjHistoriesGetResDto {
+  pageSize: number;
+  totalCount: number;
+  totalPage: number;
+  items: {
+    id: number;
+    geoId: string;
+    name: string;
+    fullAhjName: string;
+    updatedBy: string | null;
+    updatedAt: string | null;
+  }[];
+}
+
+export interface AhjHistoryGetResDto {
+  id: string;
+  general: General;
+  design: Design;
+  engineering: Engineering;
   electricalEngineering: ElectricalEngineering;
 }
