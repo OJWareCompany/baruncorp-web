@@ -14,6 +14,5 @@ export const useAhjQuery = (geoId: string) => {
       apiClient
         .get<AhjGetResDto>(`/geography/${geoId}/notes`)
         .then(({ data }) => data),
-    refetchOnWindowFocus: false,
   });
 };

@@ -12,9 +12,12 @@ const useAhjsQuery = () => {
     queryKey: [QUERY_KEY],
     queryFn: () =>
       apiClient
-        .get<AhjsGetResDto>("/geography/notes?pageNo=1") // TODO: Paginzation 적용해서 api 호출
+        .get<AhjsGetResDto>("/geography/notes", {
+          params: {
+            pageNo: 1,
+          },
+        }) // TODO: pagination 적용
         .then(({ data }) => data),
-    refetchOnWindowFocus: false, // TODO: 이후에 모든 query에 적용할지 논의 필요
   });
 };
 
