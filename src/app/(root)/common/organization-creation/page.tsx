@@ -142,6 +142,7 @@ export default function Page() {
     setValue,
     handleSubmit,
     clearErrors,
+    trigger,
     formState: { isSubmitting },
   } = form;
 
@@ -397,12 +398,15 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["street1"]}
                     placeholder="Street1"
+                    onChange={(event) => {
+                      setValue("addressForm.street1", event.target.value);
+                      trigger("addressForm");
+                    }}
                   />
                 </FormControl>
               </FormItem>
             )}
           />
-
           <FormField
             control={control}
             name="addressForm.street2"
@@ -413,6 +417,10 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["street2"]}
                     placeholder="Street2"
+                    onChange={(event) => {
+                      setValue("addressForm.street2", event.target.value);
+                      trigger("addressForm");
+                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -428,6 +436,10 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["city"]}
                     placeholder="City"
+                    onChange={(event) => {
+                      setValue("addressForm.city", event.target.value);
+                      trigger("addressForm");
+                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -443,6 +455,10 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["stateOrRegion"]}
                     placeholder="State / Region"
+                    onChange={(event) => {
+                      setValue("addressForm.stateOrRegion", event.target.value);
+                      trigger("addressForm");
+                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -458,6 +474,10 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["postalCode"]}
                     placeholder="Postal Code"
+                    onChange={(event) => {
+                      setValue("addressForm.postalCode", event.target.value);
+                      trigger("addressForm");
+                    }}
                   />
                 </FormControl>
               </FormItem>
@@ -473,6 +493,10 @@ export default function Page() {
                     {...field}
                     readOnly={readOnlyOf["country"]}
                     placeholder="Country"
+                    onChange={(event) => {
+                      setValue("addressForm.country", event.target.value);
+                      trigger("addressForm");
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
