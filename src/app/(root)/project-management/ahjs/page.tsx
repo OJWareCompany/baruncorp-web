@@ -22,8 +22,8 @@ const columnHelper = createColumnHelper<TableColumn>();
 const columns = [
   columnHelper.accessor("name", { header: "Name" }),
   columnHelper.accessor("fullAhjName", { header: "Full AHJ Name" }),
-  columnHelper.accessor("createdAt", {
-    header: "Created At",
+  columnHelper.accessor("updatedBy", {
+    header: "Updated By",
     cell: ({ getValue }) => {
       const value = getValue();
       return (
@@ -33,8 +33,8 @@ const columns = [
       );
     },
   }),
-  columnHelper.accessor("modifiedAt", {
-    header: "Modified At",
+  columnHelper.accessor("updatedAt", {
+    header: "Updated At",
     cell: ({ getValue }) => {
       const value = getValue();
       return (

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export type AhjsGetResDto = {
+export interface AhjsGetResDto {
   pageSize: number;
   totalCount: number;
   totalPage: number;
@@ -8,11 +8,10 @@ export type AhjsGetResDto = {
     geoId: string;
     name: string;
     fullAhjName: string;
-    modifiedBy: string | null;
-    modifiedAt: string | null;
-    createdAt: string | null;
+    updatedBy: string | null;
+    updatedAt: string | null;
   }[];
-};
+}
 
 export const SelectOptionEnum = z.enum(["No", "Yes", "See Notes"]);
 type SelectOption = z.infer<typeof SelectOptionEnum>;
