@@ -4,17 +4,17 @@ import {
   InvitationsPostReqDto,
   InvitationsPostResDto,
 } from "@/types/dto/users";
-import useApiClient from "@/hook/useApiClient";
+import useApi from "@/hook/useApi";
 
 const usePostInvitationsMutation = () => {
-  const apiClient = useApiClient();
+  const api = useApi();
 
   return useMutation<
     InvitationsPostResDto,
     AxiosError<ErrorResponseData>,
     InvitationsPostReqDto
   >((data) =>
-    apiClient
+    api
       .post<InvitationsPostResDto>("/users/invitations", data)
       .then(({ data }) => data)
   );

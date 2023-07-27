@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import useApiClient from "@/hook/useApiClient";
+import useApi from "@/hook/useApi";
 import { UserResponseDto } from "@/api";
 
 export const QUERY_KEY = "usersControllerGetUserInfo";
 
 const useUsersControllerGetUserInfoQuery = () => {
-  const apiClient = useApiClient();
+  const api = useApi();
 
   return useQuery<UserResponseDto, AxiosError<ErrorResponseData>>({
     queryKey: [QUERY_KEY],
     queryFn: () =>
-      apiClient.users.usersControllerGetUserInfo().then(({ data }) => data),
+      api.users.usersControllerGetUserInfo().then(({ data }) => data),
   });
 };
 

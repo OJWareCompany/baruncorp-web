@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hook/use-toast";
 import { Separator } from "@/components/ui/separator";
-import apiClient from "@/api";
+import api from "@/api";
 import { SignupPostReqDto } from "@/types/dto/auth";
 import { PasswordInput } from "@/components/ui/password-input";
 
@@ -77,7 +77,7 @@ export default function SignupPage() {
     SignupPostReqDto
   >({
     mutationFn: (data) =>
-      apiClient.post<void, AxiosResponse<void>, SignupPostReqDto>(
+      api.post<void, AxiosResponse<void>, SignupPostReqDto>(
         "/auth/signup",
         data,
         {

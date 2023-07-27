@@ -1,19 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import useApiClient from "@/hook/useApiClient";
+import useApi from "@/hook/useApi";
 import { StatesGetResDto } from "@/types/dto/departments";
 
 export const QUERY_KEY = "states";
 
 const useStatesQuery = () => {
-  const apiClient = useApiClient();
+  const api = useApi();
 
   return useQuery<StatesGetResDto, AxiosError<ErrorResponseData>>({
     queryKey: [QUERY_KEY],
     queryFn: () =>
-      apiClient
-        .get<StatesGetResDto>("/departments/states")
-        .then(({ data }) => data),
+      api.get<StatesGetResDto>("/departments/states").then(({ data }) => data),
   });
 };
 

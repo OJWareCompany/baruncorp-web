@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { ProfilePatchReqDto, ProfilePatchResDto } from "@/types/dto/users";
-import useApiClient from "@/hook/useApiClient";
+import useApi from "@/hook/useApi";
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
 const usePatchProfileMutation = (userId: string | undefined) => {
-  const apiClient = useApiClient();
+  const api = useApi();
   const invalidate = useProfileQueryInvalidation(userId);
 
   return useMutation<
@@ -18,7 +18,7 @@ const usePatchProfileMutation = (userId: string | undefined) => {
         return Promise.reject("userId is undefined.");
       }
 
-      return apiClient
+      return api
         .patch<ProfilePatchResDto>(`/users/profile/${userId}`, data)
         .then(({ data }) => data);
     },
