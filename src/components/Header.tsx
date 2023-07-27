@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useProfileQuery from "@/queries/useProfileQuery";
+import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
 
 const projectManagementNavItems: { name: string; pathname: string }[] = [
   {
@@ -50,7 +50,7 @@ const commonNavItems: { name: string; pathname: string }[] = [
 ];
 
 export default function Header() {
-  const { data: profile } = useProfileQuery();
+  const { data: user } = useUsersControllerGetUserInfoQuery();
 
   const handleSignOutButtonClick = () => {
     signOut({ redirect: false });
@@ -110,26 +110,24 @@ export default function Header() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {profile?.fullName && (
+            {user?.fullName && (
               <Button
                 variant={"ghost"}
                 className="relative h-10 w-10 rounded-full animate-in fade-in"
               >
                 <Avatar className="h-10 w-10">
-                  <AvatarFallback>
-                    {profile.fullName.slice(0, 2)}
-                  </AvatarFallback>
+                  <AvatarFallback>{user.fullName.slice(0, 2)}</AvatarFallback>
                 </Avatar>
               </Button>
             )}
           </DropdownMenuTrigger>
-          {profile && (
+          {user && (
             <DropdownMenuContent className="w-56" align="end">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col gap-1">
-                  <span className="sm">{profile.fullName}</span>
+                  <span className="sm">{user.fullName}</span>
                   <span className="text-xs leading-none text-muted-foreground">
-                    {profile.email}
+                    {user.email}
                   </span>
                 </div>
               </DropdownMenuLabel>
