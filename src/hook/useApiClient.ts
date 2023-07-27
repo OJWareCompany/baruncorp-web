@@ -10,19 +10,17 @@ const useApiClient = () => {
   const { data: session, update } = useSession();
 
   useEffect(() => {
-    const requestIntercept = apiClient.interceptors.request.use((config) => {
-      if (config.method === "post" || config.method === "patch") {
-        config.headers["Content-Type"] = "application/json";
+    const requestIntercept = apiClient.instance.interceptors.request.use(
+      (config) => {
+        if (!config.headers["Authorization"] && session != null) {
+          config.headers["Authorization"] = `Bearer ${session.accessToken}`;
+        }
+
+        return config;
       }
+    );
 
-      if (!config.headers["Authorization"]) {
-        config.headers["Authorization"] = `Bearer ${session?.accessToken}`;
-      }
-
-      return config;
-    });
-
-    const responseIntercept = apiClient.interceptors.response.use(
+    const responseIntercept = apiClient.instance.interceptors.response.use(
       (response) => response,
       async (error) => {
         if (
@@ -46,7 +44,7 @@ const useApiClient = () => {
             prevRequestConfig.headers[
               "Authorization"
             ] = `Bearer ${newSession?.accessToken}`;
-            return apiClient(prevRequestConfig);
+            return apiClient.instance(prevRequestConfig);
           }
 
           return Promise.reject("Session expired");
@@ -57,8 +55,8 @@ const useApiClient = () => {
     );
 
     return () => {
-      apiClient.interceptors.request.eject(requestIntercept);
-      apiClient.interceptors.response.eject(responseIntercept);
+      apiClient.instance.interceptors.request.eject(requestIntercept);
+      apiClient.instance.interceptors.response.eject(responseIntercept);
     };
   }, [session, update]);
 
