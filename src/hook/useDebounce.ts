@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 export default function useDebounce(
   value: string,
   enabled = true,
-  delay: number = 5000
+  delay: number = 500
 ) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   const [isDebouncing, setIsDebouncing] = useState(false);
