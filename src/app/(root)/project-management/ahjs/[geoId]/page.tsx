@@ -980,7 +980,7 @@ export default function Page() {
         <h1 className="h3 mb-4">History</h1>
         <DataTable
           columns={columns}
-          data={ahjHistories?.items.reverse() ?? []}
+          data={ahjHistories?.items ?? []}
           getRowId={(originalRow) => String(originalRow.id)}
         />
         <AhjHistorySheet
