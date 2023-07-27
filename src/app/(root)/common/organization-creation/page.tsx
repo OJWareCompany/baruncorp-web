@@ -66,7 +66,6 @@ const formSchema = z.object({
    * 6. country
    */
   addressForm: z.object({
-    address: z.string(),
     street1: z.string().min(1, { message: "Street1 is required" }),
     street2: z.string().min(1, { message: "Street2 is required" }),
     city: z.string().min(1, { message: "City required" }),
@@ -222,21 +221,27 @@ export default function Page() {
     );
   }
 
-  let addressFormErrorMessage = "";
+  let addressFormErrorMessage: string | null = null;
   if (errors.addressForm) {
     const addressForm = errors.addressForm;
     if (addressForm.street1) {
-      addressFormErrorMessage = addressForm.street1.message ?? "";
+      addressFormErrorMessage =
+        addressForm.street1.message ?? "Something went wrong";
     } else if (addressForm.street2) {
-      addressFormErrorMessage = addressForm.street2.message ?? "";
+      addressFormErrorMessage =
+        addressForm.street2.message ?? "Something went wrong";
     } else if (addressForm.city) {
-      addressFormErrorMessage = addressForm.city.message ?? "";
+      addressFormErrorMessage =
+        addressForm.city.message ?? "Something went wrong";
     } else if (addressForm.stateOrRegion) {
-      addressFormErrorMessage = addressForm.stateOrRegion.message ?? "";
+      addressFormErrorMessage =
+        addressForm.stateOrRegion.message ?? "Something went wrong";
     } else if (addressForm.postalCode) {
-      addressFormErrorMessage = addressForm.postalCode.message ?? "";
+      addressFormErrorMessage =
+        addressForm.postalCode.message ?? "Something went wrong";
     } else if (addressForm.country) {
-      addressFormErrorMessage = addressForm.country.message ?? "";
+      addressFormErrorMessage =
+        addressForm.country.message ?? "Something went wrong";
     }
   }
 
