@@ -1,23 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { PaginationState } from "@tanstack/react-table";
 import useApi from "@/hook/useApi";
 import { AhjsGetResDto } from "@/types/dto/ahjs";
 
 export const QUERY_KEY = "ahjs";
 
-const useAhjsQuery = () => {
+const useAhjsQuery = ({ pageIndex, pageSize }: PaginationState) => {
   const api = useApi();
 
   return useQuery<AhjsGetResDto, AxiosError<ErrorResponseData>>({
-    queryKey: [QUERY_KEY],
+    queryKey: [QUERY_KEY, pageIndex, pageSize],
     queryFn: () =>
       api
         .get<AhjsGetResDto>("/geography/notes", {
           params: {
-            pageNo: 1,
+            page: pageIndex + 1,
+            limit: pageSize,
           },
-        }) // TODO: pagination 적용
+        })
         .then(({ data }) => data),
+    keepPreviousData: true,
   });
 };
 
