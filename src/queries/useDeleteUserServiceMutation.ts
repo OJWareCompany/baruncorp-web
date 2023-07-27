@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import useApiClient from "@/hook/useApiClient";
+import useApi from "@/hook/useApi";
 import { UserServiceDeleteReqDto } from "@/types/dto/departments";
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
 const useDeleteUserServiceMutation = (userId: string | undefined) => {
-  const apiClient = useApiClient();
+  const api = useApi();
   const invalidate = useProfileQueryInvalidation(userId);
 
   return useMutation<
@@ -23,7 +23,7 @@ const useDeleteUserServiceMutation = (userId: string | undefined) => {
         serviceId,
       };
 
-      return apiClient
+      return api
         .delete<void>("/departments/member-services", {
           params,
         })

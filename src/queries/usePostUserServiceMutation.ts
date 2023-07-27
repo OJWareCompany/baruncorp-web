@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import useApiClient from "@/hook/useApiClient";
+import useApi from "@/hook/useApi";
 import { UserServicePostReqDto } from "@/types/dto/departments";
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
 const usePostUserServiceMutation = (userId: string | undefined) => {
-  const apiClient = useApiClient();
+  const api = useApi();
   const invalidate = useProfileQueryInvalidation(userId);
 
   return useMutation<
@@ -23,7 +23,7 @@ const usePostUserServiceMutation = (userId: string | undefined) => {
         serviceId,
       };
 
-      return apiClient
+      return api
         .post<void>("/departments/member-services", data)
         .then(({ data }) => data);
     },

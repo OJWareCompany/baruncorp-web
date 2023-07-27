@@ -6,7 +6,7 @@ import { NextAuthOptions, Session } from "next-auth";
 
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import apiClient from "@/api";
+import api from "@/api";
 
 const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET, // https://next-auth.js.org/configuration/options#secret
@@ -35,7 +35,7 @@ const authOptions: NextAuthOptions = {
 
         const {
           data: { accessToken, refreshToken },
-        } = await apiClient.auth
+        } = await api.auth
           .authenticationControllerSignIn(credentials)
           .catch((error: AxiosError) => {
             throw new Error(String(error.response?.status));
@@ -65,7 +65,7 @@ const authOptions: NextAuthOptions = {
       let { accessToken } = token;
       const { refreshToken } = token;
 
-      await apiClient.auth
+      await api.auth
         .authenticationControllerMe({
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -73,7 +73,7 @@ const authOptions: NextAuthOptions = {
         })
         .catch(async (error: AxiosError<ErrorResponseData>) => {
           if (error.response?.data.errorCode.includes("10005")) {
-            await apiClient.auth
+            await api.auth
               .authenticationControllerRefresh({
                 headers: {
                   Authorization: `Bearer ${refreshToken}`,

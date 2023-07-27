@@ -2,17 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { ProfileGetResDto } from "@/types/dto/users";
-import useApiClient from "@/hook/useApiClient";
+import useApi from "@/hook/useApi";
 
 export const QUERY_KEY = "profile";
 
 const useProfileQuery = (userId?: string) => {
-  const apiClient = useApiClient();
+  const api = useApi();
 
   return useQuery<ProfileGetResDto, AxiosError<ErrorResponseData>>({
     queryKey: [QUERY_KEY, userId ?? "mine"],
     queryFn: () =>
-      apiClient
+      api
         .get<ProfileGetResDto>(
           userId ? `/users/profile/${userId}` : "/users/profile"
         )

@@ -3,24 +3,22 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { isAxiosError } from "axios";
-import apiClient from "@/api";
+import api from "@/api";
 import { isAxiosErrorWithErrorResponseData } from "@/lib/utils";
 
-const useApiClient = () => {
+const useApi = () => {
   const { data: session, update } = useSession();
 
   useEffect(() => {
-    const requestIntercept = apiClient.instance.interceptors.request.use(
-      (config) => {
-        if (!config.headers["Authorization"] && session != null) {
-          config.headers["Authorization"] = `Bearer ${session.accessToken}`;
-        }
-
-        return config;
+    const requestIntercept = api.instance.interceptors.request.use((config) => {
+      if (!config.headers["Authorization"] && session != null) {
+        config.headers["Authorization"] = `Bearer ${session.accessToken}`;
       }
-    );
 
-    const responseIntercept = apiClient.instance.interceptors.response.use(
+      return config;
+    });
+
+    const responseIntercept = api.instance.interceptors.response.use(
       (response) => response,
       async (error) => {
         if (
@@ -44,7 +42,7 @@ const useApiClient = () => {
             prevRequestConfig.headers[
               "Authorization"
             ] = `Bearer ${newSession?.accessToken}`;
-            return apiClient.instance(prevRequestConfig);
+            return api.instance(prevRequestConfig);
           }
 
           return Promise.reject("Session expired");
@@ -55,12 +53,12 @@ const useApiClient = () => {
     );
 
     return () => {
-      apiClient.instance.interceptors.request.eject(requestIntercept);
-      apiClient.instance.interceptors.response.eject(responseIntercept);
+      api.instance.interceptors.request.eject(requestIntercept);
+      api.instance.interceptors.response.eject(responseIntercept);
     };
   }, [session, update]);
 
-  return apiClient;
+  return api;
 };
 
-export default useApiClient;
+export default useApi;
