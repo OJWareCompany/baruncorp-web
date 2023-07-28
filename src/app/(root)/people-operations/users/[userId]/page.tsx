@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -14,8 +15,9 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import usePatchProfileMutation from "@/queries/usePatchProfileMutation";
-import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
+import useUsersControllerUpdateUserByUserIdMutation from "@/queries/useUsersControllerUpdateUserByUserIdMutation";
+// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
+import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
 import PositionField from "@/components/PositionField";
 import ServicesField from "@/components/ServicesField";
 import LicensesField from "@/components/LicensesField";
@@ -29,9 +31,14 @@ const formSchema = z.object({
 });
 
 export default function Page() {
+  // const { data: profile, isSuccess: isProfileQuerySuccess } =
+  //   useProfileQueryWithParams();
+  const { userId } = useParams();
   const { data: profile, isSuccess: isProfileQuerySuccess } =
-    useProfileQueryWithParams();
-  const { mutateAsync } = usePatchProfileMutation(profile?.id);
+    useUsersControllerGetUserInfoByUserIdQuery(userId);
+  const { mutateAsync } = useUsersControllerUpdateUserByUserIdMutation(
+    profile?.id
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

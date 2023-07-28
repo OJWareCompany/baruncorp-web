@@ -33,14 +33,10 @@ import useServicesQuery from "@/queries/useDepartmentControllerFindAllServicesQu
 import useDepartmentControllerPutMemberInChageOfTheServiceMutation from "@/queries/useDepartmentControllerPutMemberInChageOfTheServiceMutation";
 import useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation from "@/queries/useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation";
 import { cn } from "@/lib/utils";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
+import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
 
-export default function ServicesField() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
-
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
+export default function ServicesMineField() {
+  const { data: profile } = useUsersControllerGetUserInfoQuery();
   const { data: services } = useServicesQuery();
   const { mutate: postUserServiceMutate } =
     useDepartmentControllerPutMemberInChageOfTheServiceMutation(profile?.id);

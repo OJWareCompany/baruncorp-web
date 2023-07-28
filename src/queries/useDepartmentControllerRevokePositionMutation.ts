@@ -4,7 +4,9 @@ import useApi from "@/hook/useApi";
 import { UserPositionDeleteReqDto } from "@/types/dto/departments";
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
-const useDeleteUserPositionMutation = (userId: string | undefined) => {
+const useDepartmentControllerRevokePositionMutation = (
+  userId: string | undefined
+) => {
   const api = useApi();
   const invalidate = useProfileQueryInvalidation(userId);
 
@@ -23,10 +25,8 @@ const useDeleteUserPositionMutation = (userId: string | undefined) => {
         positionId,
       };
 
-      return api
-        .delete<void>("/departments/user-position", {
-          params,
-        })
+      return api.departments
+        .departmentControllerRevokePosition(params)
         .then(({ data }) => data);
     },
     {
@@ -35,4 +35,4 @@ const useDeleteUserPositionMutation = (userId: string | undefined) => {
   );
 };
 
-export default useDeleteUserPositionMutation;
+export default useDepartmentControllerRevokePositionMutation;

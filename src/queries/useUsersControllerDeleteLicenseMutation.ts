@@ -4,7 +4,9 @@ import useApi from "@/hook/useApi";
 import { UserLicenseDeleteReqDto } from "@/types/dto/departments";
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
-const useDeleteUserLicenseMutation = (userId: string | undefined) => {
+const useUsersControllerDeleteLicenseMutation = (
+  userId: string | undefined
+) => {
   const api = useApi();
   const invalidate = useProfileQueryInvalidation(userId);
 
@@ -18,16 +20,14 @@ const useDeleteUserLicenseMutation = (userId: string | undefined) => {
         return Promise.reject("userId is undefined.");
       }
 
-      const params: UserLicenseDeleteReqDto = {
+      const params = {
         userId,
         type,
         issuingCountryName,
       };
 
-      return api
-        .delete<void>("/departments/licenses", {
-          params,
-        })
+      return api.users
+        .usersControllerDeleteLicense(params)
         .then(({ data }) => data);
     },
     {
@@ -36,4 +36,4 @@ const useDeleteUserLicenseMutation = (userId: string | undefined) => {
   );
 };
 
-export default useDeleteUserLicenseMutation;
+export default useUsersControllerDeleteLicenseMutation;

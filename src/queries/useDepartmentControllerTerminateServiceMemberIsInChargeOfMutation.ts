@@ -1,30 +1,32 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UserServicePostReqDto } from "@/types/dto/departments";
+import { UserServiceDeleteReqDto } from "@/types/dto/departments";
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
-const usePostUserServiceMutation = (userId: string | undefined) => {
+const useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation = (
+  userId: string | undefined
+) => {
   const api = useApi();
   const invalidate = useProfileQueryInvalidation(userId);
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
-    UserServicePostReqDto["serviceId"]
+    UserServiceDeleteReqDto["serviceId"]
   >(
     (serviceId) => {
       if (userId == null) {
         return Promise.reject("userId is undefined.");
       }
 
-      const data: UserServicePostReqDto = {
+      const params: UserServiceDeleteReqDto = {
         userId,
         serviceId,
       };
 
-      return api
-        .post<void>("/departments/member-services", data)
+      return api.departments
+        .departmentControllerTerminateServiceMemberIsInChargeOf(params)
         .then(({ data }) => data);
     },
     {
@@ -33,4 +35,4 @@ const usePostUserServiceMutation = (userId: string | undefined) => {
   );
 };
 
-export default usePostUserServiceMutation;
+export default useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation;

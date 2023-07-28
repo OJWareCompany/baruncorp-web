@@ -3,7 +3,7 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import { ServicesGetResDto } from "@/types/dto/departments";
-import useServicesQuery from "@/queries/useServicesQuery";
+import useDepartmentControllerFindAllServicesQuery from "@/queries/useDepartmentControllerFindAllServicesQuery";
 import { cn } from "@/lib/utils";
 
 type TableColumn = ServicesGetResDto[number];
@@ -26,7 +26,7 @@ const columns = [
 ];
 
 export default function Page() {
-  const { data: services } = useServicesQuery();
+  const { data: services } = useDepartmentControllerFindAllServicesQuery();
   return (
     <div>
       <h1 className="h3 mb-4">Services</h1>
