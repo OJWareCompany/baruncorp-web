@@ -2,9 +2,8 @@
 
 import React from "react";
 import { X } from "lucide-react";
-import { useParams } from "next/navigation";
 import { Badge } from "./ui/badge";
-import LicenseRegistrationDialog from "./LicenseRegistrationDialog";
+import LicenseRegistrationMineDialog from "./LicenseRegistrationMineDialog";
 import { Label } from "@/components/ui/label";
 import {
   AlertDialog,
@@ -16,14 +15,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 import useUsersControllerDeleteLicenseMutation from "@/queries/useUsersControllerDeleteLicenseMutation";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
+import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
 
-export default function LicensesField() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
+export default function LicensesMineField() {
+  const { data: profile } = useUsersControllerGetUserInfoQuery();
 
   const { mutate: deleteUserLicenseMutate } =
     useUsersControllerDeleteLicenseMutation(profile?.id);
@@ -32,7 +28,7 @@ export default function LicensesField() {
     <div className="space-y-2">
       <Label>Licenses</Label>
       <div className="flex gap-2 flex-wrap">
-        <LicenseRegistrationDialog />
+        <LicenseRegistrationMineDialog />
         {profile?.licenses.map((license) => {
           const { abbreviation, type, priority, issuingCountryName } = license;
           const key = `${abbreviation} / ${type} / ${priority}`;

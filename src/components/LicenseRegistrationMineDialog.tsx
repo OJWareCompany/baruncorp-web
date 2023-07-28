@@ -51,6 +51,7 @@ import {
 } from "@/components/ui/popover";
 import useUsersControllerPostLicenseMutation from "@/queries/useUsersControllerPostLicenseMutation";
 import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
+import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
 // import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 
 const formSchema = z.object({
@@ -66,10 +67,8 @@ const formSchema = z.object({
   }),
 });
 
-export default function LicenseRegistrationDialog() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
+export default function LicenseRegistrationMineDialog() {
+  const { data: profile } = useUsersControllerGetUserInfoQuery();
 
   const { data: states } = useDepartmentControllerFindAllStatesQuery();
   const [statePopoverOpen, setStatePopoverOpen] = useState(false);

@@ -32,13 +32,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import useDepartmentControllerRevokePositionMutation from "@/queries/useDepartmentControllerRevokePositionMutation";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
+import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
 
-export default function PositionField() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
+export default function PositionMineField() {
+  const { data: profile } = useUsersControllerGetUserInfoQuery();
   const { data: positions } = useDepartmentControllerFindAllPositionsQuery();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { mutate: postUserPositionMutate } =

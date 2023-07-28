@@ -1,30 +1,32 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UserLicensePostReqDto } from "@/types/dto/departments";
+import { UserPositionPostReqDto } from "@/types/dto/departments";
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
-const usePostUserLicenseMutation = (userId: string | undefined) => {
+const useDepartmentControllerAppointPositionMutation = (
+  userId: string | undefined
+) => {
   const api = useApi();
   const invalidate = useProfileQueryInvalidation(userId);
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
-    Omit<UserLicensePostReqDto, "userId">
+    UserPositionPostReqDto["positionId"]
   >(
-    (variables) => {
+    (positionId) => {
       if (userId == null) {
         return Promise.reject("userId is undefined.");
       }
 
-      const data: UserLicensePostReqDto = {
+      const params: UserPositionPostReqDto = {
         userId,
-        ...variables,
+        positionId,
       };
 
-      return api
-        .post<void>("/departments/licenses", data)
+      return api.departments
+        .departmentControllerAppointPosition(params)
         .then(({ data }) => data);
     },
     {
@@ -33,4 +35,4 @@ const usePostUserLicenseMutation = (userId: string | undefined) => {
   );
 };
 
-export default usePostUserLicenseMutation;
+export default useDepartmentControllerAppointPositionMutation;

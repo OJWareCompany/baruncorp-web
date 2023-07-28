@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import useProfileQuery from "@/queries/useProfileQuery";
-import usePatchProfileMutation from "@/queries/usePatchProfileMutation";
-import PositionField from "@/components/PositionField";
-import ServicesField from "@/components/ServicesField";
-import LicensesField from "@/components/LicensesField";
+import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
+import useUsersControllerUpdateUserMutation from "@/queries/useUsersControllerUpdateUserMutation";
+import PositionMineField from "@/components/PositionMineField";
+import ServicesMineField from "@/components/ServicesMineField";
+import LicensesMineField from "@/components/LicensesMineField";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -45,8 +45,10 @@ export default function ProfilePage() {
     formState: { isSubmitting, isDirty },
   } = form;
 
-  const { data: profile, isSuccess: isProfileQuerySuccess } = useProfileQuery();
-  const { mutateAsync } = usePatchProfileMutation(profile?.id);
+  // const { data: profile, isSuccess: isProfileQuerySuccess } = useProfileQuery();
+  const { data: profile, isSuccess: isProfileQuerySuccess } =
+    useUsersControllerGetUserInfoQuery();
+  const { mutateAsync } = useUsersControllerUpdateUserMutation(profile?.id);
 
   useEffect(() => {
     if (!isProfileQuerySuccess) {
@@ -152,9 +154,9 @@ export default function ProfilePage() {
           </Button>
         </form>
       </Form>
-      <PositionField />
-      <ServicesField />
-      <LicensesField />
+      <PositionMineField />
+      <ServicesMineField />
+      <LicensesMineField />
     </div>
   );
 }

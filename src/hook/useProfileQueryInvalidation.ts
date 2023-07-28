@@ -1,13 +1,14 @@
 import { useQueryClient } from "@tanstack/react-query";
-import useProfileQuery, {
-  QUERY_KEY as profileQueryKey,
-} from "@/queries/useProfileQuery";
+import useUsersControllerGetUserInfoQuery, {
+  QUERY_KEY as usersControllerGetUserInfoQueryKey,
+} from "@/queries/useUsersControllerGetUserInfoQuery";
+import { QUERY_KEY as usersControllerGetUserInfoByUserIdQueryKey } from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
 
 export default function useProfileQueryInvalidation(
   userId: string | undefined
 ) {
   const { data: myProfile, isSuccess: isMyProfileQuerySuccess } =
-    useProfileQuery();
+    useUsersControllerGetUserInfoQuery();
   const queryClient = useQueryClient();
 
   const invalidate = () => {
@@ -17,11 +18,13 @@ export default function useProfileQueryInvalidation(
 
     if (myProfile.id === userId) {
       queryClient.invalidateQueries({
-        queryKey: [profileQueryKey, "mine"],
+        queryKey: [usersControllerGetUserInfoQueryKey],
       });
     }
 
-    queryClient.invalidateQueries({ queryKey: [profileQueryKey, userId] });
+    queryClient.invalidateQueries({
+      queryKey: [usersControllerGetUserInfoByUserIdQueryKey, userId],
+    });
   };
 
   return invalidate;

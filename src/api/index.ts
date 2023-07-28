@@ -9,22 +9,33 @@
  * ---------------------------------------------------------------
  */
 
-export interface LoginReq {
+export interface SignInRequestDto {
+  /** @default "ejsvk3284@kakao.com" */
   email: string;
+  /** @default "WkdWkdaos123!" */
   password: string;
 }
 
-export interface TokenResponse {
+export interface TokenResponseDto {
   accessToken: string;
   refreshToken: string;
 }
 
-export interface SignUpReq {
+export interface SignUpRequestDto {
+  /** @default "Emma" */
   firstName: string;
+  /** @default "Smith" */
   lastName: string;
+  /** @default "hyomin@ojware.com" */
   email: string;
+  /** @default "thisistestPass123!" */
   password: string;
+  /** @default "AE2DE" */
   code: string;
+}
+
+export interface AccessTokenResponseDto {
+  accessToken: string;
 }
 
 export interface PositionResponseDto {
@@ -34,11 +45,18 @@ export interface PositionResponseDto {
   department: string;
 }
 
-export type ServiceResponseDto = object;
+export interface ServiceResponseDto {
+  /** @default "9e773832-ad39-401d-b1c2-16d74f9268ea" */
+  id: string;
+  /** @default "Structural Calculation" */
+  name: string;
+  /** @default "Structural Calculation is service..." */
+  description: string;
+}
 
 export interface LincenseResponseDto {
   userName: string;
-  type: object;
+  type: LincenseResponseDtoTypeEnum;
   issuingCountryName: string;
   abbreviation: string;
   priority: number;
@@ -61,52 +79,112 @@ export interface UserResponseDto {
   role: string;
 }
 
-export interface UpdateUserReq {
+export interface UpdateUserRequestDto {
+  /** @default "updated Hyomin" */
   firstName: string;
+  /** @default "updated Kim" */
   lastName: string;
 }
 
 export interface GiveRoleRequestDto {
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
   userId: string;
+  /** @default "member" */
   lol: string;
 }
 
-export interface CreateInvitationMailReq {
+export interface CreateInvitationMailRequestDto {
+  /** @default "OJ Tech" */
   organizationName: string;
+  /** @default "hyomin@ojware.com" */
   email: string;
-}
-
-export type OrganizationResponseDto = object;
-
-export interface CreateOrganizationReq {
-  email: string;
-  street1: string;
-  street2: string;
-  city: string;
-  stateOrRegion: string;
-  postalCode: string;
-  country: string;
-  phoneNumber: string;
-  name: string;
-  description: string;
-  /** @pattern /(client|individual|outsourcing)/ */
-  organizationType: string;
 }
 
 export interface CreateLicenseRequestDto {
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
   userId: string;
-  type: object;
+  /** @default "Electrical" */
+  type: CreateLicenseRequestDtoTypeEnum;
+  /** @default "FLORIDA" */
   issuingCountryName: string;
+  /** @default "FL" */
   abbreviation: string;
+  /** @default 9 */
   priority: number;
-  /** @format date-time */
+  /**
+   * @format date-time
+   * @default "2023-07-28T08:53:58.569Z"
+   */
   issuedDate: string;
-  /** @format date-time */
+  /**
+   * @format date-time
+   * @default "2023-07-28T08:53:58.569Z"
+   */
   expiryDate: string;
 }
 
-export interface PutMemberInChargeOfTheService {
+export interface OrganizationResponseDto {
+  id: string;
+  name: string;
+  description: string;
+  email: string;
+  phoneNumber: string;
+  organizationType: string;
+  city: string;
+  country: string;
+  postalCode: string;
+  stateOrRegion: string;
+  street1: string;
+  street2: string;
+}
+
+export interface CreateOrganizationRequestDto {
+  /** @default "hyomin@ojware.com" */
+  email: string;
+  /** @default "Apple Valley Airport" */
+  street1: string;
+  /** @default "A 101" */
+  street2: string;
+  /** @default "Apple Valley" */
+  city: string;
+  /** @default "California" */
+  stateOrRegion: string;
+  /** @default "92307" */
+  postalCode: string;
+  /** @default "United States" */
+  country: string;
+  /** @default "01012341234" */
+  phoneNumber: string;
+  /** @default "OJ Tech" */
+  name: string;
+  /** @default "This is about organization..." */
+  description: string;
+  /**
+   * @default "client"
+   * @pattern /(client|individual|outsourcing)/
+   */
+  organizationType: string;
+}
+
+export interface StatesResponseDto {
+  /** @default "CALIFORNIA" */
+  stateName: string;
+  /** @default "CA" */
+  abbreviation: string;
+  /** @default "06" */
+  geoId: string;
+  /** @default "06" */
+  stateCode: string;
+  /** @default "01779778" */
+  ansiCode: string;
+  /** @default "California" */
+  stateLongName: string;
+}
+
+export interface CreateMemberInChargeOfTheServiceRequestDto {
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
   userId: string;
+  /** @default "a061c441-be8c-4bcc-9bcc-2460a01d5a16" */
   serviceId: string;
 }
 
@@ -131,81 +209,76 @@ export interface AhjNotePaginatedResponseDto {
 }
 
 export interface General {
-  /** @example "https://google.com" */
+  /** @default "https://google.com" */
   website: string;
-  /** @example "See Notes" */
-  specificFormRequired: "No" | "Yes" | "See Notes";
-  /** @example "generalNotes..." */
+  /** @default "See Notes" */
+  specificFormRequired: GeneralSpecificFormRequiredEnum;
+  /** @default "generalNotes..." */
   generalNotes: string;
-  /** @example "2015 IBC2" */
+  /** @default "2015 IBC2" */
   buildingCodes: string;
-  /** @example "Arcata city" */
+  /** @default "Arcata city" */
   name: string;
-  /** @example "Arroyo Grande city, California" */
+  /** @default "Arroyo Grande city, California" */
   fullAhjName: string;
-  /** @example "2023-07-27T01:57:21.796Z" */
+  /** @default "2023-07-28T08:53:58.582Z" */
   createdAt: string;
-  /** @example "2023-07-27T01:57:21.796Z" */
+  /** @default "2023-07-28T08:53:58.582Z" */
   updatedAt: string;
-  /** @example "2023-07-27T01:57:21.796Z" */
+  /** @default "2023-07-28T08:53:58.582Z" */
   updatedBy: string;
-  /** @example "COUNTY" */
-  type: "STATE" | "COUNTY" | "COUNTY SUBDIVISIONS" | "PLACE";
+  /** @default "COUNTY" */
+  type: GeneralTypeEnum;
 }
 
 export interface Design {
-  /** @example "fireSetBack..." */
+  /** @default "fireSetBack..." */
   fireSetBack: string;
-  /** @example "utilityNotes..." */
+  /** @default "utilityNotes..." */
   utilityNotes: string;
-  /** @example "designNotes..." */
+  /** @default "designNotes..." */
   designNotes: string;
-  /** @example "See Notes" */
-  pvMeterRequired: "No" | "Yes" | "See Notes";
-  /** @example "See Notes" */
-  acDisconnectRequired: "No" | "Yes" | "See Notes";
-  /** @example "See Notes" */
-  centerFed120Percent: "No" | "Yes" | "See Notes";
-  /** @example "deratedAmpacity..." */
+  /** @default "See Notes" */
+  pvMeterRequired: DesignPvMeterRequiredEnum;
+  /** @default "See Notes" */
+  acDisconnectRequired: DesignAcDisconnectRequiredEnum;
+  /** @default "See Notes" */
+  centerFed120Percent: DesignCenterFed120PercentEnum;
+  /** @default "deratedAmpacity..." */
   deratedAmpacity: string;
 }
 
 export interface Engineering {
-  /** @example "See Notes" */
-  iebcAccepted: "No" | "Yes" | "See Notes";
-  /** @example "See Notes" */
-  structuralObservationRequired: "No" | "Yes" | "See Notes";
-  /** @example "Certified" */
-  digitalSignatureType: "Certified" | "Signed";
-  /** @example "See Notes" */
-  windUpliftCalculationRequired: "No" | "Yes" | "See Notes";
-  /** @example "115" */
+  /** @default "See Notes" */
+  iebcAccepted: EngineeringIebcAcceptedEnum;
+  /** @default "See Notes" */
+  structuralObservationRequired: EngineeringStructuralObservationRequiredEnum;
+  /** @default "Certified" */
+  digitalSignatureType: EngineeringDigitalSignatureTypeEnum;
+  /** @default "See Notes" */
+  windUpliftCalculationRequired: EngineeringWindUpliftCalculationRequiredEnum;
+  /** @default "115" */
   windSpeed: string;
-  /** @example "See Notes" */
-  windExposure: "B" | "C" | "D" | "See Notes";
-  /** @example "30" */
+  /** @default "See Notes" */
+  windExposure: EngineeringWindExposureEnum;
+  /** @default "30" */
   snowLoadGround: string;
-  /** @example "30" */
+  /** @default "30" */
   snowLoadFlatRoof: string;
-  /** @example "30" */
+  /** @default "30" */
   snowLoadSlopedRoof: string;
-  /** @example "See Notes" */
-  wetStampsRequired: "No" | "Yes" | "See Notes";
-  /** @example "ofWetStamps..." */
+  /** @default "See Notes" */
+  wetStampsRequired: EngineeringWetStampsRequiredEnum;
+  /** @default "ofWetStamps..." */
   ofWetStamps: string;
-  /** @example "ANSI B (11x17 INCH)" */
-  wetStampSize:
-    | "ANSI A (8.5x11 INCH)"
-    | "ANSI B (11x17 INCH)"
-    | "ANSI D (22x34 INCH)"
-    | "ARCH D (24x36 INCH)"
-    | "See Notes";
-  /** @example "engineeringNotes..." */
+  /** @default "ANSI B (11x17 INCH)" */
+  wetStampSize: EngineeringWetStampSizeEnum;
+  /** @default "engineeringNotes..." */
   engineeringNotes: string;
 }
 
 export interface ElectricalEngineering {
-  /** @example "electricalNotes..." */
+  /** @default "electricalNotes..." */
   electricalNotes: string;
 }
 
@@ -216,19 +289,19 @@ export interface AhjNoteResponseDto {
   electricalEngineering: ElectricalEngineering;
 }
 
-export interface UpdateGeneral {
+export interface UpdateAhjGeneral {
   /** @example "https://google.com" */
   website: string;
   /** @example "See Notes" */
-  specificFormRequired: "No" | "Yes" | "See Notes";
+  specificFormRequired: UpdateAhjGeneralSpecificFormRequiredEnum;
   /** @example "generalNotes..." */
   generalNotes: string;
   /** @example "buildingCodes..." */
   buildingCodes: string;
 }
 
-export interface UpdateNoteRequestDto {
-  general: UpdateGeneral;
+export interface UpdateAhjNoteRequestDto {
+  general: UpdateAhjGeneral;
   design: Design;
   engineering: Engineering;
   electricalEngineering: ElectricalEngineering;
@@ -264,12 +337,84 @@ export interface AhjNoteHistoryPaginatedResponseDto {
 }
 
 export interface AddressFromMapBox {
+  /** @default "Apple Valley Airport" */
   street1: string;
+  /** @default "A 101" */
   street2: string;
+  /** @default "Apple Valley" */
   city: string;
+  /** @default "California" */
   state: string;
+  /** @default "92307" */
   postalCode: string;
 }
+
+export type LincenseResponseDtoTypeEnum = "Electrical" | "Structural";
+
+/** @default "Electrical" */
+export type CreateLicenseRequestDtoTypeEnum = "Electrical" | "Structural";
+
+/** @default "See Notes" */
+export type GeneralSpecificFormRequiredEnum = "No" | "Yes" | "See Notes";
+
+/** @default "COUNTY" */
+export type GeneralTypeEnum =
+  | "STATE"
+  | "COUNTY"
+  | "COUNTY SUBDIVISIONS"
+  | "PLACE";
+
+/** @default "See Notes" */
+export type DesignPvMeterRequiredEnum = "No" | "Yes" | "See Notes";
+
+/** @default "See Notes" */
+export type DesignAcDisconnectRequiredEnum = "No" | "Yes" | "See Notes";
+
+/** @default "See Notes" */
+export type DesignCenterFed120PercentEnum = "No" | "Yes" | "See Notes";
+
+/** @default "See Notes" */
+export type EngineeringIebcAcceptedEnum = "No" | "Yes" | "See Notes";
+
+/** @default "See Notes" */
+export type EngineeringStructuralObservationRequiredEnum =
+  | "No"
+  | "Yes"
+  | "See Notes";
+
+/** @default "Certified" */
+export type EngineeringDigitalSignatureTypeEnum = "Certified" | "Signed";
+
+/** @default "See Notes" */
+export type EngineeringWindUpliftCalculationRequiredEnum =
+  | "No"
+  | "Yes"
+  | "See Notes";
+
+/** @default "See Notes" */
+export type EngineeringWindExposureEnum = "B" | "C" | "D" | "See Notes";
+
+/** @default "See Notes" */
+export type EngineeringWetStampsRequiredEnum = "No" | "Yes" | "See Notes";
+
+/** @default "ANSI B (11x17 INCH)" */
+export type EngineeringWetStampSizeEnum =
+  | "ANSI A (8.5x11 INCH)"
+  | "ANSI B (11x17 INCH)"
+  | "ANSI D (22x34 INCH)"
+  | "ARCH D (24x36 INCH)"
+  | "See Notes";
+
+/** @example "See Notes" */
+export type UpdateAhjGeneralSpecificFormRequiredEnum =
+  | "No"
+  | "Yes"
+  | "See Notes";
+
+/** @default "Electrical" */
+export type UsersControllerDeleteLicenseParamsTypeEnum =
+  | "Electrical"
+  | "Structural";
 
 import type {
   AxiosInstance,
@@ -334,7 +479,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "",
+      baseURL: axiosConfig.baseURL || "http://localhost:3000",
     });
     this.secure = secure;
     this.format = format;
@@ -447,6 +592,7 @@ export class HttpClient<SecurityDataType = unknown> {
 /**
  * @title Cats example
  * @version 1.0
+ * @baseUrl http://localhost:3000
  * @contact
  *
  * The cats API description
@@ -462,10 +608,10 @@ export class Api<
      * @request POST:/auth/signin
      */
     authenticationControllerSignIn: (
-      data: LoginReq,
+      data: SignInRequestDto,
       params: RequestParams = {}
     ) =>
-      this.request<TokenResponse, any>({
+      this.request<TokenResponseDto, any>({
         path: `/auth/signin`,
         method: "POST",
         body: data,
@@ -485,10 +631,10 @@ export class Api<
         jwt: number;
         refresh: number;
       },
-      data: LoginReq,
+      data: SignInRequestDto,
       params: RequestParams = {}
     ) =>
-      this.request<TokenResponse, any>({
+      this.request<TokenResponseDto, any>({
         path: `/auth/signin-time`,
         method: "POST",
         query: query,
@@ -518,7 +664,7 @@ export class Api<
      * @request POST:/auth/signup
      */
     authenticationControllerSignUp: (
-      data: SignUpReq,
+      data: SignUpRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -549,10 +695,10 @@ export class Api<
      * @request GET:/auth/refresh
      */
     authenticationControllerRefresh: (params: RequestParams = {}) =>
-      // `void` >> `{ accessToken: string }` 임의로 수정함
-      this.request<{ accessToken: string }, any>({
+      this.request<AccessTokenResponseDto, any>({
         path: `/auth/refresh`,
         method: "GET",
+        format: "json",
         ...params,
       }),
   };
@@ -564,8 +710,9 @@ export class Api<
      * @request GET:/users
      */
     usersControllerFindUsers: (
-      query: {
-        email: string;
+      query?: {
+        /** @default "hyomin@ojware.com" */
+        email?: string;
       },
       params: RequestParams = {}
     ) =>
@@ -602,7 +749,7 @@ export class Api<
      */
     usersControllerUpdateUserByUserId: (
       userId: string,
-      data: UpdateUserReq,
+      data: UpdateUserRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -634,7 +781,7 @@ export class Api<
      * @request PATCH:/users/profile
      */
     usersControllerUpdateUser: (
-      data: UpdateUserReq,
+      data: UpdateUserRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -696,15 +843,72 @@ export class Api<
      * @request POST:/users/invitations
      */
     usersControllerSendInvitationMail: (
-      data: CreateInvitationMailReq,
+      data: CreateInvitationMailRequestDto,
       params: RequestParams = {}
     ) =>
-      this.request<ServiceResponseDto, any>({
+      this.request<object, any>({
         path: `/users/invitations`,
         method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 등록된 모든 라이센스 조회 라이센스: 특정 State에서 작업 허가 받은 Member의 자격증
+     *
+     * @name UsersControllerFindAllLicenses
+     * @request GET:/users/member-licenses
+     */
+    usersControllerFindAllLicenses: (params: RequestParams = {}) =>
+      this.request<LincenseResponseDto[], any>({
+        path: `/users/member-licenses`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UsersControllerPostLicense
+     * @request POST:/users/member-licenses
+     */
+    usersControllerPostLicense: (
+      data: CreateLicenseRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/member-licenses`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description // 추후 개선 사항 -> member-licenses/:licenseId
+     *
+     * @name UsersControllerDeleteLicense
+     * @request DELETE:/users/member-licenses
+     */
+    usersControllerDeleteLicense: (
+      query: {
+        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+        userId: string;
+        /** @default "Electrical" */
+        // type: UsersControllerDeleteLicenseParamsTypeEnum
+        type: string;
+        /** @default "FLORIDA" */
+        issuingCountryName: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/member-licenses`,
+        method: "DELETE",
+        query: query,
         ...params,
       }),
   };
@@ -730,7 +934,7 @@ export class Api<
      * @request POST:/organizations
      */
     organizationControllerCreateOrganization: (
-      data: CreateOrganizationReq,
+      data: CreateOrganizationRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -749,6 +953,7 @@ export class Api<
      */
     organizationControllerFindMembers: (
       query: {
+        /** @default "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
         organizationId: string;
       },
       params: RequestParams = {}
@@ -798,8 +1003,10 @@ export class Api<
      */
     departmentControllerAppointPosition: (
       query: {
-        userId: string;
+        /** @default "3696b9c7-916d-4812-871e-976c03a06d7e!" */
         positionId: string;
+        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+        userId: string;
       },
       params: RequestParams = {}
     ) =>
@@ -818,8 +1025,10 @@ export class Api<
      */
     departmentControllerRevokePosition: (
       query: {
-        userId: string;
+        /** @default "3696b9c7-916d-4812-871e-976c03a06d7e!" */
         positionId: string;
+        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+        userId: string;
       },
       params: RequestParams = {}
     ) =>
@@ -837,61 +1046,10 @@ export class Api<
      * @request GET:/departments/states
      */
     departmentControllerFindAllStates: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<StatesResponseDto[], any>({
         path: `/departments/states`,
         method: "GET",
-        ...params,
-      }),
-
-    /**
-     * @description 등록된 모든 라이센스 조회 라이센스: 특정 State에서 작업 허가 받은 Member의 자격증
-     *
-     * @name DepartmentControllerFindAllLicenses
-     * @request GET:/departments/member-licenses
-     */
-    departmentControllerFindAllLicenses: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/departments/member-licenses`,
-        method: "GET",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DepartmentControllerPostLicense
-     * @request POST:/departments/member-licenses
-     */
-    departmentControllerPostLicense: (
-      data: CreateLicenseRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/departments/member-licenses`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DepartmentControllerDeleteLicense
-     * @request DELETE:/departments/member-licenses
-     */
-    departmentControllerDeleteLicense: (
-      query: {
-        userId: string;
-        type: string;
-        issuingCountryName: string;
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/departments/member-licenses`,
-        method: "DELETE",
-        query: query,
+        format: "json",
         ...params,
       }),
 
@@ -916,7 +1074,7 @@ export class Api<
      * @request POST:/departments/member-services
      */
     departmentControllerPutMemberInChageOfTheService: (
-      data: PutMemberInChargeOfTheService,
+      data: CreateMemberInChargeOfTheServiceRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -935,7 +1093,9 @@ export class Api<
      */
     departmentControllerTerminateServiceMemberIsInChargeOf: (
       query: {
+        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
         userId: string;
+        /** @default "a061c441-be8c-4bcc-9bcc-2460a01d5a16" */
         serviceId: string;
       },
       params: RequestParams = {}
@@ -968,8 +1128,11 @@ export class Api<
          * @default 1
          */
         page?: number;
+        /** @default "0100460" */
         geoId?: string;
+        /** @default "city" */
         fullAhjName?: string;
+        /** @default "city" */
         name?: string;
       },
       params: RequestParams = {}
@@ -1013,7 +1176,7 @@ export class Api<
      */
     geographyControllerUpdateNote: (
       geoId: string,
-      data: UpdateNoteRequestDto,
+      data: UpdateAhjNoteRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -1065,6 +1228,7 @@ export class Api<
          * @default 1
          */
         page?: number;
+        /** @default "0100460" */
         geoId?: string;
       },
       params: RequestParams = {}
