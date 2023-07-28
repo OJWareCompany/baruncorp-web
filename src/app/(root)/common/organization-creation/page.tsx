@@ -3,7 +3,7 @@
 import { DefaultValues, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
@@ -110,11 +110,14 @@ export default function Page() {
     formState: { isSubmitting, errors },
   } = form;
 
-  const [addressInputValue, setAddressInputValue] = useState("");
+  const [addressInputState, setAddressInputState] = useState({
+    value: "",
+    isTyping: false,
+  });
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const { debouncedValue: debouncedAddress, isDebouncing } = useDebounce(
-    addressInputValue,
+    addressInputState.value,
     popoverOpen
   );
   const { data: addresses, isFetching } =
@@ -123,6 +126,14 @@ export default function Page() {
   const [selectedAddress, setSelectedAddress] = useState<GeocodeFeature | null>(
     null
   );
+
+  useEffect(() => {
+    if (isDebouncing) {
+      return;
+    }
+
+    setAddressInputState((prev) => ({ ...prev, isTyping: false }));
+  }, [isDebouncing]);
 
   function onSelectAddress(address: GeocodeFeature) {
     setSelectedAddress(address);
@@ -190,11 +201,11 @@ export default function Page() {
   }
 
   function getAddressesElement() {
-    if (addressInputValue === "") {
+    if (addressInputState.value === "") {
       return <div className="py-6 text-center text-sm">No address found.</div>;
     }
 
-    if (isDebouncing || isFetching || addresses == null) {
+    if (addressInputState.isTyping || isFetching || addresses == null) {
       return <Loader2 className="my-6 mx-auto h-6 w-6 animate-spin" />;
     }
 
@@ -211,6 +222,7 @@ export default function Page() {
               onSelectAddress(address);
               clearErrors("addressForm");
               setPopoverOpen(false);
+              setAddressInputState({ value: "", isTyping: false });
             }}
             className="cursor-pointer rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
           >
@@ -342,7 +354,7 @@ export default function Page() {
               <PopoverContent
                 className="w-96 p-0"
                 onPointerDownOutside={() => {
-                  setAddressInputValue("");
+                  setAddressInputState({ value: "", isTyping: false });
                 }}
                 align="start"
               >
@@ -355,7 +367,10 @@ export default function Page() {
                     className="w-full py-3 text-sm outline-none placeholder:text-muted-foreground"
                     placeholder="Search for address"
                     onChange={(event) => {
-                      setAddressInputValue(event.target.value);
+                      setAddressInputState({
+                        value: event.target.value,
+                        isTyping: true,
+                      });
                     }}
                     autoComplete="off"
                     aria-autocomplete="list"
