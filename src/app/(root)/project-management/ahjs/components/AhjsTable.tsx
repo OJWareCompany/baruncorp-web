@@ -39,12 +39,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { AhjsGetResDto } from "@/types/dto/ahjs";
-import useAhjsQuery from "@/queries/useAhjsQuery";
+import useGeographyControllerFindNotesQuery from "@/queries/useGeographyControllerFindNotesQuery";
+import { AhjNotePaginatedResponseDto } from "@/api";
 
-type TableColumn = AhjsGetResDto["items"][number];
-
-const columnHelper = createColumnHelper<TableColumn>();
+const columnHelper =
+  createColumnHelper<AhjNotePaginatedResponseDto["items"][number]>();
 
 const columns = [
   columnHelper.accessor("name", { header: "Name" }),
@@ -98,7 +97,7 @@ export default function AhjsTable() {
     pageIndex: 0,
     pageSize: 10,
   });
-  const { data } = useAhjsQuery(pagination);
+  const { data } = useGeographyControllerFindNotesQuery(pagination);
 
   const table = useReactTable({
     data: data?.items ?? [],

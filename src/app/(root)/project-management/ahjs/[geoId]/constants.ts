@@ -1,10 +1,21 @@
 import * as z from "zod";
-import {
-  SelectOptionEnum,
-  DigitalSignatureTypeEnum,
-  WindExposureEnum,
-  ANSIEnum,
-} from "@/types/dto/ahjs";
+
+export const SelectOptionEnum = z.enum(["No", "Yes", "See Notes"]);
+export const WindExposureEnum = z.enum(["B", "C", "D", "See Notes"]);
+export const DigitalSignatureTypeEnum = z.enum(["Certified", "Signed"]);
+export const ANSIEnum = z.enum([
+  "ANSI A (8.5x11 INCH)",
+  "ANSI B (11x17 INCH)",
+  "ANSI D (22x34 INCH)",
+  "ARCH D (24x36 INCH)",
+  "See Notes",
+]);
+export const TypesEnum = z.enum([
+  "STATE",
+  "COUNTY",
+  "COUNTY SUBDIVISIONS",
+  "PLACE",
+]);
 
 export const SelectOptionEnumWithEmptyString = SelectOptionEnum.or(
   z.literal("")

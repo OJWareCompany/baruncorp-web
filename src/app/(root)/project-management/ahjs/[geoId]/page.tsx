@@ -8,6 +8,10 @@ import { useParams } from "next/navigation";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Eye, MoreHorizontal } from "lucide-react";
 import {
+  ANSIEnum,
+  DigitalSignatureTypeEnum,
+  SelectOptionEnum,
+  WindExposureEnum,
   ANSIEnumWithEmptyString,
   DigitalSignatureTypeEnumWithEmptyString,
   SelectOptionEnumWithEmptyString,
@@ -40,19 +44,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useAhjQuery } from "@/queries/useAhjQuery";
+import useGeographyControllerFindNoteByGeoIdQuery from "@/queries/useGeographyControllerFindNoteByGeoIdQuery";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  SelectOptionEnum,
-  DigitalSignatureTypeEnum,
-  WindExposureEnum,
-  ANSIEnum,
-  AhjPutReqDto,
-  AhjHistoriesGetResDto,
-} from "@/types/dto/ahjs";
-import { usePutAhjMutation } from "@/queries/usePutAhjMutation";
+import useGeographyControllerUpdateNoteMutation from "@/queries/useGeographyControllerUpdateNoteMutation";
 import { DataTable } from "@/components/ui/data-table";
-import useAhjHistoriesQuery from "@/queries/useAhjHistoriesQuery";
+import useGeographyControllerFindNoteUpdateHistoryQuery from "@/queries/useGeographyControllerFindNoteUpdateHistoryQuery";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -62,6 +58,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AhjHistorySheet from "@/app/(root)/project-management/ahjs/[geoId]/components/AhjHistorySheet";
 import FieldsRowContainer from "@/components/FieldsRowContainer";
+import {
+  AhjNoteHistoryPaginatedResponseDto,
+  UpdateAhjNoteRequestDto,
+} from "@/api";
 
 const formSchema = z.object({
   // general
@@ -111,7 +111,7 @@ const formSchema = z.object({
 type FieldValues = z.infer<typeof formSchema>;
 
 const columnHelper =
-  createColumnHelper<AhjHistoriesGetResDto["items"][number]>();
+  createColumnHelper<AhjNoteHistoryPaginatedResponseDto["items"][number]>();
 
 export default function Page() {
   const { geoId } = useParams() as { geoId: string };
@@ -119,10 +119,12 @@ export default function Page() {
     data: ahj,
     isSuccess: isAhjQuerySuccess,
     isRefetching: isAhjQueryRefetching,
-  } = useAhjQuery(geoId);
+  } = useGeographyControllerFindNoteByGeoIdQuery(geoId);
+  console.log("🚀 ~ file: page.tsx:123 ~ Page ~ ahj:", ahj);
 
-  const { mutateAsync } = usePutAhjMutation(geoId);
-  const { data: ahjHistories } = useAhjHistoriesQuery(geoId);
+  const { mutateAsync } = useGeographyControllerUpdateNoteMutation(geoId);
+  const { data: ahjHistories } =
+    useGeographyControllerFindNoteUpdateHistoryQuery(geoId);
   const [ahjHistorySheetState, setAhjHistorySheetState] = useState<{
     id?: string;
     open: boolean;
@@ -185,7 +187,7 @@ export default function Page() {
   useEffect(() => {
     /**
      * isAhjQueryRefetching 필요한 이유:
-     * usePutAhjMutation의 mutateAsync를 할 때 보내는 데이터는 trim해서 보낸다.
+     * useGeographyControllerUpdateNoteMutation의 mutateAsync를 할 때 보내는 데이터는 trim해서 보낸다.
      * e.g. "   " => null, "   abc   " => "abc"
      * 그렇기 때문에 field를 띄어쓰기해서 수정을 했다고 할지라도 보내는 데이터는 이전과 같은 데이터를 보내게 될 수 있다.
      * 이전과 같은 데이터를 보내는 것이라도, mutateAsync을 동작시키기 때문에, invalidateQuery가 발생한다.
@@ -308,7 +310,7 @@ export default function Page() {
   }, [isAhjQuerySuccess, reset, ahj, isAhjQueryRefetching]);
 
   async function onSubmit(values: FieldValues) {
-    const general: AhjPutReqDto["general"] = {
+    const general: UpdateAhjNoteRequestDto["general"] = {
       buildingCodes: schemaToConvertFromStringToNullableString.parse(
         values.general.buildingCodes
       ),
@@ -324,7 +326,7 @@ export default function Page() {
         ),
     };
 
-    const design: AhjPutReqDto["design"] = {
+    const design: UpdateAhjNoteRequestDto["design"] = {
       deratedAmpacity: schemaToConvertFromStringToNullableString.parse(
         values.design.deratedAmpacity
       ),
@@ -351,7 +353,7 @@ export default function Page() {
         ),
     };
 
-    const engineering: AhjPutReqDto["engineering"] = {
+    const engineering: UpdateAhjNoteRequestDto["engineering"] = {
       iebcAccepted:
         schemaToConvertFromSelectOptionWithEmptyStringToNullableSelectOption.parse(
           values.engineering.iebcAccepted
@@ -396,11 +398,12 @@ export default function Page() {
       ),
     };
 
-    const electricalEngineering: AhjPutReqDto["electricalEngineering"] = {
-      electricalNotes: schemaToConvertFromStringToNullableString.parse(
-        values.electricalEngineering.electricalNotes
-      ),
-    };
+    const electricalEngineering: UpdateAhjNoteRequestDto["electricalEngineering"] =
+      {
+        electricalNotes: schemaToConvertFromStringToNullableString.parse(
+          values.electricalEngineering.electricalNotes
+        ),
+      };
 
     await mutateAsync({
       general,
