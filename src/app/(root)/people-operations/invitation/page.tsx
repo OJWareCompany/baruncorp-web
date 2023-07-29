@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
-import usePostInvitationsMutation from "@/queries/usePostInvitationsMutation";
+import useUsersControllerSendInvitationMailMutation from "@/queries/useUsersControllerSendInvitationMailMutation";
 import { toast } from "@/hook/use-toast";
 
 const formSchema = z.object({
@@ -49,22 +49,20 @@ export default function Page() {
     defaultValues,
   });
   const {
-    resetField,
+    setValue,
     formState: { isSubmitting },
   } = form;
 
   const { data: organizations } = useOrganizationsQuery();
-  const { mutateAsync } = usePostInvitationsMutation();
+  const { mutateAsync } = useUsersControllerSendInvitationMailMutation();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await mutateAsync(values, {
-      onSuccess: (data) => {
-        resetField("email");
-        toast({
-          title: "Invitation success",
-          description: `Email has been sent to ${data.email}.`,
-        });
-      },
+    await mutateAsync(values).then(() => {
+      setValue("email", "");
+      toast({
+        title: "Invitation success",
+        description: `Email has been sent to ${values.email}.`,
+      });
     });
   }
 
