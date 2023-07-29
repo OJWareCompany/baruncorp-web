@@ -27,7 +27,7 @@ export interface UserLicensePostReqDto {
 
 export interface UserLicenseDeleteReqDto {
   userId: string;
-  type: string;
+  type: "Electrical" | "Structural";
   issuingCountryName: string;
 }
 
