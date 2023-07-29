@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
+import useOrganizationsQuery from "@/queries/useOrganizationControllerFindAllQuery";
 import useUsersControllerSendInvitationMailMutation from "@/queries/useUsersControllerSendInvitationMailMutation";
 import { toast } from "@/hook/use-toast";
 
