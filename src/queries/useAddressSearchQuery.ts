@@ -1,6 +1,6 @@
+import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { MapboxPlacesGetResDto } from "@/types/dto/mapbox";
 
 const client = axios.create({
   baseURL: "https://api.mapbox.com/geocoding/v5/mapbox.places",
@@ -13,7 +13,7 @@ const client = axios.create({
 });
 
 const useAddressSearchQuery = (address: string) => {
-  return useQuery<MapboxPlacesGetResDto, AxiosError>({
+  return useQuery<GeocodeFeature[], AxiosError>({
     queryKey: ["mapbox.places", address],
     queryFn: async () => {
       const response = await client.get(`${address}.json`);

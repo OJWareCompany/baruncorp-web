@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UserPositionDeleteReqDto } from "@/types/dto/departments";
+import { UserPositionDeleteReqDto } from "@/types/dto/departments"; // TODO: remove
 import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 
 const useDepartmentControllerRevokePositionMutation = (

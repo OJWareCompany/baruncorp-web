@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
-import { ServicesGetResDto } from "@/types/dto/departments";
+import { ServicesGetResDto } from "@/types/dto/departments"; // TODO: remove
 import useDepartmentControllerFindAllServicesQuery from "@/queries/useDepartmentControllerFindAllServicesQuery";
 import { cn } from "@/lib/utils";
 

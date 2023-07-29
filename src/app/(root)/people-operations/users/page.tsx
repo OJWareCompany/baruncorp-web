@@ -15,9 +15,9 @@ import { Button } from "@/components/ui/button";
 import useUsersControllerFindUsersQuery from "@/queries/useUsersControllerFindUsersQuery";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { UsersGetResDto } from "@/types/dto/users";
+import { UserResponseDto } from "@/api";
 
-const columnHelper = createColumnHelper<UsersGetResDto[number]>();
+const columnHelper = createColumnHelper<UserResponseDto>();
 
 const columns = [
   columnHelper.accessor("fullName", { header: "Full Name" }),
