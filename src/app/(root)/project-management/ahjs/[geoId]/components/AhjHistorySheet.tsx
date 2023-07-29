@@ -3,31 +3,19 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { Button } from "../../../../../../components/ui/button";
 import {
   ANSIEnumWithEmptyString,
   DigitalSignatureTypeEnumWithEmptyString,
   SelectOptionEnumWithEmptyString,
   WindExposureEnumWithEmptyString,
-  schemaToConvertFromANSIWithEmptyStringToNullableANSI,
-  schemaToConvertFromDigitalSignatureTypeWithEmptyStringToNullableDigitalSignatureType,
   schemaToConvertFromNullishANSIToANSIWithEmptyString,
   schemaToConvertFromNullishDigitalSignatureTypeToDigitalSignatureTypeWithEmptyString,
   schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString,
   schemaToConvertFromNullishStringToString,
   schemaToConvertFromNullishWindExposureToWindExposureWithEmptyString,
-  schemaToConvertFromSelectOptionWithEmptyStringToNullableSelectOption,
-  schemaToConvertFromStringToNullableString,
-  schemaToConvertFromWindExposureWithEmptyStringToNullableWindExposure,
 } from "../constants";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import useAhjHistoryQuery from "@/queries/useAhjHistoryQuery";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import useGeographyControllerFindNoteUpdateHistoryDetailQuery from "@/queries/useGeographyControllerFindNoteUpdateHistoryDetailQuery";
 import {
   Form,
   FormControl,
@@ -37,20 +25,6 @@ import {
 } from "@/components/ui/form";
 import FieldsRowContainer from "@/components/FieldsRowContainer";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ANSIEnum,
-  DigitalSignatureTypeEnum,
-  SelectOptionEnum,
-  WindExposureEnum,
-} from "@/types/dto/ahjs";
 import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
@@ -106,7 +80,7 @@ interface Props extends DialogProps {
 
 export default function AhjHistorySheet(props: Props) {
   const { data: ahjHistory, isSuccess: isAhjHistoryQuerySuccess } =
-    useAhjHistoryQuery(props.id);
+    useGeographyControllerFindNoteUpdateHistoryDetailQuery(props.id);
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
