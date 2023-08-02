@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { format } from "date-fns";
-import { useParams } from "next/navigation";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
@@ -50,8 +49,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useUsersControllerPostLicenseMutation from "@/queries/useUsersControllerPostLicenseMutation";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 
 const formSchema = z.object({
   type: z.enum(["Electrical", "Structural"]), // TODO: constants로 만들어 사용하기
@@ -66,14 +63,14 @@ const formSchema = z.object({
   }),
 });
 
-export default function LicenseRegistrationDialog() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
+interface Props {
+  userId: string;
+}
 
+export default function LicenseRegistrationDialog({ userId }: Props) {
   const { data: states } = useDepartmentControllerFindAllStatesQuery();
   const [statePopoverOpen, setStatePopoverOpen] = useState(false);
-  const { mutateAsync } = useUsersControllerPostLicenseMutation(profile?.id);
+  const { mutateAsync } = useUsersControllerPostLicenseMutation(userId);
   const [open, setOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({

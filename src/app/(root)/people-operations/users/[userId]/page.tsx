@@ -16,7 +16,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useUsersControllerUpdateUserByUserIdMutation from "@/queries/useUsersControllerUpdateUserByUserIdMutation";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
 import PositionField from "@/components/PositionField";
 import ServicesField from "@/components/ServicesField";
@@ -31,14 +30,10 @@ const formSchema = z.object({
 });
 
 export default function Page() {
-  // const { data: profile, isSuccess: isProfileQuerySuccess } =
-  //   useProfileQueryWithParams();
   const { userId } = useParams();
   const { data: profile, isSuccess: isProfileQuerySuccess } =
     useUsersControllerGetUserInfoByUserIdQuery(userId);
-  const { mutateAsync } = useUsersControllerUpdateUserByUserIdMutation(
-    profile?.id
-  );
+  const { mutateAsync } = useUsersControllerUpdateUserByUserIdMutation(userId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -154,9 +149,9 @@ export default function Page() {
           </Button>
         </form>
       </Form>
-      <PositionField />
-      <ServicesField />
-      <LicensesField />
+      <PositionField userId={userId} />
+      <ServicesField userId={userId} />
+      <LicensesField userId={userId} />
     </div>
   );
 }

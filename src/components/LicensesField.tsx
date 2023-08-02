@@ -2,7 +2,6 @@
 
 import React from "react";
 import { X } from "lucide-react";
-import { useParams } from "next/navigation";
 import { Badge } from "./ui/badge";
 import LicenseRegistrationDialog from "./LicenseRegistrationDialog";
 import { Label } from "@/components/ui/label";
@@ -16,23 +15,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 import useUsersControllerDeleteLicenseMutation from "@/queries/useUsersControllerDeleteLicenseMutation";
 import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
 
-export default function LicensesField() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
+interface Props {
+  userId: string;
+}
+
+export default function LicensesField({ userId }: Props) {
   const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
 
   const { mutate: deleteUserLicenseMutate } =
-    useUsersControllerDeleteLicenseMutation(profile?.id);
+    useUsersControllerDeleteLicenseMutation(userId);
 
   return (
     <div className="space-y-2">
       <Label>Licenses</Label>
       <div className="flex gap-2 flex-wrap">
-        <LicenseRegistrationDialog />
+        <LicenseRegistrationDialog userId={userId} />
         {profile?.licenses.map((license) => {
           const { abbreviation, type, priority, issuingCountryName } = license;
           const key = `${abbreviation} / ${type} / ${priority}`;

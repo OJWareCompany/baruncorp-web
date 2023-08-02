@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Plus, X } from "lucide-react";
-import { useParams } from "next/navigation";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import {
@@ -33,18 +32,19 @@ import {
 } from "@/components/ui/alert-dialog";
 import useDepartmentControllerRevokePositionMutation from "@/queries/useDepartmentControllerRevokePositionMutation";
 import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 
-export default function PositionField() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
+interface Props {
+  userId: string;
+}
+
+export default function PositionField({ userId }: Props) {
   const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
   const { data: positions } = useDepartmentControllerFindAllPositionsQuery();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { mutate: postUserPositionMutate } =
-    useDepartmentControllerAppointPositionMutation(profile?.id);
+    useDepartmentControllerAppointPositionMutation(userId);
   const { mutate: deleteUserPositionMutate } =
-    useDepartmentControllerRevokePositionMutation(profile?.id);
+    useDepartmentControllerRevokePositionMutation(userId);
 
   return (
     <div className="space-y-2">
