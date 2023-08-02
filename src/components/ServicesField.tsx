@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Check, Plus, X } from "lucide-react";
-import { useParams } from "next/navigation";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import {
@@ -34,20 +33,18 @@ import useDepartmentControllerPutMemberInChageOfTheServiceMutation from "@/queri
 import useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation from "@/queries/useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation";
 import { cn } from "@/lib/utils";
 import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
-// import { useProfileQueryWithParams } from "@/queries/useProfileQuery";
 
-export default function ServicesField() {
-  // const { data: profile } = useProfileQueryWithParams();
-  const { userId } = useParams();
+interface Props {
+  userId: string;
+}
 
+export default function ServicesField({ userId }: Props) {
   const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
   const { data: services } = useServicesQuery();
   const { mutate: postUserServiceMutate } =
-    useDepartmentControllerPutMemberInChageOfTheServiceMutation(profile?.id);
+    useDepartmentControllerPutMemberInChageOfTheServiceMutation(userId);
   const { mutate: deleteUserServiceMutate } =
-    useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation(
-      profile?.id
-    );
+    useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation(userId);
 
   return (
     <div className="space-y-2">
