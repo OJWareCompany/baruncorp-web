@@ -3,9 +3,9 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { UserResponseDto } from "@/api";
 
-export const QUERY_KEY = "usersControllerGetUserInfo";
+export const QUERY_KEY = "profile";
 
-const useUsersControllerGetUserInfoQuery = () => {
+const useProfileQuery = () => {
   const api = useApi();
 
   return useQuery<UserResponseDto, AxiosError<ErrorResponseData>>({
@@ -15,4 +15,4 @@ const useUsersControllerGetUserInfoQuery = () => {
   });
 };
 
-export default useUsersControllerGetUserInfoQuery;
+export default useProfileQuery;

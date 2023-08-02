@@ -3,18 +3,18 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { PositionResponseDto } from "@/api";
 
-export const QUERY_KEY = "departmentControllerFindAllPositions";
+export const QUERY_KEY = "positions";
 
-const useDepartmentControllerFindAllPositionsQuery = () => {
+const usePositionsQuery = () => {
   const api = useApi();
 
   return useQuery<PositionResponseDto[], AxiosError<ErrorResponseData>>({
     queryKey: [QUERY_KEY],
     queryFn: () =>
       api.departments
-        .departmentControllerFindAllPositions()
+        .departmentControllerGetFindAllPositions()
         .then(({ data }) => data),
   });
 };
 
-export default useDepartmentControllerFindAllPositionsQuery;
+export default usePositionsQuery;

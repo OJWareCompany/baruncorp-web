@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { format } from "date-fns";
+import { AxiosError } from "axios";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Input } from "./ui/input";
@@ -33,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useDepartmentControllerFindAllStatesQuery from "@/queries/useDepartmentControllerFindAllStatesQuery";
+import useStatesQuery from "@/queries/useStatesQuery";
 import {
   Command,
   CommandEmpty,
@@ -48,7 +49,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import useUsersControllerPostLicenseMutation from "@/queries/useUsersControllerPostLicenseMutation";
+import usePostMemberLicenseMutation from "@/queries/usePostMemberLicenseMutation";
+import { toast } from "@/hook/use-toast";
 
 const formSchema = z.object({
   type: z.enum(["Electrical", "Structural"]), // TODO: constants로 만들어 사용하기
@@ -68,9 +70,9 @@ interface Props {
 }
 
 export default function LicenseRegistrationDialog({ userId }: Props) {
-  const { data: states } = useDepartmentControllerFindAllStatesQuery();
+  const { data: states } = useStatesQuery();
   const [statePopoverOpen, setStatePopoverOpen] = useState(false);
-  const { mutateAsync } = useUsersControllerPostLicenseMutation(userId);
+  const { mutateAsync } = usePostMemberLicenseMutation(userId);
   const [open, setOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -92,13 +94,27 @@ export default function LicenseRegistrationDialog({ userId }: Props) {
       priority: Number(priority),
       issuedDate: format(issuedDate, "yyyy-MM-dd"),
       expiryDate: format(expiryDate, "yyyy-MM-dd"),
-    }).then(() => {
-      resetField("issuingCountryName");
-      resetField("priority");
-      resetField("issuedDate");
-      resetField("expiryDate");
-      setOpen(false);
-    });
+    })
+      .then(() => {
+        resetField("issuingCountryName");
+        resetField("priority");
+        resetField("issuedDate");
+        resetField("expiryDate");
+        setOpen(false);
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        const { response } = error;
+        let title = "Something went wrong";
+        let description =
+          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+        switch (response?.data.statusCode) {
+          case 409:
+            title = response?.data.message[0];
+            description = "";
+            break;
+        }
+        toast({ title, description, variant: "destructive" });
+      });
   }
 
   return (

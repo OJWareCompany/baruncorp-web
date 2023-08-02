@@ -113,12 +113,12 @@ export interface CreateLicenseRequestDto {
   priority: number;
   /**
    * @format date-time
-   * @default "2023-07-28T10:36:17.046Z"
+   * @default "2023-08-02T02:20:43.236Z"
    */
   issuedDate: string;
   /**
    * @format date-time
-   * @default "2023-07-28T10:36:17.046Z"
+   * @default "2023-08-02T02:20:43.236Z"
    */
   expiryDate: string;
 }
@@ -164,6 +164,13 @@ export interface CreateOrganizationRequestDto {
    * @pattern /(client|individual|outsourcing)/
    */
   organizationType: string;
+}
+
+export interface CreateMemberPositionRequestDto {
+  /** @default "3696b9c7-916d-4812-871e-976c03a06d7e" */
+  positionId: string;
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  userId: string;
 }
 
 export interface StatesResponseDto {
@@ -221,11 +228,11 @@ export interface General {
   name: string;
   /** @default "Arroyo Grande city, California" */
   fullAhjName: string;
-  /** @default "2023-07-28T10:36:17.058Z" */
+  /** @default "2023-08-02T02:20:43.248Z" */
   createdAt: string | null;
-  /** @default "2023-07-28T10:36:17.058Z" */
+  /** @default "2023-08-02T02:20:43.249Z" */
   updatedAt: string | null;
-  /** @default "2023-07-28T10:36:17.058Z" */
+  /** @default "2023-08-02T02:20:43.249Z" */
   updatedBy: string | null;
   /** @default "COUNTY" */
   type: "STATE" | "COUNTY" | "COUNTY SUBDIVISIONS" | "PLACE" | null;
@@ -351,6 +358,78 @@ export interface AddressFromMapBox {
   state: string;
   /** @default "92307" */
   postalCode: string;
+}
+
+export interface AuthenticationControllerPostSignInTimeParams {
+  jwt: number;
+  refresh: number;
+}
+
+export interface UsersControllerGetFindUsersParams {
+  /** @default "hyomin@ojware.com" */
+  email?: string;
+}
+
+export interface UsersControllerDeleteRemoveMemberLicenseParams {
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  userId: string;
+  /** @default "Electrical" */
+  type: "Electrical" | "Structural";
+  /** @default "FLORIDA" */
+  issuingCountryName: string;
+}
+
+export interface OrganizationControllerFindMembersParams {
+  /** @default "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
+  organizationId: string;
+}
+
+export interface DepartmentControllerDeleteRevokePositionParams {
+  /** @default "3696b9c7-916d-4812-871e-976c03a06d7e" */
+  positionId: string;
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  userId: string;
+}
+
+export interface DepartmentControllerDeleteTerminateServiceMemberIsInChargeOfParams {
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  userId: string;
+  /** @default "a061c441-be8c-4bcc-9bcc-2460a01d5a16" */
+  serviceId: string;
+}
+
+export interface GeographyControllerGetFindNotesParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   */
+  page?: number;
+  /** @default "0100460" */
+  geoId?: string;
+  /** @default "city" */
+  fullAhjName?: string;
+  /** @default "city" */
+  name?: string;
+}
+
+export interface GeographyControllerGetFindNoteUpdateHistoryParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   */
+  page?: number;
+  /** @default "0100460" */
+  geoId?: string;
 }
 
 import type {
@@ -541,10 +620,10 @@ export class Api<
     /**
      * No description
      *
-     * @name AuthenticationControllerSignIn
+     * @name AuthenticationControllerPostSignIn
      * @request POST:/auth/signin
      */
-    authenticationControllerSignIn: (
+    authenticationControllerPostSignIn: (
       data: SignInRequestDto,
       params: RequestParams = {}
     ) =>
@@ -560,14 +639,11 @@ export class Api<
     /**
      * No description
      *
-     * @name AuthenticationControllerSignInTime
+     * @name AuthenticationControllerPostSignInTime
      * @request POST:/auth/signin-time
      */
-    authenticationControllerSignInTime: (
-      query: {
-        jwt: number;
-        refresh: number;
-      },
+    authenticationControllerPostSignInTime: (
+      query: AuthenticationControllerPostSignInTimeParams,
       data: SignInRequestDto,
       params: RequestParams = {}
     ) =>
@@ -584,10 +660,10 @@ export class Api<
     /**
      * No description
      *
-     * @name AuthenticationControllerSignout
+     * @name AuthenticationControllerPostSignout
      * @request POST:/auth/signout
      */
-    authenticationControllerSignout: (params: RequestParams = {}) =>
+    authenticationControllerPostSignout: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/auth/signout`,
         method: "POST",
@@ -597,10 +673,10 @@ export class Api<
     /**
      * No description
      *
-     * @name AuthenticationControllerSignUp
+     * @name AuthenticationControllerPostSignUp
      * @request POST:/auth/signup
      */
-    authenticationControllerSignUp: (
+    authenticationControllerPostSignUp: (
       data: SignUpRequestDto,
       params: RequestParams = {}
     ) =>
@@ -615,10 +691,10 @@ export class Api<
     /**
      * No description
      *
-     * @name AuthenticationControllerMe
+     * @name AuthenticationControllerGetMe
      * @request GET:/auth/me
      */
-    authenticationControllerMe: (params: RequestParams = {}) =>
+    authenticationControllerGetMe: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/auth/me`,
         method: "GET",
@@ -628,10 +704,10 @@ export class Api<
     /**
      * No description
      *
-     * @name AuthenticationControllerRefresh
+     * @name AuthenticationControllerGetRefresh
      * @request GET:/auth/refresh
      */
-    authenticationControllerRefresh: (params: RequestParams = {}) =>
+    authenticationControllerGetRefresh: (params: RequestParams = {}) =>
       this.request<AccessTokenResponseDto, any>({
         path: `/auth/refresh`,
         method: "GET",
@@ -643,14 +719,11 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerFindUsers
+     * @name UsersControllerGetFindUsers
      * @request GET:/users
      */
-    usersControllerFindUsers: (
-      query?: {
-        /** @default "hyomin@ojware.com" */
-        email?: string;
-      },
+    usersControllerGetFindUsers: (
+      query: UsersControllerGetFindUsersParams,
       params: RequestParams = {}
     ) =>
       this.request<UserResponseDto[], any>({
@@ -681,10 +754,10 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerUpdateUserByUserId
+     * @name UsersControllerPatchUpdateUserByUserId
      * @request PATCH:/users/profile/{userId}
      */
-    usersControllerUpdateUserByUserId: (
+    usersControllerPatchUpdateUserByUserId: (
       userId: string,
       data: UpdateUserRequestDto,
       params: RequestParams = {}
@@ -714,10 +787,10 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerUpdateUser
+     * @name UsersControllerPatchUpdateUser
      * @request PATCH:/users/profile
      */
-    usersControllerUpdateUser: (
+    usersControllerPatchUpdateUser: (
       data: UpdateUserRequestDto,
       params: RequestParams = {}
     ) =>
@@ -745,10 +818,10 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerGiveRole
+     * @name UsersControllerPostGiveRole
      * @request POST:/users/gived-roles
      */
-    usersControllerGiveRole: (
+    usersControllerPostGiveRole: (
       data: GiveRoleRequestDto,
       params: RequestParams = {}
     ) =>
@@ -763,10 +836,13 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerRemoveRole
+     * @name UsersControllerDeleteRemoveRole
      * @request DELETE:/users/gived-roles/{userId}
      */
-    usersControllerRemoveRole: (userId: string, params: RequestParams = {}) =>
+    usersControllerDeleteRemoveRole: (
+      userId: string,
+      params: RequestParams = {}
+    ) =>
       this.request<void, any>({
         path: `/users/gived-roles/${userId}`,
         method: "DELETE",
@@ -776,10 +852,10 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerSendInvitationMail
+     * @name UsersControllerPostSendInvitationMail
      * @request POST:/users/invitations
      */
-    usersControllerSendInvitationMail: (
+    usersControllerPostSendInvitationMail: (
       data: CreateInvitationMailRequestDto,
       params: RequestParams = {}
     ) =>
@@ -795,10 +871,10 @@ export class Api<
     /**
      * @description 등록된 모든 라이센스 조회 라이센스: 특정 State에서 작업 허가 받은 Member의 자격증
      *
-     * @name UsersControllerFindAllLicenses
+     * @name UsersControllerGetFindAllLicenses
      * @request GET:/users/member-licenses
      */
-    usersControllerFindAllLicenses: (params: RequestParams = {}) =>
+    usersControllerGetFindAllLicenses: (params: RequestParams = {}) =>
       this.request<LincenseResponseDto[], any>({
         path: `/users/member-licenses`,
         method: "GET",
@@ -809,10 +885,10 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerPostLicense
+     * @name UsersControllerPostRegisterMemberLicense
      * @request POST:/users/member-licenses
      */
-    usersControllerPostLicense: (
+    usersControllerPostRegisterMemberLicense: (
       data: CreateLicenseRequestDto,
       params: RequestParams = {}
     ) =>
@@ -827,18 +903,11 @@ export class Api<
     /**
      * @description // 추후 개선 사항 -> member-licenses/:licenseId
      *
-     * @name UsersControllerDeleteLicense
+     * @name UsersControllerDeleteRemoveMemberLicense
      * @request DELETE:/users/member-licenses
      */
-    usersControllerDeleteLicense: (
-      query: {
-        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
-        userId: string;
-        /** @default "Electrical" */
-        type: "Electrical" | "Structural";
-        /** @default "FLORIDA" */
-        issuingCountryName: string;
-      },
+    usersControllerDeleteRemoveMemberLicense: (
+      query: UsersControllerDeleteRemoveMemberLicenseParams,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -866,10 +935,10 @@ export class Api<
     /**
      * No description
      *
-     * @name OrganizationControllerCreateOrganization
+     * @name OrganizationControllerPostCreateOrganization
      * @request POST:/organizations
      */
-    organizationControllerCreateOrganization: (
+    organizationControllerPostCreateOrganization: (
       data: CreateOrganizationRequestDto,
       params: RequestParams = {}
     ) =>
@@ -888,10 +957,7 @@ export class Api<
      * @request GET:/organizations/members
      */
     organizationControllerFindMembers: (
-      query: {
-        /** @default "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
-        organizationId: string;
-      },
+      query: OrganizationControllerFindMembersParams,
       params: RequestParams = {}
     ) =>
       this.request<UserResponseDto[], any>({
@@ -920,10 +986,10 @@ export class Api<
     /**
      * No description
      *
-     * @name DepartmentControllerFindAllPositions
+     * @name DepartmentControllerGetFindAllPositions
      * @request GET:/departments/positions
      */
-    departmentControllerFindAllPositions: (params: RequestParams = {}) =>
+    departmentControllerGetFindAllPositions: (params: RequestParams = {}) =>
       this.request<PositionResponseDto[], any>({
         path: `/departments/positions`,
         method: "GET",
@@ -934,38 +1000,29 @@ export class Api<
     /**
      * No description
      *
-     * @name DepartmentControllerAppointPosition
+     * @name DepartmentControllerPostAppointPosition
      * @request POST:/departments/member-positions
      */
-    departmentControllerAppointPosition: (
-      query: {
-        /** @default "3696b9c7-916d-4812-871e-976c03a06d7e!" */
-        positionId: string;
-        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
-        userId: string;
-      },
+    departmentControllerPostAppointPosition: (
+      data: CreateMemberPositionRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
         path: `/departments/member-positions`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
     /**
      * No description
      *
-     * @name DepartmentControllerRevokePosition
+     * @name DepartmentControllerDeleteRevokePosition
      * @request DELETE:/departments/member-positions
      */
-    departmentControllerRevokePosition: (
-      query: {
-        /** @default "3696b9c7-916d-4812-871e-976c03a06d7e!" */
-        positionId: string;
-        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
-        userId: string;
-      },
+    departmentControllerDeleteRevokePosition: (
+      query: DepartmentControllerDeleteRevokePositionParams,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -978,10 +1035,10 @@ export class Api<
     /**
      * No description
      *
-     * @name DepartmentControllerFindAllStates
+     * @name DepartmentControllerGetFindAllStates
      * @request GET:/departments/states
      */
-    departmentControllerFindAllStates: (params: RequestParams = {}) =>
+    departmentControllerGetFindAllStates: (params: RequestParams = {}) =>
       this.request<StatesResponseDto[], any>({
         path: `/departments/states`,
         method: "GET",
@@ -992,10 +1049,10 @@ export class Api<
     /**
      * No description
      *
-     * @name DepartmentControllerFindAllServices
+     * @name DepartmentControllerGetFindAllServices
      * @request GET:/departments/services
      */
-    departmentControllerFindAllServices: (params: RequestParams = {}) =>
+    departmentControllerGetFindAllServices: (params: RequestParams = {}) =>
       this.request<ServiceResponseDto[], any>({
         path: `/departments/services`,
         method: "GET",
@@ -1006,10 +1063,10 @@ export class Api<
     /**
      * No description
      *
-     * @name DepartmentControllerPutMemberInChageOfTheService
+     * @name DepartmentControllerPostPutMemberInChageOfTheService
      * @request POST:/departments/member-services
      */
-    departmentControllerPutMemberInChageOfTheService: (
+    departmentControllerPostPutMemberInChageOfTheService: (
       data: CreateMemberInChargeOfTheServiceRequestDto,
       params: RequestParams = {}
     ) =>
@@ -1024,16 +1081,11 @@ export class Api<
     /**
      * No description
      *
-     * @name DepartmentControllerTerminateServiceMemberIsInChargeOf
+     * @name DepartmentControllerDeleteTerminateServiceMemberIsInChargeOf
      * @request DELETE:/departments/member-services
      */
-    departmentControllerTerminateServiceMemberIsInChargeOf: (
-      query: {
-        /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
-        userId: string;
-        /** @default "a061c441-be8c-4bcc-9bcc-2460a01d5a16" */
-        serviceId: string;
-      },
+    departmentControllerDeleteTerminateServiceMemberIsInChargeOf: (
+      query: DepartmentControllerDeleteTerminateServiceMemberIsInChargeOfParams,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -1048,29 +1100,12 @@ export class Api<
      * No description
      *
      * @tags geography
-     * @name GeographyControllerFindNotes
+     * @name GeographyControllerGetFindNotes
      * @request GET:/geography/notes
      * @secure
      */
-    geographyControllerFindNotes: (
-      query?: {
-        /**
-         * Specifies a limit of returned records
-         * @default 20
-         */
-        limit?: number;
-        /**
-         * Page number
-         * @default 1
-         */
-        page?: number;
-        /** @default "0100460" */
-        geoId?: string;
-        /** @default "city" */
-        fullAhjName?: string;
-        /** @default "city" */
-        name?: string;
-      },
+    geographyControllerGetFindNotes: (
+      query: GeographyControllerGetFindNotesParams,
       params: RequestParams = {}
     ) =>
       this.request<AhjNotePaginatedResponseDto, any>({
@@ -1086,11 +1121,11 @@ export class Api<
      * No description
      *
      * @tags geography
-     * @name GeographyControllerFindNoteByGeoId
+     * @name GeographyControllerGetFindNoteByGeoId
      * @request GET:/geography/{geoId}/notes
      * @secure
      */
-    geographyControllerFindNoteByGeoId: (
+    geographyControllerGetFindNoteByGeoId: (
       geoId: string,
       params: RequestParams = {}
     ) =>
@@ -1106,11 +1141,30 @@ export class Api<
      * No description
      *
      * @tags geography
-     * @name GeographyControllerUpdateNote
+     * @name GeographyControllerDeleteNoteByGeoId
+     * @request DELETE:/geography/{geoId}/notes
+     * @secure
+     */
+    geographyControllerDeleteNoteByGeoId: (
+      geoId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/geography/${geoId}/notes`,
+        method: "DELETE",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerPutUpdateNote
      * @request PUT:/geography/{geoId}/notes
      * @secure
      */
-    geographyControllerUpdateNote: (
+    geographyControllerPutUpdateNote: (
       geoId: string,
       data: UpdateAhjNoteRequestDto,
       params: RequestParams = {}
@@ -1128,11 +1182,11 @@ export class Api<
      * No description
      *
      * @tags geography
-     * @name GeographyControllerFindNoteUpdateHistoryDetail
+     * @name GeographyControllerGetFinNoteUpdateHistoryDetail
      * @request GET:/geography/notes/history/{historyId}
      * @secure
      */
-    geographyControllerFindNoteUpdateHistoryDetail: (
+    geographyControllerGetFinNoteUpdateHistoryDetail: (
       historyId: number,
       params: RequestParams = {}
     ) =>
@@ -1148,25 +1202,12 @@ export class Api<
      * No description
      *
      * @tags geography
-     * @name GeographyControllerFindNoteUpdateHistory
+     * @name GeographyControllerGetFindNoteUpdateHistory
      * @request GET:/geography/notes/history
      * @secure
      */
-    geographyControllerFindNoteUpdateHistory: (
-      query?: {
-        /**
-         * Specifies a limit of returned records
-         * @default 20
-         */
-        limit?: number;
-        /**
-         * Page number
-         * @default 1
-         */
-        page?: number;
-        /** @default "0100460" */
-        geoId?: string;
-      },
+    geographyControllerGetFindNoteUpdateHistory: (
+      query: GeographyControllerGetFindNoteUpdateHistoryParams,
       params: RequestParams = {}
     ) =>
       this.request<AhjNoteHistoryPaginatedResponseDto, any>({
@@ -1182,10 +1223,10 @@ export class Api<
     /**
      * @description Census에서 행정구역이 매칭되지 않는 주소들이 있음 Census 결과와 상관 없이 프로젝트는 생성되어야함
      *
-     * @name ProjectControllerCreateProject
+     * @name ProjectControllerPostCreateProject
      * @request POST:/projects
      */
-    projectControllerCreateProject: (
+    projectControllerPostCreateProject: (
       data: AddressFromMapBox,
       params: RequestParams = {}
     ) =>

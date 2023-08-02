@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
-import useOrganizationControllerFindAllQuery from "@/queries/useOrganizationControllerFindAllQuery";
+import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
 import { OrganizationResponseDto } from "@/api";
 
 const columnHelper = createColumnHelper<OrganizationResponseDto>();
@@ -35,7 +35,7 @@ const columns = [
 ];
 
 export default function Page() {
-  const { data: organizations } = useOrganizationControllerFindAllQuery();
+  const { data: organizations } = useOrganizationsQuery();
 
   return (
     <div>

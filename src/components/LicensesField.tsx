@@ -15,18 +15,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import useUsersControllerDeleteLicenseMutation from "@/queries/useUsersControllerDeleteLicenseMutation";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
+import useDeleteMemberLicenseMutation from "@/queries/useDeleteMemberLicenseMutation";
+import useProfileByUserIdQuery from "@/queries/useProfileByUserIdQuery";
 
 interface Props {
   userId: string;
 }
 
 export default function LicensesField({ userId }: Props) {
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
+  const { data: profile } = useProfileByUserIdQuery(userId);
 
-  const { mutate: deleteUserLicenseMutate } =
-    useUsersControllerDeleteLicenseMutation(userId);
+  const { mutate: deleteMemberLicenseMutate } =
+    useDeleteMemberLicenseMutation(userId);
 
   return (
     <div className="space-y-2">
@@ -55,7 +55,7 @@ export default function LicensesField({ userId }: Props) {
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
-                      deleteUserLicenseMutate({
+                      deleteMemberLicenseMutate({
                         type,
                         issuingCountryName,
                       });

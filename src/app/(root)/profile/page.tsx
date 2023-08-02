@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
-import useUsersControllerUpdateUserMutation from "@/queries/useUsersControllerUpdateUserMutation";
+import useProfileQuery from "@/queries/useProfileQuery";
+import usePatchProfileMutation from "@/queries/usePatchProfileMutation";
 import PositionField from "@/components/PositionField";
 import ServicesField from "@/components/ServicesField";
 import LicensesField from "@/components/LicensesField";
@@ -45,9 +45,9 @@ export default function ProfilePage() {
     formState: { isSubmitting, isDirty },
   } = form;
 
-  const { data: profile, isSuccess: isProfileQuerySuccess } =
-    useUsersControllerGetUserInfoQuery();
-  const { mutateAsync } = useUsersControllerUpdateUserMutation(profile?.id);
+  const { data: profile, isSuccess: isProfileQuerySuccess } = useProfileQuery();
+  // const { mutateAsync } = usePatchProfileMutation(profile?.id);
+  const { mutateAsync } = usePatchProfileMutation();
 
   useEffect(() => {
     if (!isProfileQuerySuccess) {

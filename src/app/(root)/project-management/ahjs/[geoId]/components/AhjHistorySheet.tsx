@@ -15,7 +15,7 @@ import {
   schemaToConvertFromNullishWindExposureToWindExposureWithEmptyString,
 } from "../constants";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import useGeographyControllerFindNoteUpdateHistoryDetailQuery from "@/queries/useGeographyControllerFindNoteUpdateHistoryDetailQuery";
+import useAhjHistoryQuery from "@/queries/useAhjHistoryQuery";
 import {
   Form,
   FormControl,
@@ -80,7 +80,7 @@ interface Props extends DialogProps {
 
 export default function AhjHistorySheet(props: Props) {
   const { data: ahjHistory, isSuccess: isAhjHistoryQuerySuccess } =
-    useGeographyControllerFindNoteUpdateHistoryDetailQuery(props.id);
+    useAhjHistoryQuery(props.id);
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {

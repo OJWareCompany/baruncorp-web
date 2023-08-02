@@ -28,23 +28,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import useServicesQuery from "@/queries/useDepartmentControllerFindAllServicesQuery";
-import useDepartmentControllerPutMemberInChageOfTheServiceMutation from "@/queries/useDepartmentControllerPutMemberInChageOfTheServiceMutation";
-import useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation from "@/queries/useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation";
+import useServicesQuery from "@/queries/useServicesQuery";
+import usePostMemberServiceMutation from "@/queries/usePostMemberServiceMutation";
+import useDeleteMemberServiceMutation from "@/queries/useDeleteMemberServiceMutation";
 import { cn } from "@/lib/utils";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
+import useProfileByUserIdQuery from "@/queries/useProfileByUserIdQuery";
 
 interface Props {
   userId: string;
 }
 
 export default function ServicesField({ userId }: Props) {
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
+  const { data: profile } = useProfileByUserIdQuery(userId);
   const { data: services } = useServicesQuery();
-  const { mutate: postUserServiceMutate } =
-    useDepartmentControllerPutMemberInChageOfTheServiceMutation(userId);
-  const { mutate: deleteUserServiceMutate } =
-    useDepartmentControllerTerminateServiceMemberIsInChargeOfMutation(userId);
+  const { mutate: postMemberServiceMutate } =
+    usePostMemberServiceMutation(userId);
+  const { mutate: deleteMemberServiceMutate } =
+    useDeleteMemberServiceMutation(userId);
 
   return (
     <div className="space-y-2">
@@ -76,7 +76,7 @@ export default function ServicesField({ userId }: Props) {
                             return;
                           }
 
-                          postUserServiceMutate(service.id);
+                          postMemberServiceMutate(service.id);
                         }}
                       >
                         <Check
@@ -113,7 +113,7 @@ export default function ServicesField({ userId }: Props) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
-                    deleteUserServiceMutate(service.id);
+                    deleteMemberServiceMutate(service.id);
                   }}
                 >
                   Continue

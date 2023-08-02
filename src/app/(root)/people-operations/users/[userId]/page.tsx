@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import useUsersControllerUpdateUserByUserIdMutation from "@/queries/useUsersControllerUpdateUserByUserIdMutation";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
+import usePatchProfileByUserIdMutation from "@/queries/usePatchProfileByUserIdMutation";
+import useProfileByUserIdQuery from "@/queries/useProfileByUserIdQuery";
 import PositionField from "@/components/PositionField";
 import ServicesField from "@/components/ServicesField";
 import LicensesField from "@/components/LicensesField";
@@ -32,8 +32,8 @@ const formSchema = z.object({
 export default function Page() {
   const { userId } = useParams();
   const { data: profile, isSuccess: isProfileQuerySuccess } =
-    useUsersControllerGetUserInfoByUserIdQuery(userId);
-  const { mutateAsync } = useUsersControllerUpdateUserByUserIdMutation(userId);
+    useProfileByUserIdQuery(userId);
+  const { mutateAsync } = usePatchProfileByUserIdMutation(userId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

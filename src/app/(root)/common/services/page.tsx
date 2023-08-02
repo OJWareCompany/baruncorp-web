@@ -2,11 +2,11 @@
 
 import { createColumnHelper } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
-import { ServicesGetResDto } from "@/types/dto/departments"; // TODO: remove
-import useDepartmentControllerFindAllServicesQuery from "@/queries/useDepartmentControllerFindAllServicesQuery";
+import useServicesQuery from "@/queries/useServicesQuery";
 import { cn } from "@/lib/utils";
+import { ServiceResponseDto } from "@/api";
 
-type TableColumn = ServicesGetResDto[number];
+type TableColumn = ServiceResponseDto;
 
 const columnHelper = createColumnHelper<TableColumn>();
 
@@ -26,7 +26,7 @@ const columns = [
 ];
 
 export default function Page() {
-  const { data: services } = useDepartmentControllerFindAllServicesQuery();
+  const { data: services } = useServicesQuery();
   return (
     <div>
       <h1 className="h3 mb-4">Services</h1>

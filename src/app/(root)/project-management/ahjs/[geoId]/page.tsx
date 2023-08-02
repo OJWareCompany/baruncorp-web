@@ -44,11 +44,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import useGeographyControllerFindNoteByGeoIdQuery from "@/queries/useGeographyControllerFindNoteByGeoIdQuery";
+import useAhjQuery from "@/queries/useAhjQuery";
 import { Textarea } from "@/components/ui/textarea";
-import useGeographyControllerUpdateNoteMutation from "@/queries/useGeographyControllerUpdateNoteMutation";
+import usePutAhjMutation from "@/queries/usePutAhjMutation";
 import { DataTable } from "@/components/ui/data-table";
-import useGeographyControllerFindNoteUpdateHistoryQuery from "@/queries/useGeographyControllerFindNoteUpdateHistoryQuery";
+import useAhjHistoriesQuery from "@/queries/useAhjHistoriesQuery";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -119,12 +119,10 @@ export default function Page() {
     data: ahj,
     isSuccess: isAhjQuerySuccess,
     isRefetching: isAhjQueryRefetching,
-  } = useGeographyControllerFindNoteByGeoIdQuery(geoId);
-  console.log("🚀 ~ file: page.tsx:123 ~ Page ~ ahj:", ahj);
+  } = useAhjQuery(geoId);
 
-  const { mutateAsync } = useGeographyControllerUpdateNoteMutation(geoId);
-  const { data: ahjHistories } =
-    useGeographyControllerFindNoteUpdateHistoryQuery(geoId);
+  const { mutateAsync } = usePutAhjMutation(geoId);
+  const { data: ahjHistories } = useAhjHistoriesQuery(geoId);
   const [ahjHistorySheetState, setAhjHistorySheetState] = useState<{
     id?: string;
     open: boolean;
@@ -187,7 +185,7 @@ export default function Page() {
   useEffect(() => {
     /**
      * isAhjQueryRefetching 필요한 이유:
-     * useGeographyControllerUpdateNoteMutation의 mutateAsync를 할 때 보내는 데이터는 trim해서 보낸다.
+     * usePutAhjMutation의 mutateAsync를 할 때 보내는 데이터는 trim해서 보낸다.
      * e.g. "   " => null, "   abc   " => "abc"
      * 그렇기 때문에 field를 띄어쓰기해서 수정을 했다고 할지라도 보내는 데이터는 이전과 같은 데이터를 보내게 될 수 있다.
      * 이전과 같은 데이터를 보내는 것이라도, mutateAsync을 동작시키기 때문에, invalidateQuery가 발생한다.

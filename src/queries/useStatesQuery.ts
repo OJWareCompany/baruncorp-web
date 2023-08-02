@@ -3,18 +3,18 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { StatesResponseDto } from "@/api";
 
-export const QUERY_KEY = "departmentControllerFindAllStates";
+export const QUERY_KEY = "states";
 
-const useDepartmentControllerFindAllStatesQuery = () => {
+const useStatesQuery = () => {
   const api = useApi();
 
   return useQuery<StatesResponseDto[], AxiosError<ErrorResponseData>>({
     queryKey: [QUERY_KEY],
     queryFn: () =>
       api.departments
-        .departmentControllerFindAllStates()
+        .departmentControllerGetFindAllStates()
         .then(({ data }) => data),
   });
 };
 
-export default useDepartmentControllerFindAllStatesQuery;
+export default useStatesQuery;
