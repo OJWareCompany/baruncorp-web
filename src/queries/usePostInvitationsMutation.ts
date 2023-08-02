@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { CreateInvitationMailRequestDto } from "@/api";
 
-const useUsersControllerSendInvitationMailMutation = () => {
+const usePostInvitationsMutation = () => {
   const api = useApi();
 
   return useMutation<
@@ -12,9 +12,9 @@ const useUsersControllerSendInvitationMailMutation = () => {
     CreateInvitationMailRequestDto
   >((reqData) =>
     api.users
-      .usersControllerSendInvitationMail(reqData)
+      .usersControllerPostSendInvitationMail(reqData)
       .then(({ data: resData }) => resData)
   );
 };
 
-export default useUsersControllerSendInvitationMailMutation;
+export default usePostInvitationsMutation;

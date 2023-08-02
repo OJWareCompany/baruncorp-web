@@ -32,7 +32,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import useOrganizationControllerCreateOrganizationMutation from "@/queries/useOrganizationControllerCreateOrganizationMutation";
+import usePostOrganizationMutation from "@/queries/usePostOrganizationMutation";
 import Scene from "@/components/Scene";
 import { toast } from "@/hook/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -177,7 +177,7 @@ export default function Page() {
     };
   }
 
-  const { mutateAsync } = useOrganizationControllerCreateOrganizationMutation();
+  const { mutateAsync } = usePostOrganizationMutation();
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({ ...values, ...values.addressForm })

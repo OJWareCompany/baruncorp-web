@@ -1,32 +1,30 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UserPositionDeleteReqDto } from "@/types/dto/departments"; // TODO: remove
-import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
+import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
+import { DepartmentControllerDeleteRevokePositionParams } from "@/api";
 
-const useDepartmentControllerRevokePositionMutation = (
-  userId: string | undefined
-) => {
+const useDeleteMemberPositionMutation = (userId: string | undefined) => {
   const api = useApi();
-  const invalidate = useProfileQueryInvalidation(userId);
+  const invalidate = useProfileByUserIdQueryInvalidation(userId);
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
-    UserPositionDeleteReqDto["positionId"] | null
+    DepartmentControllerDeleteRevokePositionParams["positionId"]
   >(
     (positionId) => {
       if (userId == null || positionId == null) {
         return Promise.reject("userId or positionId is undefined.");
       }
 
-      const params: UserPositionDeleteReqDto = {
+      const params: DepartmentControllerDeleteRevokePositionParams = {
         userId,
         positionId,
       };
 
       return api.departments
-        .departmentControllerRevokePosition(params)
+        .departmentControllerDeleteRevokePosition(params)
         .then(({ data }) => data);
     },
     {
@@ -35,4 +33,4 @@ const useDepartmentControllerRevokePositionMutation = (
   );
 };
 
-export default useDepartmentControllerRevokePositionMutation;
+export default useDeleteMemberPositionMutation;

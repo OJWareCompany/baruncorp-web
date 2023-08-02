@@ -3,9 +3,9 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { OrganizationResponseDto } from "@/api";
 
-export const QUERY_KEY = "organizationControllerFindAll";
+export const QUERY_KEY = "organizations";
 
-const useOrganizationControllerFindAllQuery = () => {
+const useOrganizationsQuery = () => {
   const api = useApi();
 
   return useQuery<OrganizationResponseDto[], AxiosError<ErrorResponseData>>({
@@ -17,4 +17,4 @@ const useOrganizationControllerFindAllQuery = () => {
   });
 };
 
-export default useOrganizationControllerFindAllQuery;
+export default useOrganizationsQuery;

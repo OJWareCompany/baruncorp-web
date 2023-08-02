@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useUsersControllerGetUserInfoQuery from "@/queries/useUsersControllerGetUserInfoQuery";
+import useProfileQuery from "@/queries/useProfileQuery";
 
 const projectManagementNavItems: { name: string; pathname: string }[] = [
   {
@@ -50,7 +50,7 @@ const commonNavItems: { name: string; pathname: string }[] = [
 ];
 
 export default function Header() {
-  const { data: user } = useUsersControllerGetUserInfoQuery();
+  const { data: user } = useProfileQuery();
 
   const handleSignOutButtonClick = () => {
     signOut({ redirect: false });

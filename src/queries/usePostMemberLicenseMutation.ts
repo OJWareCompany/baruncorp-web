@@ -1,12 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
 import useApi from "@/hook/useApi";
-import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
 import { CreateLicenseRequestDto } from "@/api";
 
-const useUsersControllerPostLicenseMutation = (userId: string | undefined) => {
+const usePostMemberLicenseMutation = (userId: string | undefined) => {
   const api = useApi();
-  const invalidate = useProfileQueryInvalidation(userId);
+  const invalidate = useProfileByUserIdQueryInvalidation(userId);
 
   return useMutation<
     void,
@@ -24,7 +24,7 @@ const useUsersControllerPostLicenseMutation = (userId: string | undefined) => {
       };
 
       return api.users
-        .usersControllerPostLicense(data)
+        .usersControllerPostRegisterMemberLicense(data)
         .then(({ data }) => data);
     },
     {
@@ -33,4 +33,4 @@ const useUsersControllerPostLicenseMutation = (userId: string | undefined) => {
   );
 };
 
-export default useUsersControllerPostLicenseMutation;
+export default usePostMemberLicenseMutation;

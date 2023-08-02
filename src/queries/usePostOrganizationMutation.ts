@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { CreateOrganizationRequestDto } from "@/api";
 
-const useOrganizationControllerCreateOrganizationMutation = () => {
+const usePostOrganizationMutation = () => {
   const api = useApi();
 
   return useMutation<
@@ -12,9 +12,9 @@ const useOrganizationControllerCreateOrganizationMutation = () => {
     CreateOrganizationRequestDto
   >((reqData) =>
     api.organizations
-      .organizationControllerCreateOrganization(reqData)
+      .organizationControllerPostCreateOrganization(reqData)
       .then(({ data: resData }) => resData)
   );
 };
 
-export default useOrganizationControllerCreateOrganizationMutation;
+export default usePostOrganizationMutation;

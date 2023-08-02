@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { QUERY_KEY as ahjQueryKey } from "./useGeographyControllerFindNoteByGeoIdQuery";
-import { QUERY_KEY as ahjHistoriesQueryKey } from "./useGeographyControllerFindNoteUpdateHistoryQuery";
+import { QUERY_KEY as ahjQueryKey } from "./useAhjQuery";
+import { QUERY_KEY as ahjHistoriesQueryKey } from "./useAhjHistoriesQuery";
 import useApi from "@/hook/useApi";
 import { UpdateAhjNoteRequestDto } from "@/api";
 
-const useGeographyControllerUpdateNoteMutation = (geoId: string) => {
+const usePutAhjMutation = (geoId: string) => {
   const api = useApi();
   const queryClient = useQueryClient();
 
@@ -16,7 +16,7 @@ const useGeographyControllerUpdateNoteMutation = (geoId: string) => {
   >(
     (data) => {
       return api.geography
-        .geographyControllerUpdateNote(geoId, data)
+        .geographyControllerPutUpdateNote(geoId, data)
         .then(({ data }) => data);
     },
     {
@@ -32,4 +32,4 @@ const useGeographyControllerUpdateNoteMutation = (geoId: string) => {
   );
 };
 
-export default useGeographyControllerUpdateNoteMutation;
+export default usePutAhjMutation;

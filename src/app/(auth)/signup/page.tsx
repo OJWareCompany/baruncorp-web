@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hook/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { PasswordInput } from "@/components/ui/password-input";
-import useAuthenticationControllerSignUpMutation from "@/queries/useAuthenticationControllerSignUpMutation";
+import usePostUserMutation from "@/queries/usePostUserMutation";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -65,7 +65,7 @@ if (process.env.NODE_ENV === "production") {
 export default function SignupPage() {
   const router = useRouter();
 
-  const { mutateAsync } = useAuthenticationControllerSignUpMutation();
+  const { mutateAsync } = usePostUserMutation();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,

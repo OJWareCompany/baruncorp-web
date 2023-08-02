@@ -3,16 +3,16 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { UserResponseDto } from "@/api";
 
-export const QUERY_KEY = "usersControllerFindUsers";
+export const QUERY_KEY = "users";
 
-const useUsersControllerFindUsersQuery = () => {
+const useUsersQuery = () => {
   const api = useApi();
 
   return useQuery<UserResponseDto[], AxiosError<ErrorResponseData>>({
     queryKey: [QUERY_KEY],
     queryFn: () =>
-      api.users.usersControllerFindUsers().then(({ data }) => data),
+      api.users.usersControllerGetFindUsers({}).then(({ data }) => data),
   });
 };
 
-export default useUsersControllerFindUsersQuery;
+export default useUsersQuery;

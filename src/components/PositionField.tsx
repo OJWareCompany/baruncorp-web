@@ -18,8 +18,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
-import useDepartmentControllerFindAllPositionsQuery from "@/queries/useDepartmentControllerFindAllPositionsQuery";
-import useDepartmentControllerAppointPositionMutation from "@/queries/useDepartmentControllerAppointPositionMutation";
+import usePositionsQuery from "@/queries/usePositionsQuery";
+import usePostMemberPositionMutation from "@/queries/usePostMemberPositionMutation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,21 +30,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import useDepartmentControllerRevokePositionMutation from "@/queries/useDepartmentControllerRevokePositionMutation";
-import useUsersControllerGetUserInfoByUserIdQuery from "@/queries/useUsersControllerGetUserInfoByUserIdQuery";
+import useDeleteMemberPositionMutation from "@/queries/useDeleteMemberPositionMutation";
+import useProfileByUserIdQuery from "@/queries/useProfileByUserIdQuery";
 
 interface Props {
   userId: string;
 }
 
 export default function PositionField({ userId }: Props) {
-  const { data: profile } = useUsersControllerGetUserInfoByUserIdQuery(userId);
-  const { data: positions } = useDepartmentControllerFindAllPositionsQuery();
+  const { data: profile } = useProfileByUserIdQuery(userId);
+  const { data: positions } = usePositionsQuery();
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { mutate: postUserPositionMutate } =
-    useDepartmentControllerAppointPositionMutation(userId);
-  const { mutate: deleteUserPositionMutate } =
-    useDepartmentControllerRevokePositionMutation(userId);
+  const { mutate: postMemberPositionMutate } =
+    usePostMemberPositionMutation(userId);
+  const { mutate: deleteMemberPositionMutate } =
+    useDeleteMemberPositionMutation(userId);
 
   return (
     <div className="space-y-2">
@@ -70,7 +70,7 @@ export default function PositionField({ userId }: Props) {
                     <CommandItem
                       key={position.id}
                       onSelect={() => {
-                        postUserPositionMutate(position.id);
+                        postMemberPositionMutate(position.id);
                         setPopoverOpen(false);
                       }}
                     >
@@ -101,7 +101,7 @@ export default function PositionField({ userId }: Props) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
-                    deleteUserPositionMutate(profile?.position?.id ?? null);
+                    deleteMemberPositionMutate(profile?.position?.id ?? null);
                   }}
                 >
                   Continue

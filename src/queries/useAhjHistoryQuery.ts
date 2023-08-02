@@ -3,21 +3,19 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { AhjNoteHistoryResponseDto } from "@/api";
 
-export const QUERY_KEY = "geographyControllerFindNoteUpdateHistoryDetail";
+export const QUERY_KEY = "ahjHistories";
 
-const useGeographyControllerFindNoteUpdateHistoryDetailQuery = (
-  historyId: string | undefined
-) => {
+const useAhjHistoryQuery = (historyId: string | undefined) => {
   const api = useApi();
 
   return useQuery<AhjNoteHistoryResponseDto, AxiosError<ErrorResponseData>>({
     queryKey: [QUERY_KEY, historyId],
     queryFn: () =>
       api.geography
-        .geographyControllerFindNoteUpdateHistoryDetail(Number(historyId))
+        .geographyControllerGetFinNoteUpdateHistoryDetail(Number(historyId))
         .then(({ data }) => data),
     enabled: historyId != null,
   });
 };
 
-export default useGeographyControllerFindNoteUpdateHistoryDetailQuery;
+export default useAhjHistoryQuery;

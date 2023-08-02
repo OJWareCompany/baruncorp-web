@@ -36,7 +36,7 @@ const authOptions: NextAuthOptions = {
         const {
           data: { accessToken, refreshToken },
         } = await api.auth
-          .authenticationControllerSignIn(credentials)
+          .authenticationControllerPostSignIn(credentials)
           .catch((error: AxiosError) => {
             throw new Error(String(error.response?.status));
           });
@@ -66,7 +66,7 @@ const authOptions: NextAuthOptions = {
       const { refreshToken } = token;
 
       await api.auth
-        .authenticationControllerMe({
+        .authenticationControllerGetMe({
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -74,7 +74,7 @@ const authOptions: NextAuthOptions = {
         .catch(async (error: AxiosError<ErrorResponseData>) => {
           if (error.response?.data.errorCode.includes("10005")) {
             await api.auth
-              .authenticationControllerRefresh({
+              .authenticationControllerGetRefresh({
                 headers: {
                   Authorization: `Bearer ${refreshToken}`,
                 },

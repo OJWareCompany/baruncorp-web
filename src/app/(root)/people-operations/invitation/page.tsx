@@ -22,8 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useOrganizationsQuery from "@/queries/useOrganizationControllerFindAllQuery";
-import useUsersControllerSendInvitationMailMutation from "@/queries/useUsersControllerSendInvitationMailMutation";
+import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
+import usePostInvitationsMutation from "@/queries/usePostInvitationsMutation";
 import { toast } from "@/hook/use-toast";
 
 const formSchema = z.object({
@@ -54,7 +54,7 @@ export default function Page() {
   } = form;
 
   const { data: organizations } = useOrganizationsQuery();
-  const { mutateAsync } = useUsersControllerSendInvitationMailMutation();
+  const { mutateAsync } = usePostInvitationsMutation();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     await mutateAsync(values).then(() => {

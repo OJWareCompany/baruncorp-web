@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import useUsersControllerFindUsersQuery from "@/queries/useUsersControllerFindUsersQuery";
+import useUsersQuery from "@/queries/useUsersQuery";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { UserResponseDto } from "@/api";
@@ -124,7 +124,7 @@ const columns = [
 ];
 
 export default function Page() {
-  const { data } = useUsersControllerFindUsersQuery();
+  const { data } = useUsersQuery();
 
   return (
     <div>

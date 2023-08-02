@@ -1,15 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
 import useApi from "@/hook/useApi";
 import { UserResponseDto } from "@/api";
 
-export const QUERY_KEY = "usersControllerGetUserInfoByUserId";
-
-const useUsersControllerGetUserInfoByUserIdQuery = (userId: string) => {
+const useProfileByUserIdQuery = (userId: string) => {
   const api = useApi();
 
   return useQuery<UserResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: [QUERY_KEY, userId],
+    queryKey: [profileQueryKey, userId],
     queryFn: () => {
       return api.users
         .usersControllerGetUserInfoByUserId(userId)
@@ -18,4 +17,4 @@ const useUsersControllerGetUserInfoByUserIdQuery = (userId: string) => {
   });
 };
 
-export default useUsersControllerGetUserInfoByUserIdQuery;
+export default useProfileByUserIdQuery;

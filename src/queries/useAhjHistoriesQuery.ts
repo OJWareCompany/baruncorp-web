@@ -3,9 +3,9 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { AhjNoteHistoryPaginatedResponseDto } from "@/api";
 
-export const QUERY_KEY = "geographyControllerFindNoteUpdateHistory";
+export const QUERY_KEY = "ahjHistories";
 
-const useGeographyControllerFindNoteUpdateHistoryQuery = (geoId: string) => {
+const useAhjHistoriesQuery = (geoId: string) => {
   const api = useApi();
 
   return useQuery<
@@ -15,12 +15,12 @@ const useGeographyControllerFindNoteUpdateHistoryQuery = (geoId: string) => {
     queryKey: [QUERY_KEY, geoId],
     queryFn: () =>
       api.geography
-        .geographyControllerFindNoteUpdateHistory({
+        .geographyControllerGetFindNoteUpdateHistory({
           page: 1,
           geoId,
-        }) // TODO: pagination 적용
+        })
         .then(({ data }) => data),
   });
 };
 
-export default useGeographyControllerFindNoteUpdateHistoryQuery;
+export default useAhjHistoriesQuery;
