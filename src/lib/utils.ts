@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { AxiosError } from "axios";
 import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
+import React from "react";
 import {
   DEFAULT_ERROR_TOAST_DESCRIPTION,
   DEFAULT_ERROR_TOAST_TITLE,
@@ -69,4 +70,10 @@ export function getAddressFieldMap(address: GeocodeFeature) {
     postalCode: resource.get("postcode") ?? "",
     country: resource.get("country") ?? "",
   };
+}
+
+export function getValidChildren(children: React.ReactNode) {
+  return React.Children.toArray(children).filter((child) =>
+    React.isValidElement(child)
+  ) as React.ReactElement[];
 }
