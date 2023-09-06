@@ -11,7 +11,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  ColumnDef,
 } from "@tanstack/react-table";
 import { DataTableViewOptions } from "./view-options";
 import { DataTablePagination } from "./pagination";

@@ -11,7 +11,6 @@ import {
 } from "react-hook-form";
 
 import { VariantProps, cva } from "class-variance-authority";
-import { Input, InputProps } from "./input";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
