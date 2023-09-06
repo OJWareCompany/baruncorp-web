@@ -4,12 +4,17 @@
     "plugin:storybook/recommended",
     "prettier"
   ],
+  "plugins": ["unused-imports"],
   "rules": {
+    // eslint-plugin-import
     "import/order": [
       "warn",
       {
         "groups": ["builtin", "external", "parent", "sibling", "index"]
       }
-    ]
+    ],
+
+    // eslint-plugin-unused-imports
+    "unused-imports/no-unused-imports": "warn"
   }
 }
