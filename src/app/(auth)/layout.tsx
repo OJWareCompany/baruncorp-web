@@ -8,7 +8,7 @@ export default async function AuthLayout({
   return (
     <RoutingGuard authenticated={false}>
       <main className="w-96 mx-auto flex flex-col justify-center py-32">
-        <h1 className="h1 mb-12 text-center">Barun Corp.</h1>
+        <h1 className="h1 mb-12 text-center">Barun Corp</h1>
         {children}
       </main>
     </RoutingGuard>

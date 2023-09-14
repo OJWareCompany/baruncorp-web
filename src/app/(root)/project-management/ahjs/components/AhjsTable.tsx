@@ -1,11 +1,7 @@
 "use client";
 
 import { PaginationState, flexRender } from "@tanstack/react-table";
-import {
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
@@ -103,7 +99,6 @@ export default function AhjsTable() {
     data: data?.items ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getRowId: (originalRow) => originalRow.geoId,
     pageCount: data?.totalPage ?? -1,
     onPaginationChange: setPagination,

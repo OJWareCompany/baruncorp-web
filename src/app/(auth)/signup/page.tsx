@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,10 +15,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/hook/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { PasswordInput } from "@/components/ui/password-input";
-import usePostUserMutation from "@/queries/usePostUserMutation";
+import { PasswordInput } from "@/components/PasswordInput";
+import LoadingButton from "@/components/LoadingButton";
 
 const formSchema = z.object({
   firstName: z.string().trim().min(1, { message: "First Name is required" }),
@@ -65,7 +63,7 @@ if (process.env.NODE_ENV === "production") {
 export default function SignupPage() {
   const router = useRouter();
 
-  const { mutateAsync } = usePostUserMutation();
+  // const { mutateAsync } = use...Mutation(); // TODO
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
@@ -94,25 +92,25 @@ export default function SignupPage() {
       return;
     }
 
-    await mutateAsync(values)
-      .then(() => {
-        router.push("/signin");
-        toast({ title: "Sign-up success" });
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        const { response } = error;
+    // await mutateAsync(values)
+    //   .then(() => {
+    //     router.push("/signin");
+    //     toast({ title: "Sign-up success" });
+    //   })
+    //   .catch((error: AxiosError<ErrorResponseData>) => {
+    //     const { response } = error;
 
-        switch (response?.data.statusCode) {
-          case 404:
-            toast({
-              title: "Invalid code",
-              description:
-                "Please check your email again. If the problem persists, please contact the Barun Corp Manager.",
-              variant: "destructive",
-            });
-            break;
-        }
-      });
+    //     switch (response?.data.statusCode) {
+    //       case 404:
+    //         toast({
+    //           title: "Invalid code",
+    //           description:
+    //             "Please check your email again. If the problem persists, please contact the Barun Corp Manager.",
+    //           variant: "destructive",
+    //         });
+    //         break;
+    //     }
+    //   });
   }
 
   return (
@@ -196,11 +194,20 @@ export default function SignupPage() {
             </FormItem>
           )}
         />
-        <Button type="submit" fullWidth={true} loading={isSubmitting}>
+        <LoadingButton
+          type="submit"
+          isLoading={isSubmitting}
+          className="w-full"
+        >
           Submit
-        </Button>
+        </LoadingButton>
         <Separator />
-        <Button type="button" variant="outline" fullWidth={true} asChild={true}>
+        <Button
+          type="button"
+          variant="outline"
+          asChild={true}
+          className="w-full"
+        >
           <Link href="/signin">Sign in</Link>
         </Button>
       </form>

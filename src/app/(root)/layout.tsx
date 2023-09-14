@@ -9,7 +9,7 @@ export default async function Layout({
   return (
     <RoutingGuard authenticated={true}>
       <Header />
-      <main className="container py-8">{children}</main>
+      <main className="container px-6">{children}</main>
     </RoutingGuard>
   );
 }

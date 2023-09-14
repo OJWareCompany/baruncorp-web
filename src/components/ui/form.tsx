@@ -79,7 +79,12 @@ const FormItem = React.forwardRef<
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} className={cn("space-y-2", className)} {...props} />
+      {/* <div ref={ref} className={cn("space-y-2", className)} {...props} /> */}
+      <div
+        ref={ref}
+        className={cn("flex flex-col gap-2", className)}
+        {...props}
+      />
     </FormItemContext.Provider>
   );
 });
@@ -158,27 +163,36 @@ const FormDescription = React.forwardRef<
 });
 FormDescription.displayName = "FormDescription";
 
-const FormMessage = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, children, ...props }, ref) => {
-  const { error, formMessageId } = useFormField();
+interface FormMessageProps extends React.HTMLAttributes<HTMLParagraphElement> {
+  root?: boolean;
+}
 
-  if (!Boolean(error)) {
-    return null;
+const FormMessage = React.forwardRef<HTMLParagraphElement, FormMessageProps>(
+  ({ className, children, root = false, ...props }, ref) => {
+    const { error, formMessageId } = useFormField();
+
+    if (!Boolean(error)) {
+      return null;
+    }
+
+    const defaultMessage = "Something went wrong";
+    let message = error?.message ?? defaultMessage;
+    if (root) {
+      message = error?.root?.message ?? defaultMessage;
+    }
+
+    return (
+      <p
+        ref={ref}
+        id={formMessageId}
+        className={cn("text-sm font-medium text-destructive", className)}
+        {...props}
+      >
+        {message}
+      </p>
+    );
   }
-
-  return (
-    <p
-      ref={ref}
-      id={formMessageId}
-      className={cn("text-sm font-medium text-destructive", className)}
-      {...props}
-    >
-      {error?.message ?? "Something went wrong"}
-    </p>
-  );
-});
+);
 FormMessage.displayName = "FormMessage";
 
 export {

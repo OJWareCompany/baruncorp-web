@@ -199,6 +199,6 @@ function DropdownMenuRadioGroupDemo() {
   );
 }
 
-export const RadioGroup: Story = {
+export const RadioGroupDemo: Story = {
   render: () => <DropdownMenuRadioGroupDemo />,
 };

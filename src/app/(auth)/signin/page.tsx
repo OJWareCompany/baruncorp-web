@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,7 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hook/use-toast";
-import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordInput } from "@/components/PasswordInput";
+import LoadingButton from "@/components/LoadingButton";
 
 const formSchema = z.object({
   email: z
@@ -133,9 +133,13 @@ export default function SigninPage() {
             </FormItem>
           )}
         />
-        <Button type="submit" fullWidth={true} loading={isSubmitting}>
+        <LoadingButton
+          type="submit"
+          isLoading={isSubmitting}
+          className="w-full"
+        >
           Sign in
-        </Button>
+        </LoadingButton>
       </form>
     </Form>
   );

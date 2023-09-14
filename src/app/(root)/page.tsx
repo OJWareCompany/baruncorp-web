@@ -1,3 +1,3 @@
 export default function Page() {
-  return <div className="h3">Main</div>;
+  return <div className="py-4">Home</div>;
 }

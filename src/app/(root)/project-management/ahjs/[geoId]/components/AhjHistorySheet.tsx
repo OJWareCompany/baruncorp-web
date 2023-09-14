@@ -23,7 +23,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import FieldsRowContainer from "@/components/FieldsRowContainer";
+import FieldsRowContainer from "@/components/RowItemsContainer";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
