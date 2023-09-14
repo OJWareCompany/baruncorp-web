@@ -1,20 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { CreateUserRequestDto, IdResponse } from "@/api";
+import { CreateJobRequestDto, IdResponse } from "@/api";
 
-const usePostUserMutation = () => {
+const usePostJobMutation = () => {
   const api = useApi();
 
   return useMutation<
     IdResponse,
     AxiosError<ErrorResponseData>,
-    CreateUserRequestDto
+    CreateJobRequestDto
   >((reqData) => {
-    return api.users
-      .createUserHttpContollerCreateUnregisteredUser(reqData)
+    return api.jobs
+      .createJobHttpControllerCreateJob(reqData)
       .then(({ data: resData }) => resData);
   });
 };
 
-export default usePostUserMutation;
+export default usePostJobMutation;

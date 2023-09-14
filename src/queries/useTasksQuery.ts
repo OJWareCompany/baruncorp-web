@@ -3,13 +3,11 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { ServiceResponseDto } from "@/api";
 
-export const QUERY_KEY = "services";
-
-const useServicesQuery = () => {
+const useTasksQuery = () => {
   const api = useApi();
 
   return useQuery<ServiceResponseDto[], AxiosError<ErrorResponseData>>({
-    queryKey: [QUERY_KEY],
+    queryKey: ["tasks", "list"],
     queryFn: () =>
       api.departments
         .departmentControllerGetFindAllServices()
@@ -17,4 +15,4 @@ const useServicesQuery = () => {
   });
 };
 
-export default useServicesQuery;
+export default useTasksQuery;

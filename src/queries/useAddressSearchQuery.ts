@@ -2,24 +2,34 @@ import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 
-const client = axios.create({
-  baseURL: "https://api.mapbox.com/geocoding/v5/mapbox.places",
-  headers: {
-    Accept: "application/json",
-  },
-  params: {
-    access_token: process.env.NEXT_PUBLIC_MAP_API_KEY,
-  },
-});
+const useAddressSearchQuery = (
+  searchText: string,
+  { format }: { format: "international" | "us" }
+) => {
+  let country: string;
+  if (format === "us") {
+    country = "us";
+  }
 
-const useAddressSearchQuery = (address: string) => {
   return useQuery<GeocodeFeature[], AxiosError>({
-    queryKey: ["mapbox.places", address],
+    queryKey: ["mapbox.places", searchText],
     queryFn: async () => {
-      const response = await client.get(`${address}.json`);
+      const response = await axios.get(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+          params: {
+            access_token: process.env.NEXT_PUBLIC_MAP_API_KEY,
+            types: "address",
+            country,
+          },
+        }
+      );
       return response.data.features;
     },
-    enabled: address?.length >= 1,
+    enabled: searchText.length >= 1,
   });
 };
 

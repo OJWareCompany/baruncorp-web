@@ -1,20 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { CreateUserRequestDto, IdResponse } from "@/api";
+import { CreateProjectRequestDto, IdResponse } from "@/api";
 
-const usePostUserMutation = () => {
+const usePostProjectMutation = () => {
   const api = useApi();
 
   return useMutation<
     IdResponse,
     AxiosError<ErrorResponseData>,
-    CreateUserRequestDto
+    CreateProjectRequestDto
   >((reqData) => {
-    return api.users
-      .createUserHttpContollerCreateUnregisteredUser(reqData)
+    return api.projects
+      .createProjectHttpControllerPostCreateProejct(reqData)
       .then(({ data: resData }) => resData);
   });
 };
 
-export default usePostUserMutation;
+export default usePostProjectMutation;
