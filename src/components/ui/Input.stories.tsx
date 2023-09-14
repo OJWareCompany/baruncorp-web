@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Search } from "lucide-react";
 import { Input } from "./input";
 
 const meta: Meta<typeof Input> = {
@@ -37,19 +36,5 @@ export const Disabled: Story = {
   args: {
     value: "Input",
     disabled: true,
-  },
-};
-
-export const TrailingText: Story = {
-  args: {
-    value: "Input",
-    trailing: <span className="text-muted-foreground select-none">Kw</span>,
-  },
-};
-
-export const TrailingIcon: Story = {
-  args: {
-    value: "Input",
-    trailing: <Search className="h-5 w-5 text-muted-foreground" />,
   },
 };
