@@ -15,6 +15,7 @@ import { getTitleAndDescFromStatusCode } from "@/lib/utils";
 import {
   DEFAULT_ERROR_TOAST_DESCRIPTION,
   DEFAULT_ERROR_TOAST_TITLE,
+  SERVER_ERROR_TOAST_TITLE,
 } from "@/lib/constants";
 
 interface Props {
@@ -42,6 +43,7 @@ export default function Providers({ children }: Props) {
               return;
             }
 
+            // TODO: check
             const { title, description } = getTitleAndDescFromStatusCode(
               error.response?.data.statusCode
             );
@@ -65,13 +67,18 @@ export default function Providers({ children }: Props) {
               return;
             }
 
-            const { title, description } = getTitleAndDescFromStatusCode(
-              error.response?.data.statusCode
-            );
+            if (error.response && error.response.status >= 500) {
+              console.error(error);
+              toast({
+                title: SERVER_ERROR_TOAST_TITLE,
+                description: DEFAULT_ERROR_TOAST_DESCRIPTION,
+                variant: "destructive",
+              });
+              return;
+            }
 
             toast({
-              title,
-              description,
+              title: error.response?.data.message ?? DEFAULT_ERROR_TOAST_TITLE,
               variant: "destructive",
             });
           },
