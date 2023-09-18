@@ -3,7 +3,13 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { ProjectResponseDto } from "@/api";
 
-const useProjectQuery = (projectId: string) => {
+const useProjectQuery = ({
+  projectId,
+  initialData,
+}: {
+  projectId: string;
+  initialData?: ProjectResponseDto;
+}) => {
   const api = useApi();
 
   return useQuery<ProjectResponseDto, AxiosError<ErrorResponseData>>({
@@ -13,6 +19,7 @@ const useProjectQuery = (projectId: string) => {
         .findProjectDetailHttpControllerFindProjectDetail(projectId)
         .then(({ data }) => data),
     enabled: projectId !== "",
+    initialData,
   });
 };
 

@@ -8,17 +8,19 @@ import {
 } from "@/components/ui/breadcrumb";
 
 function PageHeader() {
+  const title = "Project Intake Portal";
+
   return (
     <div className="py-2">
       <Breadcrumb>
         <BreadcrumbItem isCurrentPage>
           <BreadcrumbLink as={Link} href="/project-intake-portal">
-            Project Intake Portal
+            {title}
           </BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
       <div className="flex justify-between items-center h-9">
-        <h3 className="h3">Project Intake Portal</h3>
+        <h3 className="h3">{title}</h3>
         <Button asChild size={"sm"}>
           <Link href="/project-intake-portal/new-service-order">
             New Service Order

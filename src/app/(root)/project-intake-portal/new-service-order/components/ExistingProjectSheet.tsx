@@ -3,10 +3,10 @@
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import JobsTable from "./JobsTable";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/popover";
 import useProjectsByOrganizationIdQuery from "@/queries/useProjectsByOrganizationIdQuery";
 import { cn } from "@/lib/utils";
+import DataTable from "@/components/table/DataTable";
+import { JobTableRowData, jobTableColumns } from "@/columns/job";
 
 interface Props extends DialogProps {
   selectedOrganizationId: string;
@@ -104,7 +106,7 @@ export default function ExistingProjectSheet({
    */
   const { data: projects, isLoading: isProjectsQueryLoading } =
     useProjectsByOrganizationIdQuery(selectedOrganizationId);
-  const { data: project } = useProjectQuery(watchProjectTempId);
+  const { data: project } = useProjectQuery({ projectId: watchProjectTempId });
 
   /**
    * useEffect
@@ -135,6 +137,59 @@ export default function ExistingProjectSheet({
       });
     }
   }, [form, project]);
+
+  /**
+   * Table
+   */
+  const jobTableData = useMemo(
+    () =>
+      project?.jobs.map<JobTableRowData>((value) => {
+        const {
+          id,
+          additionalInformationFromClient,
+          isExpedited,
+          clientInfo: { clientOrganizationName, clientUserName },
+          jobRequestNumber,
+          jobStatus,
+          mountingType,
+          orderedTasks,
+          propertyFullAddress,
+          receivedAt,
+        } = value;
+
+        return {
+          id: id,
+          additionalInformation: additionalInformationFromClient,
+          clientUserName,
+          organizationName: clientOrganizationName,
+          isExpedited,
+          jobRequestNumber,
+          jobStatus,
+          mountingType,
+          orderedTasks: orderedTasks.map<
+            JobTableRowData["orderedTasks"][number]
+          >((value) => {
+            const {
+              id,
+              assignee: { name: assigneeName },
+              taskName,
+              taskStatus,
+            } = value;
+
+            return { id, assigneeName, name: taskName, status: taskStatus };
+          }),
+          propertyFullAddress,
+          receivedAt,
+        };
+      }),
+    [project?.jobs]
+  );
+  const table = useReactTable({
+    data: jobTableData ?? [],
+    columns: jobTableColumns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (originalRow) => originalRow.id,
+  });
 
   return (
     <Sheet {...dialogProps}>
@@ -284,7 +339,7 @@ export default function ExistingProjectSheet({
                     latitude={watchProject.coordinates[1]}
                   />
                 </div>
-                <JobsTable jobs={project?.jobs ?? []} />
+                <DataTable table={table} />
                 <RowItemsContainer>
                   <Button
                     variant={"outline"}

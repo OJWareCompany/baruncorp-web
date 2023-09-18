@@ -233,35 +233,33 @@ export default function NewProjectSheet({
                     <div className="flex flex-col gap-2">
                       <FormItem>
                         <FormLabel required>Address</FormLabel>
-                        <FormControl>
-                          <AddressSearchButton
-                            format="us"
-                            onSelect={({
-                              street1,
-                              city,
-                              stateOrRegion,
-                              postalCode,
-                              country,
-                              fullAddress,
-                              coordinates,
-                            }) => {
-                              form.setValue(
-                                "address",
-                                {
-                                  street1,
-                                  street2: "",
-                                  city: city ?? "",
-                                  stateOrRegion: stateOrRegion ?? "",
-                                  postalCode: postalCode ?? "",
-                                  country: country ?? "",
-                                  fullAddress,
-                                  coordinates,
-                                },
-                                { shouldValidate: true }
-                              );
-                            }}
-                          />
-                        </FormControl>
+                        <AddressSearchButton
+                          format="us"
+                          onSelect={({
+                            street1,
+                            city,
+                            stateOrRegion,
+                            postalCode,
+                            country,
+                            fullAddress,
+                            coordinates,
+                          }) => {
+                            form.setValue(
+                              "address",
+                              {
+                                street1,
+                                street2: "",
+                                city: city ?? "",
+                                stateOrRegion: stateOrRegion ?? "",
+                                postalCode: postalCode ?? "",
+                                country: country ?? "",
+                                fullAddress,
+                                coordinates,
+                              },
+                              { shouldValidate: true, shouldDirty: true }
+                            );
+                          }}
+                        />
                         <Input
                           value={field.value.street1}
                           readOnly

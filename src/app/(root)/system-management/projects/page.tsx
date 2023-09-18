@@ -5,7 +5,7 @@ import Client from "./client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import api from "@/api";
 
-async function getInitialProjects() {
+async function getProjects() {
   const session = await getServerSession(authOptions);
   if (session == null) {
     return;
@@ -16,10 +16,6 @@ async function getInitialProjects() {
   return api.projects
     .findProjectsHttpControllerFindUsers(
       {
-        organizationId: null,
-        projectNumber: null,
-        propertyFullAddress: null,
-        propertyType: null,
         limit: pageSize,
         page: pageIndex + 1,
       },
@@ -33,11 +29,11 @@ async function getInitialProjects() {
 }
 
 export default async function Page() {
-  const initialProjects = await getInitialProjects();
+  const projects = await getProjects();
 
-  if (initialProjects == null) {
+  if (projects == null) {
     notFound();
   }
 
-  return <Client initialProjects={initialProjects} />;
+  return <Client initialProjects={projects} />;
 }
