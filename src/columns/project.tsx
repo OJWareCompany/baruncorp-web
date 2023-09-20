@@ -1,9 +1,5 @@
 import { createColumnHelper } from "@tanstack/react-table";
 
-
-
-
-
 export interface ProjectTableRowData {
   id: string;
   organizationName: string;
@@ -12,6 +8,7 @@ export interface ProjectTableRowData {
   propertyOwnerName: string | null;
   projectNumber: string | null;
   createdAt: string;
+  numberOfJobs: number;
 }
 
 const columnHelper = createColumnHelper<ProjectTableRowData>();
@@ -78,13 +75,25 @@ export const projectTableColumns = [
       );
     },
   }),
+  columnHelper.accessor("numberOfJobs", {
+    header: "Number of Jobs",
+    size: 150,
+    cell: ({ getValue }) => (
+      <p className="w-[118px] whitespace-nowrap overflow-hidden text-ellipsis">
+        {getValue()}
+      </p>
+    ),
+  }),
   columnHelper.accessor("createdAt", {
     header: "Date Created",
-    size: 300,
-    cell: ({ getValue }) =>
-      new Intl.DateTimeFormat("en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(getValue())),
+    size: 200,
+    cell: ({ getValue }) => (
+      <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
+        {new Intl.DateTimeFormat("en-US", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }).format(new Date(getValue()))}
+      </p>
+    ),
   }),
 ];

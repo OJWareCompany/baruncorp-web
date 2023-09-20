@@ -4,14 +4,14 @@ import * as z from "zod";
 import Link from "next/link";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, ChevronsUpDown, Loader2, PlusCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import NewProjectSheet from "./components/NewProjectSheet";
 import ExistingProjectSheet from "./components/ExistingProjectSheet";
 import NewClientUserSheet from "./components/NewClientUserSheet";
 import ResultDialog from "./components/ResultDialog";
+import JobTable from "./components/JobTable";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -59,8 +59,6 @@ import { CreateOrderedTaskWhenJobIsCreatedRequestDto } from "@/api";
 import { schemaToConvertFromStringToNullableString } from "@/lib/constants";
 import Dropzone from "@/components/Dropzone";
 import LoadingButton from "@/components/LoadingButton";
-import DataTable from "@/components/table/DataTable";
-import { JobTableRowData, jobTableColumns } from "@/columns/job";
 
 function PageHeader() {
   const title = "New Service Order";
@@ -539,59 +537,6 @@ export default function Page() {
       .catch(() => {});
   }
 
-  /**
-   * Table
-   */
-  const jobTableRowData = useMemo(
-    () =>
-      project?.jobs.map<JobTableRowData>((value) => {
-        const {
-          id,
-          additionalInformationFromClient,
-          isExpedited,
-          clientInfo: { clientOrganizationName, clientUserName },
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          orderedTasks,
-          propertyFullAddress,
-          receivedAt,
-        } = value;
-
-        return {
-          id: id,
-          additionalInformation: additionalInformationFromClient,
-          clientUserName,
-          organizationName: clientOrganizationName,
-          isExpedited,
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          orderedTasks: orderedTasks.map<
-            JobTableRowData["orderedTasks"][number]
-          >((value) => {
-            const {
-              id,
-              assignee: { name: assigneeName },
-              taskName,
-              taskStatus,
-            } = value;
-
-            return { id, assigneeName, name: taskName, status: taskStatus };
-          }),
-          propertyFullAddress,
-          receivedAt,
-        };
-      }),
-    [project?.jobs]
-  );
-  const table = useReactTable({
-    data: jobTableRowData ?? [],
-    columns: jobTableColumns,
-    getCoreRowModel: getCoreRowModel(),
-    getRowId: (originalRow) => originalRow.id,
-  });
-
   return (
     <>
       <PageHeader />
@@ -759,7 +704,7 @@ export default function Page() {
                         latitude={watchProject.coordinates[1]}
                       />
                     </div>
-                    <DataTable table={table} />
+                    <JobTable jobs={project?.jobs ?? []} />
                     <Button
                       variant={"outline"}
                       onClick={() => {

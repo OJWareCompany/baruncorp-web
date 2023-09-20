@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { Table as ReactTable, RowData } from "@tanstack/react-table";
 
 import { flexRender } from "@tanstack/react-table";
@@ -17,12 +17,12 @@ interface Props<TData extends RowData> {
   onRowClick?: (id: string) => void;
 }
 
-function DataTable<TData>({ table, onRowClick }: Props<TData>) {
+export default function DataTable<TData>({ table, onRowClick }: Props<TData>) {
   const isEmpty = table.getRowModel().rows.length === 0;
 
   return (
     <div className="rounded-md border overflow-hidden">
-      <Table style={isEmpty ? {} : { width: table.getCenterTotalSize() }}>
+      <Table style={isEmpty ? {} : { minWidth: table.getCenterTotalSize() }}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -80,5 +80,3 @@ function DataTable<TData>({ table, onRowClick }: Props<TData>) {
     </div>
   );
 }
-
-export default memo(DataTable) as typeof DataTable;

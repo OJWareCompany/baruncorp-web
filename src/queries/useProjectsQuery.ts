@@ -20,15 +20,12 @@ const useProjectsQuery = ({
     queryFn: () =>
       api.projects
         .findProjectsHttpControllerFindUsers({
-          propertyType: null,
-          projectNumber: null,
-          propertyFullAddress: null,
-          organizationId: null,
           page: pageIndex + 1,
           limit: pageSize,
         })
         .then(({ data }) => data),
-    initialData,
+    placeholderData: initialData,
+    keepPreviousData: true,
   });
 };
 
