@@ -236,7 +236,7 @@ const formSchema = z.object({
           if (mailingAddress.fullAddress.length === 0) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
-              message: "Address is required",
+              message: "Mailing Address is required",
               path: [`mailingAddress`],
             });
             return;
@@ -940,8 +940,8 @@ export default function Page() {
                         }}
                       />
                     )}
-                    <div className="grid grid-cols-3 gap-4">
-                      {watchProject.propertyType === "Commercial" && (
+                    {watchProject.propertyType === "Commercial" && (
+                      <div className="grid grid-cols-3 gap-4">
                         <FormField
                           control={form.control}
                           name="project.job.systemSize"
@@ -962,8 +962,8 @@ export default function Page() {
                             </FormItem>
                           )}
                         />
-                      )}
-                    </div>
+                      </div>
+                    )}
                     {/* TODO: org가 default mounting type을 가지고 있도록 해서, 그 값이 기본으로 들어가 있게끔 */}
                     <FormField
                       control={form.control}

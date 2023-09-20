@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -67,7 +68,6 @@ const formSchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Address is required",
-          path: ["root"],
         });
       }
     }),
@@ -158,7 +158,22 @@ export default function NewProjectSheet({
           ],
         });
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 409:
+            if (error.response?.data.errorCode.includes("30002")) {
+              form.setError("address", {
+                message: `${values.address.fullAddress} is already existed`,
+              });
+            }
+            if (error.response?.data.errorCode.includes("30003")) {
+              form.setError("projectNumber", {
+                message: `${values.projectNumber} is already existed`,
+              });
+            }
+            break;
+        }
+      });
   }
 
   return (
@@ -304,7 +319,7 @@ export default function NewProjectSheet({
                       />
                     </div>
                   </div>
-                  <FormMessage className="mt-2" root />
+                  <FormMessage className="mt-2" />
                 </div>
               )}
             />

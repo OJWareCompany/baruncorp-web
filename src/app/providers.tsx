@@ -76,11 +76,6 @@ export default function Providers({ children }: Props) {
               });
               return;
             }
-
-            toast({
-              title: error.response?.data.message ?? DEFAULT_ERROR_TOAST_TITLE,
-              variant: "destructive",
-            });
           },
         }),
       })

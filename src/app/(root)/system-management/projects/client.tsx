@@ -72,6 +72,7 @@ export default function Client({ initialProjects }: Props) {
           propertyFullAddress,
           propertyOwnerName,
           propertyType,
+          totalOfJobs,
         } = value;
 
         return {
@@ -82,6 +83,7 @@ export default function Client({ initialProjects }: Props) {
           propertyFullAddress,
           propertyOwnerName,
           propertyType,
+          numberOfJobs: totalOfJobs,
         };
       }),
     [paginatedProjects?.items]
