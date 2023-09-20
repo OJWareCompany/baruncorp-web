@@ -35,6 +35,10 @@ const systemManagementItems: {
     title: "Projects",
     href: "/system-management/projects",
   },
+  {
+    title: "AHJs",
+    href: "/system-management/ahj-notes",
+  },
   // {
   //   title: "Users",
   //   href: "/system-management/users",
@@ -42,10 +46,6 @@ const systemManagementItems: {
   // {
   //   title: "Organizations",
   //   href: "/system-management/organizations",
-  // },
-  // {
-  //   title: "AHJs",
-  //   href: "/system-management/ahjs",
   // },
   // {
   //   title: "Invoices",

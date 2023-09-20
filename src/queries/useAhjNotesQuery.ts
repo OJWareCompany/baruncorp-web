@@ -4,13 +4,19 @@ import { PaginationState } from "@tanstack/react-table";
 import useApi from "@/hook/useApi";
 import { AhjNotePaginatedResponseDto } from "@/api";
 
-export const QUERY_KEY = "ahjs";
+interface Props {
+  pagination: PaginationState;
+  initialData: AhjNotePaginatedResponseDto;
+}
 
-const useAhjsQuery = ({ pageIndex, pageSize }: PaginationState) => {
+const useAhjNotesQuery = ({
+  initialData,
+  pagination: { pageIndex, pageSize },
+}: Props) => {
   const api = useApi();
 
   return useQuery<AhjNotePaginatedResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: [QUERY_KEY, pageIndex, pageSize],
+    queryKey: ["ahjNotes", "list", { pageIndex, pageSize }],
     queryFn: () =>
       api.geography
         .geographyControllerGetFindNotes({
@@ -18,8 +24,9 @@ const useAhjsQuery = ({ pageIndex, pageSize }: PaginationState) => {
           limit: pageSize,
         })
         .then(({ data }) => data),
+    placeholderData: initialData,
     keepPreviousData: true,
   });
 };
 
-export default useAhjsQuery;
+export default useAhjNotesQuery;
