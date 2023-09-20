@@ -5,25 +5,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  ANSIEnum,
-  ANSIEnumWithEmptyString,
-  DigitalSignatureTypeEnum,
-  DigitalSignatureTypeEnumWithEmptyString,
-  SelectOptionEnum,
-  SelectOptionEnumWithEmptyString,
-  WindExposureEnum,
-  WindExposureEnumWithEmptyString,
-  schemaToConvertFromANSIWithEmptyStringToNullableANSI,
-  schemaToConvertFromDigitalSignatureTypeWithEmptyStringToNullableDigitalSignatureType,
-  schemaToConvertFromNullishANSIToANSIWithEmptyString,
-  schemaToConvertFromNullishDigitalSignatureTypeToDigitalSignatureTypeWithEmptyString,
-  schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString,
-  schemaToConvertFromNullishWindExposureToWindExposureWithEmptyString,
-  schemaToConvertFromSelectOptionWithEmptyStringToNullableSelectOption,
-  schemaToConvertFromWindExposureWithEmptyStringToNullableWindExposure,
-} from "./constants";
-import AhjNoteHistoryTable from "./AhjNoteHistoryTable";
 import useAhjNoteQuery from "@/queries/useAhjNoteQuery";
 import {
   Form,
@@ -45,12 +26,25 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { AhjNoteResponseDto, UpdateAhjNoteRequestDto } from "@/api";
 import {
-  schemaToConvertFromNullishStringToString,
+  ANSIEnum,
+  ANSIEnumWithEmptyString,
+  DigitalSignatureTypeEnum,
+  DigitalSignatureTypeEnumWithEmptyString,
+  SelectOptionEnum,
+  SelectOptionEnumWithEmptyString,
+  WindExposureEnum,
+  WindExposureEnumWithEmptyString,
+  schemaToConvertFromANSIWithEmptyStringToNullableANSI,
+  schemaToConvertFromDigitalSignatureTypeWithEmptyStringToNullableDigitalSignatureType,
+  schemaToConvertFromSelectOptionWithEmptyStringToNullableSelectOption,
+  schemaToConvertFromWindExposureWithEmptyStringToNullableWindExposure,
   schemaToConvertFromStringToNullableString,
 } from "@/lib/constants";
 import LoadingButton from "@/components/LoadingButton";
 import usePutAhjMutation from "@/queries/usePutAhjMutation";
 import ItemsContainer from "@/components/ItemsContainer";
+import { getFieldValuesFromAhjNote } from "@/lib/utils";
+import AhjNoteHistoryTable from "@/components/ahj/AhjNoteHistoryTable";
 
 const formSchema = z.object({
   // general
@@ -95,114 +89,6 @@ const formSchema = z.object({
 });
 
 type FieldValues = z.infer<typeof formSchema>;
-
-export function getFieldValuesFromAhjNote(
-  ahjNote: AhjNoteResponseDto
-): FieldValues {
-  const { design, electricalEngineering, engineering, general } = ahjNote;
-
-  return {
-    // general
-    general: {
-      name: general.name,
-      website: schemaToConvertFromNullishStringToString.parse(general.website),
-      specificFormRequired:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          general.specificFormRequired
-        ),
-      buildingCodes: schemaToConvertFromNullishStringToString.parse(
-        general.buildingCodes
-      ),
-      generalNotes: schemaToConvertFromNullishStringToString.parse(
-        general.generalNotes
-      ),
-      updatedAt: schemaToConvertFromNullishStringToString.parse(
-        general.updatedAt
-      ),
-      updatedBy: schemaToConvertFromNullishStringToString.parse(
-        general.updatedBy
-      ),
-    },
-    // design
-    design: {
-      fireSetBack: schemaToConvertFromNullishStringToString.parse(
-        design.fireSetBack
-      ),
-      utilityNotes: schemaToConvertFromNullishStringToString.parse(
-        design.utilityNotes
-      ),
-      designNotes: schemaToConvertFromNullishStringToString.parse(
-        design.designNotes
-      ),
-      pvMeterRequired:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          design.pvMeterRequired
-        ),
-      acDisconnectRequired:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          design.acDisconnectRequired
-        ),
-      centerFed120Percent:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          design.centerFed120Percent
-        ),
-      deratedAmpacity: schemaToConvertFromNullishStringToString.parse(
-        design.deratedAmpacity
-      ),
-    },
-    // structural engineering
-    structuralEngineering: {
-      iebcAccepted:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          engineering.iebcAccepted
-        ),
-      structuralObservationRequired:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          engineering.structuralObservationRequired
-        ),
-      digitalSignatureType:
-        schemaToConvertFromNullishDigitalSignatureTypeToDigitalSignatureTypeWithEmptyString.parse(
-          engineering.digitalSignatureType
-        ),
-      windUpliftCalculationRequired:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          engineering.windUpliftCalculationRequired
-        ),
-      windSpeed: schemaToConvertFromNullishStringToString.parse(
-        engineering.windSpeed
-      ),
-      windExposure:
-        schemaToConvertFromNullishWindExposureToWindExposureWithEmptyString.parse(
-          engineering.windExposure
-        ),
-      snowLoadGround: schemaToConvertFromNullishStringToString.parse(
-        engineering.snowLoadGround
-      ),
-      snowLoadFlatRoof: schemaToConvertFromNullishStringToString.parse(
-        engineering.snowLoadFlatRoof
-      ),
-      wetStampsRequired:
-        schemaToConvertFromNullishSelectOptionToSelectOptionWithEmptyString.parse(
-          engineering.wetStampsRequired
-        ),
-      ofWetStamps: schemaToConvertFromNullishStringToString.parse(
-        engineering.ofWetStamps
-      ),
-      wetStampSize: schemaToConvertFromNullishANSIToANSIWithEmptyString.parse(
-        engineering.wetStampSize
-      ),
-      engineeringNotes: schemaToConvertFromNullishStringToString.parse(
-        engineering.engineeringNotes
-      ),
-    },
-    // electrical engineering
-    electricalEngineering: {
-      engineeringNotes: schemaToConvertFromNullishStringToString.parse(
-        electricalEngineering.electricalNotes
-      ),
-    },
-  };
-}
 
 interface Props {
   geoId: string;
@@ -329,6 +215,7 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
           values.electricalEngineering.engineeringNotes
         ),
       };
+
     await mutateAsync({
       general,
       design,

@@ -8,8 +8,7 @@ import {
   DigitalSignatureTypeEnumWithEmptyString,
   SelectOptionEnumWithEmptyString,
   WindExposureEnumWithEmptyString,
-} from "./constants";
-import { getFieldValuesFromAhjNote } from "./AhjNote";
+} from "@/lib/constants";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import useAhjNoteHistoryQuery from "@/queries/useAhjNoteHistoryQuery";
 import {
@@ -22,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import RowItemsContainer from "@/components/RowItemsContainer";
+import { getFieldValuesFromAhjNote } from "@/lib/utils";
 
 const formSchema = z.object({
   // general

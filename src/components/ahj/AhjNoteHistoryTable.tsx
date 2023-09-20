@@ -4,14 +4,10 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import { initialPagination } from "./constants";
-
 import AhjNoteHistorySheet from "./AhjNoteHistorySheet";
 import DataTable from "@/components/table/DataTable";
 import Pagination from "@/components/table/Pagination";
-
-
 import usePaginatedAhjNoteHistoriesQuery from "@/queries/usePaginatedAhjNoteHistoriesQuery";
 import {
   AhjNoteHistoryTableRowData,

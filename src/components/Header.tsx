@@ -36,7 +36,7 @@ const systemManagementItems: {
     href: "/system-management/projects",
   },
   {
-    title: "AHJs",
+    title: "AHJ Notes",
     href: "/system-management/ahj-notes",
   },
   // {

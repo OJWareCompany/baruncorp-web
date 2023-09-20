@@ -14,7 +14,7 @@ export const ahjNoteTableColumns = [
     header: "Name",
     size: 400,
     cell: ({ getValue }) => (
-      <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
+      <p className="w-[368px] whitespace-nowrap overflow-hidden text-ellipsis">
         {getValue()}
       </p>
     ),
