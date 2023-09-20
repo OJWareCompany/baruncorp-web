@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
+import Client from "./client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import api from "@/api";
 
@@ -31,5 +32,5 @@ export default async function Page({ params: { projectId } }: Props) {
     notFound();
   }
 
-  return <div>{JSON.stringify(project)}</div>;
+  return <Client initialProject={project} />;
 }

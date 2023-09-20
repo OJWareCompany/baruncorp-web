@@ -47,6 +47,11 @@ export const jobTableColumns = [
   columnHelper.accessor("jobRequestNumber", {
     header: "#",
     size: 100,
+    cell: ({ getValue }) => (
+      <p className="w-[68px] whitespace-nowrap overflow-hidden text-ellipsis">
+        {getValue()}
+      </p>
+    ),
   }),
   columnHelper.accessor("propertyFullAddress", {
     header: "Address",
@@ -78,6 +83,11 @@ export const jobTableColumns = [
   columnHelper.accessor("mountingType", {
     header: "Mounting Type",
     size: 250,
+    cell: ({ getValue }) => (
+      <p className="w-[218px] whitespace-nowrap overflow-hidden text-ellipsis">
+        {getValue()}
+      </p>
+    ),
   }),
   columnHelper.accessor("additionalInformation", {
     header: "Additional Information",
@@ -97,7 +107,7 @@ export const jobTableColumns = [
     },
   }),
   columnHelper.accessor("jobStatus", {
-    header: "Job Status",
+    header: "Status",
     size: 150,
     cell: ({ getValue }) => {
       const value = getValue();
@@ -171,11 +181,14 @@ export const jobTableColumns = [
   }),
   columnHelper.accessor("receivedAt", {
     header: "Date Received",
-    size: 300,
-    cell: ({ getValue }) =>
-      new Intl.DateTimeFormat("en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(getValue())),
+    size: 200,
+    cell: ({ getValue }) => (
+      <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
+        {new Intl.DateTimeFormat("en-US", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }).format(new Date(getValue()))}
+      </p>
+    ),
   }),
 ];

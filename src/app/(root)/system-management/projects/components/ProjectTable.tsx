@@ -8,12 +8,9 @@ import {
 import { useRouter } from "next/navigation";
 import { initialPagination } from "./constants";
 
-
 import DataTable from "@/components/table/DataTable";
 import Pagination from "@/components/table/Pagination";
-import {
-  ProjectPaginatedResponseDto,
-} from "@/api";
+import { ProjectPaginatedResponseDto } from "@/api";
 import useProjectsQuery from "@/queries/useProjectsQuery";
 import { ProjectTableRowData, projectTableColumns } from "@/columns/project";
 
@@ -85,8 +82,8 @@ export default function ProjectTable({ initialProjects }: Props) {
     <div className="space-y-4">
       <DataTable
         table={table}
-        onRowClick={(jobId) => {
-          router.push(`/system-management/jobs/${jobId}`);
+        onRowClick={(projectId) => {
+          router.push(`/system-management/projects/${projectId}`);
         }}
       />
       <Pagination table={table} />
