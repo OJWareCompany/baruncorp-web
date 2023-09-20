@@ -38,6 +38,7 @@ import LoadingButton from "@/components/LoadingButton";
 import Minimap from "@/components/Minimap";
 import usePatchProjectMutation from "@/queries/usePatchProjectMutation";
 import useProjectQuery from "@/queries/useProjectQuery";
+import { Button } from "@/components/ui/button";
 
 interface PageHeaderProps {
   project?: ProjectResponseDto;
@@ -76,11 +77,11 @@ function PageHeader({ project }: PageHeaderProps) {
       </Breadcrumb>
       <div className="flex justify-between items-center h-9">
         <h3 className="h3">{title}</h3>
-        {/* <Button asChild={true} size={"sm"}>
+        <Button asChild={true} size={"sm"}>
           <Link href={`/system-management/projects/${projectId}/ahj`}>
             View AHJ
           </Link>
-        </Button> */}
+        </Button>
       </div>
     </div>
   );

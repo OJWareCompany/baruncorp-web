@@ -23,6 +23,21 @@ export const schemaToConvertFromStringToNullableString = z
   .trim()
   .transform((v) => (v === "" ? null : v));
 
+/**
+ * undefined => ""
+ * null => ""
+ * 3 => "3"
+ * "" => ""
+ * "  " => ""
+ * "  abc  " => "abc"
+ * "abc" => "abc"
+ */
+export const schemaToConvertFromNullishStringToString = z.coerce
+  .string()
+  .trim()
+  .nullish()
+  .transform((v) => v ?? "");
+
 export const statuses = [
   {
     value: "Not Started",

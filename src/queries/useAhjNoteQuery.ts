@@ -3,18 +3,23 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { AhjNoteResponseDto } from "@/api";
 
-export const QUERY_KEY = "ahjs";
-
-const useAhjQuery = (geoId: string) => {
+const useAhjNoteQuery = ({
+  geoId,
+  initialData,
+}: {
+  geoId: string;
+  initialData?: AhjNoteResponseDto;
+}) => {
   const api = useApi();
 
   return useQuery<AhjNoteResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: [QUERY_KEY, geoId],
+    queryKey: ["ahjNotes", "detail", geoId],
     queryFn: () =>
       api.geography
         .geographyControllerGetFindNoteByGeoId(geoId)
         .then(({ data }) => data),
+    initialData,
   });
 };
 
-export default useAhjQuery;
+export default useAhjNoteQuery;
