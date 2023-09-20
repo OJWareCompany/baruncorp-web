@@ -1,8 +1,7 @@
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
-import { authOptions } from "../api/auth/[...nextauth]/route";
-import Header from "@/components/Header";
-import RoutingGuard from "@/components/RoutingGuard";
+import Client from "./client";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import api from "@/api";
 
 async function getProfile() {
@@ -20,21 +19,12 @@ async function getProfile() {
     .then(({ data }) => data);
 }
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function Page() {
   const profile = await getProfile();
 
   if (profile == null) {
     notFound();
   }
 
-  return (
-    <RoutingGuard authenticated={true}>
-      <Header initialProfile={profile} />
-      <main className="container px-6">{children}</main>
-    </RoutingGuard>
-  );
+  return <Client initialProfile={profile} />;
 }

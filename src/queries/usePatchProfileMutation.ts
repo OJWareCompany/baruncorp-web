@@ -1,21 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { UpdateUserRequestDto } from "../api/index";
 import useApi from "@/hook/useApi";
-import useProfileQueryInvalidation from "@/hook/useProfileQueryInvalidation";
+import { UpdateUserRequestDto } from "@/api";
 
 const usePatchProfileMutation = () => {
   const api = useApi();
-  const invalidate = useProfileQueryInvalidation();
 
   return useMutation<void, AxiosError<ErrorResponseData>, UpdateUserRequestDto>(
-    (data) => {
+    (reqData) => {
       return api.users
-        .usersControllerPatchUpdateUser(data)
-        .then(({ data }) => data);
-    },
-    {
-      onSuccess: () => invalidate(),
+        .usersControllerPatchUpdateUser(reqData)
+        .then(({ data: resData }) => resData);
     }
   );
 };

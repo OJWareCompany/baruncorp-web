@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LogOut, User2 } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import React from "react";
@@ -25,6 +25,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { UserResponseDto } from "@/api";
 
 const systemManagementItems: {
   title: string;
@@ -87,8 +88,12 @@ const ListItem = React.forwardRef<
 });
 ListItem.displayName = "ListItem";
 
-export default function Header() {
-  const { data: user } = useProfileQuery();
+interface Props {
+  initialProfile: UserResponseDto;
+}
+
+export default function Header({ initialProfile }: Props) {
+  const { data: user } = useProfileQuery(initialProfile);
 
   const handleSignOutButtonClick = () => {
     signOut({ redirect: false });
@@ -102,7 +107,7 @@ export default function Header() {
             <h1 className="h3 pointer-events-none">Barun Corp</h1>
           </Link>
           <nav>
-            <NavigationMenu>
+            <NavigationMenu delayDuration={0}>
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>
@@ -168,7 +173,7 @@ export default function Header() {
             {user?.fullName && (
               <Button
                 variant={"ghost"}
-                className="relative h-10 w-10 rounded-full animate-in fade-in"
+                className="relative h-10 w-10 rounded-full"
               >
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>{user.fullName.slice(0, 2)}</AvatarFallback>
@@ -187,13 +192,13 @@ export default function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {/* <DropdownMenuItem asChild>
-                <Link href="/profile">
+              <DropdownMenuItem asChild>
+                <Link href="/my/profile">
                   <User2 className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator /> */}
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOutButtonClick}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sign Out</span>
