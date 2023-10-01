@@ -52,7 +52,8 @@ const SelectContent = React.forwardRef<
       className={cn(
         "p-1",
         position === "popper" &&
-          "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+          "h-[var(--radix-select-trigger-height)] w-full min-w-[calc(var(--radix-select-trigger-width)-2px)]" // trigger와 width가 차이가 나서 -2px 추가함
+        // "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
       )}
     >
       {children}

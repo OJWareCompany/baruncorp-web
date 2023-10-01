@@ -1,4 +1,4 @@
-import RoutingGuard from "@/components/RoutingGuard";
+import Unauthenticate from "./Unauthenticate";
 
 export default async function AuthLayout({
   children,
@@ -6,11 +6,11 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <RoutingGuard authenticated={false}>
+    <Unauthenticate>
       <main className="w-96 mx-auto flex flex-col justify-center py-32">
         <h1 className="h1 mb-12 text-center">Barun Corp</h1>
         {children}
       </main>
-    </RoutingGuard>
+    </Unauthenticate>
   );
 }

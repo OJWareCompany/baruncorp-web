@@ -1,14 +1,8 @@
 import { DialogProps } from "@radix-ui/react-dialog";
-import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import {
-  ANSIEnumWithEmptyString,
-  DigitalSignatureTypeEnumWithEmptyString,
-  SelectOptionEnumWithEmptyString,
-  WindExposureEnumWithEmptyString,
-} from "@/lib/constants";
+
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import useAhjNoteHistoryQuery from "@/queries/useAhjNoteHistoryQuery";
 import {
@@ -21,51 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import RowItemsContainer from "@/components/RowItemsContainer";
-import { getFieldValuesFromAhjNote } from "@/lib/utils";
-
-const formSchema = z.object({
-  // general
-  general: z.object({
-    name: z.string(),
-    website: z.string(),
-    specificFormRequired: SelectOptionEnumWithEmptyString,
-    generalNotes: z.string(),
-    buildingCodes: z.string(),
-    updatedBy: z.string(),
-    updatedAt: z.string(),
-  }),
-  // design
-  design: z.object({
-    fireSetBack: z.string(),
-    utilityNotes: z.string(),
-    designNotes: z.string(),
-    pvMeterRequired: SelectOptionEnumWithEmptyString,
-    acDisconnectRequired: SelectOptionEnumWithEmptyString,
-    centerFed120Percent: SelectOptionEnumWithEmptyString,
-    deratedAmpacity: z.string(),
-  }),
-  // structural engineering
-  structuralEngineering: z.object({
-    iebcAccepted: SelectOptionEnumWithEmptyString,
-    structuralObservationRequired: SelectOptionEnumWithEmptyString,
-    digitalSignatureType: DigitalSignatureTypeEnumWithEmptyString,
-    windUpliftCalculationRequired: SelectOptionEnumWithEmptyString,
-    windSpeed: z.string(),
-    windExposure: WindExposureEnumWithEmptyString,
-    snowLoadGround: z.string(),
-    snowLoadFlatRoof: z.string(),
-    wetStampsRequired: SelectOptionEnumWithEmptyString,
-    ofWetStamps: z.string(),
-    wetStampSize: ANSIEnumWithEmptyString,
-    engineeringNotes: z.string(),
-  }),
-  // electrical engineering
-  electricalEngineering: z.object({
-    engineeringNotes: z.string(),
-  }),
-});
-
-type FieldValues = z.infer<typeof formSchema>;
+import { FieldValues, formSchema, getFieldValuesFromAhjNote } from "@/lib/ahj";
 
 interface Props extends DialogProps {
   id?: string;
@@ -178,11 +128,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                       <FormItem>
                         <FormLabel>Building Codes</FormLabel>
                         <FormControl>
-                          <Textarea
-                            {...field}
-                            className="resize-none"
-                            readOnly
-                          />
+                          <Textarea {...field} readOnly />
                         </FormControl>
                       </FormItem>
                     )}
@@ -194,11 +140,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                       <FormItem>
                         <FormLabel>General Notes</FormLabel>
                         <FormControl>
-                          <Textarea
-                            {...field}
-                            className="resize-none"
-                            readOnly
-                          />
+                          <Textarea {...field} readOnly />
                         </FormControl>
                       </FormItem>
                     )}
@@ -266,7 +208,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                     <FormItem>
                       <FormLabel>Fire Setback</FormLabel>
                       <FormControl>
-                        <Textarea {...field} className="resize-none" readOnly />
+                        <Textarea {...field} readOnly />
                       </FormControl>
                     </FormItem>
                   )}
@@ -278,7 +220,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                     <FormItem>
                       <FormLabel>Utility Notes</FormLabel>
                       <FormControl>
-                        <Textarea {...field} className="resize-none" readOnly />
+                        <Textarea {...field} readOnly />
                       </FormControl>
                     </FormItem>
                   )}
@@ -290,7 +232,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                     <FormItem>
                       <FormLabel>Design Notes</FormLabel>
                       <FormControl>
-                        <Textarea {...field} className="resize-none" readOnly />
+                        <Textarea {...field} readOnly />
                       </FormControl>
                     </FormItem>
                   )}
@@ -447,7 +389,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                     <FormItem>
                       <FormLabel>Engineering Notes</FormLabel>
                       <FormControl>
-                        <Textarea {...field} className="resize-none" readOnly />
+                        <Textarea {...field} readOnly />
                       </FormControl>
                     </FormItem>
                   )}
@@ -463,7 +405,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                   <FormItem>
                     <FormLabel>Engineering Notes</FormLabel>
                     <FormControl>
-                      <Textarea {...field} className="resize-none" readOnly />
+                      <Textarea {...field} readOnly />
                     </FormControl>
                   </FormItem>
                 )}

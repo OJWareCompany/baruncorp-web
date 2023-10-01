@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { DefaultValues, useForm } from "react-hook-form";
 import * as z from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -14,105 +14,85 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/hook/use-toast";
 import { PasswordInput } from "@/components/PasswordInput";
 import LoadingButton from "@/components/LoadingButton";
+import { defaultErrorToast } from "@/lib/constants";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   email: z
     .string()
     .trim()
     .min(1, { message: "Email Address is required" })
-    .email({ message: "Format of email address is incorrect" }),
+    .email({ message: "Format of Email Address is incorrect" }),
   password: z.string().trim().min(1, { message: "Password is required" }),
 });
 
-const defaultValues = {
-  email: "ejsvk3284@kakao.com",
-  password: "WkdWkdaos123!",
-};
+type FieldValues = z.infer<typeof formSchema>;
 
-if (process.env.NODE_ENV === "production") {
-  defaultValues.email = "";
-  defaultValues.password = "";
+let defaultValues: DefaultValues<FieldValues> = {
+  email: "",
+  password: "",
+};
+if (process.env.NODE_ENV === "development") {
+  defaultValues = {
+    email: "ejsvk3284@kakao.com",
+    password: "WkdWkdaos123!",
+  };
 }
 
 export default function SigninPage() {
   const router = useRouter();
+  const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  /**
+   * Form
+   */
+  const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
-  const {
-    control,
-    formState: { isSubmitting },
-    handleSubmit,
-  } = form;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FieldValues) {
     const { email, password } = values;
-    if (email.split("@")[0] === password) {
-      control.setError("password", {
-        message: "Password cannot be a email address",
-      });
-      return;
-    }
-
-    const response = await signIn("credentials", {
+    const signInResponse = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
 
-    if (response == null) {
-      toast({
-        title: "Something went wrong",
-        description:
-          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
-        variant: "destructive",
-      });
+    if (signInResponse == null) {
+      toast(defaultErrorToast);
       return;
     }
-
-    let { error: statusCode } = response;
-
-    if (statusCode == null) {
-      router.push("/");
+    const { error } = signInResponse;
+    if (error == null) {
       toast({ title: "Sign-in success" });
+      router.push("/");
       return;
     }
-
-    const { success } = z
-      .number()
-      .min(400)
-      .max(499)
-      .safeParse(Number(statusCode));
-
-    if (success) {
-      toast({
-        title: "Invalid email address or password",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Server error",
-        description:
-          "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.",
-        variant: "destructive",
-      });
+    const statusCode = Number(error);
+    switch (statusCode) {
+      case 400:
+        form.setError("password", {
+          message: "Invalid email address or password",
+        });
+        break;
+      default:
+        toast(defaultErrorToast);
+        break;
     }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
-          control={control}
+          control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required={true}>Email Address</FormLabel>
+              <FormLabel required>Email Address</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -121,11 +101,11 @@ export default function SigninPage() {
           )}
         />
         <FormField
-          control={control}
+          control={form.control}
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required={true}>Password</FormLabel>
+              <FormLabel required>Password</FormLabel>
               <FormControl>
                 <PasswordInput {...field} />
               </FormControl>
@@ -135,7 +115,7 @@ export default function SigninPage() {
         />
         <LoadingButton
           type="submit"
-          isLoading={isSubmitting}
+          isLoading={form.formState.isSubmitting}
           className="w-full"
         >
           Sign in

@@ -12,8 +12,12 @@ export const ahjNoteHistoryTableColumns = [
   columnHelper.accessor("updatedBy", {
     header: "Modified By",
     size: 400,
-    cell: ({ getValue }) => (
-      <p className="w-[368px] whitespace-nowrap overflow-hidden text-ellipsis">
+    cell: ({ getValue, column }) => (
+      <p
+        className={`w-[${
+          column.getSize() - 32
+        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
         {getValue()}
       </p>
     ),
@@ -21,8 +25,12 @@ export const ahjNoteHistoryTableColumns = [
   columnHelper.accessor("updatedAt", {
     header: "Date Modified",
     size: 400,
-    cell: ({ getValue }) => (
-      <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
+    cell: ({ getValue, column }) => (
+      <p
+        className={`w-[${
+          column.getSize() - 32
+        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
         {new Intl.DateTimeFormat("en-US", {
           dateStyle: "short",
           timeStyle: "short",

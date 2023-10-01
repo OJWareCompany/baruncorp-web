@@ -50,7 +50,10 @@ export default function DataTable<TData>({ table, onRowClick }: Props<TData>) {
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className={cn(onRowClick != null && "cursor-pointer")}
+                className={cn(
+                  onRowClick != null && "cursor-pointer",
+                  row.depth > 0 && "bg-muted/50"
+                )}
                 onClick={() => {
                   onRowClick?.(row.id);
                 }}

@@ -8,7 +8,7 @@ const useAhjNoteQuery = ({
   initialData,
 }: {
   geoId: string;
-  initialData?: AhjNoteResponseDto;
+  initialData?: AhjNoteResponseDto | null;
 }) => {
   const api = useApi();
 
@@ -18,7 +18,7 @@ const useAhjNoteQuery = ({
       api.geography
         .geographyControllerGetFindNoteByGeoId(geoId)
         .then(({ data }) => data),
-    initialData,
+    initialData: initialData == null ? undefined : initialData,
   });
 };
 

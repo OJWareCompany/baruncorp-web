@@ -1,22 +1,14 @@
 "use client";
 
 import * as z from "zod";
-import Link from "next/link";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { Check, ChevronsUpDown, Loader2, PlusCircle, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import NewProjectSheet from "./components/NewProjectSheet";
-import ExistingProjectSheet from "./components/ExistingProjectSheet";
-import NewClientUserSheet from "./components/NewClientUserSheet";
-import ResultDialog from "./components/ResultDialog";
-import JobTable from "./components/JobTable";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
+import { useEffect, useMemo, useState } from "react";
+import { X } from "lucide-react";
+import NewProjectSheet from "./NewProjectSheet";
+import ExistingProjectSheet from "./ExistingProjectSheet";
+import ResultDialog from "./ResultDialog";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,92 +18,81 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
 import RowItemsContainer from "@/components/RowItemsContainer";
 import useProjectQuery from "@/queries/useProjectQuery";
 import { Input } from "@/components/ui/input";
 import Minimap from "@/components/Minimap";
 import ItemsContainer from "@/components/ItemsContainer";
-import useTasksQuery from "@/queries/useTasksQuery";
 import { Checkbox } from "@/components/ui/checkbox";
-import useUserByUserIdQuery from "@/queries/useUserQuery";
+import useUserQuery from "@/queries/useUserQuery";
 import AddressSearchButton from "@/components/AddressSearchButton";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { AffixInput } from "@/components/AffixInput";
-import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
-import { cn } from "@/lib/utils";
-import useUsersByOrganizationIdQuery from "@/queries/useClientUsersByOrganizationIdQuery";
 import usePostJobMutation from "@/queries/usePostJobMutation";
 import { CreateOrderedTaskWhenJobIsCreatedRequestDto } from "@/api";
-import { schemaToConvertFromStringToNullableString } from "@/lib/constants";
+import {
+  ELECTRICAL_LOAD_CALCULATION_SERVICE_ID,
+  ELECTRICAL_LOAD_JUSTIFICATION_LETTER_SERVICE_ID,
+  ELECTRICAL_PE_STAMP_SERVICE_ID,
+  ELECTRICAL_POST_INSTALLED_LETTER_SERVICE_ID,
+  ELECTRICAL_WET_STAMP_SERVICE_ID,
+  ESS_ELECTRICAL_PE_STAMP_SERVICE_ID,
+  ESS_STRUCTURAL_PE_STAMP_SERVICE_ID,
+  MountingTypeEnum,
+  OTHER_SERVICE_ID,
+  SPECIAL_INSPECTION_FORM_SERVICE_ID,
+  STRUCTURAL_FEASIBILITY_SERVICE_ID,
+  STRUCTURAL_PE_STAMP_SERVICE_ID,
+  STRUCTURAL_POST_INSTALLED_LETTER_SERVICE_ID,
+  STRUCTURAL_WET_STAMP_SERVICE_ID,
+  transformStringIntoNullableString,
+} from "@/lib/constants";
 import Dropzone from "@/components/Dropzone";
 import LoadingButton from "@/components/LoadingButton";
+import OrganizationsCombobox from "@/components/combobox/OrganizationsCombobox";
+import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizationCombobox";
+import NewUserByOrganizationSheet from "@/components/sheet/NewUserByOrganizationSheet";
+import Item from "@/components/Item";
+import { Label } from "@/components/ui/label";
+import useAllServicesQuery from "@/queries/useAllServicesQuery";
+import useOrganizationQuery from "@/queries/useOrganizationQuery";
+import BaseTable from "@/components/table/BaseTable";
+import { JobTableRowData, jobTableColumns } from "@/columns/job";
+import PageHeader from "@/components/PageHeader";
 
-function PageHeader() {
-  const title = "New Service Order";
+export default function Page() {
+  /**
+   * State
+   */
+  const [organizationId, setOrganizationId] = useState("");
+  const [projectId, setProjectId] = useState("");
+  const [wetStampChecked, setWetStampChecked] = useState(false);
 
-  return (
-    <div className="py-2 ">
-      <Breadcrumb>
-        <BreadcrumbItem>
-          <BreadcrumbLink as={Link} href="/project-intake-portal">
-            Project Intake Portal
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem isCurrentPage>
-          <BreadcrumbLink
-            as={Link}
-            href="/project-intake-portal/new-service-order"
-          >
-            {title}
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
-      <div className="flex justify-between items-center h-9">
-        <h3 className="h3">{title}</h3>
-      </div>
-    </div>
-  );
-}
+  const [newProjectSheetOpen, setNewProjectSheetOpen] = useState(false);
+  const [existingProjectSheetOpen, setExistingProjectSheetOpen] =
+    useState(false);
+  const [newUserSheetOpen, setNewUserSheetOpen] = useState(false);
+  const [result, setResult] = useState<{ open: boolean; jobId?: string }>({
+    open: false,
+  });
+  const [files, setFiles] = useState<File[]>([]);
 
-const formSchema = z.object({
-  organization: z.object({
-    id: z.string().trim().min(1, { message: "Organization Id is required" }),
-    name: z
-      .string()
-      .trim()
-      .min(1, { message: "Organization Name is required" }),
-  }),
-  project: z
-    .object({
-      tempId: z.string(),
-      id: z.string().trim().min(1, { message: "Project Id is required" }),
-      propertyAddress: z
-        .string()
-        .trim()
-        .min(1, { message: "Project Property Address is required" }),
-      propertyType: z.enum(["Residential", "Commercial"], {
-        required_error: "Project Property Type is required",
-      }),
-      propertyOwner: z.string(),
-      projectNumber: z.string(),
-      coordinates: z
-        .array(z.number())
-        .min(1, { message: "Project Coordinates is required" }),
-      job: z
+  /**
+   * Query
+   */
+  const { data: project } = useProjectQuery({ projectId });
+  const { data: organization } = useOrganizationQuery({ organizationId });
+  const { data: services } = useAllServicesQuery();
+  const { mutateAsync } = usePostJobMutation();
+
+  /**
+   * Form
+   */
+  const formSchema = useMemo(
+    () =>
+      z
         .object({
           clientUser: z.object({
             id: z
@@ -128,67 +109,72 @@ const formSchema = z.object({
               })
             ),
           }),
-          systemSize: z.string(),
-          mountingType: z.enum([
-            "Roof Mount",
-            "Ground Mount",
-            "Roof Mount & Ground Mount",
-          ]),
-          tasks: z
-            .array(
-              z.object({
-                id: z.string(),
-                name: z.string(),
-                description: z.string().nullable(),
-              })
-            )
-            .min(1, { message: "At least one task should be selected" }),
-          descriptionForOtherTasks: z.array(
+          systemSize: z.string().trim(),
+          mountingType: MountingTypeEnum,
+          services: z.array(
+            z.object({
+              id: z.string().trim(),
+              description: z.string().trim().nullable(),
+            })
+          ),
+          descriptionForOtherServices: z.array(
             z.object({
               description: z.string().trim(),
             })
           ),
           typeOfWetStamp: z.array(
             z.object({
-              id: z.string(),
-              name: z.string(),
-              description: z.string().nullable(),
+              id: z.string().trim(),
+              description: z.string().trim().nullable(),
             })
           ),
-          numberOfWetStamp: z.string(),
+          numberOfWetStamp: z.string().trim(),
           mailingAddress: z.object({
-            street1: z.string(),
-            street2: z.string(),
-            city: z.string(),
-            stateOrRegion: z.string(),
-            postalCode: z.string(),
-            country: z.string(),
-            fullAddress: z.string(),
+            street1: z.string().trim(),
+            street2: z.string().trim(),
+            city: z.string().trim(),
+            stateOrRegion: z.string().trim(),
+            postalCode: z.string().trim(),
+            country: z.string().trim(),
+            fullAddress: z.string().trim(),
             coordinates: z.array(z.number()),
           }),
-          additionalInformation: z.string(),
+          additionalInformation: z.string().trim(),
           isExpedited: z.boolean(),
         })
         .superRefine((values, ctx) => {
-          const { tasks, descriptionForOtherTasks } = values;
-          if (tasks.find((task) => task.name === "Other") === undefined) {
+          const { services, descriptionForOtherServices } = values;
+          if (
+            services.find((value) => value.id === OTHER_SERVICE_ID) ===
+            undefined
+          ) {
             return;
           }
 
-          for (const index in descriptionForOtherTasks) {
-            const { description } = descriptionForOtherTasks[index];
+          for (const index in descriptionForOtherServices) {
+            const { description } = descriptionForOtherServices[index];
             if (description.length === 0) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: "Description for Other Task is required",
-                path: [`descriptionForOtherTasks.${index}.description`],
+                path: [`descriptionForOtherServices.${index}.description`],
               });
             }
           }
         })
         .superRefine((values, ctx) => {
-          const { tasks, typeOfWetStamp } = values;
-          if (tasks.find((task) => task.name === "Wet Stamp") === undefined) {
+          const { services } = values;
+          if (services.length === 0 && !wetStampChecked) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "At least one task should be selected",
+              path: [`services`],
+            });
+          }
+        })
+        .superRefine((values, ctx) => {
+          const { typeOfWetStamp } = values;
+          if (!wetStampChecked) {
             return;
           }
 
@@ -202,8 +188,8 @@ const formSchema = z.object({
           }
         })
         .superRefine((values, ctx) => {
-          const { tasks, numberOfWetStamp } = values;
-          if (tasks.find((task) => task.name === "Wet Stamp") === undefined) {
+          const { numberOfWetStamp } = values;
+          if (!wetStampChecked) {
             return;
           }
 
@@ -226,8 +212,8 @@ const formSchema = z.object({
           }
         })
         .superRefine((values, ctx) => {
-          const { tasks, mailingAddress } = values;
-          if (tasks.find((task) => task.name === "Wet Stamp") === undefined) {
+          const { mailingAddress } = values;
+          if (!wetStampChecked) {
             return;
           }
 
@@ -239,91 +225,68 @@ const formSchema = z.object({
             });
             return;
           }
+        })
+        .superRefine((values, ctx) => {
+          if (project?.propertyType === "Commercial") {
+            const { systemSize } = values;
+            if (systemSize.length === 0) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "System Size is required",
+                path: ["systemSize"],
+              });
+              return;
+            }
+
+            if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(systemSize)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "System Size should be a number",
+                path: ["systemSize"],
+              });
+              return;
+            }
+          }
         }),
-    })
-    .superRefine((values, ctx) => {
-      const {
-        propertyType,
-        job: { systemSize },
-      } = values;
-      if (propertyType === "Residential") {
-        return;
-      }
+    [project?.propertyType, wetStampChecked]
+  );
 
-      if (systemSize.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "System Size is required",
-          path: ["job.systemSize"],
-        });
-        return;
-      }
+  type FieldValues = z.infer<typeof formSchema>;
 
-      if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(systemSize)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "System Size should be a number",
-          path: ["job.systemSize"],
-        });
-        return;
-      }
-    }),
-});
-
-export default function Page() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      organization: {
+      clientUser: {
         id: "",
-        name: "",
+        emailAddressesToReceiveDeliverables: [],
       },
-      project: {
-        tempId: "",
-        id: "",
-        projectNumber: "",
-        propertyAddress: "",
-        propertyOwner: "",
+      systemSize: "",
+      mountingType: "Roof Mount",
+      services: [],
+      descriptionForOtherServices: [{ description: "" }],
+      numberOfWetStamp: "",
+      mailingAddress: {
+        city: "",
         coordinates: [],
-        job: {
-          clientUser: {
-            id: "",
-            emailAddressesToReceiveDeliverables: [],
-          },
-          systemSize: "",
-          mountingType: "Roof Mount",
-          tasks: [],
-          descriptionForOtherTasks: [{ description: "" }],
-          numberOfWetStamp: "",
-          mailingAddress: {
-            city: "",
-            coordinates: [],
-            country: "",
-            fullAddress: "",
-            postalCode: "",
-            stateOrRegion: "",
-            street1: "",
-            street2: "",
-          },
-          typeOfWetStamp: [],
-          additionalInformation: "",
-          isExpedited: false,
-        },
+        country: "",
+        fullAddress: "",
+        postalCode: "",
+        stateOrRegion: "",
+        street1: "",
+        street2: "",
       },
+      typeOfWetStamp: [],
+      additionalInformation: "",
+      isExpedited: false,
     },
   });
-  const router = useRouter();
-
-  /**
-   * Fields
-   */
   const {
     fields: emailAddressesToReceiveDeliverablesFields,
     append: appendEmailAddressToReceiveDeliverables,
     remove: removeEmailAddressToReceiveDeliverables,
   } = useFieldArray({
     control: form.control,
-    name: "project.job.clientUser.emailAddressesToReceiveDeliverables",
+    name: "clientUser.emailAddressesToReceiveDeliverables",
   });
   const {
     fields: otherTasksFields,
@@ -331,204 +294,205 @@ export default function Page() {
     remove: removeOtherTask,
   } = useFieldArray({
     control: form.control,
-    name: "project.job.descriptionForOtherTasks",
+    name: "descriptionForOtherServices",
   });
+  const watchClientUser = form.watch("clientUser");
+  const watchServices = form.watch("services");
+  const watchTypeOfWetStamp = form.watch("typeOfWetStamp");
 
-  /**
-   * State
-   */
-  const [organizationsComboboxOpen, setOrganizationsComboboxOpen] =
-    useState(false);
-  const [clientUsersComboboxOpen, setClientUsersComboboxOpen] = useState(false);
-  const [newProjectSheetOpen, setNewProjectSheetOpen] = useState(false);
-  const [existingProjectSheetOpen, setExistingProjectSheetOpen] =
-    useState(false);
-  const [newClientUserSheetOpen, setNewClientUserSheetOpen] = useState(false);
-  const [result, setResult] = useState<
-    { open: false } | { open: true; jobId: string }
-  >({ open: false });
+  const { data: user } = useUserQuery({ userId: watchClientUser.id });
 
-  /**
-   * Watch
-   */
-  const watchOrganization = form.watch("organization");
-  const watchProject = form.watch("project");
-  const watchProjectTempId = form.watch("project.tempId");
-  const watchClientUser = form.watch("project.job.clientUser");
-  const watchTasks = form.watch("project.job.tasks");
-  const watchTypeOfWetStamp = form.watch("project.job.typeOfWetStamp");
-
-  /**
-   * Query
-   */
-  const { data: organizations, isLoading: isOrganizationsQueryLoading } =
-    useOrganizationsQuery();
-  const { data: project } = useProjectQuery({ projectId: watchProjectTempId });
-  const { data: users, isLoading: isUsersQueryLoading } =
-    useUsersByOrganizationIdQuery(watchOrganization.id);
-  const { data: user } = useUserByUserIdQuery(watchClientUser.id);
-  const { data: tasks } = useTasksQuery();
-  const { mutateAsync } = usePostJobMutation();
+  const otherService = useMemo(
+    () => services?.find((value) => value.id === OTHER_SERVICE_ID),
+    [services]
+  );
+  const electricalWetStampService = useMemo(
+    () =>
+      services?.find((value) => value.id === ELECTRICAL_WET_STAMP_SERVICE_ID),
+    [services]
+  );
+  const structuralWetStampService = useMemo(
+    () =>
+      services?.find((value) => value.id === STRUCTURAL_WET_STAMP_SERVICE_ID),
+    [services]
+  );
 
   /**
    * useEffect
    */
   useEffect(() => {
-    if (project) {
+    if (project && organization) {
       const {
-        projectId,
-        projectNumber,
-        propertyAddress,
-        projectPropertyOwnerName,
-        propertyType,
         systemSize,
         mailingAddressForWetStamp,
         hasHistoryElectricalPEStamp, // TODO: replace name
         hasHistoryStructuralPEStamp, // TODO: replace name
+        jobs,
       } = project;
-      const { fullAddress, coordinates } = propertyAddress ?? {};
+
+      let recentJob;
+      if (jobs.length > 0) {
+        recentJob = jobs[0];
+      }
+
+      const hasElectricalWetStampService =
+        recentJob?.orderedServices.find(
+          (value) => value.serviceId === ELECTRICAL_WET_STAMP_SERVICE_ID
+        ) !== undefined;
+      const hasStructuralWetStampService =
+        recentJob?.orderedServices.find(
+          (value) => value.serviceId === STRUCTURAL_WET_STAMP_SERVICE_ID
+        ) !== undefined;
+
+      if (hasElectricalWetStampService || hasStructuralWetStampService) {
+        setWetStampChecked(true);
+      }
 
       const typeOfWetStamp: {
         id: string;
-        name: string;
         description: string | null;
       }[] = [];
-      if (hasHistoryElectricalPEStamp) {
-        const electricalWetStamp = tasks
-          ?.find((task) => task.name === "Wet Stamp")
-          ?.childTasks.find((value) => value.name === "Electrical Wet Stamp");
-        if (electricalWetStamp != null) {
-          typeOfWetStamp.push({
-            id: electricalWetStamp.id,
-            name: electricalWetStamp.name,
-            description: null,
-          });
-        }
+      if (hasHistoryElectricalPEStamp || hasElectricalWetStampService) {
+        typeOfWetStamp.push({
+          id: ELECTRICAL_WET_STAMP_SERVICE_ID,
+          description: null,
+        });
       }
-      if (hasHistoryStructuralPEStamp) {
-        const structuralWetStamp = tasks
-          ?.find((task) => task.name === "Wet Stamp")
-          ?.childTasks.find((value) => value.name === "Structural Wet Stamp");
-        if (structuralWetStamp != null) {
-          typeOfWetStamp.push({
-            id: structuralWetStamp.id,
-            name: structuralWetStamp.name,
-            description: null,
-          });
-        }
+      if (hasHistoryStructuralPEStamp || hasStructuralWetStampService) {
+        typeOfWetStamp.push({
+          id: STRUCTURAL_WET_STAMP_SERVICE_ID,
+          description: null,
+        });
       }
 
-      form.setValue("project", {
-        tempId: projectId,
-        id: projectId,
-        projectNumber: projectNumber ?? "",
-        propertyAddress: fullAddress ?? "",
-        coordinates: coordinates ?? [],
-        propertyOwner: projectPropertyOwnerName ?? "",
-        propertyType,
-        job: {
-          clientUser: {
-            id: "",
-            emailAddressesToReceiveDeliverables: [],
-          },
-          systemSize: systemSize == null ? "" : String(systemSize),
-          mountingType: "Roof Mount", // TODO: default value of organization
-          tasks: [],
-          descriptionForOtherTasks: [{ description: "" }],
-          typeOfWetStamp,
-          numberOfWetStamp: "",
-          mailingAddress: {
-            city: mailingAddressForWetStamp?.city ?? "",
-            coordinates: mailingAddressForWetStamp?.coordinates ?? [],
-            country: mailingAddressForWetStamp?.country ?? "",
-            fullAddress: mailingAddressForWetStamp?.fullAddress ?? "",
-            postalCode: mailingAddressForWetStamp?.postalCode ?? "",
-            stateOrRegion: mailingAddressForWetStamp?.state ?? "",
-            street1: mailingAddressForWetStamp?.street1 ?? "",
-            street2: mailingAddressForWetStamp?.street2 ?? "",
-          },
-          additionalInformation: "",
-          isExpedited: false,
+      console.log("mt", organization.mountingTypeDefaultValue);
+
+      form.reset({
+        clientUser: {
+          id: "",
+          emailAddressesToReceiveDeliverables: [],
         },
+        systemSize: systemSize == null ? "" : String(systemSize),
+        mountingType:
+          organization.mountingTypeDefaultValue == null
+            ? "Roof Mount"
+            : (organization.mountingTypeDefaultValue as z.infer<
+                typeof MountingTypeEnum
+              >),
+        services: recentJob
+          ? recentJob.orderedServices
+              .filter(
+                (value) =>
+                  value.serviceId !== ELECTRICAL_WET_STAMP_SERVICE_ID &&
+                  value.serviceId !== STRUCTURAL_WET_STAMP_SERVICE_ID
+              )
+              .map((value) => ({ id: value.serviceId, description: null }))
+          : [],
+        descriptionForOtherServices: recentJob
+          ? recentJob.orderedServices
+              .filter((value) => value.serviceId === OTHER_SERVICE_ID)
+              .map((value) => ({ description: value.description ?? "" }))
+          : [],
+        typeOfWetStamp,
+        numberOfWetStamp: "",
+        mailingAddress: {
+          city: mailingAddressForWetStamp?.city ?? "",
+          coordinates: mailingAddressForWetStamp?.coordinates ?? [],
+          country: mailingAddressForWetStamp?.country ?? "",
+          fullAddress: mailingAddressForWetStamp?.fullAddress ?? "",
+          postalCode: mailingAddressForWetStamp?.postalCode ?? "",
+          stateOrRegion: mailingAddressForWetStamp?.state ?? "",
+          street1: mailingAddressForWetStamp?.street1 ?? "",
+          street2: mailingAddressForWetStamp?.street2 ?? "",
+        },
+        additionalInformation: "",
+        isExpedited: false,
       });
     }
-  }, [form, project, tasks]);
+  }, [form, organization, project]);
 
   useEffect(() => {
     if (user) {
       form.setValue(
-        "project.job.clientUser.emailAddressesToReceiveDeliverables",
-        user.deliverablesEmails.map((email) => ({ email }))
+        "clientUser.emailAddressesToReceiveDeliverables",
+        user.deliverablesEmails.map((email) => ({ email })),
+        {
+          shouldDirty: true,
+        }
       );
+      form.trigger("clientUser.emailAddressesToReceiveDeliverables");
     }
   }, [form, user]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const {
-      organization: {},
-      project: {
-        id: projectId,
-        propertyType,
-        job: {
-          additionalInformation,
-          clientUser: { emailAddressesToReceiveDeliverables, id: clientUserId },
-          systemSize,
-          mountingType,
-          tasks,
-          typeOfWetStamp,
-          descriptionForOtherTasks,
-          mailingAddress,
-          numberOfWetStamp,
-          isExpedited,
-        },
-      },
-    } = values;
+  useEffect(() => {
+    if (form.formState.isSubmitted) {
+      form.trigger("services");
+    }
+  }, [form, wetStampChecked]);
 
-    const taskIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[] = [];
-
-    for (const task of tasks) {
-      if (task.name === "Other") {
-        for (const descriptionForOtherTask of descriptionForOtherTasks) {
-          taskIds.push({
-            taskId: task.id,
-            description: descriptionForOtherTask.description,
-          });
-        }
-        continue;
-      }
-
-      if (task.name === "Wet Stamp") {
-        for (const type of typeOfWetStamp) {
-          taskIds.push({ taskId: type.id, description: type.description });
-        }
-        continue;
-      }
-
-      taskIds.push({ taskId: task.id, description: task.description });
+  async function onSubmit(values: FieldValues) {
+    if (project == null) {
+      return;
     }
 
-    const hasWetStamp =
-      tasks.find((task) => task.name === "Wet Stamp") !== undefined;
+    const taskIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[] = [];
+    for (const service of values.services) {
+      if (service.id === OTHER_SERVICE_ID) {
+        for (const descriptionForOtherService of values.descriptionForOtherServices) {
+          taskIds.push({
+            serviceId: service.id,
+            description: descriptionForOtherService.description,
+          });
+        }
+      } else {
+        taskIds.push({
+          serviceId: service.id,
+          description: service.description,
+        });
+      }
+    }
+
+    if (wetStampChecked) {
+      for (const wetStampService of values.typeOfWetStamp) {
+        taskIds.push({
+          serviceId: wetStampService.id,
+          description: wetStampService.description,
+        });
+      }
+    }
 
     await mutateAsync({
-      additionalInformationFromClient:
-        schemaToConvertFromStringToNullableString.parse(additionalInformation),
-      clientUserId,
-      deliverablesEmails: emailAddressesToReceiveDeliverables.map(
-        ({ email }) => email
+      additionalInformationFromClient: transformStringIntoNullableString.parse(
+        values.additionalInformation
       ),
-      isExpedited,
-      systemSize: propertyType === "Commercial" ? Number(systemSize) : null,
-      mountingType,
-      projectId,
+      clientUserId: values.clientUser.id,
+      deliverablesEmails:
+        values.clientUser.emailAddressesToReceiveDeliverables.map(
+          ({ email }) => email
+        ),
+      isExpedited: values.isExpedited,
+      systemSize:
+        project.propertyType === "Commercial"
+          ? Number(values.systemSize)
+          : null,
+      mountingType: values.mountingType,
+      projectId: project.projectId,
       taskIds,
-      mailingAddressForWetStamp: hasWetStamp
+      mailingAddressForWetStamp: wetStampChecked
         ? {
-            ...mailingAddress,
-            state: mailingAddress.stateOrRegion,
+            ...values.mailingAddress,
+            country: transformStringIntoNullableString.parse(
+              values.mailingAddress.country
+            ),
+            state: values.mailingAddress.stateOrRegion,
+            street2: transformStringIntoNullableString.parse(
+              values.mailingAddress.street2
+            ),
           }
         : null,
-      numberOfWetStamp: hasWetStamp ? Number(numberOfWetStamp) : null,
+      numberOfWetStamp: wetStampChecked
+        ? Number(values.numberOfWetStamp)
+        : null,
     })
       .then(({ id }) => {
         // TODO: client인 경우 어떻게? project-management/jobs/:jobId로 이동?
@@ -537,289 +501,175 @@ export default function Page() {
       .catch(() => {});
   }
 
+  function reset() {
+    setProjectId("");
+    setWetStampChecked(false);
+  }
+
+  /**
+   * Table
+   */
+  const jobTableData = useMemo(
+    () =>
+      project?.jobs.map<JobTableRowData>((value) => {
+        const {
+          id,
+          additionalInformationFromClient,
+          isExpedited,
+          clientInfo: { clientOrganizationName, clientUserName },
+          jobRequestNumber,
+          jobStatus,
+          mountingType,
+          assignedTasks,
+          propertyFullAddress,
+          receivedAt,
+        } = value;
+
+        return {
+          id: id,
+          additionalInformation: additionalInformationFromClient,
+          clientUserName,
+          organizationName: clientOrganizationName,
+          isExpedited,
+          jobRequestNumber,
+          jobStatus,
+          mountingType,
+          tasks: assignedTasks.map<JobTableRowData["tasks"][number]>(
+            (value) => {
+              const { assignTaskId, assigneeName, status, taskName } = value;
+
+              return { id: assignTaskId, assigneeName, name: taskName, status };
+            }
+          ),
+          propertyFullAddress,
+          receivedAt,
+        };
+      }),
+    [project?.jobs]
+  );
+
+  const title = "New Service Order";
+
   return (
-    <>
-      <PageHeader />
-      <div className="py-4">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <section>
-              {/* TODO: New Organization */}
-              <FormField
-                control={form.control}
-                name="organization"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Organization</FormLabel>
-                    <FormControl>
-                      <Popover
-                        open={organizationsComboboxOpen}
-                        onOpenChange={setOrganizationsComboboxOpen}
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            aria-expanded={organizationsComboboxOpen}
-                            className="justify-between px-3 font-normal"
-                          >
-                            {field.value.id === ""
-                              ? "Select an organization"
-                              : field.value.name}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-0" align="start">
-                          <Command>
-                            <CommandInput placeholder="Search" />
-                            {isOrganizationsQueryLoading ? (
-                              <div className="h-[68px] flex justify-center items-center">
-                                <Loader2 className="h-6 w-6 animate-spin" />
-                              </div>
-                            ) : (
-                              <>
-                                <CommandEmpty>
-                                  No organization found.
-                                </CommandEmpty>
-                                <CommandList>
-                                  <CommandGroup>
-                                    {organizations?.map((organization) => (
-                                      <CommandItem
-                                        key={organization.id}
-                                        value={organization.name}
-                                        onSelect={() => {
-                                          form.setValue("organization", {
-                                            id: organization.id,
-                                            name: organization.name,
-                                          });
-                                          form.resetField("project");
-                                          setOrganizationsComboboxOpen(false);
-                                        }}
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            watchOrganization.id ===
-                                              organization.id
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                        {organization.name}
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </>
-                            )}
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        items={[
+          { href: "/project-intake-portal", name: "Project Intake Portal" },
+          {
+            href: "/project-intake-portal/new-service-order",
+            name: title,
+          },
+        ]}
+        title={title}
+      />
+      <div>
+        <div className="space-y-6">
+          <section>
+            <Item>
+              <Label>Organization</Label>
+              <OrganizationsCombobox
+                organizationId={organizationId}
+                onSelect={(newOrganizationId) => {
+                  setOrganizationId(newOrganizationId);
+                  reset();
+                }}
               />
-            </section>
-            {watchOrganization.id !== "" && (
-              <section>
-                <h4 className="h4 mb-2">Project</h4>
-                {watchProject.id === "" ? (
-                  <RowItemsContainer>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setNewProjectSheetOpen(true);
-                      }}
-                    >
-                      New Project
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setExistingProjectSheetOpen(true);
-                      }}
-                    >
-                      Existing Project
-                    </Button>
-                  </RowItemsContainer>
-                ) : (
-                  <ItemsContainer>
-                    <FormField
-                      control={form.control}
-                      name="project.propertyAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>Property Address</FormLabel>
-                          <FormControl>
-                            <Input {...field} readOnly />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+            </Item>
+          </section>
+          {organizationId !== "" && (
+            <section>
+              <h4 className="h4 mb-2">Project</h4>
+              {projectId === "" ? (
+                <RowItemsContainer>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setNewProjectSheetOpen(true);
+                    }}
+                  >
+                    New Project
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setExistingProjectSheetOpen(true);
+                    }}
+                  >
+                    Existing Project
+                  </Button>
+                </RowItemsContainer>
+              ) : (
+                <ItemsContainer>
+                  <Item>
+                    <Label>Property Address</Label>
+                    <Input
+                      value={project?.propertyAddress.fullAddress ?? ""}
+                      readOnly
                     />
-                    <RowItemsContainer>
-                      <FormField
-                        control={form.control}
-                        name="project.propertyType"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel required>Property Type</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                  </Item>
+                  <RowItemsContainer>
+                    <Item>
+                      <Label>Property Type</Label>
+                      <Input value={project?.propertyType ?? ""} readOnly />
+                    </Item>
+                    <Item>
+                      <Label>Property Owner</Label>
+                      <Input
+                        value={project?.projectPropertyOwnerName ?? ""}
+                        readOnly
                       />
-                      <FormField
-                        control={form.control}
-                        name="project.propertyOwner"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Property Owner</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="project.projectNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Project Number</FormLabel>
-                            <FormControl>
-                              <Input {...field} readOnly />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </RowItemsContainer>
-                    <div className="w-full h-[400px]">
-                      <Minimap
-                        longitude={watchProject.coordinates[0]}
-                        latitude={watchProject.coordinates[1]}
-                      />
-                    </div>
-                    <JobTable jobs={project?.jobs ?? []} />
-                    <Button
-                      variant={"outline"}
-                      onClick={() => {
-                        form.resetField("project");
-                      }}
-                    >
-                      Reset Project
-                    </Button>
-                  </ItemsContainer>
-                )}
-              </section>
-            )}
-            {watchProject.id !== "" && (
-              <>
-                <section>
-                  <h4 className="h4 mb-2">Job</h4>
+                    </Item>
+                    <Item>
+                      <Label>Project Number</Label>
+                      <Input value={project?.projectNumber ?? ""} readOnly />
+                    </Item>
+                  </RowItemsContainer>
+                  <div className="w-full h-[400px]">
+                    <Minimap
+                      longitude={project?.propertyAddress.coordinates[0]}
+                      latitude={project?.propertyAddress.coordinates[1]}
+                    />
+                  </div>
+                  <BaseTable
+                    columns={jobTableColumns}
+                    data={jobTableData ?? []}
+                  />
+                  <Button
+                    variant={"outline"}
+                    onClick={() => {
+                      reset();
+                    }}
+                  >
+                    Reset Project
+                  </Button>
+                </ItemsContainer>
+              )}
+            </section>
+          )}
+          {projectId !== "" && (
+            <section>
+              <h4 className="h4 mb-2">Job</h4>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
                   <ItemsContainer>
                     <FormField
                       control={form.control}
-                      name="project.job.clientUser.id"
+                      name="clientUser.id"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel required>Client User</FormLabel>
                           <FormControl>
-                            <Popover
-                              open={clientUsersComboboxOpen}
-                              onOpenChange={setClientUsersComboboxOpen}
-                            >
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  aria-expanded={clientUsersComboboxOpen}
-                                  className="justify-between px-3 font-normal"
-                                >
-                                  {field.value === ""
-                                    ? "Select a client user"
-                                    : users?.find(
-                                        (user) => user.id === field.value
-                                      )?.fullName}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="p-0 w-[326px]"
-                                align="start"
-                              >
-                                <Command>
-                                  <CommandInput placeholder="Search" />
-                                  {isUsersQueryLoading && (
-                                    <div className="h-[68px] flex justify-center items-center">
-                                      <Loader2 className="h-6 w-6 animate-spin" />
-                                    </div>
-                                  )}
-                                  {!isUsersQueryLoading &&
-                                  users &&
-                                  users.length === 0 ? (
-                                    <div className="h-[68px] flex justify-center items-center text-sm">
-                                      No client user found.
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <CommandEmpty>
-                                        No client user found.
-                                      </CommandEmpty>
-                                      <CommandList>
-                                        <CommandGroup>
-                                          {users?.map((user) => (
-                                            <CommandItem
-                                              key={user.email}
-                                              value={`${user.fullName} ${user.email}`}
-                                              onSelect={() => {
-                                                field.onChange(user.id);
-                                                setClientUsersComboboxOpen(
-                                                  false
-                                                );
-                                              }}
-                                            >
-                                              <Check
-                                                className={cn(
-                                                  "mr-2 h-4 w-4 flex-shrink-0",
-                                                  field.value === user.id
-                                                    ? "opacity-100"
-                                                    : "opacity-0"
-                                                )}
-                                              />
-                                              <div>
-                                                <p className="font-medium">
-                                                  {user.fullName}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                  {user.email}
-                                                </p>
-                                              </div>
-                                            </CommandItem>
-                                          ))}
-                                        </CommandGroup>
-                                      </CommandList>
-                                    </>
-                                  )}
-                                  <div className="-mx-1 h-px bg-border" />
-                                  <div className="p-1 text-foreground">
-                                    <div
-                                      className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
-                                      onClick={() => {
-                                        setClientUsersComboboxOpen(false);
-                                        setNewClientUserSheetOpen(true);
-                                      }}
-                                    >
-                                      <PlusCircle className="mr-2 h-4 w-4 flex-shrink-0" />
-                                      New Client User
-                                    </div>
-                                  </div>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                            <UsersByOrganizationCombobox
+                              organizationId={organizationId}
+                              userId={field.value}
+                              onSelect={(newUserId) => {
+                                field.onChange(newUserId);
+                              }}
+                              onAdd={() => {
+                                setNewUserSheetOpen(true);
+                              }}
+                              ref={field.ref}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -829,7 +679,7 @@ export default function Page() {
                       .length !== 0 && (
                       <FormField
                         control={form.control}
-                        name="project.job.clientUser.emailAddressesToReceiveDeliverables"
+                        name="clientUser.emailAddressesToReceiveDeliverables"
                         render={() => {
                           return (
                             <FormItem>
@@ -841,7 +691,7 @@ export default function Page() {
                                   <FormField
                                     key={field.id}
                                     control={form.control}
-                                    name={`project.job.clientUser.emailAddressesToReceiveDeliverables.${index}.email`}
+                                    name={`clientUser.emailAddressesToReceiveDeliverables.${index}.email`}
                                     render={({ field }) => (
                                       <FormItem>
                                         <div className="flex flex-row gap-2">
@@ -885,11 +735,11 @@ export default function Page() {
                         }}
                       />
                     )}
-                    {watchProject.propertyType === "Commercial" && (
+                    {project?.propertyType === "Commercial" && (
                       <div className="grid grid-cols-3 gap-4">
                         <FormField
                           control={form.control}
-                          name="project.job.systemSize"
+                          name="systemSize"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel required>System Size</FormLabel>
@@ -909,17 +759,17 @@ export default function Page() {
                         />
                       </div>
                     )}
-                    {/* TODO: org가 default mounting type을 가지고 있도록 해서, 그 값이 기본으로 들어가 있게끔 */}
                     <FormField
                       control={form.control}
-                      name="project.job.mountingType"
+                      name="mountingType"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel required>Mounting Type</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
+                              ref={field.ref}
                             >
                               <FormItem className="flex-row gap-3 items-center">
                                 <FormControl>
@@ -953,165 +803,212 @@ export default function Page() {
                     />
                     <FormField
                       control={form.control}
-                      name="project.job.tasks"
+                      name="services"
                       render={() => (
                         <FormItem>
                           <FormLabel required>Task</FormLabel>
                           <div className="grid grid-cols-3 gap-y-2 gap-x-4">
-                            {tasks
-                              ?.sort((a, b) => {
-                                if (a.name === "Other") {
-                                  return 1;
-                                }
-                                if (b.name === "Other") {
-                                  return -1;
-                                }
-                                return a.name < b.name ? -1 : 1;
-                              })
-                              .map((task) => (
+                            {services
+                              ?.filter(
+                                (value) =>
+                                  value.id !==
+                                    ELECTRICAL_WET_STAMP_SERVICE_ID &&
+                                  value.id !==
+                                    STRUCTURAL_WET_STAMP_SERVICE_ID &&
+                                  value.id !== OTHER_SERVICE_ID
+                              )
+                              ?.sort((a, b) => (a.name < b.name ? -1 : 1))
+                              .map((service) => (
                                 <FormField
-                                  key={task.id}
+                                  key={service.id}
                                   control={form.control}
-                                  name="project.job.tasks"
+                                  name="services"
                                   render={({ field }) => (
-                                    <FormItem
-                                      key={task.id}
-                                      className="flex flex-row gap-3 items-center"
-                                    >
+                                    <FormItem className="flex flex-row gap-3 items-center">
                                       <FormControl>
                                         <Checkbox
+                                          ref={field.ref}
                                           checked={
                                             field.value.find(
-                                              (value) => value.id === task.id
+                                              (value) => value.id === service.id
                                             ) !== undefined
                                           }
-                                          onCheckedChange={(checked) => {
-                                            switch (task.name) {
-                                              case "ESS Electrical PE Stamp":
-                                              case "Electrical Load Calculation":
-                                              case "Electrical Load Justification Letter":
-                                              case "Electrical PE Stamp":
-                                              case "Electrical Post Installed Letter":
-                                                if (
-                                                  checked &&
-                                                  watchTypeOfWetStamp.find(
-                                                    (value) =>
-                                                      value.name ===
-                                                      "Electrical Wet Stamp"
-                                                  ) === undefined
-                                                ) {
-                                                  form.setValue(
-                                                    "project.job.typeOfWetStamp",
-                                                    [
-                                                      ...watchTypeOfWetStamp,
-                                                      tasks
-                                                        ?.find(
-                                                          (task) =>
-                                                            task.name ===
-                                                            "Wet Stamp"
-                                                        )
-                                                        ?.childTasks.find(
-                                                          (value) =>
-                                                            value.name ===
-                                                            "Electrical Wet Stamp"
-                                                        )!,
-                                                    ]
-                                                  );
-                                                }
-
-                                                if (!checked) {
-                                                  form.setValue(
-                                                    "project.job.typeOfWetStamp",
-                                                    watchTypeOfWetStamp.filter(
-                                                      (value) =>
-                                                        value.name !==
-                                                        "Electrical Wet Stamp"
-                                                    )
-                                                  );
-                                                }
-                                                break;
-
-                                              case "ESS Structural PE Stamp":
-                                              case "Special Inspection Form":
-                                              case "Structural Feasibility":
-                                              case "Structural PE Stamp":
-                                              case "Structural Post Installed Letter":
-                                                if (
-                                                  checked &&
-                                                  watchTypeOfWetStamp.find(
-                                                    (value) =>
-                                                      value.name ===
-                                                      "Structural Wet Stamp"
-                                                  ) === undefined
-                                                ) {
-                                                  form.setValue(
-                                                    "project.job.typeOfWetStamp",
-                                                    [
-                                                      ...watchTypeOfWetStamp,
-                                                      tasks
-                                                        ?.find(
-                                                          (task) =>
-                                                            task.name ===
-                                                            "Wet Stamp"
-                                                        )
-                                                        ?.childTasks.find(
-                                                          (value) =>
-                                                            value.name ===
-                                                            "Structural Wet Stamp"
-                                                        )!,
-                                                    ]
-                                                  );
-                                                }
-
-                                                if (!checked) {
-                                                  form.setValue(
-                                                    "project.job.typeOfWetStamp",
-                                                    watchTypeOfWetStamp.filter(
-                                                      (value) =>
-                                                        value.name !==
-                                                        "Structural Wet Stamp"
-                                                    )
-                                                  );
-                                                }
-                                                break;
+                                          onCheckedChange={(newChecked) => {
+                                            if (
+                                              electricalWetStampService &&
+                                              structuralWetStampService
+                                            ) {
+                                              switch (service.id) {
+                                                case ESS_ELECTRICAL_PE_STAMP_SERVICE_ID:
+                                                case ELECTRICAL_LOAD_CALCULATION_SERVICE_ID:
+                                                case ELECTRICAL_LOAD_JUSTIFICATION_LETTER_SERVICE_ID:
+                                                case ELECTRICAL_PE_STAMP_SERVICE_ID:
+                                                case ELECTRICAL_POST_INSTALLED_LETTER_SERVICE_ID:
+                                                  if (newChecked) {
+                                                    form.setValue(
+                                                      "typeOfWetStamp",
+                                                      [
+                                                        ...watchTypeOfWetStamp,
+                                                        {
+                                                          id: electricalWetStampService.id,
+                                                          description: null,
+                                                        },
+                                                      ],
+                                                      {
+                                                        shouldValidate: true,
+                                                      }
+                                                    );
+                                                  } else {
+                                                    form.setValue(
+                                                      "typeOfWetStamp",
+                                                      watchTypeOfWetStamp.filter(
+                                                        (value) =>
+                                                          value.id !==
+                                                          ELECTRICAL_WET_STAMP_SERVICE_ID
+                                                      ),
+                                                      {
+                                                        shouldValidate: true,
+                                                      }
+                                                    );
+                                                  }
+                                                  break;
+                                                case ESS_STRUCTURAL_PE_STAMP_SERVICE_ID:
+                                                case SPECIAL_INSPECTION_FORM_SERVICE_ID:
+                                                case STRUCTURAL_FEASIBILITY_SERVICE_ID:
+                                                case STRUCTURAL_PE_STAMP_SERVICE_ID:
+                                                case STRUCTURAL_POST_INSTALLED_LETTER_SERVICE_ID:
+                                                  if (newChecked) {
+                                                    form.setValue(
+                                                      "typeOfWetStamp",
+                                                      [
+                                                        ...watchTypeOfWetStamp,
+                                                        {
+                                                          id: structuralWetStampService.id,
+                                                          description: null,
+                                                        },
+                                                      ],
+                                                      {
+                                                        shouldValidate: true,
+                                                      }
+                                                    );
+                                                  } else {
+                                                    form.setValue(
+                                                      "typeOfWetStamp",
+                                                      watchTypeOfWetStamp.filter(
+                                                        (value) =>
+                                                          value.id !==
+                                                          STRUCTURAL_WET_STAMP_SERVICE_ID
+                                                      ),
+                                                      {
+                                                        shouldValidate: true,
+                                                      }
+                                                    );
+                                                  }
+                                                  break;
+                                              }
                                             }
 
-                                            if (checked) {
+                                            if (newChecked) {
                                               field.onChange([
                                                 ...field.value,
                                                 {
-                                                  id: task.id,
-                                                  name: task.name,
+                                                  id: service.id,
                                                   description: null,
                                                 },
                                               ]);
-                                              return;
+                                            } else {
+                                              field.onChange(
+                                                field.value.filter(
+                                                  (value) =>
+                                                    value.id !== service.id
+                                                )
+                                              );
                                             }
-
-                                            field.onChange(
-                                              field.value.filter(
-                                                (value) => value.id !== task.id
-                                              )
-                                            );
                                           }}
                                         />
                                       </FormControl>
                                       <FormLabel className="font-normal">
-                                        {task.name}
+                                        {service.name}
                                       </FormLabel>
                                     </FormItem>
                                   )}
                                 />
                               ))}
+                            <FormField
+                              control={form.control}
+                              name="services"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row gap-3 items-center">
+                                  <FormControl>
+                                    <Checkbox
+                                      ref={field.ref}
+                                      checked={wetStampChecked}
+                                      onCheckedChange={(newChecked) => {
+                                        if (typeof newChecked === "boolean") {
+                                          setWetStampChecked(newChecked);
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    Wet Stamp
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                            {otherService && (
+                              <FormField
+                                control={form.control}
+                                name="services"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row gap-3 items-center">
+                                    <FormControl>
+                                      <Checkbox
+                                        ref={field.ref}
+                                        checked={
+                                          field.value.find(
+                                            (value) =>
+                                              value.id === otherService.id
+                                          ) !== undefined
+                                        }
+                                        onCheckedChange={(newChecked) => {
+                                          if (newChecked) {
+                                            field.onChange([
+                                              ...field.value,
+                                              {
+                                                id: otherService.id,
+                                                description: null,
+                                              },
+                                            ]);
+                                          } else {
+                                            field.onChange(
+                                              field.value.filter(
+                                                (value) =>
+                                                  value.id !== otherService.id
+                                              )
+                                            );
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {otherService.name}
+                                    </FormLabel>
+                                  </FormItem>
+                                )}
+                              />
+                            )}
                           </div>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {watchTasks.find((task) => task.name === "Other") && (
+                    {watchServices.find(
+                      (task) => task.id === otherService?.id
+                    ) && (
                       <FormField
                         control={form.control}
-                        name="project.job.descriptionForOtherTasks"
+                        name="descriptionForOtherServices"
                         render={() => (
                           <FormItem>
                             <FormLabel>Description for Other Task</FormLabel>
@@ -1119,7 +1016,7 @@ export default function Page() {
                               <FormField
                                 key={field.id}
                                 control={form.control}
-                                name={`project.job.descriptionForOtherTasks.${index}.description`}
+                                name={`descriptionForOtherServices.${index}.description`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <div className="flex flex-row gap-2">
@@ -1163,175 +1060,215 @@ export default function Page() {
                         )}
                       />
                     )}
-                    {watchTasks.find((task) => task.name === "Wet Stamp") && (
-                      <>
-                        <FormField
-                          control={form.control}
-                          name="project.job.typeOfWetStamp"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel required>Type of Wet Stamp</FormLabel>
-                              {tasks
-                                ?.find((task) => task.name === "Wet Stamp")
-                                ?.childTasks.map((task) => (
-                                  <FormField
-                                    key={task.id}
-                                    control={form.control}
-                                    name="project.job.typeOfWetStamp"
-                                    render={({ field }) => (
-                                      <FormItem
-                                        key={task.id}
-                                        className="flex flex-row gap-3 items-center"
-                                      >
-                                        <FormControl>
-                                          <Checkbox
-                                            checked={
-                                              field.value.find(
-                                                (value) => value.id === task.id
-                                              ) !== undefined
-                                            }
-                                            onCheckedChange={(checked) =>
-                                              checked
-                                                ? field.onChange([
-                                                    ...field.value,
-                                                    {
-                                                      id: task.id,
-                                                      name: task.name,
-                                                      description: null,
-                                                    },
-                                                  ])
-                                                : field.onChange(
-                                                    field.value.filter(
-                                                      (value) =>
-                                                        value.id !== task.id
-                                                    )
-                                                  )
-                                            }
-                                          />
-                                        </FormControl>
-                                        <FormLabel className="font-normal">
-                                          {task.name}
-                                        </FormLabel>
-                                      </FormItem>
-                                    )}
-                                  />
-                                ))}
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="grid grid-cols-3 gap-4">
+                    {wetStampChecked &&
+                      electricalWetStampService &&
+                      structuralWetStampService && (
+                        <>
                           <FormField
                             control={form.control}
-                            name="project.job.numberOfWetStamp"
-                            render={({ field }) => (
+                            name="typeOfWetStamp"
+                            render={() => (
                               <FormItem>
                                 <FormLabel required>
-                                  Number of Wet Stamp
+                                  Type of Wet Stamp
                                 </FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
+                                <FormField
+                                  control={form.control}
+                                  name="typeOfWetStamp"
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-row gap-3 items-center">
+                                      <FormControl>
+                                        <Checkbox
+                                          ref={field.ref}
+                                          checked={
+                                            field.value.find(
+                                              (value) =>
+                                                value.id ===
+                                                electricalWetStampService.id
+                                            ) !== undefined
+                                          }
+                                          onCheckedChange={(checked) =>
+                                            checked
+                                              ? field.onChange([
+                                                  ...field.value,
+                                                  {
+                                                    id: electricalWetStampService.id,
+                                                    description: null,
+                                                  },
+                                                ])
+                                              : field.onChange(
+                                                  field.value.filter(
+                                                    (value) =>
+                                                      value.id !==
+                                                      electricalWetStampService.id
+                                                  )
+                                                )
+                                          }
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {electricalWetStampService.name}
+                                      </FormLabel>
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={form.control}
+                                  name="typeOfWetStamp"
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-row gap-3 items-center">
+                                      <FormControl>
+                                        <Checkbox
+                                          ref={field.ref}
+                                          checked={
+                                            field.value.find(
+                                              (value) =>
+                                                value.id ===
+                                                structuralWetStampService.id
+                                            ) !== undefined
+                                          }
+                                          onCheckedChange={(checked) =>
+                                            checked
+                                              ? field.onChange([
+                                                  ...field.value,
+                                                  {
+                                                    id: structuralWetStampService.id,
+                                                    description: null,
+                                                  },
+                                                ])
+                                              : field.onChange(
+                                                  field.value.filter(
+                                                    (value) =>
+                                                      value.id !==
+                                                      structuralWetStampService.id
+                                                  )
+                                                )
+                                          }
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {structuralWetStampService.name}
+                                      </FormLabel>
+                                    </FormItem>
+                                  )}
+                                />
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                        </div>
-
-                        <FormField
-                          control={form.control}
-                          name="project.job.mailingAddress"
-                          render={({ field }) => (
-                            <div>
-                              <div className="grid grid-cols-3 gap-4">
-                                <div className="flex flex-col gap-2">
-                                  <FormItem>
-                                    <FormLabel required>
-                                      Mailing Address
-                                    </FormLabel>
-                                    <AddressSearchButton
-                                      format="us"
-                                      onSelect={({
-                                        street1,
-                                        city,
-                                        stateOrRegion,
-                                        postalCode,
-                                        country,
-                                        fullAddress,
-                                        coordinates,
-                                      }) => {
-                                        form.setValue(
-                                          "project.job.mailingAddress",
-                                          {
-                                            street1,
-                                            street2: "",
-                                            city: city ?? "",
-                                            stateOrRegion: stateOrRegion ?? "",
-                                            postalCode: postalCode ?? "",
-                                            country: country ?? "",
-                                            fullAddress,
-                                            coordinates,
-                                          },
-                                          {
-                                            shouldValidate: true,
-                                            shouldDirty: true,
-                                          }
-                                        );
-                                      }}
+                          <div className="grid grid-cols-3 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="numberOfWetStamp"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel required>
+                                    Number of Wet Stamp
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name="mailingAddress"
+                            render={({ field }) => (
+                              <div>
+                                <div className="grid grid-cols-3 gap-4">
+                                  <div className="flex flex-col gap-2">
+                                    <FormItem>
+                                      <FormLabel required>
+                                        Mailing Address
+                                      </FormLabel>
+                                      <AddressSearchButton
+                                        ref={field.ref}
+                                        format="us"
+                                        onSelect={({
+                                          street1,
+                                          city,
+                                          stateOrRegion,
+                                          postalCode,
+                                          country,
+                                          fullAddress,
+                                          coordinates,
+                                        }) => {
+                                          form.setValue(
+                                            "mailingAddress",
+                                            {
+                                              street1,
+                                              street2: "",
+                                              city: city ?? "",
+                                              stateOrRegion:
+                                                stateOrRegion ?? "",
+                                              postalCode: postalCode ?? "",
+                                              country: country ?? "",
+                                              fullAddress,
+                                              coordinates,
+                                            },
+                                            {
+                                              shouldValidate: true,
+                                              shouldDirty: true,
+                                            }
+                                          );
+                                        }}
+                                      />
+                                      <Input
+                                        value={field.value.street1}
+                                        readOnly
+                                        placeholder="Street 1"
+                                      />
+                                      <Input
+                                        value={field.value.street2}
+                                        onChange={(event) => {
+                                          field.onChange({
+                                            ...field.value,
+                                            street2: event.target.value,
+                                          });
+                                        }}
+                                        placeholder="Street 2"
+                                      />
+                                      <Input
+                                        value={field.value.city}
+                                        readOnly
+                                        placeholder="City"
+                                      />
+                                      <Input
+                                        value={field.value.stateOrRegion}
+                                        readOnly
+                                        placeholder="State Or Region"
+                                      />
+                                      <Input
+                                        value={field.value.postalCode}
+                                        readOnly
+                                        placeholder="Postal Code"
+                                      />
+                                      <Input
+                                        value={field.value.country}
+                                        readOnly
+                                        placeholder="Country"
+                                      />
+                                    </FormItem>
+                                  </div>
+                                  <div className="col-span-2">
+                                    <Minimap
+                                      longitude={field.value.coordinates[0]}
+                                      latitude={field.value.coordinates[1]}
                                     />
-                                    <Input
-                                      value={field.value.street1}
-                                      readOnly
-                                      placeholder="Street 1"
-                                    />
-                                    <Input
-                                      value={field.value.street2}
-                                      onChange={(event) => {
-                                        field.onChange({
-                                          ...field.value,
-                                          street2: event.target.value,
-                                        });
-                                      }}
-                                      placeholder="Street 2"
-                                    />
-                                    <Input
-                                      value={field.value.city}
-                                      readOnly
-                                      placeholder="City"
-                                    />
-                                    <Input
-                                      value={field.value.stateOrRegion}
-                                      readOnly
-                                      placeholder="State Or Region"
-                                    />
-                                    <Input
-                                      value={field.value.postalCode}
-                                      readOnly
-                                      placeholder="Postal Code"
-                                    />
-                                    <Input
-                                      value={field.value.country}
-                                      readOnly
-                                      placeholder="Country"
-                                    />
-                                  </FormItem>
+                                  </div>
                                 </div>
-                                <div className="col-span-2">
-                                  <Minimap
-                                    longitude={field.value.coordinates[0]}
-                                    latitude={field.value.coordinates[1]}
-                                  />
-                                </div>
+                                <FormMessage className="mt-2" />
                               </div>
-                              <FormMessage className="mt-2" />
-                            </div>
-                          )}
-                        />
-                      </>
-                    )}
+                            )}
+                          />
+                        </>
+                      )}
                     <FormField
                       control={form.control}
-                      name="project.job.additionalInformation"
+                      name="additionalInformation"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Additional Information</FormLabel>
@@ -1345,12 +1282,13 @@ export default function Page() {
                     {/* TODO: member인 경우만 */}
                     <FormField
                       control={form.control}
-                      name="project.job.isExpedited"
+                      name="isExpedited"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex-row-reverse justify-end items-center gap-3">
                           <FormLabel>Expedite</FormLabel>
                           <FormControl>
                             <Checkbox
+                              ref={field.ref}
                               checked={field.value}
                               onCheckedChange={(newChecked) => {
                                 field.onChange(newChecked);
@@ -1361,71 +1299,64 @@ export default function Page() {
                         </FormItem>
                       )}
                     />
-                    <Dropzone />
+                    <Dropzone files={files} onFilesChange={setFiles} />
+                    <LoadingButton
+                      className="w-full"
+                      type="submit"
+                      isLoading={form.formState.isSubmitting}
+                    >
+                      Submit
+                    </LoadingButton>
                   </ItemsContainer>
-                </section>
-                <LoadingButton
-                  className="w-full"
-                  type="submit"
-                  isLoading={form.formState.isSubmitting}
-                >
-                  Submit
-                </LoadingButton>
-              </>
-            )}
-          </form>
-        </Form>
+                </form>
+              </Form>
+            </section>
+          )}
+        </div>
       </div>
-      {watchOrganization.id !== "" && (
+      {organizationId !== "" && (
         <>
           <NewProjectSheet
-            selectedOrganizationId={watchOrganization.id}
+            organizationId={organizationId}
             open={newProjectSheetOpen}
             onOpenChange={setNewProjectSheetOpen}
             onSelect={(newProjectId) => {
-              form.setValue("project.tempId", newProjectId);
+              setProjectId(newProjectId);
             }}
           />
           <ExistingProjectSheet
-            selectedOrganizationId={watchOrganization.id}
+            organizationId={organizationId}
             open={existingProjectSheetOpen}
             onOpenChange={setExistingProjectSheetOpen}
             onSelect={(newProjectId) => {
-              form.setValue("project.tempId", newProjectId);
+              setProjectId(newProjectId);
             }}
           />
-          <NewClientUserSheet
-            selectedOrganizationId={watchOrganization.id}
-            open={newClientUserSheetOpen}
-            onOpenChange={setNewClientUserSheetOpen}
-            onSelect={(newUserId) => {
-              form.setValue("project.job.clientUser.id", newUserId, {
+          <NewUserByOrganizationSheet
+            open={newUserSheetOpen}
+            onOpenChange={setNewUserSheetOpen}
+            organizationId={organizationId}
+            onAdd={(newUserId) => {
+              form.setValue("clientUser.id", newUserId, {
                 shouldValidate: true,
+                shouldDirty: true,
               });
             }}
           />
           <ResultDialog
+            files={files}
             open={result.open}
+            jobId={result.jobId}
             onOpenChange={(newOpen) => {
               if (!newOpen) {
-                form.resetField("project");
+                reset();
                 setResult({ open: false });
+                setFiles([]);
               }
-            }}
-            onOrderMoreButtonClick={() => {
-              form.resetField("project");
-              setResult({ open: false });
-            }}
-            onViewDetailButtonClick={() => {
-              if (!result.open) {
-                return;
-              }
-
-              router.push(`/system-management/jobs/${result.jobId}`);
             }}
           />
         </>
       )}
-    </>
+    </div>
   );
 }

@@ -1,13 +1,14 @@
 import { getServerSession } from "next-auth";
+import { isAxiosError } from "axios";
 import { notFound } from "next/navigation";
-import Client from "./client";
+import Client from "./Client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import api from "@/api";
 
 async function getProject(projectId: string) {
   const session = await getServerSession(authOptions);
   if (session == null) {
-    return;
+    return null;
   }
 
   return api.projects
@@ -16,7 +17,14 @@ async function getProject(projectId: string) {
         Authorization: `Bearer ${session.accessToken}`,
       },
     })
-    .then(({ data }) => data);
+    .then(({ data }) => data)
+    .catch((error) => {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        notFound();
+      }
+
+      return null;
+    });
 }
 
 interface Props {
@@ -27,10 +35,6 @@ interface Props {
 
 export default async function Page({ params: { projectId } }: Props) {
   const project = await getProject(projectId);
-
-  if (project == null) {
-    notFound();
-  }
 
   return <Client initialProject={project} />;
 }

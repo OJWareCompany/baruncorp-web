@@ -1,45 +1,53 @@
 import Link from "next/link";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
+import PageHeader from "@/components/PageHeader";
+import { Separator } from "@/components/ui/separator";
+import { Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-function PageHeader() {
+export default function Page() {
   const title = "Project Intake Portal";
 
   return (
-    <div className="py-2">
-      <Breadcrumb>
-        <BreadcrumbItem isCurrentPage>
-          <BreadcrumbLink as={Link} href="/project-intake-portal">
-            {title}
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
-      <div className="flex justify-between items-center h-9">
-        <h3 className="h3">{title}</h3>
-        <Button asChild size={"sm"}>
-          <Link href="/project-intake-portal/new-service-order">
-            New Service Order
-          </Link>
-        </Button>
-      </div>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        items={[{ href: "/project-intake-portal", name: title }]}
+        title={title}
+      />
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Information</AlertTitle>
+        <AlertDescription className="py-3">
+          <p>
+            Please send an email to{" "}
+            <a href="mailto:newjobs@baruncorp.com" className="underline">
+              newjobs@baruncorp.com
+            </a>{" "}
+            if you need to:
+          </p>
+          <ul className="list-disc pl-6 my-2">
+            <li>Add additional services to an active service order</li>
+            <li>
+              Send us updated information for an active service order or for a
+              service order that is on hold
+            </li>
+            <li>Any other questions or issues concerning service orders</li>
+          </ul>
+          <p>
+            Please send an email to{" "}
+            <a href="mailto:chrisk@baruncorp.com" className="underline">
+              chrisk@baruncorp.com
+            </a>{" "}
+            for any matter relating to the portal.
+          </p>
+        </AlertDescription>
+      </Alert>
+      <Button asChild>
+        <Link href={`/project-intake-portal/new-service-order`}>
+          New Service Order
+        </Link>
+      </Button>
     </div>
-  );
-}
-
-export default function Page() {
-  return (
-    <>
-      <PageHeader />
-      <div className="py-4">
-        <div className="bg-muted h-[400px] flex items-center justify-center">
-          <span className="h3">Informtaion Section</span>
-        </div>
-      </div>
-    </>
   );
 }

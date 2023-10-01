@@ -17,8 +17,12 @@ export const projectTableColumns = [
   columnHelper.accessor("organizationName", {
     header: "Organization",
     size: 200,
-    cell: ({ getValue }) => (
-      <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
+    cell: ({ getValue, column }) => (
+      <p
+        className={`w-[${
+          column.getSize() - 32
+        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
         {getValue()}
       </p>
     ),
@@ -26,8 +30,12 @@ export const projectTableColumns = [
   columnHelper.accessor("propertyFullAddress", {
     header: "Address",
     size: 400,
-    cell: ({ getValue }) => (
-      <p className="w-[368px] whitespace-nowrap overflow-hidden text-ellipsis">
+    cell: ({ getValue, column }) => (
+      <p
+        className={`w-[${
+          column.getSize() - 32
+        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
         {getValue()}
       </p>
     ),
@@ -35,8 +43,12 @@ export const projectTableColumns = [
   columnHelper.accessor("propertyType", {
     header: "Property Type",
     size: 150,
-    cell: ({ getValue }) => (
-      <p className="w-[118px] whitespace-nowrap overflow-hidden text-ellipsis">
+    cell: ({ getValue, column }) => (
+      <p
+        className={`w-[${
+          column.getSize() - 32
+        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
         {getValue()}
       </p>
     ),
@@ -44,15 +56,19 @@ export const projectTableColumns = [
   columnHelper.accessor("propertyOwnerName", {
     header: "Property Owner",
     size: 200,
-    cell: ({ getValue }) => {
+    cell: ({ getValue, column }) => {
       const value = getValue();
 
-      if (value == null || value === "") {
+      if (value == null) {
         return <p className="text-muted-foreground">-</p>;
       }
 
       return (
-        <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
+        <p
+          className={`w-[${
+            column.getSize() - 32
+          }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        >
           {value}
         </p>
       );
@@ -61,15 +77,19 @@ export const projectTableColumns = [
   columnHelper.accessor("projectNumber", {
     header: "Project Number",
     size: 200,
-    cell: ({ getValue }) => {
+    cell: ({ getValue, column }) => {
       const value = getValue();
 
-      if (value == null || value === "") {
+      if (value == null) {
         return <p className="text-muted-foreground">-</p>;
       }
 
       return (
-        <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
+        <p
+          className={`w-[${
+            column.getSize() - 32
+          }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        >
           {value}
         </p>
       );
@@ -78,8 +98,12 @@ export const projectTableColumns = [
   columnHelper.accessor("numberOfJobs", {
     header: "Number of Jobs",
     size: 150,
-    cell: ({ getValue }) => (
-      <p className="w-[118px] whitespace-nowrap overflow-hidden text-ellipsis">
+    cell: ({ getValue, column }) => (
+      <p
+        className={`w-[${
+          column.getSize() - 32
+        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
         {getValue()}
       </p>
     ),
@@ -87,13 +111,25 @@ export const projectTableColumns = [
   columnHelper.accessor("createdAt", {
     header: "Date Created",
     size: 200,
-    cell: ({ getValue }) => (
-      <p className="w-[168px] whitespace-nowrap overflow-hidden text-ellipsis">
-        {new Intl.DateTimeFormat("en-US", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }).format(new Date(getValue()))}
-      </p>
-    ),
+    cell: ({ getValue, column }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return (
+        <p
+          className={`w-[${
+            column.getSize() - 32
+          }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        >
+          {new Intl.DateTimeFormat("en-US", {
+            dateStyle: "short",
+            timeStyle: "short",
+          }).format(new Date(value))}
+        </p>
+      );
+    },
   }),
 ];

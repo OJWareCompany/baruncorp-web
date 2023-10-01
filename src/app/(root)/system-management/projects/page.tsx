@@ -1,23 +1,31 @@
 import { getServerSession } from "next-auth";
+import { isAxiosError } from "axios";
 import { notFound } from "next/navigation";
 import { initialPagination } from "./constants";
-import Client from "./client";
+import Client from "./Client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import api from "@/api";
 
-async function getProjects() {
+interface SearchParams {
+  pageIndex: string | undefined;
+  pageSize: string | undefined;
+}
+
+async function getProjects(searchParams: SearchParams) {
   const session = await getServerSession(authOptions);
   if (session == null) {
-    return;
+    return null;
   }
-
-  const { pageIndex, pageSize } = initialPagination;
 
   return api.projects
     .findProjectsHttpControllerFindUsers(
       {
-        limit: pageSize,
-        page: pageIndex + 1,
+        page: searchParams.pageIndex
+          ? Number(searchParams.pageIndex) + 1
+          : initialPagination.pageIndex + 1,
+        limit: searchParams.pageSize
+          ? Number(searchParams.pageSize)
+          : initialPagination.pageSize,
       },
       {
         headers: {
@@ -25,15 +33,22 @@ async function getProjects() {
         },
       }
     )
-    .then(({ data }) => data);
+    .then(({ data }) => data)
+    .catch((error) => {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        notFound();
+      }
+
+      return null;
+    });
 }
 
-export default async function Page() {
-  const projects = await getProjects();
-
-  if (projects == null) {
-    notFound();
-  }
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const projects = await getProjects(searchParams);
 
   return <Client initialProjects={projects} />;
 }

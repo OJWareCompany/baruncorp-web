@@ -54,7 +54,7 @@
 
 // const formSchema = z.object({
 //   type: z.enum(["Electrical", "Structural"]), // TODO: constants로 만들어 사용하기
-//   abbreviation: z.string(),
+//   abbreviation: z.string().trim(),
 //   issuingCountryName: z.string({ required_error: "State is required" }),
 //   priority: z.string({ required_error: "Priority is required" }),
 //   issuedDate: z.date({

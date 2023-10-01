@@ -1,13 +1,14 @@
 import { getServerSession } from "next-auth";
+import { isAxiosError } from "axios";
 import { notFound } from "next/navigation";
-import Client from "./client";
+import Client from "./Client";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import api from "@/api";
 
 async function getProfile() {
   const session = await getServerSession(authOptions);
   if (session == null) {
-    return;
+    return null;
   }
 
   return api.users
@@ -16,15 +17,18 @@ async function getProfile() {
         Authorization: `Bearer ${session.accessToken}`,
       },
     })
-    .then(({ data }) => data);
+    .then(({ data }) => data)
+    .catch((error) => {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        notFound();
+      }
+
+      return null;
+    });
 }
 
 export default async function Page() {
   const profile = await getProfile();
-
-  if (profile == null) {
-    notFound();
-  }
 
   return <Client initialProfile={profile} />;
 }

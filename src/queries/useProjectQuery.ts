@@ -8,7 +8,7 @@ const useProjectQuery = ({
   initialData,
 }: {
   projectId: string;
-  initialData?: ProjectResponseDto;
+  initialData?: ProjectResponseDto | null;
 }) => {
   const api = useApi();
 
@@ -19,7 +19,7 @@ const useProjectQuery = ({
         .findProjectDetailHttpControllerFindProjectDetail(projectId)
         .then(({ data }) => data),
     enabled: projectId !== "",
-    initialData,
+    initialData: initialData == null ? undefined : initialData,
   });
 };
 

@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { isAxiosError } from "axios";
 import api from "@/api";
-import { isAxiosErrorWithErrorResponseData } from "@/lib/utils";
 
 const useApi = () => {
   const { data: session, update } = useSession();
@@ -22,33 +21,27 @@ const useApi = () => {
       (response) => response,
       async (error) => {
         if (
-          !isAxiosError(error) ||
-          !isAxiosErrorWithErrorResponseData(error) ||
-          error.config == null ||
-          error.response == null
+          !isAxiosError<ErrorResponseData>(error) ||
+          error.response?.status !== 401
         ) {
           return Promise.reject(error);
         }
 
-        const prevRequestConfig = error.config;
-        if (
-          error.response.data.errorCode.includes("10005") &&
-          !prevRequestConfig.sent
-        ) {
-          prevRequestConfig.sent = true;
+        if (error.response?.data.errorCode.includes("10005")) {
           const newSession = await update();
-          if (newSession?.isValid) {
-            const prevRequestConfig = error.config;
-            prevRequestConfig.headers[
-              "Authorization"
-            ] = `Bearer ${newSession?.accessToken}`;
-            return api.instance(prevRequestConfig);
+          if (newSession != null && newSession.authError == null) {
+            return api.instance({
+              ...error.config,
+              headers: {
+                Authorization: `Bearer ${newSession.accessToken}`,
+              },
+            });
           }
-
-          return Promise.reject("Session expired");
         }
 
-        return Promise.reject(error);
+        return Promise.reject(
+          new Error("Authentication Error", { cause: "AUTH_ERROR" })
+        );
       }
     );
 

@@ -3,7 +3,13 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { OrganizationResponseDto } from "@/api";
 
-const useOrganizationQuery = (organizationId: string) => {
+const useOrganizationQuery = ({
+  organizationId,
+  initialData,
+}: {
+  organizationId: string;
+  initialData?: OrganizationResponseDto | null;
+}) => {
   const api = useApi();
 
   return useQuery<OrganizationResponseDto, AxiosError<ErrorResponseData>>({
@@ -12,6 +18,8 @@ const useOrganizationQuery = (organizationId: string) => {
       api.organizations
         .findOrganizationHttpControllerGet(organizationId)
         .then(({ data }) => data),
+    enabled: organizationId !== "",
+    initialData: initialData == null ? undefined : initialData,
   });
 };
 

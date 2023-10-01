@@ -1,27 +1,18 @@
-// import { useMutation } from "@tanstack/react-query";
-// import { AxiosError } from "axios";
-// import { UpdateUserRequestDto } from "../api/index";
-// import useApi from "@/hook/useApi";
-// import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import useApi from "@/hook/useApi";
+import { UpdateUserRequestDto } from "@/api";
 
-// const usePatchProfileByUserIdMutation = (userId: string | undefined) => {
-//   const api = useApi();
-//   const invalidate = useProfileByUserIdQueryInvalidation(userId);
+const usePatchProfileByUserIdMutation = (userId: string) => {
+  const api = useApi();
 
-//   return useMutation<void, AxiosError<ErrorResponseData>, UpdateUserRequestDto>(
-//     (data) => {
-//       if (userId == null) {
-//         return Promise.reject("userId is undefined.");
-//       }
+  return useMutation<void, AxiosError<ErrorResponseData>, UpdateUserRequestDto>(
+    (reqData) => {
+      return api.users
+        .usersControllerPatchUpdateUserByUserId(userId, reqData)
+        .then(({ data: resData }) => resData);
+    }
+  );
+};
 
-//       return api.users
-//         .usersControllerPatchUpdateUserByUserId(userId, data)
-//         .then(({ data }) => data);
-//     },
-//     {
-//       onSuccess: () => invalidate(),
-//     }
-//   );
-// };
-
-// export default usePatchProfileByUserIdMutation;
+export default usePatchProfileByUserIdMutation;

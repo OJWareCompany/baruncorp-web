@@ -1,8 +1,8 @@
 import { Inter } from "next/font/google";
-import Providers from "./providers";
-import { Toaster } from "@/components/Toaster";
+import Providers from "./Providers";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./globals.css";
+import { Toaster } from "@/components/Toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 

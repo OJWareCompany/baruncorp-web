@@ -1,13 +1,6 @@
 import React, { useMemo, useState } from "react";
-import {
-  PaginationState,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { initialPagination } from "./constants";
-import AhjNoteHistorySheet from "./AhjNoteHistorySheet";
-import DataTable from "@/components/table/DataTable";
-import Pagination from "@/components/table/Pagination";
+import { PaginationState } from "@tanstack/react-table";
+import { PaginationTable } from "../table/PaginationTable";
 import usePaginatedAhjNoteHistoriesQuery from "@/queries/usePaginatedAhjNoteHistoriesQuery";
 import {
   AhjNoteHistoryTableRowData,
@@ -16,79 +9,51 @@ import {
 
 interface Props {
   geoId: string;
+  onRowClick?: (historyId: string) => void;
 }
 
-export default function AhjNoteHistoryTable({ geoId }: Props) {
+export default function AhjNoteHistoryTable({ geoId, onRowClick }: Props) {
   /**
    * State
    */
-  const [pagination, setPagination] =
-    useState<PaginationState>(initialPagination);
-  const [ahjHistorySheetState, setAhjHistorySheetState] = useState<{
-    id?: string;
-    open: boolean;
-  }>({ open: false });
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 5,
+  });
 
   /**
    * Query
    */
-  const { data: paginatedAhjNoteHistories } = usePaginatedAhjNoteHistoriesQuery(
-    {
-      geoId,
-      pagination,
-    }
-  );
+  const { data: ahjNoteHistories } = usePaginatedAhjNoteHistoriesQuery({
+    geoId,
+    pagination,
+  });
 
   /**
    * Table
    */
-  const ahjNoteHistoryTableRowData = useMemo(
+  const ahjNoteHistoryTableData = useMemo(
     () =>
-      paginatedAhjNoteHistories?.items.map<AhjNoteHistoryTableRowData>(
-        (value) => {
-          const { id, updatedAt, updatedBy } = value;
+      ahjNoteHistories?.items.map<AhjNoteHistoryTableRowData>((value) => {
+        const { id, updatedAt, updatedBy } = value;
 
-          return {
-            id: String(id),
-            updatedAt,
-            updatedBy,
-          };
-        }
-      ),
-    [paginatedAhjNoteHistories?.items]
+        return {
+          id: String(id),
+          updatedAt,
+          updatedBy,
+        };
+      }),
+    [ahjNoteHistories?.items]
   );
-  const table = useReactTable({
-    data: ahjNoteHistoryTableRowData ?? [],
-    columns: ahjNoteHistoryTableColumns,
-    getCoreRowModel: getCoreRowModel(),
-    getRowId: (originalRow) => originalRow.id,
-    pageCount: paginatedAhjNoteHistories?.totalPage ?? -1,
-    onPaginationChange: setPagination,
-    manualPagination: true,
-    state: {
-      pagination,
-    },
-  });
 
   return (
-    <>
-      <div className="space-y-4">
-        <DataTable
-          table={table}
-          onRowClick={(historyId) => {
-            setAhjHistorySheetState({ open: true, id: historyId });
-          }}
-        />
-        <Pagination table={table} />
-      </div>
-      <AhjNoteHistorySheet
-        {...ahjHistorySheetState}
-        onOpenChange={(open) => {
-          if (!open) {
-            setAhjHistorySheetState({ open });
-          }
-        }}
-      />
-    </>
+    <PaginationTable
+      columns={ahjNoteHistoryTableColumns}
+      data={ahjNoteHistoryTableData ?? []}
+      onPaginationChange={setPagination}
+      pageCount={ahjNoteHistories?.totalPage ?? -1}
+      pagination={pagination}
+      onRowClick={onRowClick}
+    />
   );
 }

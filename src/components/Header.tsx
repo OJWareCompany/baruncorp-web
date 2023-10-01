@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, User2 } from "lucide-react";
+import { Building, LogOut, User2 } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import React from "react";
@@ -32,32 +32,32 @@ const systemManagementItems: {
   href: string;
 }[] = [
   {
+    title: "Users",
+    href: "/system-management/users",
+  },
+  {
+    title: "Organizations",
+    href: "/system-management/organizations",
+  },
+  {
     title: "Projects",
     href: "/system-management/projects",
+  },
+  {
+    title: "Jobs",
+    href: "/system-management/jobs",
+  },
+  {
+    title: "Tasks",
+    href: "/system-management/tasks",
   },
   {
     title: "AHJ Notes",
     href: "/system-management/ahj-notes",
   },
   // {
-  //   title: "Users",
-  //   href: "/system-management/users",
-  // },
-  // {
-  //   title: "Organizations",
-  //   href: "/system-management/organizations",
-  // },
-  // {
   //   title: "Invoices",
   //   href: "/system-management/invoices",
-  // },
-  // {
-  //   title: "Tasks",
-  //   href: "/system-management/tasks",
-  // },
-  // {
-  //   title: "Jobs",
-  //   href: "/system-management/jobs",
   // },
   // {
   //   title: "Tracking Numbers",
@@ -89,7 +89,7 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 interface Props {
-  initialProfile: UserResponseDto;
+  initialProfile: UserResponseDto | null;
 }
 
 export default function Header({ initialProfile }: Props) {
@@ -196,6 +196,12 @@ export default function Header({ initialProfile }: Props) {
                 <Link href="/my/profile">
                   <User2 className="mr-2 h-4 w-4" />
                   <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/my/organization">
+                  <Building className="mr-2 h-4 w-4" />
+                  <span>Organization</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
