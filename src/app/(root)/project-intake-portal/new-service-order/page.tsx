@@ -59,8 +59,8 @@ import { Label } from "@/components/ui/label";
 import useAllServicesQuery from "@/queries/useAllServicesQuery";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import BaseTable from "@/components/table/BaseTable";
-import { JobTableRowData, jobTableColumns } from "@/columns/job";
 import PageHeader from "@/components/PageHeader";
+import { jobForProjectColumns } from "@/columns/job";
 
 export default function Page() {
   /**
@@ -303,18 +303,22 @@ export default function Page() {
   const { data: user } = useUserQuery({ userId: watchClientUser.id });
 
   const otherService = useMemo(
-    () => services?.find((value) => value.id === OTHER_SERVICE_ID),
-    [services]
+    () => services?.items.find((value) => value.id === OTHER_SERVICE_ID),
+    [services?.items]
   );
   const electricalWetStampService = useMemo(
     () =>
-      services?.find((value) => value.id === ELECTRICAL_WET_STAMP_SERVICE_ID),
-    [services]
+      services?.items.find(
+        (value) => value.id === ELECTRICAL_WET_STAMP_SERVICE_ID
+      ),
+    [services?.items]
   );
   const structuralWetStampService = useMemo(
     () =>
-      services?.find((value) => value.id === STRUCTURAL_WET_STAMP_SERVICE_ID),
-    [services]
+      services?.items.find(
+        (value) => value.id === STRUCTURAL_WET_STAMP_SERVICE_ID
+      ),
+    [services?.items]
   );
 
   /**
@@ -506,48 +510,6 @@ export default function Page() {
     setWetStampChecked(false);
   }
 
-  /**
-   * Table
-   */
-  const jobTableData = useMemo(
-    () =>
-      project?.jobs.map<JobTableRowData>((value) => {
-        const {
-          id,
-          additionalInformationFromClient,
-          isExpedited,
-          clientInfo: { clientOrganizationName, clientUserName },
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          assignedTasks,
-          propertyFullAddress,
-          receivedAt,
-        } = value;
-
-        return {
-          id: id,
-          additionalInformation: additionalInformationFromClient,
-          clientUserName,
-          organizationName: clientOrganizationName,
-          isExpedited,
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          tasks: assignedTasks.map<JobTableRowData["tasks"][number]>(
-            (value) => {
-              const { assignTaskId, assigneeName, status, taskName } = value;
-
-              return { id: assignTaskId, assigneeName, name: taskName, status };
-            }
-          ),
-          propertyFullAddress,
-          receivedAt,
-        };
-      }),
-    [project?.jobs]
-  );
-
   const title = "New Service Order";
 
   return (
@@ -631,8 +593,9 @@ export default function Page() {
                     />
                   </div>
                   <BaseTable
-                    columns={jobTableColumns}
-                    data={jobTableData ?? []}
+                    columns={jobForProjectColumns}
+                    data={project?.jobs ?? []}
+                    getRowId={({ id }) => id}
                   />
                   <Button
                     variant={"outline"}
@@ -808,8 +771,8 @@ export default function Page() {
                         <FormItem>
                           <FormLabel required>Task</FormLabel>
                           <div className="grid grid-cols-3 gap-y-2 gap-x-4">
-                            {services
-                              ?.filter(
+                            {services?.items
+                              .filter(
                                 (value) =>
                                   value.id !==
                                     ELECTRICAL_WET_STAMP_SERVICE_ID &&

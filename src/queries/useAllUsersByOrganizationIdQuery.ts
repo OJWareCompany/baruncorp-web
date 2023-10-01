@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UserResponseDto } from "@/api";
+import { UserPaginatedResopnseDto, UserResponseDto } from "@/api";
 
 const useAllUsersByOrganizationIdQuery = (organizationId: string) => {
   const api = useApi();
 
-  return useQuery<UserResponseDto[], AxiosError<ErrorResponseData>>({
+  return useQuery<UserPaginatedResopnseDto, AxiosError<ErrorResponseData>>({
     queryKey: ["users", "list", { organizationId }],
     queryFn: () =>
       api.users
@@ -14,7 +14,7 @@ const useAllUsersByOrganizationIdQuery = (organizationId: string) => {
           organizationId,
           limit: Number.MAX_SAFE_INTEGER,
         })
-        .then(({ data }) => data.items),
+        .then(({ data }) => data),
     enabled: organizationId !== "",
   });
 };

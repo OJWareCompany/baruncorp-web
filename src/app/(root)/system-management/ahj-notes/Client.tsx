@@ -7,40 +7,42 @@ import { AhjNotePaginatedResponseDto } from "@/api";
 import PaginatedTable from "@/components/table/PaginatedTable";
 import usePagination from "@/hook/usePagination";
 import usePaginatedAhjNotesQuery from "@/queries/usePaginatedAhjNotesQuery";
-import { AhjNoteTableRowData, ahjNoteTableColumns } from "@/columns/ahj-note";
+import {
+  ahjNoteColumns,
+  getAhjNoteTableExportDataFromAhjNotes,
+} from "@/columns/ahjNote";
 import PageHeader from "@/components/PageHeader";
 interface Props {
   initialAhjNotes: AhjNotePaginatedResponseDto | null;
 }
 
 export default function Client({ initialAhjNotes }: Props) {
+  const title = "AHJ Notes";
   const router = useRouter();
+
+  /**
+   * State
+   */
   const [pagination, setPagination] = usePagination(
     initialPagination.pageIndex,
     initialPagination.pageSize
   );
 
+  /**
+   * Query
+   */
   const { data: ahjNotes } = usePaginatedAhjNotesQuery({
     pagination,
     initialData: initialAhjNotes,
   });
 
-  const ahjNoteTableData = useMemo(
-    () =>
-      ahjNotes?.items.map<AhjNoteTableRowData>((value) => {
-        const { fullAhjName, geoId, name, updatedAt } = value;
-
-        return {
-          fullName: fullAhjName,
-          id: geoId,
-          name,
-          updatedAt,
-        };
-      }),
-    [ahjNotes?.items]
+  /**
+   * Table
+   */
+  const ahjNoteTableExportData = useMemo(
+    () => getAhjNoteTableExportDataFromAhjNotes(ahjNotes),
+    [ahjNotes]
   );
-
-  const title = "AHJ Notes";
 
   return (
     <div className="flex flex-col gap-4">
@@ -49,14 +51,17 @@ export default function Client({ initialAhjNotes }: Props) {
         title={title}
       />
       <PaginatedTable
-        columns={ahjNoteTableColumns}
-        data={ahjNoteTableData ?? []}
+        columns={ahjNoteColumns}
+        data={ahjNotes?.items ?? []}
+        exportData={ahjNoteTableExportData ?? []}
+        exportFileName={title}
         pageCount={ahjNotes?.totalPage ?? -1}
         pagination={pagination}
         onPaginationChange={setPagination}
         onRowClick={(id) => {
           router.push(`/system-management/ahj-notes/${id}`);
         }}
+        getRowId={({ geoId }) => geoId}
       />
     </div>
   );

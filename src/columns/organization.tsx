@@ -1,16 +1,10 @@
+import { OrganizationPaginatedResponseDto } from "@/api";
 import { createColumnHelper } from "@tanstack/react-table";
 
-export interface OrganizationTableRowData {
-  id: string;
-  name: string;
-  address: string;
-  phoneNumber: string | null;
-  email: string | null;
-}
+const columnHelper =
+  createColumnHelper<OrganizationPaginatedResponseDto["items"][number]>();
 
-const columnHelper = createColumnHelper<OrganizationTableRowData>();
-
-export const organizationTableColumns = [
+export const organizationColumns = [
   columnHelper.accessor("name", {
     header: "Name",
     size: 200,
@@ -23,7 +17,7 @@ export const organizationTableColumns = [
       </p>
     ),
   }),
-  columnHelper.accessor("address", {
+  columnHelper.accessor("fullAddress", {
     header: "Address",
     size: 400,
     cell: ({ getValue, column }) => (
@@ -60,3 +54,22 @@ export const organizationTableColumns = [
     ),
   }),
 ];
+
+interface OrganizationTableExportData {
+  [index: string]: unknown;
+  Name: string;
+  Address: string;
+  "Phone Number": string;
+  "Email Address to Receive Invoice": string;
+}
+
+export function getOrganizationTableExportDataFromOrganizations(
+  organizations: OrganizationPaginatedResponseDto | undefined
+): OrganizationTableExportData[] | undefined {
+  return organizations?.items.map<OrganizationTableExportData>((value) => ({
+    Name: value.name,
+    Address: value.fullAddress,
+    "Phone Number": value.phoneNumber ?? "-",
+    "Email Address to Receive Invoice": value.email ?? "-",
+  }));
+}

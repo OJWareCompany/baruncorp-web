@@ -1,12 +1,12 @@
 "use client";
 import { useMemo } from "react";
-import { ServiceResponseDto } from "@/api";
-import { ServiceTableRowData, serviceTableColumn } from "@/columns/service";
+import { ServicePaginatedResponseDto, ServiceResponseDto } from "@/api";
+import { serviceColumns } from "@/columns/service";
 import PageHeader from "@/components/PageHeader";
 import BaseTable from "@/components/table/BaseTable";
 import useAllServicesQuery from "@/queries/useAllServicesQuery";
 interface Props {
-  initialServices: ServiceResponseDto[] | null;
+  initialServices: ServicePaginatedResponseDto | null;
 }
 
 export default function Client({ initialServices }: Props) {
@@ -14,30 +14,17 @@ export default function Client({ initialServices }: Props) {
 
   const { data: services } = useAllServicesQuery(initialServices);
 
-  const serviceTableData = useMemo(
-    () =>
-      services
-        ?.map<ServiceTableRowData>((value) => {
-          const { basePrice, billingCode, id, name } = value;
-
-          return {
-            basePrice,
-            billingCode,
-            id,
-            name,
-          };
-        })
-        .sort((a, b) => (a.name < b.name ? -1 : 1)),
-    [services]
-  );
-
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         items={[{ href: "/system-management/tasks", name: title }]}
         title={title}
       />
-      <BaseTable columns={serviceTableColumn} data={serviceTableData ?? []} />
+      <BaseTable
+        columns={serviceColumns}
+        data={services?.items ?? []}
+        getRowId={({ id }) => id}
+      />
     </div>
   );
 }

@@ -51,3 +51,16 @@ export function getValidChildren(children: React.ReactNode) {
     React.isValidElement(child)
   ) as React.ReactElement[];
 }
+
+const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
+export function formatDateTime(dateTimeString: string) {
+  if (typeof dateTimeString !== "string") {
+    return "-";
+  }
+
+  return dateTimeFormatter.format(new Date(dateTimeString));
+}

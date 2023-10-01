@@ -53,15 +53,15 @@ import CommonAlertDialogContent from "@/components/CommonAlertDialogContent";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import PageHeader from "@/components/PageHeader";
 import BaseTable from "@/components/table/BaseTable";
-import { JobNoteTableRowData, jobNoteTableColumns } from "@/columns/job-note";
+import { jobNoteColumns } from "@/columns/jobNote";
 import useJobNotesQuery from "@/queries/useJobNotesQuery";
-import { JobTableRowData, jobTableColumns } from "@/columns/job";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { jobForProjectColumns } from "@/columns/job";
 
 interface Props {
   initialJob: JobResponseDto | null;
@@ -353,63 +353,6 @@ export default function Client({ initialJob, initialProject }: Props) {
 
   const title = job?.jobName ?? "";
 
-  /**
-   * Table
-   */
-  const jobNoteTableData = useMemo(
-    () =>
-      jobNotes?.notes.map<JobNoteTableRowData>((value) => {
-        const { commenterName, content, createdAt, jobNoteId } = value;
-
-        return {
-          commenter: commenterName,
-          content,
-          createdAt,
-          id: jobNoteId,
-        };
-      }),
-    [jobNotes?.notes]
-  );
-
-  const jobTableData = useMemo(
-    () =>
-      project?.jobs.map<JobTableRowData>((value) => {
-        const {
-          id,
-          additionalInformationFromClient,
-          isExpedited,
-          clientInfo: { clientOrganizationName, clientUserName },
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          assignedTasks,
-          propertyFullAddress,
-          receivedAt,
-        } = value;
-
-        return {
-          id: id,
-          additionalInformation: additionalInformationFromClient,
-          clientUserName,
-          organizationName: clientOrganizationName,
-          isExpedited,
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          tasks: assignedTasks.map<JobTableRowData["tasks"][number]>(
-            (value) => {
-              const { assignTaskId, assigneeName, status, taskName } = value;
-
-              return { id: assignTaskId, assigneeName, name: taskName, status };
-            }
-          ),
-          propertyFullAddress,
-          receivedAt,
-        };
-      }),
-    [project?.jobs]
-  );
-
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -526,11 +469,12 @@ export default function Client({ initialJob, initialProject }: Props) {
               </div>
             </div>
             <BaseTable
-              columns={jobTableColumns}
-              data={jobTableData ?? []}
+              columns={jobForProjectColumns}
+              data={project?.jobs ?? []}
               onRowClick={(jobId) => {
                 router.push(`/system-management/jobs/${jobId}`);
               }}
+              getRowId={({ id }) => id}
             />
           </ItemsContainer>
         </section>
@@ -866,8 +810,9 @@ export default function Client({ initialJob, initialProject }: Props) {
           <h4 className="h4 mb-2">Job Note</h4>
           <ItemsContainer>
             <BaseTable
-              columns={jobNoteTableColumns}
-              data={jobNoteTableData ?? []}
+              columns={jobNoteColumns}
+              data={jobNotes?.notes ?? []}
+              getRowId={({ jobNoteId }) => jobNoteId}
             />
             <JobNoteForm jobId={jobId} />
           </ItemsContainer>

@@ -22,7 +22,7 @@ async function getServices() {
         },
       }
     )
-    .then(({ data }) => data.items)
+    .then(({ data }) => data)
     .catch((error) => {
       if (isAxiosError(error) && error.response?.status === 404) {
         notFound();

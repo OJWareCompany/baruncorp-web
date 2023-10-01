@@ -1,15 +1,11 @@
+import { JobNoteListResponseDto } from "@/api";
+import { formatDateTime } from "@/lib/utils";
 import { createColumnHelper } from "@tanstack/react-table";
 
-export interface JobNoteTableRowData {
-  id: string;
-  content: string;
-  commenter: string;
-  createdAt: string;
-}
+const columnHelper =
+  createColumnHelper<JobNoteListResponseDto["notes"][number]>();
 
-const columnHelper = createColumnHelper<JobNoteTableRowData>();
-
-export const jobNoteTableColumns = [
+export const jobNoteColumns = [
   columnHelper.accessor("content", {
     header: "Content",
     size: 400,
@@ -22,7 +18,7 @@ export const jobNoteTableColumns = [
       </p>
     ),
   }),
-  columnHelper.accessor("commenter", {
+  columnHelper.accessor("commenterName", {
     header: "Commenter",
     size: 200,
     cell: ({ getValue, column }) => (
@@ -42,10 +38,7 @@ export const jobNoteTableColumns = [
         style={{ width: column.getSize() - 32 }}
         className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
-        {new Intl.DateTimeFormat("en-US", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }).format(new Date(getValue()))}
+        {formatDateTime(getValue())}
       </p>
     ),
   }),

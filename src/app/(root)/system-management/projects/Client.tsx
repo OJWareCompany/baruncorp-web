@@ -5,7 +5,10 @@ import { initialPagination } from "./constants";
 import { ProjectPaginatedResponseDto } from "@/api";
 import usePagination from "@/hook/usePagination";
 import usePaginatedProjectsQuery from "@/queries/usePaginatedProjectsQuery";
-import { ProjectTableRowData, projectTableColumns } from "@/columns/project";
+import {
+  getProjectTableExportDataFromProjects,
+  projectColumns,
+} from "@/columns/project";
 import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
 
@@ -14,46 +17,32 @@ interface Props {
 }
 
 export default function Client({ initialProjects }: Props) {
+  const title = "Projects";
   const router = useRouter();
+
+  /**
+   * State
+   */
   const [pagination, setPagination] = usePagination(
     initialPagination.pageIndex,
     initialPagination.pageSize
   );
 
+  /**
+   * Query
+   */
   const { data: projects } = usePaginatedProjectsQuery({
     pagination,
     initialData: initialProjects,
   });
 
-  const projectTableData = useMemo(
-    () =>
-      projects?.items.map<ProjectTableRowData>((value) => {
-        const {
-          createdAt,
-          projectId,
-          organizationName,
-          projectNumber,
-          propertyFullAddress,
-          propertyOwnerName,
-          propertyType,
-          totalOfJobs,
-        } = value;
-
-        return {
-          createdAt,
-          id: projectId,
-          organizationName,
-          projectNumber,
-          propertyFullAddress,
-          propertyOwnerName,
-          propertyType,
-          numberOfJobs: totalOfJobs,
-        };
-      }),
-    [projects?.items]
+  /**
+   * Table
+   */
+  const projectTableExportData = useMemo(
+    () => getProjectTableExportDataFromProjects(projects),
+    [projects]
   );
-
-  const title = "Projects";
 
   return (
     <div className="flex flex-col gap-4">
@@ -62,14 +51,17 @@ export default function Client({ initialProjects }: Props) {
         title={title}
       />
       <PaginatedTable
-        columns={projectTableColumns}
-        data={projectTableData ?? []}
+        columns={projectColumns}
+        data={projects?.items ?? []}
+        exportData={projectTableExportData ?? []}
+        exportFileName={title}
         pageCount={projects?.totalPage ?? -1}
         pagination={pagination}
         onPaginationChange={setPagination}
         onRowClick={(id) => {
           router.push(`/system-management/projects/${id}`);
         }}
+        getRowId={({ projectId }) => projectId}
       />
     </div>
   );

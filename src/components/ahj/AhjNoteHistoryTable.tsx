@@ -3,9 +3,9 @@ import { PaginationState } from "@tanstack/react-table";
 import PaginatedTable from "../table/PaginatedTable";
 import usePaginatedAhjNoteHistoriesQuery from "@/queries/usePaginatedAhjNoteHistoriesQuery";
 import {
-  AhjNoteHistoryTableRowData,
-  ahjNoteHistoryTableColumns,
-} from "@/columns/ahj-note-history";
+  ahjNoteHistoryColumns,
+  getAhjNoteHistoryTableExportDataFromAhjNoteHistories,
+} from "@/columns/ahjNoteHistory";
 
 interface Props {
   geoId: string;
@@ -32,28 +32,23 @@ export default function AhjNoteHistoryTable({ geoId, onRowClick }: Props) {
   /**
    * Table
    */
-  const ahjNoteHistoryTableData = useMemo(
+  const ahjNoteHistoryTableExportData = useMemo(
     () =>
-      ahjNoteHistories?.items.map<AhjNoteHistoryTableRowData>((value) => {
-        const { id, updatedAt, updatedBy } = value;
-
-        return {
-          id: String(id),
-          updatedAt,
-          updatedBy,
-        };
-      }),
-    [ahjNoteHistories?.items]
+      getAhjNoteHistoryTableExportDataFromAhjNoteHistories(ahjNoteHistories),
+    [ahjNoteHistories]
   );
 
   return (
     <PaginatedTable
-      columns={ahjNoteHistoryTableColumns}
-      data={ahjNoteHistoryTableData ?? []}
+      columns={ahjNoteHistoryColumns}
+      data={ahjNoteHistories?.items ?? []}
+      exportData={ahjNoteHistoryTableExportData ?? []}
+      exportFileName="AHJ Note Histories"
       onPaginationChange={setPagination}
       pageCount={ahjNoteHistories?.totalPage ?? -1}
       pagination={pagination}
       onRowClick={onRowClick}
+      getRowId={({ id }) => String(id)}
     />
   );
 }

@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { FieldValues, formSchema, getFieldValuesFromAhjNote } from "@/lib/ahj";
+import { formatDateTime } from "@/lib/utils";
 
 interface Props extends DialogProps {
   id?: string;
@@ -437,10 +438,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
                           value={
                             field.value === ""
                               ? "-"
-                              : new Intl.DateTimeFormat("en-US", {
-                                  dateStyle: "short",
-                                  timeStyle: "short",
-                                }).format(new Date(field.value))
+                              : formatDateTime(field.value)
                           }
                           readOnly
                         />

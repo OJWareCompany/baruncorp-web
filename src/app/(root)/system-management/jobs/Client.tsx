@@ -6,66 +6,44 @@ import { initialPagination } from "./constants";
 import { JobPaginatedResponseDto } from "@/api";
 import usePagination from "@/hook/usePagination";
 import usePaginatedJobsQuery from "@/queries/usePaginatedJobsQuery";
-import { JobTableRowData, jobTableColumns } from "@/columns/job";
 import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
+import {
+  getJobTableExportDataFromJobs,
+  jobPaginatedColumns,
+} from "@/columns/job";
 
 interface Props {
   initialJobs: JobPaginatedResponseDto | null;
 }
 
 export default function Client({ initialJobs }: Props) {
+  const title = "Jobs";
   const router = useRouter();
+
+  /**
+   * State
+   */
   const [pagination, setPagination] = usePagination(
     initialPagination.pageIndex,
     initialPagination.pageSize
   );
 
+  /**
+   * Query
+   */
   const { data: jobs } = usePaginatedJobsQuery({
     pagination,
     initialData: initialJobs,
   });
 
-  const jobTableData = useMemo(
-    () =>
-      jobs?.items.map<JobTableRowData>((value) => {
-        const {
-          id,
-          additionalInformationFromClient,
-          isExpedited,
-          clientInfo: { clientOrganizationName, clientUserName },
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          assignedTasks,
-          propertyFullAddress,
-          receivedAt,
-        } = value;
-
-        return {
-          id,
-          additionalInformation: additionalInformationFromClient,
-          clientUserName,
-          organizationName: clientOrganizationName,
-          isExpedited,
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          tasks: assignedTasks.map<JobTableRowData["tasks"][number]>(
-            (value) => {
-              const { assignTaskId, assigneeName, status, taskName } = value;
-
-              return { id: assignTaskId, assigneeName, name: taskName, status };
-            }
-          ),
-          propertyFullAddress,
-          receivedAt,
-        };
-      }),
-    [jobs?.items]
+  /**
+   * Table
+   */
+  const jobTableExportData = useMemo(
+    () => getJobTableExportDataFromJobs(jobs),
+    [jobs]
   );
-
-  const title = "Jobs";
 
   return (
     <div className="flex flex-col gap-4">
@@ -74,14 +52,17 @@ export default function Client({ initialJobs }: Props) {
         title={title}
       />
       <PaginatedTable
-        columns={jobTableColumns}
-        data={jobTableData ?? []}
+        columns={jobPaginatedColumns}
+        data={jobs?.items ?? []}
+        exportData={jobTableExportData ?? []}
+        exportFileName={title}
         pageCount={jobs?.totalPage ?? -1}
         pagination={pagination}
         onPaginationChange={setPagination}
         onRowClick={(id) => {
           router.push(`/system-management/jobs/${id}`);
         }}
+        getRowId={({ id }) => id}
       />
     </div>
   );

@@ -1,16 +1,10 @@
+import { UserPaginatedResopnseDto } from "@/api";
 import { createColumnHelper } from "@tanstack/react-table";
 
-export interface UserTableRowData {
-  id: string;
-  email: string;
-  fullName: string;
-  phoneNumber: string | null;
-  organization: string;
-}
+const columnHelper =
+  createColumnHelper<UserPaginatedResopnseDto["items"][number]>();
 
-const columnHelper = createColumnHelper<UserTableRowData>();
-
-export const userTableColumns = [
+export const userColumns = [
   columnHelper.accessor("organization", {
     header: "Organization",
     size: 200,
@@ -68,3 +62,22 @@ export const userTableColumns = [
     },
   }),
 ];
+
+interface UserTableExportData {
+  [index: string]: unknown;
+  Organization: string;
+  Email: string;
+  "Full Name": string;
+  "Phone Number": string;
+}
+
+export function getUserTableExportDataFromUsers(
+  users: UserPaginatedResopnseDto | undefined
+): UserTableExportData[] | undefined {
+  return users?.items.map<UserTableExportData>((value) => ({
+    Organization: value.organization,
+    Email: value.email,
+    "Full Name": value.fullName,
+    "Phone Number": value.phoneNumber ?? "-",
+  }));
+}

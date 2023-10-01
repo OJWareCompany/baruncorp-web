@@ -40,6 +40,7 @@ import {
   getUpdateAhjNoteRequestDtoFromFieldValues,
 } from "@/lib/ahj";
 import AhjNoteHistory from "@/components/ahj/AhjNoteHistory";
+import { formatDateTime } from "@/lib/utils";
 
 interface Props {
   geoId: string;
@@ -631,12 +632,7 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                     <FormControl>
                       <Input
                         value={
-                          field.value === ""
-                            ? "-"
-                            : new Intl.DateTimeFormat("en-US", {
-                                dateStyle: "short",
-                                timeStyle: "short",
-                              }).format(new Date(field.value))
+                          field.value === "" ? "-" : formatDateTime(field.value)
                         }
                         readOnly
                       />

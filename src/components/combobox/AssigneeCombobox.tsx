@@ -55,7 +55,7 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
             <span className="flex-1 text-start">
               {userId === ""
                 ? "Select an assignee"
-                : users?.find((value) => value.id === userId)?.fullName}
+                : users?.items.find((value) => value.id === userId)?.fullName}
             </span>
             {isUsersQueryLoading ? (
               <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
@@ -79,16 +79,16 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
             }}
           >
             <CommandInput placeholder="Search" />
-            {users && users.length !== 0 && (
+            {users && users.items.length !== 0 && (
               <CommandEmpty>No user found.</CommandEmpty>
             )}
             {users &&
-              (users.length === 0 ? (
+              (users.items.length === 0 ? (
                 <div className="py-6 text-center text-sm">No user found.</div>
               ) : (
                 <CommandList>
                   <CommandGroup>
-                    {users.map((user) => (
+                    {users.items.map((user) => (
                       <CommandItem
                         key={user.id}
                         value={`${user.fullName} ${user.email}`}

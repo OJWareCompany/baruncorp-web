@@ -1,50 +1,46 @@
 "use client";
-
 import Link from "next/link";
-import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { initialPagination } from "./constants";
-
 import { UserPaginatedResopnseDto } from "@/api";
 import { Button } from "@/components/ui/button";
 import usePagination from "@/hook/usePagination";
 import usePaginatedUsersQuery from "@/queries/usePaginatedUsersQuery";
-import { UserTableRowData, userTableColumns } from "@/columns/user";
+import { getUserTableExportDataFromUsers, userColumns } from "@/columns/user";
 import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
+import { useMemo } from "react";
 interface Props {
   initialUsers: UserPaginatedResopnseDto | null;
 }
 
 export default function Client({ initialUsers }: Props) {
+  const title = "Users";
   const router = useRouter();
+
+  /**
+   * State
+   */
   const [pagination, setPagination] = usePagination(
     initialPagination.pageIndex,
     initialPagination.pageSize
   );
 
+  /**
+   * Query
+   */
   const { data: users } = usePaginatedUsersQuery({
     pagination,
     initialData: initialUsers,
   });
 
-  const userTableData = useMemo(
-    () =>
-      users?.items.map<UserTableRowData>((value) => {
-        const { email, fullName, id, organization, phoneNumber } = value;
-
-        return {
-          email,
-          fullName,
-          id,
-          organization,
-          phoneNumber,
-        };
-      }),
-    [users?.items]
+  /**
+   * Table
+   */
+  const userTableExportData = useMemo(
+    () => getUserTableExportDataFromUsers(users),
+    [users]
   );
-
-  const title = "Users";
 
   return (
     <div className="flex flex-col gap-4">
@@ -58,14 +54,17 @@ export default function Client({ initialUsers }: Props) {
         }
       />
       <PaginatedTable
-        columns={userTableColumns}
-        data={userTableData ?? []}
+        columns={userColumns}
+        data={users?.items ?? []}
+        exportData={userTableExportData ?? []}
+        exportFileName={title}
         pageCount={users?.totalPage ?? -1}
         pagination={pagination}
         onPaginationChange={setPagination}
         onRowClick={(id) => {
           router.push(`/system-management/users/${id}`);
         }}
+        getRowId={({ id }) => id}
       />
     </div>
   );

@@ -37,7 +37,6 @@ import useProjectQuery from "@/queries/useProjectQuery";
 import { Button } from "@/components/ui/button";
 import { PropertyTypeEnum } from "@/lib/constants";
 import BaseTable from "@/components/table/BaseTable";
-import { JobTableRowData, jobTableColumns } from "@/columns/job";
 import PageHeader from "@/components/PageHeader";
 import {
   DropdownMenu,
@@ -45,6 +44,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { jobForProjectColumns } from "@/columns/job";
 
 const formSchema = z.object({
   organization: z
@@ -180,48 +180,6 @@ export default function Client({ initialProject }: Props) {
         }
       });
   }
-
-  /**
-   * Table
-   */
-  const jobTableData = useMemo(
-    () =>
-      project?.jobs.map<JobTableRowData>((value) => {
-        const {
-          id,
-          additionalInformationFromClient,
-          isExpedited,
-          clientInfo: { clientOrganizationName, clientUserName },
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          assignedTasks,
-          propertyFullAddress,
-          receivedAt,
-        } = value;
-
-        return {
-          id: id,
-          additionalInformation: additionalInformationFromClient,
-          clientUserName,
-          organizationName: clientOrganizationName,
-          isExpedited,
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          tasks: assignedTasks.map<JobTableRowData["tasks"][number]>(
-            (value) => {
-              const { assignTaskId, assigneeName, status, taskName } = value;
-
-              return { id: assignTaskId, assigneeName, name: taskName, status };
-            }
-          ),
-          propertyFullAddress,
-          receivedAt,
-        };
-      }),
-    [project?.jobs]
-  );
 
   const title = project?.propertyAddress.fullAddress ?? "";
 
@@ -438,11 +396,12 @@ export default function Client({ initialProject }: Props) {
         </form>
       </Form>
       <BaseTable
-        columns={jobTableColumns}
-        data={jobTableData ?? []}
+        columns={jobForProjectColumns}
+        data={project?.jobs ?? []}
         onRowClick={(jobId) => {
           router.push(`/system-management/jobs/${jobId}`);
         }}
+        getRowId={({ id }) => id}
       />
     </div>
   );

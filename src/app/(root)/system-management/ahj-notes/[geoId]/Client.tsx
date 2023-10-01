@@ -42,6 +42,7 @@ import {
 } from "@/lib/ahj";
 import AhjNoteHistory from "@/components/ahj/AhjNoteHistory";
 import PageHeader from "@/components/PageHeader";
+import { formatDateTime } from "@/lib/utils";
 
 interface Props {
   geoId: string;
@@ -648,10 +649,7 @@ export default function Client({ geoId, initialAhjNote }: Props) {
                           value={
                             field.value === ""
                               ? "-"
-                              : new Intl.DateTimeFormat("en-US", {
-                                  dateStyle: "short",
-                                  timeStyle: "short",
-                                }).format(new Date(field.value))
+                              : formatDateTime(field.value)
                           }
                           readOnly
                         />

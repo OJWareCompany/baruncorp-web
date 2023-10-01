@@ -1,15 +1,11 @@
+import { AhjNotePaginatedResponseDto } from "@/api";
+import { formatDateTime } from "@/lib/utils";
 import { createColumnHelper } from "@tanstack/react-table";
 
-export interface AhjNoteTableRowData {
-  id: string;
-  name: string;
-  fullName: string;
-  updatedAt: string;
-}
+const columnHelper =
+  createColumnHelper<AhjNotePaginatedResponseDto["items"][number]>();
 
-const columnHelper = createColumnHelper<AhjNoteTableRowData>();
-
-export const ahjNoteTableColumns = [
+export const ahjNoteColumns = [
   columnHelper.accessor("name", {
     header: "Name",
     size: 400,
@@ -22,7 +18,7 @@ export const ahjNoteTableColumns = [
       </p>
     ),
   }),
-  columnHelper.accessor("fullName", {
+  columnHelper.accessor("fullAhjName", {
     header: "Full Name",
     size: 400,
     cell: ({ getValue, column }) => (
@@ -42,11 +38,25 @@ export const ahjNoteTableColumns = [
         style={{ width: column.getSize() - 32 }}
         className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
-        {new Intl.DateTimeFormat("en-US", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }).format(new Date(getValue()))}
+        {formatDateTime(getValue())}
       </p>
     ),
   }),
 ];
+
+interface AhjNoteTableExportData {
+  [index: string]: unknown;
+  Name: string;
+  "Full Name": string;
+  "Date Updated": string;
+}
+
+export function getAhjNoteTableExportDataFromAhjNotes(
+  ahjNotes: AhjNotePaginatedResponseDto | undefined
+): AhjNoteTableExportData[] | undefined {
+  return ahjNotes?.items.map<AhjNoteTableExportData>((value) => ({
+    Name: value.name,
+    "Full Name": value.fullAhjName,
+    "Date Updated": formatDateTime(value.updatedAt),
+  }));
+}

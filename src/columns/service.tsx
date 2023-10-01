@@ -1,15 +1,10 @@
+import { ServicePaginatedResponseDto, ServiceResponseDto } from "@/api";
 import { createColumnHelper } from "@tanstack/react-table";
 
-export interface ServiceTableRowData {
-  id: string;
-  name: string;
-  billingCode: string;
-  basePrice: number;
-}
+const columnHelper =
+  createColumnHelper<ServicePaginatedResponseDto["items"][number]>();
 
-const columnHelper = createColumnHelper<ServiceTableRowData>();
-
-export const serviceTableColumn = [
+export const serviceColumns = [
   columnHelper.accessor("name", {
     header: "Name",
     size: 400,

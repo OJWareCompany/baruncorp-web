@@ -20,7 +20,7 @@ import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
 import ItemsContainer from "@/components/ItemsContainer";
 import BaseTable from "@/components/table/BaseTable";
-import { JobTableRowData, jobTableColumns } from "@/columns/job";
+import { jobForProjectColumns } from "@/columns/job";
 
 interface Props extends DialogProps {
   organizationId: string;
@@ -50,48 +50,6 @@ export default function ExistingProjectSheet({
   useEffect(() => {
     setProjectId("");
   }, [organizationId]);
-
-  /**
-   * Table
-   */
-  const jobTableData = useMemo(
-    () =>
-      project?.jobs.map<JobTableRowData>((value) => {
-        const {
-          id,
-          additionalInformationFromClient,
-          isExpedited,
-          clientInfo: { clientOrganizationName, clientUserName },
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          assignedTasks,
-          propertyFullAddress,
-          receivedAt,
-        } = value;
-
-        return {
-          id: id,
-          additionalInformation: additionalInformationFromClient,
-          clientUserName,
-          organizationName: clientOrganizationName,
-          isExpedited,
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          tasks: assignedTasks.map<JobTableRowData["tasks"][number]>(
-            (value) => {
-              const { assignTaskId, assigneeName, status, taskName } = value;
-
-              return { id: assignTaskId, assigneeName, name: taskName, status };
-            }
-          ),
-          propertyFullAddress,
-          receivedAt,
-        };
-      }),
-    [project?.jobs]
-  );
 
   return (
     <Sheet {...dialogProps}>
@@ -136,7 +94,11 @@ export default function ExistingProjectSheet({
                   latitude={project?.propertyAddress.coordinates[1]}
                 />
               </div>
-              <BaseTable columns={jobTableColumns} data={jobTableData ?? []} />
+              <BaseTable
+                columns={jobForProjectColumns}
+                data={project?.jobs ?? []}
+                getRowId={({ id }) => id}
+              />
               <RowItemsContainer>
                 <Button
                   variant={"outline"}

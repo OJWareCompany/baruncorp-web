@@ -51,7 +51,7 @@ const ProjectsByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
             <span className="flex-1 text-start">
               {projectId === ""
                 ? "Select an project"
-                : projects?.find((item) => item.projectId === projectId)
+                : projects?.items.find((item) => item.projectId === projectId)
                     ?.propertyFullAddress}
             </span>
             {isProjectsQueryLoading ? (
@@ -64,18 +64,18 @@ const ProjectsByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
         <PopoverContent className="p-0 w-[440px]" align="start">
           <Command>
             <CommandInput placeholder="Search" />
-            {projects && projects.length !== 0 && (
+            {projects && projects.items.length !== 0 && (
               <CommandEmpty>No project found.</CommandEmpty>
             )}
             {projects &&
-              (projects.length === 0 ? (
+              (projects.items.length === 0 ? (
                 <div className="py-6 text-center text-sm">
                   No project found.
                 </div>
               ) : (
                 <CommandList>
                   <CommandGroup>
-                    {projects.map((project) => {
+                    {projects.items.map((project) => {
                       const [street1, ...rest] =
                         project.propertyFullAddress.split(",");
 

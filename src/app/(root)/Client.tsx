@@ -1,86 +1,67 @@
 "use client";
-
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { initialPagination } from "./constants";
 import { JobPaginatedResponseDto } from "@/api";
 import usePagination from "@/hook/usePagination";
-import { JobTableRowData, jobTableColumns } from "@/columns/job";
 import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
 import usePaginatedMyActiveJobsQuery from "@/queries/usePaginatedMyActiveJobsQuery";
+import {
+  getJobTableExportDataFromJobs,
+  jobPaginatedColumns,
+} from "@/columns/job";
 
 interface Props {
   initialMyActiveJobs: JobPaginatedResponseDto | null;
 }
 
 export default function Client({ initialMyActiveJobs }: Props) {
+  const title = "Home";
   const router = useRouter();
+
+  /**
+   * State
+   */
   const [pagination, setPagination] = usePagination(
     initialPagination.pageIndex,
     initialPagination.pageSize
   );
 
+  /**
+   * Query
+   */
   const { data: jobs } = usePaginatedMyActiveJobsQuery({
     pagination,
     initialData: initialMyActiveJobs,
   });
 
-  const jobTableData = useMemo(
-    () =>
-      jobs?.items.map<JobTableRowData>((value) => {
-        const {
-          id,
-          additionalInformationFromClient,
-          isExpedited,
-          clientInfo: { clientOrganizationName, clientUserName },
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          assignedTasks,
-          propertyFullAddress,
-          receivedAt,
-        } = value;
-
-        return {
-          id,
-          additionalInformation: additionalInformationFromClient,
-          clientUserName,
-          organizationName: clientOrganizationName,
-          isExpedited,
-          jobRequestNumber,
-          jobStatus,
-          mountingType,
-          tasks: assignedTasks.map<JobTableRowData["tasks"][number]>(
-            (value) => {
-              const { assignTaskId, assigneeName, status, taskName } = value;
-
-              return { id: assignTaskId, assigneeName, name: taskName, status };
-            }
-          ),
-          propertyFullAddress,
-          receivedAt,
-        };
-      }),
-    [jobs?.items]
+  /**
+   * Table
+   */
+  const jobTableExportData = useMemo(
+    () => getJobTableExportDataFromJobs(jobs),
+    [jobs]
   );
-
-  const title = "Home";
+  const tableTitle = "My Active Jobs";
 
   return (
     <div className="flex flex-col gap-4">
       <PageHeader items={[{ href: "/", name: title }]} title={title} />
       <section>
-        <h4 className="h4 mb-2">My Active Jobs</h4>
+        <h4 className="h4 mb-2">{tableTitle}</h4>
         <PaginatedTable
-          columns={jobTableColumns}
-          data={jobTableData ?? []}
+          columns={jobPaginatedColumns}
+          data={jobs?.items ?? []}
+          exportData={jobTableExportData ?? []}
+          exportFileName={tableTitle}
           pageCount={jobs?.totalPage ?? -1}
           pagination={pagination}
           onPaginationChange={setPagination}
           onRowClick={(id) => {
             router.push(`/system-management/jobs/${id}`);
           }}
+          getRowId={({ id }) => id}
         />
       </section>
     </div>

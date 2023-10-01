@@ -1,19 +1,11 @@
+import { ProjectPaginatedResponseDto } from "@/api";
+import { formatDateTime } from "@/lib/utils";
 import { createColumnHelper } from "@tanstack/react-table";
 
-export interface ProjectTableRowData {
-  id: string;
-  organizationName: string;
-  propertyFullAddress: string;
-  propertyType: string;
-  propertyOwnerName: string | null;
-  projectNumber: string | null;
-  createdAt: string;
-  numberOfJobs: number;
-}
+const columnHelper =
+  createColumnHelper<ProjectPaginatedResponseDto["items"][number]>();
 
-const columnHelper = createColumnHelper<ProjectTableRowData>();
-
-export const projectTableColumns = [
+export const projectColumns = [
   columnHelper.accessor("organizationName", {
     header: "Organization",
     size: 200,
@@ -90,7 +82,7 @@ export const projectTableColumns = [
       );
     },
   }),
-  columnHelper.accessor("numberOfJobs", {
+  columnHelper.accessor("totalOfJobs", {
     header: "Number of Jobs",
     size: 150,
     cell: ({ getValue, column }) => (
@@ -105,24 +97,38 @@ export const projectTableColumns = [
   columnHelper.accessor("createdAt", {
     header: "Date Created",
     size: 200,
-    cell: ({ getValue, column }) => {
-      const value = getValue();
-
-      if (value == null) {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return (
-        <p
-          style={{ width: column.getSize() - 32 }}
-          className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-        >
-          {new Intl.DateTimeFormat("en-US", {
-            dateStyle: "short",
-            timeStyle: "short",
-          }).format(new Date(value))}
-        </p>
-      );
-    },
+    cell: ({ getValue, column }) => (
+      <p
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
+        {formatDateTime(getValue())}
+      </p>
+    ),
   }),
 ];
+
+interface ProjectTableExportData {
+  [index: string]: unknown;
+  Organization: string;
+  Address: string;
+  "Property Type": string;
+  "Property Owner": string;
+  "Project Number": string;
+  "Number of Jobs": number;
+  "Date Created": string;
+}
+
+export function getProjectTableExportDataFromProjects(
+  projects: ProjectPaginatedResponseDto | undefined
+): ProjectTableExportData[] | undefined {
+  return projects?.items.map<ProjectTableExportData>((value) => ({
+    Organization: value.organizationName,
+    Address: value.propertyFullAddress,
+    "Property Type": value.propertyType,
+    "Property Owner": value.propertyOwnerName ?? "-",
+    "Project Number": value.projectNumber ?? "-",
+    "Number of Jobs": value.totalOfJobs,
+    "Date Created": formatDateTime(value.createdAt),
+  }));
+}

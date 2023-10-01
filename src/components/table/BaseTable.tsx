@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   ColumnDef,
+  TableOptions,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -17,22 +18,24 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-interface BaseTableProps<TData extends { id: string }> {
+interface BaseTableProps<TData> {
   columns: ColumnDef<TData, any>[];
   data: TData[];
   onRowClick?: (id: string) => void;
+  getRowId: TableOptions<TData>["getRowId"];
 }
 
-export default function BaseTable<TData extends { id: string }>({
+export default function BaseTable<TData>({
   columns,
   data,
   onRowClick,
+  getRowId,
 }: BaseTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getRowId: (originalRow) => originalRow.id,
+    getRowId,
   });
 
   const isEmpty = table.getRowModel().rows.length === 0;

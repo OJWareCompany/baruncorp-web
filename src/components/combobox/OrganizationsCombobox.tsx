@@ -48,8 +48,9 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
             <span className="flex-1 text-start">
               {organizationId === ""
                 ? "Select an organization"
-                : organizations?.find((value) => value.id === organizationId)
-                    ?.name}
+                : organizations?.items.find(
+                    (value) => value.id === organizationId
+                  )?.name}
             </span>
             {isOrganizationsQueryLoading ? (
               <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
@@ -61,18 +62,18 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
         <PopoverContent className="p-0" align="start">
           <Command>
             <CommandInput placeholder="Search" />
-            {organizations && organizations.length !== 0 && (
+            {organizations && organizations.items.length !== 0 && (
               <CommandEmpty>No organization found.</CommandEmpty>
             )}
             {organizations &&
-              (organizations.length === 0 ? (
+              (organizations.items.length === 0 ? (
                 <div className="py-6 text-center text-sm">
                   No organization found.
                 </div>
               ) : (
                 <CommandList>
                   <CommandGroup>
-                    {organizations.map((organization) => (
+                    {organizations.items.map((organization) => (
                       <CommandItem
                         key={organization.id}
                         value={organization.name}

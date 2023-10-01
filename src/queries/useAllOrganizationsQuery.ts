@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { OrganizationPaginatedResponseFields } from "@/api";
+import { OrganizationPaginatedResponseDto } from "@/api";
 
 const useAllOrganizationsQuery = () => {
   const api = useApi();
 
   return useQuery<
-    OrganizationPaginatedResponseFields[],
+    OrganizationPaginatedResponseDto,
     AxiosError<ErrorResponseData>
   >({
     queryKey: ["organizations", "list"],
@@ -16,7 +16,7 @@ const useAllOrganizationsQuery = () => {
         .findOrganizationPaginatedHttpControllerGetOrganizationPaginated({
           limit: Number.MAX_SAFE_INTEGER,
         })
-        .then(({ data }) => data.items),
+        .then(({ data }) => data),
   });
 };
 

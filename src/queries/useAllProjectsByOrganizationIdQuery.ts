@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { ProjectPaginatedResponseFields } from "@/api";
+import {
+  ProjectPaginatedResponseDto,
+  ProjectPaginatedResponseFields,
+} from "@/api";
 
 const useAllProjectsByOrganizationIdQuery = (organizationId: string) => {
   const api = useApi();
 
-  return useQuery<
-    ProjectPaginatedResponseFields[],
-    AxiosError<ErrorResponseData>
-  >({
+  return useQuery<ProjectPaginatedResponseDto, AxiosError<ErrorResponseData>>({
     queryKey: ["projects", "list", { organizationId }],
     queryFn: () =>
       api.projects
@@ -17,7 +17,7 @@ const useAllProjectsByOrganizationIdQuery = (organizationId: string) => {
           organizationId,
           limit: Number.MAX_SAFE_INTEGER,
         })
-        .then(({ data }) => data.items),
+        .then(({ data }) => data),
   });
 };
 

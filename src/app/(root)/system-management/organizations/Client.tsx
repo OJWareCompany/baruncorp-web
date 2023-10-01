@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import usePagination from "@/hook/usePagination";
 import usePaginatedOrganizationsQuery from "@/queries/usePaginatedOrganizationsQuery";
 import {
-  OrganizationTableRowData,
-  organizationTableColumns,
+  getOrganizationTableExportDataFromOrganizations,
+  organizationColumns,
 } from "@/columns/organization";
 import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
@@ -20,33 +20,32 @@ interface Props {
 }
 
 export default function Client({ initialOrganizations }: Props) {
+  const title = "Organizations";
   const router = useRouter();
+
+  /**
+   * State
+   */
   const [pagination, setPagination] = usePagination(
     initialPagination.pageIndex,
     initialPagination.pageSize
   );
 
+  /**
+   * Query
+   */
   const { data: organizations } = usePaginatedOrganizationsQuery({
     pagination,
     initialData: initialOrganizations,
   });
 
-  const organizationTableData = useMemo(
-    () =>
-      organizations?.items.map<OrganizationTableRowData>((value) => {
-        const { email, fullAddress, id, name, phoneNumber } = value;
-
-        return {
-          id,
-          address: fullAddress,
-          email,
-          name,
-          phoneNumber,
-        };
-      }),
-    [organizations?.items]
+  /**
+   * Table
+   */
+  const organizationTableExportData = useMemo(
+    () => getOrganizationTableExportDataFromOrganizations(organizations),
+    [organizations]
   );
-  const title = "Organizations";
 
   return (
     <div className="flex flex-col gap-4">
@@ -62,14 +61,17 @@ export default function Client({ initialOrganizations }: Props) {
         }
       />
       <PaginatedTable
-        columns={organizationTableColumns}
-        data={organizationTableData ?? []}
+        columns={organizationColumns}
+        data={organizations?.items ?? []}
+        exportData={organizationTableExportData ?? []}
+        exportFileName={title}
         pageCount={organizations?.totalPage ?? -1}
         pagination={pagination}
         onPaginationChange={setPagination}
         onRowClick={(id) => {
           router.push(`/system-management/organizations/${id}`);
         }}
+        getRowId={({ id }) => id}
       />
     </div>
   );
