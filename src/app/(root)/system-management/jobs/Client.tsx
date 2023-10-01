@@ -7,7 +7,7 @@ import { JobPaginatedResponseDto } from "@/api";
 import usePagination from "@/hook/usePagination";
 import usePaginatedJobsQuery from "@/queries/usePaginatedJobsQuery";
 import { JobTableRowData, jobTableColumns } from "@/columns/job";
-import { PaginationTable } from "@/components/table/PaginationTable";
+import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
 
 interface Props {
@@ -73,7 +73,7 @@ export default function Client({ initialJobs }: Props) {
         items={[{ href: "/system-management/jobs", name: title }]}
         title={title}
       />
-      <PaginationTable
+      <PaginatedTable
         columns={jobTableColumns}
         data={jobTableData ?? []}
         pageCount={jobs?.totalPage ?? -1}

@@ -6,7 +6,7 @@ import { ProjectPaginatedResponseDto } from "@/api";
 import usePagination from "@/hook/usePagination";
 import usePaginatedProjectsQuery from "@/queries/usePaginatedProjectsQuery";
 import { ProjectTableRowData, projectTableColumns } from "@/columns/project";
-import { PaginationTable } from "@/components/table/PaginationTable";
+import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
 
 interface Props {
@@ -61,7 +61,7 @@ export default function Client({ initialProjects }: Props) {
         items={[{ href: "/system-management/projects", name: title }]}
         title={title}
       />
-      <PaginationTable
+      <PaginatedTable
         columns={projectTableColumns}
         data={projectTableData ?? []}
         pageCount={projects?.totalPage ?? -1}

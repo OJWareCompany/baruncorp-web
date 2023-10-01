@@ -6,7 +6,7 @@ import { initialPagination } from "./constants";
 import { JobPaginatedResponseDto } from "@/api";
 import usePagination from "@/hook/usePagination";
 import { JobTableRowData, jobTableColumns } from "@/columns/job";
-import { PaginationTable } from "@/components/table/PaginationTable";
+import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
 import usePaginatedMyActiveJobsQuery from "@/queries/usePaginatedMyActiveJobsQuery";
 
@@ -72,7 +72,7 @@ export default function Client({ initialMyActiveJobs }: Props) {
       <PageHeader items={[{ href: "/", name: title }]} title={title} />
       <section>
         <h4 className="h4 mb-2">My Active Jobs</h4>
-        <PaginationTable
+        <PaginatedTable
           columns={jobTableColumns}
           data={jobTableData ?? []}
           pageCount={jobs?.totalPage ?? -1}

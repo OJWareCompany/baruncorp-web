@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface PaginationTableProps<TData extends { id: string }> {
+interface PaginatedTableProps<TData extends { id: string }> {
   columns: ColumnDef<TData, any>[];
   data: TData[];
   onRowClick?: (id: string) => void;
@@ -42,14 +42,14 @@ interface PaginationTableProps<TData extends { id: string }> {
   onPaginationChange: OnChangeFn<PaginationState>;
 }
 
-export function PaginationTable<TData extends { id: string }>({
+export default function PaginatedTable<TData extends { id: string }>({
   columns,
   data,
   onRowClick,
   pageCount,
   pagination,
   onPaginationChange,
-}: PaginationTableProps<TData>) {
+}: PaginatedTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,

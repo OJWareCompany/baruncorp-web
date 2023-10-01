@@ -13,7 +13,7 @@ import {
   OrganizationTableRowData,
   organizationTableColumns,
 } from "@/columns/organization";
-import { PaginationTable } from "@/components/table/PaginationTable";
+import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
 interface Props {
   initialOrganizations: OrganizationPaginatedResponseDto | null;
@@ -61,7 +61,7 @@ export default function Client({ initialOrganizations }: Props) {
           </Button>
         }
       />
-      <PaginationTable
+      <PaginatedTable
         columns={organizationTableColumns}
         data={organizationTableData ?? []}
         pageCount={organizations?.totalPage ?? -1}

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { PaginationState } from "@tanstack/react-table";
-import { PaginationTable } from "../table/PaginationTable";
+import PaginatedTable from "../table/PaginatedTable";
 import usePaginatedAhjNoteHistoriesQuery from "@/queries/usePaginatedAhjNoteHistoriesQuery";
 import {
   AhjNoteHistoryTableRowData,
@@ -47,7 +47,7 @@ export default function AhjNoteHistoryTable({ geoId, onRowClick }: Props) {
   );
 
   return (
-    <PaginationTable
+    <PaginatedTable
       columns={ahjNoteHistoryTableColumns}
       data={ahjNoteHistoryTableData ?? []}
       onPaginationChange={setPagination}

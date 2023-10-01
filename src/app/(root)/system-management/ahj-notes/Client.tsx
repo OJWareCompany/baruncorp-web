@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { initialPagination } from "./constants";
 import { AhjNotePaginatedResponseDto } from "@/api";
-import { PaginationTable } from "@/components/table/PaginationTable";
+import PaginatedTable from "@/components/table/PaginatedTable";
 import usePagination from "@/hook/usePagination";
 import usePaginatedAhjNotesQuery from "@/queries/usePaginatedAhjNotesQuery";
 import { AhjNoteTableRowData, ahjNoteTableColumns } from "@/columns/ahj-note";
@@ -48,7 +48,7 @@ export default function Client({ initialAhjNotes }: Props) {
         items={[{ href: "/system-management/ahj-notes", name: title }]}
         title={title}
       />
-      <PaginationTable
+      <PaginatedTable
         columns={ahjNoteTableColumns}
         data={ahjNoteTableData ?? []}
         pageCount={ahjNotes?.totalPage ?? -1}

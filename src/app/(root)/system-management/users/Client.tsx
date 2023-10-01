@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import usePagination from "@/hook/usePagination";
 import usePaginatedUsersQuery from "@/queries/usePaginatedUsersQuery";
 import { UserTableRowData, userTableColumns } from "@/columns/user";
-import { PaginationTable } from "@/components/table/PaginationTable";
+import PaginatedTable from "@/components/table/PaginatedTable";
 import PageHeader from "@/components/PageHeader";
 interface Props {
   initialUsers: UserPaginatedResopnseDto | null;
@@ -57,7 +57,7 @@ export default function Client({ initialUsers }: Props) {
           </Button>
         }
       />
-      <PaginationTable
+      <PaginatedTable
         columns={userTableColumns}
         data={userTableData ?? []}
         pageCount={users?.totalPage ?? -1}
