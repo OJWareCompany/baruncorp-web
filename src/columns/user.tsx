@@ -16,9 +16,8 @@ export const userTableColumns = [
     size: 200,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -29,9 +28,8 @@ export const userTableColumns = [
     size: 200,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -42,9 +40,8 @@ export const userTableColumns = [
     size: 200,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -62,9 +59,8 @@ export const userTableColumns = [
 
       return (
         <p
-          className={`w-[${
-            column.getSize() - 32
-          }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+          style={{ width: column.getSize() - 32 }}
+          className={`whitespace-nowrap overflow-hidden text-ellipsis`}
         >
           {value}
         </p>

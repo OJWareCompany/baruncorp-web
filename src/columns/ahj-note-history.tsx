@@ -14,9 +14,8 @@ export const ahjNoteHistoryTableColumns = [
     size: 400,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -27,9 +26,8 @@ export const ahjNoteHistoryTableColumns = [
     size: 400,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {new Intl.DateTimeFormat("en-US", {
           dateStyle: "short",

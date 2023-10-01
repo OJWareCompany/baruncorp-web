@@ -48,9 +48,8 @@ export const jobTableColumns = [
     size: 100,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -61,9 +60,8 @@ export const jobTableColumns = [
     size: 400,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -74,9 +72,8 @@ export const jobTableColumns = [
     size: 200,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -87,9 +84,8 @@ export const jobTableColumns = [
     size: 200,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -100,9 +96,8 @@ export const jobTableColumns = [
     size: 250,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {getValue()}
       </p>
@@ -120,9 +115,8 @@ export const jobTableColumns = [
 
       return (
         <p
-          className={`w-[${
-            column.getSize() - 32
-          }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+          style={{ width: column.getSize() - 32 }}
+          className={`whitespace-nowrap overflow-hidden text-ellipsis`}
         >
           {value}
         </p>
@@ -199,9 +193,8 @@ export const jobTableColumns = [
     size: 200,
     cell: ({ getValue, column }) => (
       <p
-        className={`w-[${
-          column.getSize() - 32
-        }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
         {new Intl.DateTimeFormat("en-US", {
           dateStyle: "short",
