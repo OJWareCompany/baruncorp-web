@@ -24,7 +24,7 @@ import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import CommonAlertDialogContent from "@/components/CommonAlertDialogContent";
 import ExpandableTable from "@/components/table/ExpandableTable";
 
-interface OrderedServicesTableRowData {
+interface RowData {
   id: string;
   name: string;
   description: string | null;
@@ -32,10 +32,10 @@ interface OrderedServicesTableRowData {
   price: number | null;
   assigneeId: string | null;
   serviceId: string | null;
-  subRows?: OrderedServicesTableRowData[];
+  subRows?: RowData[];
 }
 
-const columnHelper = createColumnHelper<OrderedServicesTableRowData>();
+const columnHelper = createColumnHelper<RowData>();
 
 interface Props {
   projectId: string;
@@ -52,7 +52,7 @@ export default function OrderedServicesTable({
 }: Props) {
   const data = useMemo(
     () =>
-      orderedServices.map<OrderedServicesTableRowData>((value) => {
+      orderedServices.map<RowData>((value) => {
         const {
           status,
           description,
@@ -137,21 +137,6 @@ export default function OrderedServicesTable({
         size: 400,
         cell: ({ getValue, row, column }) => {
           const value = getValue();
-
-          // if (row.original.serviceId === OTHER_SERVICE_ID) {
-          //   return (
-          //     <TooltipProvider delayDuration={0}>
-          //       <Tooltip>
-          //         <TooltipTrigger asChild>
-          //           <span className="underline cursor-default">{value}</span>
-          //         </TooltipTrigger>
-          //         <TooltipContent side="right" sideOffset={8}>
-          //           <p className="cursor-default">{row.original.description}</p>
-          //         </TooltipContent>
-          //       </Tooltip>
-          //     </TooltipProvider>
-          //   );
-          // }
 
           if (row.depth === 0) {
             return (
@@ -259,7 +244,7 @@ export default function OrderedServicesTable({
 }
 
 interface AssigneeProps {
-  cellContext: CellContext<OrderedServicesTableRowData, string | null>;
+  cellContext: CellContext<RowData, string | null>;
   jobId: string;
   projectId: string;
 }
@@ -333,7 +318,7 @@ function Assignee({
 }
 
 interface ActionProps {
-  cellContext: CellContext<OrderedServicesTableRowData, string | null>;
+  cellContext: CellContext<RowData, string | null>;
   jobId: string;
   projectId: string;
 }
