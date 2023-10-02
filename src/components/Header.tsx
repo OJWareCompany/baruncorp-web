@@ -25,7 +25,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { UserResponseDto } from "@/api";
 
 const systemManagementItems: {
   title: string;
@@ -55,10 +54,10 @@ const systemManagementItems: {
     title: "AHJ Notes",
     href: "/system-management/ahj-notes",
   },
-  // {
-  //   title: "Invoices",
-  //   href: "/system-management/invoices",
-  // },
+  {
+    title: "Invoices",
+    href: "/system-management/invoices",
+  },
   // {
   //   title: "Tracking Numbers",
   //   href: "/system-management/tracking-numbers",
@@ -88,12 +87,8 @@ const ListItem = React.forwardRef<
 });
 ListItem.displayName = "ListItem";
 
-interface Props {
-  initialProfile: UserResponseDto | null;
-}
-
-export default function Header({ initialProfile }: Props) {
-  const { data: user } = useProfileQuery(initialProfile);
+export default function Header() {
+  const { data: user } = useProfileQuery();
 
   const handleSignOutButtonClick = () => {
     signOut({ redirect: false });
@@ -173,7 +168,7 @@ export default function Header({ initialProfile }: Props) {
             {user?.fullName && (
               <Button
                 variant={"ghost"}
-                className="relative h-10 w-10 rounded-full"
+                className="relative h-10 w-10 rounded-full animate-in fade-in"
               >
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>{user.fullName.slice(0, 2)}</AvatarFallback>

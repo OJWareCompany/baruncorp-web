@@ -5,10 +5,8 @@ import { OrganizationResponseDto } from "@/api";
 
 const useOrganizationQuery = ({
   organizationId,
-  initialData,
 }: {
   organizationId: string;
-  initialData?: OrganizationResponseDto | null;
 }) => {
   const api = useApi();
 
@@ -19,7 +17,6 @@ const useOrganizationQuery = ({
         .findOrganizationHttpControllerGet(organizationId)
         .then(({ data }) => data),
     enabled: organizationId !== "",
-    initialData: initialData == null ? undefined : initialData,
   });
 };
 

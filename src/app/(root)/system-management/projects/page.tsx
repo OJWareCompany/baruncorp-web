@@ -1,54 +1,69 @@
-import { getServerSession } from "next-auth";
-import { isAxiosError } from "axios";
-import { notFound } from "next/navigation";
+"use client";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { initialPagination } from "./constants";
-import Client from "./Client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import api from "@/api";
+import usePagination from "@/hook/usePagination";
+import usePaginatedProjectsQuery from "@/queries/usePaginatedProjectsQuery";
+import {
+  getProjectTableExportDataFromProjects,
+  projectColumns,
+} from "@/columns/project";
+import PaginatedTable from "@/components/table/PaginatedTable";
+import PageHeader from "@/components/PageHeader";
+import PageLoading from "@/components/PageLoading";
 
-interface SearchParams {
-  pageIndex: string | undefined;
-  pageSize: string | undefined;
-}
+const title = "Projects";
 
-async function getProjects(searchParams: SearchParams) {
-  const session = await getServerSession(authOptions);
-  if (session == null) {
-    return null;
+export default function Page() {
+  const router = useRouter();
+
+  /**
+   * State
+   */
+  const [pagination, setPagination] = usePagination(
+    initialPagination.pageIndex,
+    initialPagination.pageSize
+  );
+
+  /**
+   * Query
+   */
+  const { data: projects, isLoading: isProjectsQueryLoading } =
+    usePaginatedProjectsQuery({
+      pagination,
+    });
+
+  /**
+   * Table
+   */
+  const projectTableExportData = useMemo(
+    () => getProjectTableExportDataFromProjects(projects),
+    [projects]
+  );
+
+  if (isProjectsQueryLoading) {
+    return <PageLoading />;
   }
 
-  return api.projects
-    .findProjectsHttpControllerFindUsers(
-      {
-        page: searchParams.pageIndex
-          ? Number(searchParams.pageIndex) + 1
-          : initialPagination.pageIndex + 1,
-        limit: searchParams.pageSize
-          ? Number(searchParams.pageSize)
-          : initialPagination.pageSize,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    )
-    .then(({ data }) => data)
-    .catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        notFound();
-      }
-
-      return null;
-    });
-}
-
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const projects = await getProjects(searchParams);
-
-  return <Client initialProjects={projects} />;
+  return (
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        items={[{ href: "/system-management/projects", name: title }]}
+        title={title}
+      />
+      <PaginatedTable
+        columns={projectColumns}
+        data={projects?.items ?? []}
+        exportData={projectTableExportData ?? []}
+        exportFileName={title}
+        pageCount={projects?.totalPage ?? -1}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        onRowClick={(id) => {
+          router.push(`/system-management/projects/${id}`);
+        }}
+        getRowId={({ projectId }) => projectId}
+      />
+    </div>
+  );
 }

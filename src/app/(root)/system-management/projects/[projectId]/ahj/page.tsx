@@ -1,31 +1,17 @@
-import { getServerSession } from "next-auth";
-import { isAxiosError } from "axios";
-import { notFound } from "next/navigation";
-import Client from "./Client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import api from "@/api";
+"use client";
+import React, { useEffect, useState } from "react";
+import {
+  AhjNoteResponseDto,
+} from "@/api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useProjectQuery from "@/queries/useProjectQuery";
+import useApi from "@/hook/useApi";
+import PageHeader from "@/components/PageHeader";
+import { transformProjectAssociatedRegulatoryBodyIntoArray } from "@/lib/ahj";
+import PageLoading from "@/components/PageLoading";
+import AhjNote from "@/components/ahj/AhjNote";
 
-async function getProject(projectId: string) {
-  const session = await getServerSession(authOptions);
-  if (session == null) {
-    return null;
-  }
-
-  return api.projects
-    .findProjectDetailHttpControllerFindProjectDetail(projectId, {
-      headers: {
-        Authorization: `Bearer ${session.accessToken}`,
-      },
-    })
-    .then(({ data }) => data)
-    .catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        notFound();
-      }
-
-      return null;
-    });
-}
+const title = "AHJ Note";
 
 interface Props {
   params: {
@@ -33,8 +19,98 @@ interface Props {
   };
 }
 
-export default async function Page({ params: { projectId } }: Props) {
-  const project = await getProject(projectId);
+export default function Page({ params: { projectId } }: Props) {
+  const api = useApi();
 
-  return <Client initialProject={project} />;
+  /**
+   * State
+   */
+  const [selectedTab, setSelectedTab] = useState<string>();
+  const [ahjState, setAhjState] = useState<{
+    isLoading: boolean;
+    items: {
+      type: string;
+      name: string;
+      geoId: string;
+      note: AhjNoteResponseDto;
+    }[];
+  }>({ isLoading: true, items: [] });
+
+  /**
+   * Query
+   */
+  const { data: project, isLoading: isProjectQueryLoading } = useProjectQuery({
+    projectId,
+  });
+
+  useEffect(() => {
+    if (project) {
+      const projectAssociatedRegulatoryBodyArray =
+        transformProjectAssociatedRegulatoryBodyIntoArray(
+          project.projectAssociatedRegulatoryBody
+        );
+
+      Promise.all(
+        projectAssociatedRegulatoryBodyArray.map(async (value) => {
+          const { data: ahjNote } =
+            await api.geography.geographyControllerGetFindNoteByGeoId(
+              value.geoId
+            );
+
+          return {
+            ...value,
+            note: ahjNote,
+          };
+        })
+      ).then((value) => {
+        setSelectedTab(value[0].type);
+        setAhjState({
+          isLoading: false,
+          items: value,
+        });
+      });
+    }
+  }, [api.geography, project]);
+
+  if (isProjectQueryLoading || ahjState.isLoading) {
+    return <PageLoading />;
+  }
+
+  return (
+    <div className="flex flex-col">
+      <PageHeader
+        items={[
+          { href: "/system-management/projects", name: "Projects" },
+          {
+            href: `/system-management/projects/${project?.projectId}`,
+            name: project?.propertyAddress.fullAddress ?? "",
+          },
+          {
+            href: `/system-management/projects/${project?.projectId}/ahj`,
+            name: title,
+          },
+        ]}
+        title={title}
+      />
+      <Tabs
+        value={selectedTab}
+        onValueChange={(newValue) => {
+          setSelectedTab(newValue);
+        }}
+      >
+        <TabsList>
+          {ahjState.items.map((ahj) => (
+            <TabsTrigger key={ahj.type} value={ahj.type}>
+              {ahj.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {ahjState.items.map((ahj) => (
+          <TabsContent key={ahj.type} value={ahj.type} className="mt-4">
+            <AhjNote geoId={ahj.geoId} initialAhjNote={ahj.note} />
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
+  );
 }

@@ -3,9 +3,7 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { ServicePaginatedResponseDto } from "@/api";
 
-const useAllServicesQuery = (
-  initialData?: ServicePaginatedResponseDto | null
-) => {
+const useAllServicesQuery = () => {
   const api = useApi();
 
   return useQuery<ServicePaginatedResponseDto, AxiosError<ErrorResponseData>>({
@@ -16,7 +14,6 @@ const useAllServicesQuery = (
           limit: Number.MAX_SAFE_INTEGER,
         })
         .then(({ data }) => data),
-    initialData: initialData == null ? undefined : initialData,
   });
 };
 

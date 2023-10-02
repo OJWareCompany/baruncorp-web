@@ -2,7 +2,6 @@ import { DialogProps } from "@radix-ui/react-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import useAhjNoteHistoryQuery from "@/queries/useAhjNoteHistoryQuery";
 import {
@@ -26,47 +25,7 @@ export default function AhjNoteHistorySheet({ id, ...dialogProps }: Props) {
   const { data: ahjNoteHistory } = useAhjNoteHistoryQuery(id);
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      // general
-      general: {
-        name: "",
-        website: "",
-        specificFormRequired: "",
-        generalNotes: "",
-        buildingCodes: "",
-        updatedBy: "",
-        updatedAt: "",
-      },
-      // design
-      design: {
-        fireSetBack: "",
-        utilityNotes: "",
-        designNotes: "",
-        pvMeterRequired: "",
-        acDisconnectRequired: "",
-        centerFed120Percent: "",
-        deratedAmpacity: "",
-      },
-      // structural engineering
-      structuralEngineering: {
-        engineeringNotes: "",
-        iebcAccepted: "",
-        structuralObservationRequired: "",
-        windUpliftCalculationRequired: "",
-        wetStampsRequired: "",
-        digitalSignatureType: "",
-        windExposure: "",
-        wetStampSize: "",
-        windSpeed: "",
-        snowLoadGround: "",
-        snowLoadFlatRoof: "",
-        ofWetStamps: "",
-      },
-      // electrical engineering
-      electricalEngineering: {
-        engineeringNotes: "",
-      },
-    },
+    defaultValues: getFieldValuesFromAhjNote(),
   });
 
   useEffect(() => {

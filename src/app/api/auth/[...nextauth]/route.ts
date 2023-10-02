@@ -8,7 +8,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import api from "@/api";
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
@@ -95,97 +95,11 @@ export const authOptions: NextAuthOptions = {
       }
 
       return { ...token, authError: "REFRESH_TOKEN_ERROR" };
-
-      // const test = await api.auth
-      //   .authenticationControllerGetMe({
-      //     headers: {
-      //       Authorization: `Bearer ${accessToken}`,
-      //     },
-      //   })
-      //   .then(() => accessToken)
-      //   .catch(async (error: AxiosError<ErrorResponseData>) => {
-      //     if (error.response?.data.errorCode.includes("10005")) {
-      //       return await api.auth
-      //         .authenticationControllerGetRefresh({
-      //           headers: {
-      //             Authorization: `Bearer ${refreshToken}`,
-      //           },
-      //         })
-      //         .then(
-      //           ({ data: { accessToken: newAccessToken } }) => newAccessToken
-      //         )
-      //         .catch((error: AxiosError<ErrorResponseData>) => {
-      //           if (error.response?.data.errorCode.includes("10006")) {
-      //             authError = "REFRESH_TOKEN_ERROR";
-      //             return;
-      //           }
-
-      //           authError = "UNKNOWN_ERROR";
-      //         });
-      //       return null;
-      //     }
-
-      //     return null;
-      //   });
-
-      // return token;
-
-      // let authError: Session["authError"];
-      // let { accessToken } = token;
-      // const { refreshToken } = token;
-
-      // await api.auth
-      //   .authenticationControllerGetMe({
-      //     headers: {
-      //       Authorization: `Bearer ${accessToken}`,
-      //     },
-      //   })
-      //   .catch(async (error: AxiosError<ErrorResponseData>) => {
-      //     if (error.response?.data.errorCode.includes("10005")) {
-      //       await api.auth
-      //         .authenticationControllerGetRefresh({
-      //           headers: {
-      //             Authorization: `Bearer ${refreshToken}`,
-      //           },
-      //         })
-      //         .then((response) => {
-      //           accessToken = response.data.accessToken;
-      //         })
-      //         .catch((error: AxiosError<ErrorResponseData>) => {
-      //           if (error.response?.data.errorCode.includes("10006")) {
-      //             authError = "REFRESH_TOKEN_ERROR";
-      //             return;
-      //           }
-
-      //           authError = "UNKNOWN_ERROR";
-      //         });
-      //       return;
-      //     }
-
-      //     authError = "UNKNOWN_ERROR";
-      //   });
-
-      // return {
-      //   ...token,
-      //   accessToken,
-      //   authError,
-      //   email: null,
-      //   id: null,
-      //   organizationId: null,
-      // };
     },
     async session({ session, token }) {
       const { accessToken, email, id, organizationId, authError } = token;
 
       return { ...session, accessToken, authError, email, id, organizationId };
-      // const { accessToken, refreshToken, authError } = token;
-      // return {
-      //   ...session,
-      //   accessToken,
-      //   refreshToken,
-      //   authError,
-      //   isValid: authError == null,
-      // };
     },
   },
   session: {

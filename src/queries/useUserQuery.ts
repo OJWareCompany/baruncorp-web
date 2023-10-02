@@ -3,13 +3,7 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { UserResponseDto } from "@/api";
 
-const useUserQuery = ({
-  userId,
-  initialData,
-}: {
-  userId: string;
-  initialData?: UserResponseDto | null;
-}) => {
+const useUserQuery = ({ userId }: { userId: string }) => {
   const api = useApi();
 
   return useQuery<UserResponseDto, AxiosError<ErrorResponseData>>({
@@ -19,7 +13,6 @@ const useUserQuery = ({
         .usersControllerGetUserInfoByUserId(userId)
         .then(({ data }) => data),
     enabled: userId !== "",
-    initialData: initialData == null ? undefined : initialData,
   });
 };
 

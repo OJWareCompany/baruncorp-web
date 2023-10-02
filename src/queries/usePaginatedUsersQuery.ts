@@ -6,11 +6,9 @@ import { UserPaginatedResopnseDto } from "@/api";
 
 interface Props {
   pagination: PaginationState;
-  initialData: UserPaginatedResopnseDto | null;
 }
 
 const usePaginatedUsersQuery = ({
-  initialData,
   pagination: { pageIndex, pageSize },
 }: Props) => {
   const api = useApi();
@@ -24,7 +22,6 @@ const usePaginatedUsersQuery = ({
           limit: pageSize,
         })
         .then(({ data }) => data),
-    placeholderData: initialData == null ? undefined : initialData,
     keepPreviousData: true,
   });
 };

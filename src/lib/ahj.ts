@@ -15,7 +15,11 @@ import {
   transformWindExposureWithEmptyStringIntoNullableWindExposure,
   transformANSIWithEmptyStringIntoNullableANSI,
 } from "@/lib/constants";
-import { AhjNoteResponseDto, UpdateAhjNoteRequestDto } from "@/api";
+import {
+  AhjNoteResponseDto,
+  ProjectAssociatedRegulatoryBodyDto,
+  UpdateAhjNoteRequestDto,
+} from "@/api";
 
 export const formSchema = z.object({
   // general
@@ -62,7 +66,7 @@ export const formSchema = z.object({
 export type FieldValues = z.infer<typeof formSchema>;
 
 export function getFieldValuesFromAhjNote(
-  ahjNote: AhjNoteResponseDto | null
+  ahjNote?: AhjNoteResponseDto
 ): FieldValues {
   return {
     // general
@@ -260,4 +264,51 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
       ),
     },
   };
+}
+
+type ProjectAssociatedRegulatoryBodyArray = {
+  type: string;
+  name: string;
+  geoId: string;
+}[];
+
+export function transformProjectAssociatedRegulatoryBodyIntoArray(
+  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto
+): ProjectAssociatedRegulatoryBodyArray {
+  if (projectAssociatedRegulatoryBody == null) {
+    return [];
+  }
+
+  const array: ProjectAssociatedRegulatoryBodyArray = [];
+
+  if (projectAssociatedRegulatoryBody.placeId != null) {
+    array.push({
+      type: "place",
+      name: "Place",
+      geoId: projectAssociatedRegulatoryBody.placeId,
+    });
+  }
+  if (projectAssociatedRegulatoryBody.countySubdivisionsId != null) {
+    array.push({
+      type: "countySubdivision",
+      name: "County Subdivision",
+      geoId: projectAssociatedRegulatoryBody.countySubdivisionsId,
+    });
+  }
+  if (projectAssociatedRegulatoryBody.countyId != null) {
+    array.push({
+      type: "county",
+      name: "County",
+      geoId: projectAssociatedRegulatoryBody.countyId,
+    });
+  }
+  if (projectAssociatedRegulatoryBody.stateId != null) {
+    array.push({
+      type: "state",
+      name: "State",
+      geoId: projectAssociatedRegulatoryBody.stateId,
+    });
+  }
+
+  return array;
 }

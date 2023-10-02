@@ -1,54 +1,78 @@
-import { getServerSession } from "next-auth";
-import { isAxiosError } from "axios";
-import { notFound } from "next/navigation";
+"use client";
+import Link from "next/link";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { initialPagination } from "./constants";
-import Client from "./Client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import api from "@/api";
+import { Button } from "@/components/ui/button";
+import usePagination from "@/hook/usePagination";
+import usePaginatedOrganizationsQuery from "@/queries/usePaginatedOrganizationsQuery";
+import {
+  getOrganizationTableExportDataFromOrganizations,
+  organizationColumns,
+} from "@/columns/organization";
+import PaginatedTable from "@/components/table/PaginatedTable";
+import PageHeader from "@/components/PageHeader";
+import PageLoading from "@/components/PageLoading";
 
-interface SearchParams {
-  pageIndex: string | undefined;
-  pageSize: string | undefined;
-}
+const title = "Organizations";
 
-async function getOrganizations(searchParams: SearchParams) {
-  const session = await getServerSession(authOptions);
-  if (session == null) {
-    return null;
+export default function Page() {
+  const router = useRouter();
+
+  /**
+   * State
+   */
+  const [pagination, setPagination] = usePagination(
+    initialPagination.pageIndex,
+    initialPagination.pageSize
+  );
+
+  /**
+   * Query
+   */
+  const { data: organizations, isLoading: isOrganizationsQueryLoading } =
+    usePaginatedOrganizationsQuery({
+      pagination,
+    });
+
+  /**
+   * Table
+   */
+  const organizationTableExportData = useMemo(
+    () => getOrganizationTableExportDataFromOrganizations(organizations),
+    [organizations]
+  );
+
+  if (isOrganizationsQueryLoading) {
+    return <PageLoading />;
   }
 
-  return api.organizations
-    .findOrganizationPaginatedHttpControllerGetOrganizationPaginated(
-      {
-        page: searchParams.pageIndex
-          ? Number(searchParams.pageIndex) + 1
-          : initialPagination.pageIndex + 1,
-        limit: searchParams.pageSize
-          ? Number(searchParams.pageSize)
-          : initialPagination.pageSize,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    )
-    .then(({ data }) => data)
-    .catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        notFound();
-      }
-
-      return null;
-    });
-}
-
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const organizations = await getOrganizations(searchParams);
-
-  return <Client initialOrganizations={organizations} />;
+  return (
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        items={[{ href: "/system-management/organizations", name: title }]}
+        title={title}
+        action={
+          <Button asChild size={"sm"}>
+            <Link href="/system-management/organizations/new">
+              New Organization
+            </Link>
+          </Button>
+        }
+      />
+      <PaginatedTable
+        columns={organizationColumns}
+        data={organizations?.items ?? []}
+        exportData={organizationTableExportData ?? []}
+        exportFileName={title}
+        pageCount={organizations?.totalPage ?? -1}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        onRowClick={(id) => {
+          router.push(`/system-management/organizations/${id}`);
+        }}
+        getRowId={({ id }) => id}
+      />
+    </div>
+  );
 }

@@ -1,54 +1,70 @@
-import { getServerSession } from "next-auth";
-import { isAxiosError } from "axios";
-import { notFound } from "next/navigation";
+"use client";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { initialPagination } from "./constants";
-import Client from "./Client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import api from "@/api";
+import PageHeader from "@/components/PageHeader";
+import usePaginatedMyActiveJobsQuery from "@/queries/usePaginatedMyActiveJobsQuery";
+import {
+  getJobTableExportDataFromJobs,
+  jobPaginatedColumns,
+} from "@/columns/job";
+import usePagination from "@/hook/usePagination";
+import PaginatedTable from "@/components/table/PaginatedTable";
+import PageLoading from "@/components/PageLoading";
 
-interface SearchParams {
-  pageIndex: string | undefined;
-  pageSize: string | undefined;
-}
+const title = "Home";
+const tableTitle = "My Active Jobs";
 
-async function getMyActiveJobs(searchParams: SearchParams) {
-  const session = await getServerSession(authOptions);
-  if (session == null) {
-    return null;
+export default function Page() {
+  const router = useRouter();
+
+  /**
+   * State
+   */
+  const [pagination, setPagination] = usePagination(
+    initialPagination.pageIndex,
+    initialPagination.pageSize
+  );
+
+  /**
+   * Query
+   */
+  const { data: jobs, isLoading: isJobsQueryLoading } =
+    usePaginatedMyActiveJobsQuery({
+      pagination,
+    });
+
+  /**
+   * Table
+   */
+  const jobTableExportData = useMemo(
+    () => getJobTableExportDataFromJobs(jobs),
+    [jobs]
+  );
+
+  if (isJobsQueryLoading) {
+    return <PageLoading />;
   }
 
-  return api.myActiveJobs
-    .findMyActiveJobPaginatedHttpControllerFindJob(
-      {
-        page: searchParams.pageIndex
-          ? Number(searchParams.pageIndex) + 1
-          : initialPagination.pageIndex + 1,
-        limit: searchParams.pageSize
-          ? Number(searchParams.pageSize)
-          : initialPagination.pageSize,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    )
-    .then(({ data }) => data)
-    .catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        notFound();
-      }
-
-      return null;
-    });
-}
-
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const myActiveJobs = await getMyActiveJobs(searchParams);
-
-  return <Client initialMyActiveJobs={myActiveJobs} />;
+  return (
+    <div className="flex flex-col gap-4">
+      <PageHeader items={[{ href: "/", name: title }]} title={title} />
+      <section>
+        <h4 className="h4 mb-2">{tableTitle}</h4>
+        <PaginatedTable
+          columns={jobPaginatedColumns}
+          data={jobs?.items ?? []}
+          exportData={jobTableExportData ?? []}
+          exportFileName={tableTitle}
+          pageCount={jobs?.totalPage ?? -1}
+          pagination={pagination}
+          onPaginationChange={setPagination}
+          onRowClick={(id) => {
+            router.push(`/system-management/jobs/${id}`);
+          }}
+          getRowId={({ id }) => id}
+        />
+      </section>
+    </div>
+  );
 }

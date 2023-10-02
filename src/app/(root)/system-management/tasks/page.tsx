@@ -1,39 +1,31 @@
-import { getServerSession } from "next-auth";
-import { isAxiosError } from "axios";
-import { notFound } from "next/navigation";
-import Client from "./Client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import api from "@/api";
+"use client";
+import { serviceColumns } from "@/columns/service";
+import PageHeader from "@/components/PageHeader";
+import PageLoading from "@/components/PageLoading";
+import BaseTable from "@/components/table/BaseTable";
+import useAllServicesQuery from "@/queries/useAllServicesQuery";
 
-async function getServices() {
-  const session = await getServerSession(authOptions);
-  if (session == null) {
-    return null;
+const title = "Tasks";
+
+export default function Page() {
+  const { data: services, isLoading: isServicesQueryLoading } =
+    useAllServicesQuery();
+
+  if (isServicesQueryLoading) {
+    return <PageLoading />;
   }
 
-  return api.services
-    .findServicePaginatedHttpControllerGet(
-      {
-        limit: Number.MAX_SAFE_INTEGER,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    )
-    .then(({ data }) => data)
-    .catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        notFound();
-      }
-
-      return null;
-    });
-}
-
-export default async function Page() {
-  const services = await getServices();
-
-  return <Client initialServices={services} />;
+  return (
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        items={[{ href: "/system-management/tasks", name: title }]}
+        title={title}
+      />
+      <BaseTable
+        columns={serviceColumns}
+        data={services?.items ?? []}
+        getRowId={({ id }) => id}
+      />
+    </div>
+  );
 }

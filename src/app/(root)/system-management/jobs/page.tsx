@@ -1,54 +1,68 @@
-import { getServerSession } from "next-auth";
-import { isAxiosError } from "axios";
-import { notFound } from "next/navigation";
+"use client";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { initialPagination } from "./constants";
-import Client from "./Client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import api from "@/api";
+import PageHeader from "@/components/PageHeader";
+import usePagination from "@/hook/usePagination";
+import usePaginatedJobsQuery from "@/queries/usePaginatedJobsQuery";
+import PaginatedTable from "@/components/table/PaginatedTable";
+import {
+  getJobTableExportDataFromJobs,
+  jobPaginatedColumns,
+} from "@/columns/job";
+import PageLoading from "@/components/PageLoading";
 
-interface SearchParams {
-  pageIndex: string | undefined;
-  pageSize: string | undefined;
-}
+const title = "Jobs";
 
-async function getJobs(searchParams: SearchParams) {
-  const session = await getServerSession(authOptions);
-  if (session == null) {
-    return null;
+export default function Page() {
+  const router = useRouter();
+
+  /**
+   * State
+   */
+  const [pagination, setPagination] = usePagination(
+    initialPagination.pageIndex,
+    initialPagination.pageSize
+  );
+
+  /**
+   * Query
+   */
+  const { data: jobs, isLoading: isJobsQueryLoading } = usePaginatedJobsQuery({
+    pagination,
+  });
+
+  /**
+   * Table
+   */
+  const jobTableExportData = useMemo(
+    () => getJobTableExportDataFromJobs(jobs),
+    [jobs]
+  );
+
+  if (isJobsQueryLoading) {
+    return <PageLoading />;
   }
 
-  return api.jobs
-    .findJobPaginatedHttpControllerFindJob(
-      {
-        page: searchParams.pageIndex
-          ? Number(searchParams.pageIndex) + 1
-          : initialPagination.pageIndex + 1,
-        limit: searchParams.pageSize
-          ? Number(searchParams.pageSize)
-          : initialPagination.pageSize,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    )
-    .then(({ data }) => data)
-    .catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        notFound();
-      }
-
-      return null;
-    });
-}
-
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
-  const jobs = await getJobs(searchParams);
-
-  return <Client initialJobs={jobs} />;
+  return (
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        items={[{ href: "/system-management/jobs", name: title }]}
+        title={title}
+      />
+      <PaginatedTable
+        columns={jobPaginatedColumns}
+        data={jobs?.items ?? []}
+        exportData={jobTableExportData ?? []}
+        exportFileName="Jobs"
+        pageCount={jobs?.totalPage ?? -1}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        onRowClick={(id) => {
+          router.push(`/system-management/jobs/${id}`);
+        }}
+        getRowId={({ id }) => id}
+      />
+    </div>
+  );
 }

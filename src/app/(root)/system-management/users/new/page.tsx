@@ -1,12 +1,10 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
 import { X } from "lucide-react";
 import { useEffect } from "react";
-
 import {
   Form,
   FormControl,
@@ -18,9 +16,7 @@ import {
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { Input } from "@/components/ui/input";
 import LoadingButton from "@/components/LoadingButton";
-
 import usePostUserMutation from "@/queries/usePostUserMutation";
-
 import { Button } from "@/components/ui/button";
 import OrganizationsCombobox from "@/components/combobox/OrganizationsCombobox";
 import { useToast } from "@/components/ui/use-toast";
@@ -57,13 +53,15 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
+const title = "New User";
+
 export default function Page() {
   const { toast } = useToast();
 
   /**
    * Form
    */
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       organizationId: "",
@@ -91,7 +89,7 @@ export default function Page() {
     }
   }, [form, isSubmitSuccessful]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FieldValues) {
     const {
       organizationId,
       emailAddress,
@@ -134,8 +132,6 @@ export default function Page() {
         }
       });
   }
-
-  const title = "New User";
 
   return (
     <div className="flex flex-col gap-4">

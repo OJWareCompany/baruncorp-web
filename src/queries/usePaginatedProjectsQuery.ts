@@ -6,7 +6,7 @@ import { ProjectPaginatedResponseDto } from "@/api";
 
 interface Props {
   pagination: PaginationState;
-  initialData: ProjectPaginatedResponseDto | null;
+  initialData?: ProjectPaginatedResponseDto | null;
 }
 
 const usePaginatedProjectsQuery = ({

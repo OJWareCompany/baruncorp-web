@@ -1,5 +1,4 @@
 "use client";
-
 import * as z from "zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +7,6 @@ import { X } from "lucide-react";
 import NewProjectSheet from "./NewProjectSheet";
 import ExistingProjectSheet from "./ExistingProjectSheet";
 import ResultDialog from "./ResultDialog";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import RowItemsContainer from "@/components/RowItemsContainer";
 import useProjectQuery from "@/queries/useProjectQuery";
 import { Input } from "@/components/ui/input";
@@ -61,6 +58,8 @@ import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import BaseTable from "@/components/table/BaseTable";
 import PageHeader from "@/components/PageHeader";
 import { jobForProjectColumns } from "@/columns/job";
+
+const title = "New Service Order";
 
 export default function Page() {
   /**
@@ -510,8 +509,6 @@ export default function Page() {
     setWetStampChecked(false);
   }
 
-  const title = "New Service Order";
-
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -524,403 +521,263 @@ export default function Page() {
         ]}
         title={title}
       />
-      <div>
-        <div className="space-y-6">
+      <div className="space-y-6">
+        <section>
+          <Item>
+            <Label>Organization</Label>
+            <OrganizationsCombobox
+              organizationId={organizationId}
+              onSelect={(newOrganizationId) => {
+                setOrganizationId(newOrganizationId);
+                reset();
+              }}
+            />
+          </Item>
+        </section>
+        {organizationId !== "" && (
           <section>
-            <Item>
-              <Label>Organization</Label>
-              <OrganizationsCombobox
-                organizationId={organizationId}
-                onSelect={(newOrganizationId) => {
-                  setOrganizationId(newOrganizationId);
-                  reset();
-                }}
-              />
-            </Item>
-          </section>
-          {organizationId !== "" && (
-            <section>
-              <h4 className="h4 mb-2">Project</h4>
-              {projectId === "" ? (
+            <h4 className="h4 mb-2">Project</h4>
+            {projectId === "" ? (
+              <RowItemsContainer>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setNewProjectSheetOpen(true);
+                  }}
+                >
+                  New Project
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setExistingProjectSheetOpen(true);
+                  }}
+                >
+                  Existing Project
+                </Button>
+              </RowItemsContainer>
+            ) : (
+              <ItemsContainer>
+                <Item>
+                  <Label>Property Address</Label>
+                  <Input
+                    value={project?.propertyAddress.fullAddress ?? ""}
+                    readOnly
+                  />
+                </Item>
                 <RowItemsContainer>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setNewProjectSheetOpen(true);
-                    }}
-                  >
-                    New Project
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setExistingProjectSheetOpen(true);
-                    }}
-                  >
-                    Existing Project
-                  </Button>
-                </RowItemsContainer>
-              ) : (
-                <ItemsContainer>
                   <Item>
-                    <Label>Property Address</Label>
+                    <Label>Property Type</Label>
+                    <Input value={project?.propertyType ?? ""} readOnly />
+                  </Item>
+                  <Item>
+                    <Label>Property Owner</Label>
                     <Input
-                      value={project?.propertyAddress.fullAddress ?? ""}
+                      value={project?.projectPropertyOwnerName ?? ""}
                       readOnly
                     />
                   </Item>
-                  <RowItemsContainer>
-                    <Item>
-                      <Label>Property Type</Label>
-                      <Input value={project?.propertyType ?? ""} readOnly />
-                    </Item>
-                    <Item>
-                      <Label>Property Owner</Label>
-                      <Input
-                        value={project?.projectPropertyOwnerName ?? ""}
-                        readOnly
-                      />
-                    </Item>
-                    <Item>
-                      <Label>Project Number</Label>
-                      <Input value={project?.projectNumber ?? ""} readOnly />
-                    </Item>
-                  </RowItemsContainer>
-                  <div className="w-full h-[400px]">
-                    <Minimap
-                      longitude={project?.propertyAddress.coordinates[0]}
-                      latitude={project?.propertyAddress.coordinates[1]}
-                    />
-                  </div>
-                  <BaseTable
-                    columns={jobForProjectColumns}
-                    data={project?.jobs ?? []}
-                    getRowId={({ id }) => id}
+                  <Item>
+                    <Label>Project Number</Label>
+                    <Input value={project?.projectNumber ?? ""} readOnly />
+                  </Item>
+                </RowItemsContainer>
+                <div className="w-full h-[400px]">
+                  <Minimap
+                    longitude={project?.propertyAddress.coordinates[0]}
+                    latitude={project?.propertyAddress.coordinates[1]}
                   />
-                  <Button
-                    variant={"outline"}
-                    onClick={() => {
-                      reset();
-                    }}
-                  >
-                    Reset Project
-                  </Button>
-                </ItemsContainer>
-              )}
-            </section>
-          )}
-          {projectId !== "" && (
-            <section>
-              <h4 className="h4 mb-2">Job</h4>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  <ItemsContainer>
-                    <FormField
-                      control={form.control}
-                      name="clientUser.id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>Client User</FormLabel>
-                          <FormControl>
-                            <UsersByOrganizationCombobox
-                              organizationId={organizationId}
-                              userId={field.value}
-                              onSelect={(newUserId) => {
-                                field.onChange(newUserId);
-                              }}
-                              onAdd={() => {
-                                setNewUserSheetOpen(true);
-                              }}
-                              ref={field.ref}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {watchClientUser.emailAddressesToReceiveDeliverables
-                      .length !== 0 && (
-                      <FormField
-                        control={form.control}
-                        name="clientUser.emailAddressesToReceiveDeliverables"
-                        render={() => {
-                          return (
-                            <FormItem>
-                              <FormLabel required>
-                                Email Addresses to Receive Deliverables
-                              </FormLabel>
-                              {emailAddressesToReceiveDeliverablesFields.map(
-                                (field, index) => (
-                                  <FormField
-                                    key={field.id}
-                                    control={form.control}
-                                    name={`clientUser.emailAddressesToReceiveDeliverables.${index}.email`}
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <div className="flex flex-row gap-2">
-                                          <FormControl>
-                                            <Input {...field} />
-                                          </FormControl>
-                                          {index !== 0 && (
-                                            <Button
-                                              variant={"outline"}
-                                              size={"icon"}
-                                              className="flex-shrink-0"
-                                              onClick={() => {
-                                                removeEmailAddressToReceiveDeliverables(
-                                                  index
-                                                );
-                                              }}
-                                            >
-                                              <X className="h-4 w-4" />
-                                            </Button>
-                                          )}
-                                        </div>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                )
-                              )}
-                              <Button
-                                variant={"outline"}
-                                className="w-full"
-                                onClick={() => {
-                                  appendEmailAddressToReceiveDeliverables({
-                                    email: "",
-                                  });
-                                }}
-                              >
-                                Add Email Address
-                              </Button>
-                            </FormItem>
-                          );
-                        }}
-                      />
+                </div>
+                <BaseTable
+                  columns={jobForProjectColumns}
+                  data={project?.jobs ?? []}
+                  getRowId={({ id }) => id}
+                />
+                <Button
+                  variant={"outline"}
+                  onClick={() => {
+                    reset();
+                  }}
+                >
+                  Reset Project
+                </Button>
+              </ItemsContainer>
+            )}
+          </section>
+        )}
+        {projectId !== "" && (
+          <section>
+            <h4 className="h4 mb-2">Job</h4>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <ItemsContainer>
+                  <FormField
+                    control={form.control}
+                    name="clientUser.id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Client User</FormLabel>
+                        <FormControl>
+                          <UsersByOrganizationCombobox
+                            organizationId={organizationId}
+                            userId={field.value}
+                            onSelect={(newUserId) => {
+                              field.onChange(newUserId);
+                            }}
+                            onAdd={() => {
+                              setNewUserSheetOpen(true);
+                            }}
+                            ref={field.ref}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                    {project?.propertyType === "Commercial" && (
-                      <div className="grid grid-cols-3 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="systemSize"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel required>System Size</FormLabel>
-                              <FormControl>
-                                <AffixInput
-                                  suffixElement={
-                                    <span className="text-muted-foreground">
-                                      kW
-                                    </span>
-                                  }
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    )}
+                  />
+                  {watchClientUser.emailAddressesToReceiveDeliverables
+                    .length !== 0 && (
                     <FormField
                       control={form.control}
-                      name="mountingType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>Mounting Type</FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              value={field.value}
-                              ref={field.ref}
-                            >
-                              <FormItem className="flex-row gap-3 items-center">
-                                <FormControl>
-                                  <RadioGroupItem value="Roof Mount" />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  Roof Mount
-                                </FormLabel>
-                              </FormItem>
-                              <FormItem className="flex-row gap-3 items-center">
-                                <FormControl>
-                                  <RadioGroupItem value="Ground Mount" />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  Ground Mount
-                                </FormLabel>
-                              </FormItem>
-                              <FormItem className="flex-row gap-3 items-center">
-                                <FormControl>
-                                  <RadioGroupItem value="Roof Mount & Ground Mount" />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  Roof Mount & Ground Mount
-                                </FormLabel>
-                              </FormItem>
-                            </RadioGroup>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="services"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel required>Task</FormLabel>
-                          <div className="grid grid-cols-3 gap-y-2 gap-x-4">
-                            {services?.items
-                              .filter(
-                                (value) =>
-                                  value.id !==
-                                    ELECTRICAL_WET_STAMP_SERVICE_ID &&
-                                  value.id !==
-                                    STRUCTURAL_WET_STAMP_SERVICE_ID &&
-                                  value.id !== OTHER_SERVICE_ID
-                              )
-                              ?.sort((a, b) => (a.name < b.name ? -1 : 1))
-                              .map((service) => (
+                      name="clientUser.emailAddressesToReceiveDeliverables"
+                      render={() => {
+                        return (
+                          <FormItem>
+                            <FormLabel required>
+                              Email Addresses to Receive Deliverables
+                            </FormLabel>
+                            {emailAddressesToReceiveDeliverablesFields.map(
+                              (field, index) => (
                                 <FormField
-                                  key={service.id}
+                                  key={field.id}
                                   control={form.control}
-                                  name="services"
+                                  name={`clientUser.emailAddressesToReceiveDeliverables.${index}.email`}
                                   render={({ field }) => (
-                                    <FormItem className="flex flex-row gap-3 items-center">
-                                      <FormControl>
-                                        <Checkbox
-                                          ref={field.ref}
-                                          checked={
-                                            field.value.find(
-                                              (value) => value.id === service.id
-                                            ) !== undefined
-                                          }
-                                          onCheckedChange={(newChecked) => {
-                                            if (
-                                              electricalWetStampService &&
-                                              structuralWetStampService
-                                            ) {
-                                              switch (service.id) {
-                                                case ESS_ELECTRICAL_PE_STAMP_SERVICE_ID:
-                                                case ELECTRICAL_LOAD_CALCULATION_SERVICE_ID:
-                                                case ELECTRICAL_LOAD_JUSTIFICATION_LETTER_SERVICE_ID:
-                                                case ELECTRICAL_PE_STAMP_SERVICE_ID:
-                                                case ELECTRICAL_POST_INSTALLED_LETTER_SERVICE_ID:
-                                                  if (newChecked) {
-                                                    form.setValue(
-                                                      "typeOfWetStamp",
-                                                      [
-                                                        ...watchTypeOfWetStamp,
-                                                        {
-                                                          id: electricalWetStampService.id,
-                                                          description: null,
-                                                        },
-                                                      ],
-                                                      {
-                                                        shouldValidate: true,
-                                                      }
-                                                    );
-                                                  } else {
-                                                    form.setValue(
-                                                      "typeOfWetStamp",
-                                                      watchTypeOfWetStamp.filter(
-                                                        (value) =>
-                                                          value.id !==
-                                                          ELECTRICAL_WET_STAMP_SERVICE_ID
-                                                      ),
-                                                      {
-                                                        shouldValidate: true,
-                                                      }
-                                                    );
-                                                  }
-                                                  break;
-                                                case ESS_STRUCTURAL_PE_STAMP_SERVICE_ID:
-                                                case SPECIAL_INSPECTION_FORM_SERVICE_ID:
-                                                case STRUCTURAL_FEASIBILITY_SERVICE_ID:
-                                                case STRUCTURAL_PE_STAMP_SERVICE_ID:
-                                                case STRUCTURAL_POST_INSTALLED_LETTER_SERVICE_ID:
-                                                  if (newChecked) {
-                                                    form.setValue(
-                                                      "typeOfWetStamp",
-                                                      [
-                                                        ...watchTypeOfWetStamp,
-                                                        {
-                                                          id: structuralWetStampService.id,
-                                                          description: null,
-                                                        },
-                                                      ],
-                                                      {
-                                                        shouldValidate: true,
-                                                      }
-                                                    );
-                                                  } else {
-                                                    form.setValue(
-                                                      "typeOfWetStamp",
-                                                      watchTypeOfWetStamp.filter(
-                                                        (value) =>
-                                                          value.id !==
-                                                          STRUCTURAL_WET_STAMP_SERVICE_ID
-                                                      ),
-                                                      {
-                                                        shouldValidate: true,
-                                                      }
-                                                    );
-                                                  }
-                                                  break;
-                                              }
-                                            }
-
-                                            if (newChecked) {
-                                              field.onChange([
-                                                ...field.value,
-                                                {
-                                                  id: service.id,
-                                                  description: null,
-                                                },
-                                              ]);
-                                            } else {
-                                              field.onChange(
-                                                field.value.filter(
-                                                  (value) =>
-                                                    value.id !== service.id
-                                                )
+                                    <FormItem>
+                                      <div className="flex flex-row gap-2">
+                                        <FormControl>
+                                          <Input {...field} />
+                                        </FormControl>
+                                        {index !== 0 && (
+                                          <Button
+                                            variant={"outline"}
+                                            size={"icon"}
+                                            className="flex-shrink-0"
+                                            onClick={() => {
+                                              removeEmailAddressToReceiveDeliverables(
+                                                index
                                               );
-                                            }
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <FormLabel className="font-normal">
-                                        {service.name}
-                                      </FormLabel>
+                                            }}
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </Button>
+                                        )}
+                                      </div>
+                                      <FormMessage />
                                     </FormItem>
                                   )}
                                 />
-                              ))}
-                            <FormField
-                              control={form.control}
-                              name="services"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row gap-3 items-center">
-                                  <FormControl>
-                                    <Checkbox
-                                      ref={field.ref}
-                                      checked={wetStampChecked}
-                                      onCheckedChange={(newChecked) => {
-                                        if (typeof newChecked === "boolean") {
-                                          setWetStampChecked(newChecked);
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    Wet Stamp
-                                  </FormLabel>
-                                </FormItem>
-                              )}
-                            />
-                            {otherService && (
+                              )
+                            )}
+                            <Button
+                              variant={"outline"}
+                              className="w-full"
+                              onClick={() => {
+                                appendEmailAddressToReceiveDeliverables({
+                                  email: "",
+                                });
+                              }}
+                            >
+                              Add Email Address
+                            </Button>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  )}
+                  {project?.propertyType === "Commercial" && (
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="systemSize"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required>System Size</FormLabel>
+                            <FormControl>
+                              <AffixInput
+                                suffixElement={
+                                  <span className="text-muted-foreground">
+                                    kW
+                                  </span>
+                                }
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="mountingType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Mounting Type</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            ref={field.ref}
+                          >
+                            <FormItem className="flex-row gap-3 items-center">
+                              <FormControl>
+                                <RadioGroupItem value="Roof Mount" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Roof Mount
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex-row gap-3 items-center">
+                              <FormControl>
+                                <RadioGroupItem value="Ground Mount" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Ground Mount
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex-row gap-3 items-center">
+                              <FormControl>
+                                <RadioGroupItem value="Roof Mount & Ground Mount" />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                Roof Mount & Ground Mount
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="services"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel required>Task</FormLabel>
+                        <div className="grid grid-cols-3 gap-y-2 gap-x-4">
+                          {services?.items
+                            .filter(
+                              (value) =>
+                                value.id !== ELECTRICAL_WET_STAMP_SERVICE_ID &&
+                                value.id !== STRUCTURAL_WET_STAMP_SERVICE_ID &&
+                                value.id !== OTHER_SERVICE_ID
+                            )
+                            ?.sort((a, b) => (a.name < b.name ? -1 : 1))
+                            .map((service) => (
                               <FormField
+                                key={service.id}
                                 control={form.control}
                                 name="services"
                                 render={({ field }) => (
@@ -930,16 +787,89 @@ export default function Page() {
                                         ref={field.ref}
                                         checked={
                                           field.value.find(
-                                            (value) =>
-                                              value.id === otherService.id
+                                            (value) => value.id === service.id
                                           ) !== undefined
                                         }
                                         onCheckedChange={(newChecked) => {
+                                          if (
+                                            electricalWetStampService &&
+                                            structuralWetStampService
+                                          ) {
+                                            switch (service.id) {
+                                              case ESS_ELECTRICAL_PE_STAMP_SERVICE_ID:
+                                              case ELECTRICAL_LOAD_CALCULATION_SERVICE_ID:
+                                              case ELECTRICAL_LOAD_JUSTIFICATION_LETTER_SERVICE_ID:
+                                              case ELECTRICAL_PE_STAMP_SERVICE_ID:
+                                              case ELECTRICAL_POST_INSTALLED_LETTER_SERVICE_ID:
+                                                if (newChecked) {
+                                                  form.setValue(
+                                                    "typeOfWetStamp",
+                                                    [
+                                                      ...watchTypeOfWetStamp,
+                                                      {
+                                                        id: electricalWetStampService.id,
+                                                        description: null,
+                                                      },
+                                                    ],
+                                                    {
+                                                      shouldValidate: true,
+                                                    }
+                                                  );
+                                                } else {
+                                                  form.setValue(
+                                                    "typeOfWetStamp",
+                                                    watchTypeOfWetStamp.filter(
+                                                      (value) =>
+                                                        value.id !==
+                                                        ELECTRICAL_WET_STAMP_SERVICE_ID
+                                                    ),
+                                                    {
+                                                      shouldValidate: true,
+                                                    }
+                                                  );
+                                                }
+                                                break;
+                                              case ESS_STRUCTURAL_PE_STAMP_SERVICE_ID:
+                                              case SPECIAL_INSPECTION_FORM_SERVICE_ID:
+                                              case STRUCTURAL_FEASIBILITY_SERVICE_ID:
+                                              case STRUCTURAL_PE_STAMP_SERVICE_ID:
+                                              case STRUCTURAL_POST_INSTALLED_LETTER_SERVICE_ID:
+                                                if (newChecked) {
+                                                  form.setValue(
+                                                    "typeOfWetStamp",
+                                                    [
+                                                      ...watchTypeOfWetStamp,
+                                                      {
+                                                        id: structuralWetStampService.id,
+                                                        description: null,
+                                                      },
+                                                    ],
+                                                    {
+                                                      shouldValidate: true,
+                                                    }
+                                                  );
+                                                } else {
+                                                  form.setValue(
+                                                    "typeOfWetStamp",
+                                                    watchTypeOfWetStamp.filter(
+                                                      (value) =>
+                                                        value.id !==
+                                                        STRUCTURAL_WET_STAMP_SERVICE_ID
+                                                    ),
+                                                    {
+                                                      shouldValidate: true,
+                                                    }
+                                                  );
+                                                }
+                                                break;
+                                            }
+                                          }
+
                                           if (newChecked) {
                                             field.onChange([
                                               ...field.value,
                                               {
-                                                id: otherService.id,
+                                                id: service.id,
                                                 description: null,
                                               },
                                             ]);
@@ -947,7 +877,7 @@ export default function Page() {
                                             field.onChange(
                                               field.value.filter(
                                                 (value) =>
-                                                  value.id !== otherService.id
+                                                  value.id !== service.id
                                               )
                                             );
                                           }
@@ -955,327 +885,385 @@ export default function Page() {
                                       />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                      {otherService.name}
+                                      {service.name}
                                     </FormLabel>
                                   </FormItem>
                                 )}
                               />
-                            )}
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {watchServices.find(
-                      (task) => task.id === otherService?.id
-                    ) && (
-                      <FormField
-                        control={form.control}
-                        name="descriptionForOtherServices"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>Description for Other Task</FormLabel>
-                            {otherTasksFields.map((field, index) => (
-                              <FormField
-                                key={field.id}
-                                control={form.control}
-                                name={`descriptionForOtherServices.${index}.description`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <div className="flex flex-row gap-2">
-                                      <FormControl>
-                                        <Input
-                                          {...field}
-                                          placeholder={`Other Task ${
-                                            index + 1
-                                          }`}
-                                        />
-                                      </FormControl>
-                                      {index !== 0 && (
-                                        <Button
-                                          variant={"outline"}
-                                          size={"icon"}
-                                          className="flex-shrink-0"
-                                          onClick={() => {
-                                            removeOtherTask(index);
-                                          }}
-                                        >
-                                          <X className="h-4 w-4" />
-                                        </Button>
-                                      )}
-                                    </div>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
                             ))}
-                            <Button
-                              variant={"outline"}
-                              className="w-full"
-                              onClick={() => {
-                                appendOtherTask({ description: "" });
-                              }}
-                              type="button"
-                            >
-                              Add Other Task
-                            </Button>
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                    {wetStampChecked &&
-                      electricalWetStampService &&
-                      structuralWetStampService && (
-                        <>
                           <FormField
                             control={form.control}
-                            name="typeOfWetStamp"
-                            render={() => (
-                              <FormItem>
-                                <FormLabel required>
-                                  Type of Wet Stamp
+                            name="services"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row gap-3 items-center">
+                                <FormControl>
+                                  <Checkbox
+                                    ref={field.ref}
+                                    checked={wetStampChecked}
+                                    onCheckedChange={(newChecked) => {
+                                      if (typeof newChecked === "boolean") {
+                                        setWetStampChecked(newChecked);
+                                      }
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  Wet Stamp
                                 </FormLabel>
-                                <FormField
-                                  control={form.control}
-                                  name="typeOfWetStamp"
-                                  render={({ field }) => (
-                                    <FormItem className="flex flex-row gap-3 items-center">
-                                      <FormControl>
-                                        <Checkbox
-                                          ref={field.ref}
-                                          checked={
-                                            field.value.find(
-                                              (value) =>
-                                                value.id ===
-                                                electricalWetStampService.id
-                                            ) !== undefined
-                                          }
-                                          onCheckedChange={(checked) =>
-                                            checked
-                                              ? field.onChange([
-                                                  ...field.value,
-                                                  {
-                                                    id: electricalWetStampService.id,
-                                                    description: null,
-                                                  },
-                                                ])
-                                              : field.onChange(
-                                                  field.value.filter(
-                                                    (value) =>
-                                                      value.id !==
-                                                      electricalWetStampService.id
-                                                  )
-                                                )
-                                          }
-                                        />
-                                      </FormControl>
-                                      <FormLabel className="font-normal">
-                                        {electricalWetStampService.name}
-                                      </FormLabel>
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name="typeOfWetStamp"
-                                  render={({ field }) => (
-                                    <FormItem className="flex flex-row gap-3 items-center">
-                                      <FormControl>
-                                        <Checkbox
-                                          ref={field.ref}
-                                          checked={
-                                            field.value.find(
-                                              (value) =>
-                                                value.id ===
-                                                structuralWetStampService.id
-                                            ) !== undefined
-                                          }
-                                          onCheckedChange={(checked) =>
-                                            checked
-                                              ? field.onChange([
-                                                  ...field.value,
-                                                  {
-                                                    id: structuralWetStampService.id,
-                                                    description: null,
-                                                  },
-                                                ])
-                                              : field.onChange(
-                                                  field.value.filter(
-                                                    (value) =>
-                                                      value.id !==
-                                                      structuralWetStampService.id
-                                                  )
-                                                )
-                                          }
-                                        />
-                                      </FormControl>
-                                      <FormLabel className="font-normal">
-                                        {structuralWetStampService.name}
-                                      </FormLabel>
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormMessage />
                               </FormItem>
                             )}
                           />
-                          <div className="grid grid-cols-3 gap-4">
+                          {otherService && (
                             <FormField
                               control={form.control}
-                              name="numberOfWetStamp"
+                              name="services"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row gap-3 items-center">
+                                  <FormControl>
+                                    <Checkbox
+                                      ref={field.ref}
+                                      checked={
+                                        field.value.find(
+                                          (value) =>
+                                            value.id === otherService.id
+                                        ) !== undefined
+                                      }
+                                      onCheckedChange={(newChecked) => {
+                                        if (newChecked) {
+                                          field.onChange([
+                                            ...field.value,
+                                            {
+                                              id: otherService.id,
+                                              description: null,
+                                            },
+                                          ]);
+                                        } else {
+                                          field.onChange(
+                                            field.value.filter(
+                                              (value) =>
+                                                value.id !== otherService.id
+                                            )
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {otherService.name}
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {watchServices.find(
+                    (task) => task.id === otherService?.id
+                  ) && (
+                    <FormField
+                      control={form.control}
+                      name="descriptionForOtherServices"
+                      render={() => (
+                        <FormItem>
+                          <FormLabel>Description for Other Task</FormLabel>
+                          {otherTasksFields.map((field, index) => (
+                            <FormField
+                              key={field.id}
+                              control={form.control}
+                              name={`descriptionForOtherServices.${index}.description`}
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel required>
-                                    Number of Wet Stamp
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
+                                  <div className="flex flex-row gap-2">
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder={`Other Task ${index + 1}`}
+                                      />
+                                    </FormControl>
+                                    {index !== 0 && (
+                                      <Button
+                                        variant={"outline"}
+                                        size={"icon"}
+                                        className="flex-shrink-0"
+                                        onClick={() => {
+                                          removeOtherTask(index);
+                                        }}
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
-                          </div>
+                          ))}
+                          <Button
+                            variant={"outline"}
+                            className="w-full"
+                            onClick={() => {
+                              appendOtherTask({ description: "" });
+                            }}
+                            type="button"
+                          >
+                            Add Other Task
+                          </Button>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {wetStampChecked &&
+                    electricalWetStampService &&
+                    structuralWetStampService && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="typeOfWetStamp"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel required>Type of Wet Stamp</FormLabel>
+                              <FormField
+                                control={form.control}
+                                name="typeOfWetStamp"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row gap-3 items-center">
+                                    <FormControl>
+                                      <Checkbox
+                                        ref={field.ref}
+                                        checked={
+                                          field.value.find(
+                                            (value) =>
+                                              value.id ===
+                                              electricalWetStampService.id
+                                          ) !== undefined
+                                        }
+                                        onCheckedChange={(checked) =>
+                                          checked
+                                            ? field.onChange([
+                                                ...field.value,
+                                                {
+                                                  id: electricalWetStampService.id,
+                                                  description: null,
+                                                },
+                                              ])
+                                            : field.onChange(
+                                                field.value.filter(
+                                                  (value) =>
+                                                    value.id !==
+                                                    electricalWetStampService.id
+                                                )
+                                              )
+                                        }
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {electricalWetStampService.name}
+                                    </FormLabel>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="typeOfWetStamp"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row gap-3 items-center">
+                                    <FormControl>
+                                      <Checkbox
+                                        ref={field.ref}
+                                        checked={
+                                          field.value.find(
+                                            (value) =>
+                                              value.id ===
+                                              structuralWetStampService.id
+                                          ) !== undefined
+                                        }
+                                        onCheckedChange={(checked) =>
+                                          checked
+                                            ? field.onChange([
+                                                ...field.value,
+                                                {
+                                                  id: structuralWetStampService.id,
+                                                  description: null,
+                                                },
+                                              ])
+                                            : field.onChange(
+                                                field.value.filter(
+                                                  (value) =>
+                                                    value.id !==
+                                                    structuralWetStampService.id
+                                                )
+                                              )
+                                        }
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {structuralWetStampService.name}
+                                    </FormLabel>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-3 gap-4">
                           <FormField
                             control={form.control}
-                            name="mailingAddress"
+                            name="numberOfWetStamp"
                             render={({ field }) => (
-                              <div>
-                                <div className="grid grid-cols-3 gap-4">
-                                  <div className="flex flex-col gap-2">
-                                    <FormItem>
-                                      <FormLabel required>
-                                        Mailing Address
-                                      </FormLabel>
-                                      <AddressSearchButton
-                                        ref={field.ref}
-                                        format="us"
-                                        onSelect={({
-                                          street1,
-                                          city,
-                                          stateOrRegion,
-                                          postalCode,
-                                          country,
-                                          fullAddress,
-                                          coordinates,
-                                        }) => {
-                                          form.setValue(
-                                            "mailingAddress",
-                                            {
-                                              street1,
-                                              street2: "",
-                                              city: city ?? "",
-                                              stateOrRegion:
-                                                stateOrRegion ?? "",
-                                              postalCode: postalCode ?? "",
-                                              country: country ?? "",
-                                              fullAddress,
-                                              coordinates,
-                                            },
-                                            {
-                                              shouldValidate: true,
-                                              shouldDirty: true,
-                                            }
-                                          );
-                                        }}
-                                      />
-                                      <Input
-                                        value={field.value.street1}
-                                        readOnly
-                                        placeholder="Street 1"
-                                      />
-                                      <Input
-                                        value={field.value.street2}
-                                        onChange={(event) => {
-                                          field.onChange({
-                                            ...field.value,
-                                            street2: event.target.value,
-                                          });
-                                        }}
-                                        placeholder="Street 2"
-                                      />
-                                      <Input
-                                        value={field.value.city}
-                                        readOnly
-                                        placeholder="City"
-                                      />
-                                      <Input
-                                        value={field.value.stateOrRegion}
-                                        readOnly
-                                        placeholder="State Or Region"
-                                      />
-                                      <Input
-                                        value={field.value.postalCode}
-                                        readOnly
-                                        placeholder="Postal Code"
-                                      />
-                                      <Input
-                                        value={field.value.country}
-                                        readOnly
-                                        placeholder="Country"
-                                      />
-                                    </FormItem>
-                                  </div>
-                                  <div className="col-span-2">
-                                    <Minimap
-                                      longitude={field.value.coordinates[0]}
-                                      latitude={field.value.coordinates[1]}
-                                    />
-                                  </div>
-                                </div>
-                                <FormMessage className="mt-2" />
-                              </div>
+                              <FormItem>
+                                <FormLabel required>
+                                  Number of Wet Stamp
+                                </FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
                             )}
                           />
-                        </>
-                      )}
-                    <FormField
-                      control={form.control}
-                      name="additionalInformation"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Additional Information</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {/* TODO: member인 경우만 */}
-                    <FormField
-                      control={form.control}
-                      name="isExpedited"
-                      render={({ field }) => (
-                        <FormItem className="flex-row-reverse justify-end items-center gap-3">
-                          <FormLabel>Expedite</FormLabel>
-                          <FormControl>
-                            <Checkbox
-                              ref={field.ref}
-                              checked={field.value}
-                              onCheckedChange={(newChecked) => {
-                                field.onChange(newChecked);
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Dropzone files={files} onFilesChange={setFiles} />
-                    <LoadingButton
-                      className="w-full"
-                      type="submit"
-                      isLoading={form.formState.isSubmitting}
-                    >
-                      Submit
-                    </LoadingButton>
-                  </ItemsContainer>
-                </form>
-              </Form>
-            </section>
-          )}
-        </div>
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="mailingAddress"
+                          render={({ field }) => (
+                            <div>
+                              <div className="grid grid-cols-3 gap-4">
+                                <div className="flex flex-col gap-2">
+                                  <FormItem>
+                                    <FormLabel required>
+                                      Mailing Address
+                                    </FormLabel>
+                                    <AddressSearchButton
+                                      ref={field.ref}
+                                      format="us"
+                                      onSelect={({
+                                        street1,
+                                        city,
+                                        stateOrRegion,
+                                        postalCode,
+                                        country,
+                                        fullAddress,
+                                        coordinates,
+                                      }) => {
+                                        form.setValue(
+                                          "mailingAddress",
+                                          {
+                                            street1,
+                                            street2: "",
+                                            city: city ?? "",
+                                            stateOrRegion: stateOrRegion ?? "",
+                                            postalCode: postalCode ?? "",
+                                            country: country ?? "",
+                                            fullAddress,
+                                            coordinates,
+                                          },
+                                          {
+                                            shouldValidate: true,
+                                            shouldDirty: true,
+                                          }
+                                        );
+                                      }}
+                                    />
+                                    <Input
+                                      value={field.value.street1}
+                                      readOnly
+                                      placeholder="Street 1"
+                                    />
+                                    <Input
+                                      value={field.value.street2}
+                                      onChange={(event) => {
+                                        field.onChange({
+                                          ...field.value,
+                                          street2: event.target.value,
+                                        });
+                                      }}
+                                      placeholder="Street 2"
+                                    />
+                                    <Input
+                                      value={field.value.city}
+                                      readOnly
+                                      placeholder="City"
+                                    />
+                                    <Input
+                                      value={field.value.stateOrRegion}
+                                      readOnly
+                                      placeholder="State Or Region"
+                                    />
+                                    <Input
+                                      value={field.value.postalCode}
+                                      readOnly
+                                      placeholder="Postal Code"
+                                    />
+                                    <Input
+                                      value={field.value.country}
+                                      readOnly
+                                      placeholder="Country"
+                                    />
+                                  </FormItem>
+                                </div>
+                                <div className="col-span-2">
+                                  <Minimap
+                                    longitude={field.value.coordinates[0]}
+                                    latitude={field.value.coordinates[1]}
+                                  />
+                                </div>
+                              </div>
+                              <FormMessage className="mt-2" />
+                            </div>
+                          )}
+                        />
+                      </>
+                    )}
+                  <FormField
+                    control={form.control}
+                    name="additionalInformation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Additional Information</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* TODO: member인 경우만 */}
+                  <FormField
+                    control={form.control}
+                    name="isExpedited"
+                    render={({ field }) => (
+                      <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                        <FormLabel>Expedite</FormLabel>
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              field.onChange(newChecked);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Dropzone files={files} onFilesChange={setFiles} />
+                  <LoadingButton
+                    className="w-full"
+                    type="submit"
+                    isLoading={form.formState.isSubmitting}
+                  >
+                    Submit
+                  </LoadingButton>
+                </ItemsContainer>
+              </form>
+            </Form>
+          </section>
+        )}
       </div>
       {organizationId !== "" && (
         <>

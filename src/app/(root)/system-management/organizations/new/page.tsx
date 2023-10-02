@@ -1,10 +1,8 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
-
 import { useEffect } from "react";
 import {
   Form,
@@ -83,6 +81,8 @@ const formSchema = z.object({
       }
     }),
 });
+
+const title = "New Organization";
 
 export default function Page() {
   const { toast } = useToast();
@@ -175,7 +175,6 @@ export default function Page() {
         }
       });
   }
-  const title = "New Organization";
 
   return (
     <div className="flex flex-col gap-4">

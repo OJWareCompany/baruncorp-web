@@ -6,11 +6,9 @@ import { OrganizationPaginatedResponseDto } from "@/api";
 
 interface Props {
   pagination: PaginationState;
-  initialData: OrganizationPaginatedResponseDto | null;
 }
 
 const usePaginatedOrganizationsQuery = ({
-  initialData,
   pagination: { pageIndex, pageSize },
 }: Props) => {
   const api = useApi();
@@ -27,7 +25,6 @@ const usePaginatedOrganizationsQuery = ({
           limit: pageSize,
         })
         .then(({ data }) => data),
-    placeholderData: initialData == null ? undefined : initialData,
     keepPreviousData: true,
   });
 };

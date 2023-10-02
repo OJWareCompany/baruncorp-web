@@ -7,7 +7,7 @@ import {
 
 import { statuses } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
-import { JobPaginatedResponseDto, ProjectResponseDto } from "@/api";
+import { JobPaginatedResponseDto, LineItem, ProjectResponseDto } from "@/api";
 import { formatDateTime } from "@/lib/utils";
 
 const jobPaginatedColumnHelper =
@@ -399,3 +399,41 @@ export function getJobTableExportDataFromJobs(
     "Date Received": formatDateTime(value.receivedAt),
   }));
 }
+
+const jobToInvoiceColumnHelper = createColumnHelper<LineItem>();
+
+export const jobToInvoiceColumns = [
+  jobToInvoiceColumnHelper.accessor("billingCodes", {
+    header: "Billing Codes",
+    size: 150,
+  }),
+  jobToInvoiceColumnHelper.accessor("clientOrganization.name", {
+    header: "Organization",
+    size: 150,
+  }),
+  jobToInvoiceColumnHelper.accessor("propertyType", {
+    header: "Property Type",
+    size: 150,
+  }),
+  jobToInvoiceColumnHelper.accessor("mountingType", {
+    header: "Mounting Type",
+    size: 150,
+  }),
+  jobToInvoiceColumnHelper.accessor("dateSentToClient", {
+    header: "Date Sent to Client",
+    size: 150,
+  }),
+  // TODO: replace
+  jobToInvoiceColumnHelper.accessor("description", {
+    header: "Description",
+    size: 150,
+  }),
+  jobToInvoiceColumnHelper.accessor("price", {
+    header: "Price",
+    size: 150,
+  }),
+  jobToInvoiceColumnHelper.accessor("pricingType", {
+    header: "Pricing Type",
+    size: 150,
+  }),
+];

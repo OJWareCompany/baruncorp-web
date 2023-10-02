@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/PageHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export default function Page() {
-  const title = "Project Intake Portal";
+const title = "Project Intake Portal";
 
+export default function Page() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader

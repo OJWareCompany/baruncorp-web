@@ -8,7 +8,7 @@ const useAhjNoteQuery = ({
   initialData,
 }: {
   geoId: string;
-  initialData?: AhjNoteResponseDto | null;
+  initialData?: AhjNoteResponseDto;
 }) => {
   const api = useApi();
 
