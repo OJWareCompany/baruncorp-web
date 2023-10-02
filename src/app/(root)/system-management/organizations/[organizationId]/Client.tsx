@@ -28,7 +28,9 @@ import AddressSearchButton from "@/components/AddressSearchButton";
 import Minimap from "@/components/Minimap";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import {
+  MountingTypeEnum,
   MountingTypeEnumWithEmptyString,
+  PropertyTypeEnum,
   PropertyTypeEnumWithEmptyString,
   transformNullishMountingTypeEnumIntoMountingTypeEnumWithEmptyString,
   transformNullishPropertyTypeEnumIntoPropertyTypeEnumWithEmptyString,
@@ -216,10 +218,11 @@ export default function Client({ initialOrganization }: Props) {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem value="Residential">
-                            Residential
-                          </SelectItem>
-                          <SelectItem value="Commercial">Commercial</SelectItem>
+                          {PropertyTypeEnum.options.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -241,13 +244,11 @@ export default function Client({ initialOrganization }: Props) {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem value="Roof Mount">Roof Mount</SelectItem>
-                          <SelectItem value="Ground Mount">
-                            Ground Mount
-                          </SelectItem>
-                          <SelectItem value="Roof Mount & Ground Mount">
-                            Roof Mount & Ground Mount
-                          </SelectItem>
+                          {MountingTypeEnum.options.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>

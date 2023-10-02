@@ -135,9 +135,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -196,9 +196,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -224,9 +224,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -252,9 +252,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -335,9 +335,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -363,9 +363,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -391,9 +391,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {DigitalSignatureTypeEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {DigitalSignatureTypeEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -421,9 +421,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -461,9 +461,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {WindExposureEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {WindExposureEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -517,9 +517,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {SelectOptionEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {SelectOptionEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -557,9 +557,9 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            {ANSIEnum.options.map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {item}
+                            {ANSIEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
                               </SelectItem>
                             ))}
                           </SelectGroup>

@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
 import React from "react";
+import { format } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -52,15 +53,10 @@ export function getValidChildren(children: React.ReactNode) {
   ) as React.ReactElement[];
 }
 
-const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "short",
-  timeStyle: "short",
-});
-
 export function formatDateTime(dateTimeString: string) {
   if (typeof dateTimeString !== "string") {
     return "-";
   }
 
-  return dateTimeFormatter.format(new Date(dateTimeString));
+  return format(new Date(dateTimeString), "MM-dd-yyyy, p");
 }

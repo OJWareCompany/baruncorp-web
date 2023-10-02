@@ -202,12 +202,11 @@ export default function NewProjectSheet({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="Residential">
-                              Residential
-                            </SelectItem>
-                            <SelectItem value="Commercial">
-                              Commercial
-                            </SelectItem>
+                            {PropertyTypeEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
