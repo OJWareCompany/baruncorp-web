@@ -1,9 +1,8 @@
 import Link from "next/link";
 import React from "react";
+import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/PageHeader";
-import { Separator } from "@/components/ui/separator";
-import { Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Page() {

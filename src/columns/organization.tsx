@@ -1,5 +1,5 @@
-import { OrganizationPaginatedResponseDto } from "@/api";
 import { createColumnHelper } from "@tanstack/react-table";
+import { OrganizationPaginatedResponseDto } from "@/api";
 
 const columnHelper =
   createColumnHelper<OrganizationPaginatedResponseDto["items"][number]>();

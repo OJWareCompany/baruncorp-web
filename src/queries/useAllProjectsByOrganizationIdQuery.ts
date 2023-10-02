@@ -1,10 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import {
-  ProjectPaginatedResponseDto,
-  ProjectPaginatedResponseFields,
-} from "@/api";
+import { ProjectPaginatedResponseDto } from "@/api";
 
 const useAllProjectsByOrganizationIdQuery = (organizationId: string) => {
   const api = useApi();

@@ -16,6 +16,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+import { download, generateCsv, mkConfig } from "export-to-csv";
 import { Button } from "../ui/button";
 import {
   Table,
@@ -33,8 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { download, generateCsv, mkConfig } from "export-to-csv";
-import { useToast } from "../ui/use-toast";
 
 interface PaginatedTableProps<TData> {
   columns: ColumnDef<TData, any>[];

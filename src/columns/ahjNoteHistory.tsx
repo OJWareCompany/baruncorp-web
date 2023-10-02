@@ -1,6 +1,6 @@
+import { createColumnHelper } from "@tanstack/react-table";
 import { AhjNoteHistoryPaginatedResponseDto } from "@/api";
 import { formatDateTime } from "@/lib/utils";
-import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper =
   createColumnHelper<AhjNoteHistoryPaginatedResponseDto["items"][number]>();

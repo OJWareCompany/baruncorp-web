@@ -1,6 +1,5 @@
 "use client";
-import { useMemo } from "react";
-import { ServicePaginatedResponseDto, ServiceResponseDto } from "@/api";
+import { ServicePaginatedResponseDto } from "@/api";
 import { serviceColumns } from "@/columns/service";
 import PageHeader from "@/components/PageHeader";
 import BaseTable from "@/components/table/BaseTable";

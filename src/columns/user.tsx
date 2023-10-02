@@ -1,5 +1,5 @@
-import { UserPaginatedResopnseDto } from "@/api";
 import { createColumnHelper } from "@tanstack/react-table";
+import { UserPaginatedResopnseDto } from "@/api";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResopnseDto["items"][number]>();

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { ServicePaginatedResponseDto, ServiceResponseDto } from "@/api";
+import { ServicePaginatedResponseDto } from "@/api";
 
 const useAllServicesQuery = (
   initialData?: ServicePaginatedResponseDto | null

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UserPaginatedResopnseDto, UserResponseDto } from "@/api";
+import { UserPaginatedResopnseDto } from "@/api";
 
 const useAllUsersByOrganizationIdQuery = (organizationId: string) => {
   const api = useApi();
