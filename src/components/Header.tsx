@@ -54,10 +54,10 @@ const systemManagementItems: {
     title: "AHJ Notes",
     href: "/system-management/ahj-notes",
   },
-  {
-    title: "Invoices",
-    href: "/system-management/invoices",
-  },
+  // {
+  //   title: "Invoices",
+  //   href: "/system-management/invoices",
+  // },
   // {
   //   title: "Tracking Numbers",
   //   href: "/system-management/tracking-numbers",
