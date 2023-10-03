@@ -358,23 +358,18 @@ export default function Page({ params: { jobId } }: Props) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link
-                  href={{
-                    protocol: "barun",
-                    host: "open-explorer",
-                    slashes: true,
-                    query: {
-                      payload: JSON.stringify({
-                        organizationName: project?.clientOrganization,
-                        projectFolderName: project?.propertyAddress.fullAddress,
-                        jobFolderName: job?.jobName,
-                      }),
-                    },
-                  }}
+                <a
+                  href={`barun://open-explorer?payload=${encodeURIComponent(
+                    JSON.stringify({
+                      organizationName: project?.clientOrganization,
+                      projectFolderName: project?.propertyAddress.fullAddress,
+                      jobFolderName: job?.jobName,
+                    })
+                  )}`}
                 >
                   <FolderOpen className="mr-2 h-4 w-4" />
                   <span>Open Folder</span>
-                </Link>
+                </a>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
