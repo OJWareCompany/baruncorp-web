@@ -39,6 +39,7 @@ import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizati
 import NewUserSheet from "@/components/sheet/NewUserByOrganizationSheet";
 import {
   ELECTRICAL_WET_STAMP_SERVICE_ID,
+  MountingTypeEnum,
   STRUCTURAL_WET_STAMP_SERVICE_ID,
   statuses,
   transformNullishStringIntoString,
@@ -131,10 +132,7 @@ export default function Page({ params: { jobId } }: Props) {
             ),
           }),
           additionalInformation: z.string().trim(),
-          mountingType: z
-            .string()
-            .trim()
-            .min(1, { message: "Mounting Type is required" }),
+          mountingType: MountingTypeEnum,
           isExpedited: z.boolean(),
           systemSize: z.string().trim(),
           numberOfWetStamp: z.string().trim(),
@@ -229,7 +227,8 @@ export default function Page({ params: { jobId } }: Props) {
         })),
       },
       additionalInformation: job?.additionalInformationFromClient ?? "",
-      mountingType: job?.mountingType ?? "",
+      mountingType:
+        (job?.mountingType as z.infer<typeof MountingTypeEnum>) ?? "Roof Mount",
       isExpedited: job?.isExpedited ?? false,
       systemSize: job?.systemSize == null ? "" : String(job.systemSize),
       numberOfWetStamp:
@@ -265,6 +264,7 @@ export default function Page({ params: { jobId } }: Props) {
    */
   useEffect(() => {
     if (job) {
+      console.log("🚀 ~ file: page.tsx:268 ~ useEffect ~ job:", job);
       form.reset(getFieldValues(job));
     }
   }, [form, getFieldValues, job]);
@@ -594,8 +594,8 @@ export default function Page({ params: { jobId } }: Props) {
                       <FormControl>
                         <RadioGroup
                           ref={field.ref}
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
                         >
                           <FormItem className="flex-row gap-3 items-center">
                             <FormControl>
