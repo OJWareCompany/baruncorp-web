@@ -71,16 +71,14 @@ export default function SigninPage() {
       router.push("/");
       return;
     }
+
     const statusCode = Number(error);
-    switch (statusCode) {
-      case 400:
-        form.setError("password", {
-          message: "Invalid email address or password",
-        });
-        break;
-      default:
-        toast(defaultErrorToast);
-        break;
+    if (statusCode >= 400 && statusCode < 500) {
+      form.setError("password", {
+        message: "Invalid email address or password",
+      });
+    } else {
+      toast(defaultErrorToast);
     }
   }
 

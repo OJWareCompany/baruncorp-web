@@ -11,7 +11,6 @@ interface Props {
 }
 
 export default function Dropzone({ files, onFilesChange }: Props) {
-  // const [progress, setProgress] = useState(0);
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const newFiles = [...files];
@@ -28,7 +27,7 @@ export default function Dropzone({ files, onFilesChange }: Props) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       <div
         {...getRootProps()}
         className={cn(
@@ -58,45 +57,6 @@ export default function Dropzone({ files, onFilesChange }: Props) {
           </Button>
         </div>
       ))}
-      {/* <button
-        type="button"
-        onClick={() => {
-          const formData = new FormData();
-          for (const file of droppedFiles) {
-            formData.append("files", file);
-          }
-
-          axios
-            .post(
-              "http://211.107.90.2:3001/filesystem/123/1234/files",
-              formData,
-              {
-                onUploadProgress: (axiosProgressEvent) => {
-                  setProgress((axiosProgressEvent?.progress ?? 0) * 100);
-                },
-              }
-            )
-            .then((a) => {
-              console.log("a", a);
-            })
-            .catch((b) => {
-              console.log("b", b);
-            });
-          //   axios
-          //     .postForm("http://211.107.90.2:3001/filesystem/123/123/files", {
-          //       file: acceptedFiles, // FileList will be unwrapped as sepate fields
-          //     })
-          //     .then((a) => {
-          //       console.log("a", a);
-          //     })
-          //     .catch((b) => {
-          //       console.log("b", b);
-          //     });
-        }}
-      >
-        click
-      </button>
-      <Progress value={progress} /> */}
-    </>
+    </div>
   );
 }

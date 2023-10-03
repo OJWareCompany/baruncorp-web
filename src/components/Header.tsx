@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import React from "react";
 import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -88,10 +89,12 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default function Header() {
+  const { toast } = useToast();
   const { data: user } = useProfileQuery();
 
   const handleSignOutButtonClick = () => {
     signOut({ redirect: false });
+    toast({ title: "Sign-out success" });
   };
 
   return (

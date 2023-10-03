@@ -368,8 +368,6 @@ export default function Page() {
         });
       }
 
-      console.log("mt", organization.mountingTypeDefaultValue);
-
       form.reset({
         clientUser: {
           id: "",
