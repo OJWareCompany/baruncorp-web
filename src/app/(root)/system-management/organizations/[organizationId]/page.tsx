@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { AlertCircle } from "lucide-react";
 import { OrganizationResponseDto } from "@/api";
 import {
   Form,
@@ -35,6 +36,7 @@ import {
 } from "@/lib/constants";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -161,6 +163,13 @@ export default function Page({ params: { organizationId } }: Props) {
         ]}
         title={title}
       />
+      <Alert variant={"destructive"}>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Work in Progress</AlertTitle>
+        <AlertDescription>
+          Organization editing feature will be added.
+        </AlertDescription>
+      </Alert>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <RowItemsContainer>
