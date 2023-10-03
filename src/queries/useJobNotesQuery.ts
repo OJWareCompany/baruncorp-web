@@ -11,7 +11,7 @@ const useJobNotesQuery = ({ jobId }: Props) => {
   const api = useApi();
 
   return useQuery<JobNoteListResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["jobNotes", "list", jobId],
+    queryKey: ["job-notes", "list", { jobId }],
     queryFn: () =>
       api.orderedJobNotes
         .findJobNotesHttpControllerFind(jobId)

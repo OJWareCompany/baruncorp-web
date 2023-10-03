@@ -14,7 +14,7 @@ const usePaginatedMyActiveJobsQuery = ({
   const api = useApi();
 
   return useQuery<JobPaginatedResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["myActiveJobs", "list", { pageIndex, pageSize }],
+    queryKey: ["my-active-jobs", "list", { pageIndex, pageSize }],
     queryFn: () =>
       api.myActiveJobs
         .findMyActiveJobPaginatedHttpControllerFindJob({

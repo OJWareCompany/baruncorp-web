@@ -2,9 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { PaginationState } from "@tanstack/react-table";
 import useApi from "@/hook/useApi";
-import {
-  AhjNoteHistoryPaginatedResponseDto,
-} from "@/api";
+import { AhjNoteHistoryPaginatedResponseDto } from "@/api";
 
 interface Props {
   geoId: string;
@@ -23,7 +21,12 @@ const usePaginatedAhjNoteHistoriesQuery = ({
     AhjNoteHistoryPaginatedResponseDto,
     AxiosError<ErrorResponseData>
   >({
-    queryKey: ["ahjNoteHistories", "list", { pageIndex, pageSize }],
+    queryKey: [
+      "ahj-note-histories",
+      "list",
+      { geoId },
+      { pageIndex, pageSize },
+    ],
     queryFn: () =>
       api.geography
         .geographyControllerGetFindNoteUpdateHistory({

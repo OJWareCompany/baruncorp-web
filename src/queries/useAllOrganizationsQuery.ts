@@ -10,7 +10,7 @@ const useAllOrganizationsQuery = () => {
     OrganizationPaginatedResponseDto,
     AxiosError<ErrorResponseData>
   >({
-    queryKey: ["organizations", "list"],
+    queryKey: ["organizations", "list", "all"],
     queryFn: () =>
       api.organizations
         .findOrganizationPaginatedHttpControllerGetOrganizationPaginated({

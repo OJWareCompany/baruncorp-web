@@ -7,7 +7,7 @@ const useJobQuery = ({ jobId }: { jobId: string }) => {
   const api = useApi();
 
   return useQuery<JobResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["jobs", "detail", jobId],
+    queryKey: ["jobs", "detail", { jobId }],
     queryFn: () =>
       api.jobs.findJobHttpControllerFindJob(jobId).then(({ data }) => data),
     enabled: jobId !== "",

@@ -156,7 +156,7 @@ export default function NewProjectSheet({
         onSelect(id);
         form.reset();
         queryClient.invalidateQueries({
-          queryKey: ["projects", "list", { organizationId }],
+          queryKey: ["projects", "list", "all", { organizationId }],
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

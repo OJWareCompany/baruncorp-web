@@ -7,7 +7,7 @@ const useAllUsersByOrganizationIdQuery = (organizationId: string) => {
   const api = useApi();
 
   return useQuery<UserPaginatedResopnseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["users", "list", { organizationId }],
+    queryKey: ["users", "list", "all", { organizationId }],
     queryFn: () =>
       api.users
         .findUsersHttpControllerGetFindUsers({

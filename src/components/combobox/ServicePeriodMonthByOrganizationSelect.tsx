@@ -1,11 +1,8 @@
 "use client";
 import { forwardRef } from "react";
 
-
-
-
 import { format } from "date-fns";
-import useInvoiceOrganizationsQuery from "@/queries/useInvoiceOrganizationsQuery";
+import useInvoiceOrganizationsQuery from "@/queries/useOrganizationsToInvoiceQuery";
 import {
   Select,
   SelectContent,

@@ -14,7 +14,11 @@ const useJobsToInvoiceQuery = ({
   const api = useApi();
 
   return useQuery<LineItem[], AxiosError<ErrorResponseData>>({
-    queryKey: ["jobsToInvoice", "list", { organizationId, servicePeriodMonth }],
+    queryKey: [
+      "jobs-to-invoice",
+      "list",
+      { organizationId, servicePeriodMonth },
+    ],
     queryFn: () =>
       api.jobsToInvoice
         .findJobToInvoiceHttpControllerFindJob({

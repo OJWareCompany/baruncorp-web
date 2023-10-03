@@ -46,7 +46,7 @@ export default function JobNoteForm({ jobId }: Props) {
       .then(() => {
         form.reset();
         queryClient.invalidateQueries({
-          queryKey: ["jobNotes", "list", jobId],
+          queryKey: ["job-notes", "list", { jobId }],
         });
       })
       .catch(() => {});

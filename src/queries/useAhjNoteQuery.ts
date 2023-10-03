@@ -13,7 +13,7 @@ const useAhjNoteQuery = ({
   const api = useApi();
 
   return useQuery<AhjNoteResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["ahjNotes", "detail", geoId],
+    queryKey: ["ahj-notes", "detail", { geoId }],
     queryFn: () =>
       api.geography
         .geographyControllerGetFindNoteByGeoId(geoId)

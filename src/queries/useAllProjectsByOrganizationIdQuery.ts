@@ -7,7 +7,7 @@ const useAllProjectsByOrganizationIdQuery = (organizationId: string) => {
   const api = useApi();
 
   return useQuery<ProjectPaginatedResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["projects", "list", { organizationId }],
+    queryKey: ["projects", "list", "all", { organizationId }],
     queryFn: () =>
       api.projects
         .findProjectsHttpControllerFindUsers({

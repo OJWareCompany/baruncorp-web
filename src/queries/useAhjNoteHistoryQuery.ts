@@ -7,7 +7,7 @@ const useAhjNoteHistoryQuery = (historyId: string | undefined) => {
   const api = useApi();
 
   return useQuery<AhjNoteHistoryResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["ahjNoteHistories", "detail", historyId],
+    queryKey: ["ahj-note-histories", "detail", { historyId }],
     queryFn: () =>
       api.geography
         .geographyControllerGetFinNoteUpdateHistoryDetail(Number(historyId))

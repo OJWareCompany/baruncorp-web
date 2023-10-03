@@ -79,10 +79,10 @@ export default function Page({ params: { geoId } }: Props) {
     await mutateAsync(getUpdateAhjNoteRequestDtoFromFieldValues(values))
       .then(() => {
         queryClient.invalidateQueries({
-          queryKey: ["ahjNotes", "detail", geoId],
+          queryKey: ["ahj-notes", "detail", { geoId }],
         });
         queryClient.invalidateQueries({
-          queryKey: ["ahjNoteHistories", "list"],
+          queryKey: ["ahj-note-histories", "list", { geoId }],
         });
       })
       .catch(() => {});

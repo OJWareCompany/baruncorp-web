@@ -304,10 +304,10 @@ export default function Page({ params: { jobId } }: Props) {
     })
       .then(() => {
         queryClient.invalidateQueries({
-          queryKey: ["jobs", "detail", jobId],
+          queryKey: ["jobs", "detail", { jobId }],
         });
         queryClient.invalidateQueries({
-          queryKey: ["projects", "detail", projectId],
+          queryKey: ["projects", "detail", { projectId }],
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
@@ -823,10 +823,10 @@ export default function Page({ params: { jobId } }: Props) {
                     patchJobHoldMutateAsync()
                       .then(() => {
                         queryClient.invalidateQueries({
-                          queryKey: ["jobs", "detail", jobId],
+                          queryKey: ["jobs", "detail", { jobId }],
                         });
                         queryClient.invalidateQueries({
-                          queryKey: ["projects", "detail", projectId],
+                          queryKey: ["projects", "detail", { projectId }],
                         });
                       })
                       .catch(() => {});
@@ -850,10 +850,10 @@ export default function Page({ params: { jobId } }: Props) {
                     patchJobCancelMutateAsync()
                       .then(() => {
                         queryClient.invalidateQueries({
-                          queryKey: ["jobs", "detail", jobId],
+                          queryKey: ["jobs", "detail", { jobId }],
                         });
                         queryClient.invalidateQueries({
-                          queryKey: ["projects", "detail", projectId],
+                          queryKey: ["projects", "detail", { projectId }],
                         });
                       })
                       .catch(() => {});

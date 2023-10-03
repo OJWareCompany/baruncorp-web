@@ -129,7 +129,7 @@ export default function Page({ params: { userId } }: Props) {
     })
       .then(() => {
         queryClient.invalidateQueries({
-          queryKey: ["users", "detail", userId],
+          queryKey: ["users", "detail", { userId }],
         });
 
         if (

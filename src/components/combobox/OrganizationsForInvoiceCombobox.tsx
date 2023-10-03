@@ -16,7 +16,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import useInvoiceOrganizationsQuery from "@/queries/useInvoiceOrganizationsQuery";
+import useOrganizationsToInvoiceQuery from "@/queries/useOrganizationsToInvoiceQuery";
 
 interface Props {
   organizationId: string;
@@ -34,7 +34,7 @@ const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
      * Query
      */
     const { data: organizations, isLoading: isOrganizationsQueryLoading } =
-      useInvoiceOrganizationsQuery();
+      useOrganizationsToInvoiceQuery();
 
     return (
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>

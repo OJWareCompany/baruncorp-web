@@ -22,9 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  TermsEnum,
-} from "@/lib/constants";
+import { TermsEnum } from "@/lib/constants";
 import PageHeader from "@/components/PageHeader";
 import InvoiceOrganizationsCombobox from "@/components/combobox/OrganizationsForInvoiceCombobox";
 import {
@@ -41,6 +39,8 @@ import ServicePeriodMonthByOrganizationSelect from "@/components/combobox/Servic
 import useJobsToInvoiceQuery from "@/queries/useJobsToInvoiceQuery";
 import BaseTable from "@/components/table/BaseTable";
 import { jobToInvoiceColumns } from "@/columns/job";
+import { Textarea } from "@/components/ui/textarea";
+import LoadingButton from "@/components/LoadingButton";
 
 const formSchema = z.object({
   organizationId: z
@@ -55,6 +55,7 @@ const formSchema = z.object({
     .string()
     .trim()
     .min(1, { message: "Service Month is required" }),
+  notesToClient: z.string().trim(),
   //   emailAddressToReceiveInvoice: z
   //     .string()
   //     .trim()
@@ -98,9 +99,9 @@ const formSchema = z.object({
   //     }),
 });
 
-export default function Page() {
-  const title = "New Invoice";
+const title = "New Invoice";
 
+export default function Page() {
   /**
    * Form
    */
@@ -111,6 +112,7 @@ export default function Page() {
       invoiceDate: new Date(),
       terms: "30",
       servicePeriodMonth: "",
+      notesToClient: "",
       //   emailAddressToReceiveInvoice: "",
       //   phoneNumber: "",
       //   defaultMountingType: "",
@@ -339,6 +341,26 @@ export default function Page() {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="notesToClient"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Notes to Client</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <LoadingButton
+            type="submit"
+            isLoading={form.formState.isSubmitting}
+            className="w-full"
+          >
+            Submit
+          </LoadingButton>
         </form>
       </Form>
       <BaseTable

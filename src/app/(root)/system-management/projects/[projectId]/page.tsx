@@ -149,7 +149,7 @@ export default function Page({ params: { projectId } }: Props) {
     })
       .then(() => {
         queryClient.invalidateQueries({
-          queryKey: ["projects", "detail", projectId],
+          queryKey: ["projects", "detail", { projectId }],
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

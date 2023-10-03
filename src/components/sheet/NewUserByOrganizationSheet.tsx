@@ -135,7 +135,7 @@ export default function NewUserSheet({
         form.reset();
         onAdd(id);
         queryClient.invalidateQueries({
-          queryKey: ["users", "list", { organizationId }],
+          queryKey: ["users", "list", "all", { organizationId }],
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

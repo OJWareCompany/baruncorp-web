@@ -7,7 +7,7 @@ const useProjectQuery = ({ projectId }: { projectId: string }) => {
   const api = useApi();
 
   return useQuery<ProjectResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["projects", "detail", projectId],
+    queryKey: ["projects", "detail", { projectId }],
     queryFn: () =>
       api.projects
         .findProjectDetailHttpControllerFindProjectDetail(projectId)

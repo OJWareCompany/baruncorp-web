@@ -14,7 +14,7 @@ const usePaginatedAhjNotesQuery = ({
   const api = useApi();
 
   return useQuery<AhjNotePaginatedResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["ahjNotes", "list", { pageIndex, pageSize }],
+    queryKey: ["ahj-notes", "list", { pageIndex, pageSize }],
     queryFn: () =>
       api.geography
         .geographyControllerGetFindNotes({

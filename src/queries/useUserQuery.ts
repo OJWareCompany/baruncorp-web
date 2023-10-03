@@ -7,7 +7,7 @@ const useUserQuery = ({ userId }: { userId: string }) => {
   const api = useApi();
 
   return useQuery<UserResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["users", "detail", userId],
+    queryKey: ["users", "detail", { userId }],
     queryFn: () =>
       api.users
         .usersControllerGetUserInfoByUserId(userId)

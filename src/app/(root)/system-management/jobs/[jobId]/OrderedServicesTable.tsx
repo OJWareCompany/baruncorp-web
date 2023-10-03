@@ -280,10 +280,10 @@ function Assignee({
           })
             .then(() => {
               queryClient.invalidateQueries({
-                queryKey: ["jobs", "detail", jobId],
+                queryKey: ["jobs", "detail", { jobId }],
               });
               queryClient.invalidateQueries({
-                queryKey: ["projects", "detail", projectId],
+                queryKey: ["projects", "detail", { projectId }],
               });
             })
             .catch(() => {});
@@ -301,10 +301,10 @@ function Assignee({
             patchAssignedTaskCompleteMutateAsync()
               .then(() => {
                 queryClient.invalidateQueries({
-                  queryKey: ["jobs", "detail", jobId],
+                  queryKey: ["jobs", "detail", { jobId }],
                 });
                 queryClient.invalidateQueries({
-                  queryKey: ["projects", "detail", projectId],
+                  queryKey: ["projects", "detail", { projectId }],
                 });
               })
               .catch(() => {});
@@ -354,10 +354,10 @@ function Action({ cellContext: { row }, jobId, projectId }: ActionProps) {
             patchOrderedServiceCancelMutateAsync()
               .then(() => {
                 queryClient.invalidateQueries({
-                  queryKey: ["jobs", "detail", jobId],
+                  queryKey: ["jobs", "detail", { jobId }],
                 });
                 queryClient.invalidateQueries({
-                  queryKey: ["projects", "detail", projectId],
+                  queryKey: ["projects", "detail", { projectId }],
                 });
               })
               .catch(() => {});
@@ -379,10 +379,10 @@ function Action({ cellContext: { row }, jobId, projectId }: ActionProps) {
           patchOrderedServiceReactivateMutateAsync()
             .then(() => {
               queryClient.invalidateQueries({
-                queryKey: ["jobs", "detail", jobId],
+                queryKey: ["jobs", "detail", { jobId }],
               });
               queryClient.invalidateQueries({
-                queryKey: ["projects", "detail", projectId],
+                queryKey: ["projects", "detail", { projectId }],
               });
             })
             .catch(() => {});

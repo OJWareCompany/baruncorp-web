@@ -7,7 +7,7 @@ const useAllServicesQuery = () => {
   const api = useApi();
 
   return useQuery<ServicePaginatedResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["services", "list"],
+    queryKey: ["services", "list", "all"],
     queryFn: () =>
       api.services
         .findServicePaginatedHttpControllerGet({

@@ -1,15 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import {
-  ClientToInvoiceResponseDto,
-} from "@/api";
+import { ClientToInvoiceResponseDto } from "@/api";
 
-const useInvoiceOrganizationsQuery = () => {
+const useOrganizationsToInvoiceQuery = () => {
   const api = useApi();
 
   return useQuery<ClientToInvoiceResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["organizations", "list"],
+    queryKey: ["organizations-to-invoice", "list"],
     queryFn: () =>
       api.invoicesClients
         .findClientToInvoiceHttpControllerGet()
@@ -17,4 +15,4 @@ const useInvoiceOrganizationsQuery = () => {
   });
 };
 
-export default useInvoiceOrganizationsQuery;
+export default useOrganizationsToInvoiceQuery;
