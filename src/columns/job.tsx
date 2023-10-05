@@ -27,33 +27,21 @@ export const jobPaginatedColumns = [
       return <Badge variant={"destructive"}>Expedite</Badge>;
     },
   }),
-  jobPaginatedColumnHelper.accessor("jobRequestNumber", {
-    header: "#",
-    size: 100,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {getValue()}
-      </p>
-    ),
-  }),
-  jobPaginatedColumnHelper.accessor("propertyFullAddress", {
-    header: "Address",
-    size: 400,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {getValue()}
-      </p>
-    ),
-  }),
   jobPaginatedColumnHelper.accessor("clientInfo.clientOrganizationName", {
     header: "Organization",
     size: 200,
+    cell: ({ getValue, column }) => (
+      <p
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
+        {getValue()}
+      </p>
+    ),
+  }),
+  jobPaginatedColumnHelper.accessor("jobName", {
+    header: "Name",
+    size: 500,
     cell: ({ getValue, column }) => (
       <p
         style={{ width: column.getSize() - 32 }}
@@ -203,33 +191,21 @@ export const jobForProjectColumns = [
       return <Badge variant={"destructive"}>Expedite</Badge>;
     },
   }),
-  jobForProjectColumnHelper.accessor("jobRequestNumber", {
-    header: "#",
-    size: 100,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {getValue()}
-      </p>
-    ),
-  }),
-  jobForProjectColumnHelper.accessor("propertyFullAddress", {
-    header: "Address",
-    size: 400,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {getValue()}
-      </p>
-    ),
-  }),
   jobForProjectColumnHelper.accessor("clientInfo.clientOrganizationName", {
     header: "Organization",
     size: 200,
+    cell: ({ getValue, column }) => (
+      <p
+        style={{ width: column.getSize() - 32 }}
+        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
+      >
+        {getValue()}
+      </p>
+    ),
+  }),
+  jobForProjectColumnHelper.accessor("jobName", {
+    header: "Name",
+    size: 500,
     cell: ({ getValue, column }) => (
       <p
         style={{ width: column.getSize() - 32 }}
@@ -365,9 +341,8 @@ export const jobForProjectColumns = [
 interface JobTableExportData {
   [index: string]: unknown;
   Expedite: boolean;
-  "#": number;
-  Address: string;
   Organization: string;
+  Name: string;
   "Client User": string;
   "Mounting Type": string;
   "Additional Information": string;
@@ -381,9 +356,8 @@ export function getJobTableExportDataFromJobs(
 ): JobTableExportData[] | undefined {
   return jobs?.items.map<JobTableExportData>((value) => ({
     Expedite: value.isExpedited,
-    "#": value.jobRequestNumber,
-    Address: value.propertyFullAddress,
     Organization: value.clientInfo.clientOrganizationName,
+    Name: value.jobName,
     "Client User": value.clientInfo.clientUserName,
     "Mounting Type": value.mountingType,
     "Additional Information": value.additionalInformationFromClient ?? "-",

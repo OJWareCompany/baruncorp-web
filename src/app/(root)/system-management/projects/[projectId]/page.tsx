@@ -220,178 +220,188 @@ export default function Page({ params: { projectId } }: Props) {
           </DropdownMenu>
         }
       />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="organization"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>Organization</FormLabel>
-                <FormControl>
-                  <Input {...field} readOnly />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <RowItemsContainer>
-            <FormField
-              control={form.control}
-              name="propertyType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Property Type</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select a property type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {PropertyTypeEnum.options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="propertyOwner"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Property Owner</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="projectNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Project Number</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </RowItemsContainer>
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="flex flex-col gap-2">
+      <div className="space-y-6">
+        <section>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="organization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Organization</FormLabel>
+                    <FormControl>
+                      <Input {...field} readOnly />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <RowItemsContainer>
+                <FormField
+                  control={form.control}
+                  name="propertyType"
+                  render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>Address</FormLabel>
-                      <AddressSearchButton
-                        ref={field.ref}
-                        format="us"
-                        onSelect={({
-                          street1,
-                          city,
-                          stateOrRegion,
-                          postalCode,
-                          country,
-                          fullAddress,
-                          coordinates,
-                        }) => {
-                          form.setValue(
-                            "address",
-                            {
+                      <FormLabel required>Property Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select a property type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {PropertyTypeEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="propertyOwner"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Property Owner</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="projectNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </RowItemsContainer>
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="flex flex-col gap-2">
+                        <FormItem>
+                          <FormLabel required>Address</FormLabel>
+                          <AddressSearchButton
+                            ref={field.ref}
+                            format="us"
+                            onSelect={({
                               street1,
-                              street2: "",
-                              city: city ?? "",
-                              stateOrRegion: stateOrRegion ?? "",
-                              postalCode: postalCode ?? "",
-                              country: country ?? "",
+                              city,
+                              stateOrRegion,
+                              postalCode,
+                              country,
                               fullAddress,
                               coordinates,
-                            },
-                            { shouldValidate: true, shouldDirty: true }
-                          );
-                        }}
-                      />
-                      <Input
-                        value={field.value.street1}
-                        readOnly
-                        placeholder="Street 1"
-                      />
-                      <Input
-                        value={field.value.street2}
-                        onChange={(event) => {
-                          field.onChange({
-                            ...field.value,
-                            street2: event.target.value,
-                          });
-                        }}
-                        placeholder="Street 2"
-                      />
-                      <Input
-                        value={field.value.city}
-                        readOnly
-                        placeholder="City"
-                      />
-                      <Input
-                        value={field.value.stateOrRegion}
-                        readOnly
-                        placeholder="State Or Region"
-                      />
-                      <Input
-                        value={field.value.postalCode}
-                        readOnly
-                        placeholder="Postal Code"
-                      />
-                      <Input
-                        value={field.value.country}
-                        readOnly
-                        placeholder="Country"
-                      />
-                    </FormItem>
+                            }) => {
+                              form.setValue(
+                                "address",
+                                {
+                                  street1,
+                                  street2: "",
+                                  city: city ?? "",
+                                  stateOrRegion: stateOrRegion ?? "",
+                                  postalCode: postalCode ?? "",
+                                  country: country ?? "",
+                                  fullAddress,
+                                  coordinates,
+                                },
+                                { shouldValidate: true, shouldDirty: true }
+                              );
+                            }}
+                          />
+                          <Input
+                            value={field.value.street1}
+                            readOnly
+                            placeholder="Street 1"
+                          />
+                          <Input
+                            value={field.value.street2}
+                            onChange={(event) => {
+                              field.onChange({
+                                ...field.value,
+                                street2: event.target.value,
+                              });
+                            }}
+                            placeholder="Street 2"
+                          />
+                          <Input
+                            value={field.value.city}
+                            readOnly
+                            placeholder="City"
+                          />
+                          <Input
+                            value={field.value.stateOrRegion}
+                            readOnly
+                            placeholder="State Or Region"
+                          />
+                          <Input
+                            value={field.value.postalCode}
+                            readOnly
+                            placeholder="Postal Code"
+                          />
+                          <Input
+                            value={field.value.country}
+                            readOnly
+                            placeholder="Country"
+                          />
+                        </FormItem>
+                      </div>
+                      <div className="col-span-2">
+                        <Minimap
+                          longitude={field.value.coordinates[0]}
+                          latitude={field.value.coordinates[1]}
+                        />
+                      </div>
+                    </div>
+                    <FormMessage className="mt-2" />
                   </div>
-                  <div className="col-span-2">
-                    <Minimap
-                      longitude={field.value.coordinates[0]}
-                      latitude={field.value.coordinates[1]}
-                    />
-                  </div>
-                </div>
-                <FormMessage className="mt-2" />
-              </div>
-            )}
+                )}
+              />
+              <LoadingButton
+                type="submit"
+                className="w-full"
+                isLoading={form.formState.isSubmitting}
+                disabled={!form.formState.isDirty}
+              >
+                Edit
+              </LoadingButton>
+            </form>
+          </Form>
+        </section>
+        <section>
+          <h4 className="h4 mb-2">Jobs Related to Project</h4>
+          <BaseTable
+            columns={jobForProjectColumns}
+            data={project?.jobs ?? []}
+            onRowClick={(jobId) => {
+              router.push(`/system-management/jobs/${jobId}`);
+            }}
+            getRowId={({ id }) => id}
           />
-          <LoadingButton
-            type="submit"
-            className="w-full"
-            isLoading={form.formState.isSubmitting}
-            disabled={!form.formState.isDirty}
-          >
-            Edit
-          </LoadingButton>
-        </form>
-      </Form>
-      <BaseTable
-        columns={jobForProjectColumns}
-        data={project?.jobs ?? []}
-        onRowClick={(jobId) => {
-          router.push(`/system-management/jobs/${jobId}`);
-        }}
-        getRowId={({ id }) => id}
-      />
+        </section>
+      </div>
     </div>
   );
 }

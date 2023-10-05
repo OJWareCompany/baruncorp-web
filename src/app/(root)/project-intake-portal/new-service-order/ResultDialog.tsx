@@ -14,6 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import useJobQuery from "@/queries/useJobQuery";
+import { useToast } from "@/components/ui/use-toast";
+import { errorToastDescription } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 interface Props extends DialogProps {
   onOpenChange: (open: boolean) => void;
@@ -23,36 +26,65 @@ interface Props extends DialogProps {
 
 export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
   const router = useRouter();
-  const [progress, setProgress] = useState(0);
+  const { toast } = useToast();
+  const [progressState, setProgressState] = useState({
+    value: 0,
+    error: false,
+  });
   const { data: job } = useJobQuery({ jobId: jobId ?? "" });
 
   useEffect(() => {
-    if (dialogProps.open && job && files.length !== 0) {
+    if (dialogProps.open && job) {
       const {
         clientInfo: { clientOrganizationName },
         jobName,
         propertyFullAddress,
       } = job;
 
-      const url = `/filesystem/${encodeURIComponent(
-        clientOrganizationName
-      )}/${encodeURIComponent(propertyFullAddress)}/${encodeURIComponent(
-        jobName
-      )}/files`;
+      if (files.length !== 0) {
+        const url = `${
+          process.env.NEXT_PUBLIC_NAS_API_URL
+        }/filesystem/${encodeURIComponent(
+          clientOrganizationName
+        )}/${encodeURIComponent(propertyFullAddress)}/${encodeURIComponent(
+          jobName
+        )}/files`;
 
-      const formData = new FormData();
-      for (const file of files) {
-        formData.append("files", file);
+        const formData = new FormData();
+        for (const file of files) {
+          formData.append("files", file);
+        }
+
+        axios
+          .post(url, formData, {
+            onUploadProgress: (axiosProgressEvent) => {
+              setProgressState({
+                value: (axiosProgressEvent?.progress ?? 0) * 100,
+                error: false,
+              });
+            },
+          })
+          .catch(() => {
+            toast({
+              title: "Upload failed",
+              description: errorToastDescription,
+              variant: "destructive",
+            });
+            setProgressState({ value: 100, error: true });
+          });
+      } else {
+        axios.post(
+          `${
+            process.env.NEXT_PUBLIC_NAS_API_URL
+          }/filesystem/${encodeURIComponent(
+            clientOrganizationName
+          )}/${encodeURIComponent(propertyFullAddress)}/${encodeURIComponent(
+            jobName
+          )}`
+        );
       }
-
-      axios.post(url, formData, {
-        baseURL: process.env.NEXT_PUBLIC_NAS_API_URL,
-        onUploadProgress: (axiosProgressEvent) => {
-          setProgress((axiosProgressEvent?.progress ?? 0) * 100);
-        },
-      });
     } else {
-      setProgress(0);
+      setProgressState({ value: 0, error: false });
     }
   }, [dialogProps.open, files, job]);
 
@@ -60,7 +92,7 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
     <Dialog
       {...dialogProps}
       onOpenChange={(newOpen) => {
-        if (files.length !== 0 && progress !== 100) {
+        if (files.length !== 0 && progressState.value !== 100) {
           return;
         }
 
@@ -77,10 +109,17 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
         </DialogHeader>
         {files.length !== 0 && (
           <div className="flex flex-col gap-1">
-            <Progress value={progress} />
-            <p className="text-xs text-muted-foreground text-center">
-              {progress !== 100
+            <Progress value={progressState.value} />
+            <p
+              className={cn(
+                "text-xs text-muted-foreground text-center",
+                progressState.error && "text-destructive"
+              )}
+            >
+              {progressState.value !== 100
                 ? "Please wait for upload..."
+                : progressState.error
+                ? "Upload failed"
                 : "Upload completed"}
             </p>
           </div>
@@ -91,7 +130,7 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
             onClick={() => {
               dialogProps.onOpenChange(false);
             }}
-            disabled={files.length !== 0 && progress !== 100}
+            disabled={files.length !== 0 && progressState.value !== 100}
           >
             Order More
           </Button>
@@ -103,7 +142,7 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
 
               router.push(`/system-management/jobs/${jobId}`);
             }}
-            disabled={files.length !== 0 && progress !== 100}
+            disabled={files.length !== 0 && progressState.value !== 100}
           >
             View Detail
           </Button>

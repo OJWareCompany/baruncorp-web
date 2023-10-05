@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -158,6 +158,18 @@ export default function NewProjectSheet({
         queryClient.invalidateQueries({
           queryKey: ["projects", "list", "all", { organizationId }],
         });
+
+        axios
+          .post(
+            `${
+              process.env.NEXT_PUBLIC_NAS_API_URL
+            }/filesystem/${encodeURIComponent(
+              organization?.name ?? ""
+            )}/${encodeURIComponent(values.address.fullAddress)}`
+          )
+          .then((value) => {
+            console.log(value);
+          });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {

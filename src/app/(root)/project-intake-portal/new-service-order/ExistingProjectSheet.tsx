@@ -58,67 +58,78 @@ export default function ExistingProjectSheet({
           <SheetTitle>Existing Project</SheetTitle>
         </SheetHeader>
         <ItemsContainer>
-          <Item>
-            <Label>Property Address</Label>
-            <ProjectsByOrganizationCombobox
-              projectId={projectId}
-              organizationId={organizationId}
-              onSelect={(newProjectId) => {
-                setProjectId(newProjectId);
-              }}
-              modal={true}
-            />
-          </Item>
-          {projectId !== "" && (
-            <>
-              <RowItemsContainer>
-                <Item>
-                  <Label>Property Type</Label>
-                  <Input value={project?.propertyType ?? ""} readOnly />
-                </Item>
-                <Item>
-                  <Label>Property Owner</Label>
-                  <Input
-                    value={project?.projectPropertyOwnerName ?? ""}
-                    readOnly
-                  />
-                </Item>
-                <Item>
-                  <Label>Project Number</Label>
-                  <Input value={project?.projectNumber ?? ""} readOnly />
-                </Item>
-              </RowItemsContainer>
-              <div className="w-full h-[400px]">
-                <Minimap
-                  longitude={project?.propertyAddress.coordinates[0]}
-                  latitude={project?.propertyAddress.coordinates[1]}
-                />
-              </div>
-              <BaseTable
-                columns={jobForProjectColumns}
-                data={project?.jobs ?? []}
-                getRowId={({ id }) => id}
+          <section>
+            <Item>
+              <Label>Property Address</Label>
+              <ProjectsByOrganizationCombobox
+                projectId={projectId}
+                organizationId={organizationId}
+                onSelect={(newProjectId) => {
+                  setProjectId(newProjectId);
+                }}
+                modal={true}
               />
-              <RowItemsContainer>
-                <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    dialogProps.onOpenChange?.(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    onSelect(projectId);
-                    dialogProps.onOpenChange?.(false);
-                    setProjectId("");
-                  }}
-                >
-                  Select
-                </Button>
-              </RowItemsContainer>
-            </>
+            </Item>
+          </section>
+          {projectId !== "" && (
+            <div className="space-y-6">
+              <section>
+                <ItemsContainer>
+                  <RowItemsContainer>
+                    <Item>
+                      <Label>Property Type</Label>
+                      <Input value={project?.propertyType ?? ""} readOnly />
+                    </Item>
+                    <Item>
+                      <Label>Property Owner</Label>
+                      <Input
+                        value={project?.projectPropertyOwnerName ?? ""}
+                        readOnly
+                      />
+                    </Item>
+                    <Item>
+                      <Label>Project Number</Label>
+                      <Input value={project?.projectNumber ?? ""} readOnly />
+                    </Item>
+                  </RowItemsContainer>
+                  <div className="w-full h-[400px]">
+                    <Minimap
+                      longitude={project?.propertyAddress.coordinates[0]}
+                      latitude={project?.propertyAddress.coordinates[1]}
+                    />
+                  </div>
+                </ItemsContainer>
+              </section>
+              <section>
+                <h4 className="h4 mb-2">Jobs Related to Project</h4>
+                <ItemsContainer>
+                  <BaseTable
+                    columns={jobForProjectColumns}
+                    data={project?.jobs ?? []}
+                    getRowId={({ id }) => id}
+                  />
+                  <RowItemsContainer>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => {
+                        dialogProps.onOpenChange?.(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        onSelect(projectId);
+                        dialogProps.onOpenChange?.(false);
+                        setProjectId("");
+                      }}
+                    >
+                      Select
+                    </Button>
+                  </RowItemsContainer>
+                </ItemsContainer>
+              </section>
+            </div>
           )}
         </ItemsContainer>
       </SheetContent>

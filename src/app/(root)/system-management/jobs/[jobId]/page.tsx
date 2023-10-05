@@ -445,15 +445,18 @@ export default function Page({ params: { jobId } }: Props) {
                 />
               </div>
             </div>
-            <BaseTable
-              columns={jobForProjectColumns}
-              data={project?.jobs ?? []}
-              onRowClick={(jobId) => {
-                router.push(`/system-management/jobs/${jobId}`);
-              }}
-              getRowId={({ id }) => id}
-            />
           </ItemsContainer>
+        </section>
+        <section>
+          <h4 className="h4 mb-2">Jobs Related to Project</h4>
+          <BaseTable
+            columns={jobForProjectColumns}
+            data={project?.jobs ?? []}
+            onRowClick={(jobId) => {
+              router.push(`/system-management/jobs/${jobId}`);
+            }}
+            getRowId={({ id }) => id}
+          />
         </section>
         <section>
           <h4 className="h4 mb-2">Job</h4>

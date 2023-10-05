@@ -586,21 +586,28 @@ export default function Page() {
                     latitude={project?.propertyAddress.coordinates[1]}
                   />
                 </div>
-                <BaseTable
-                  columns={jobForProjectColumns}
-                  data={project?.jobs ?? []}
-                  getRowId={({ id }) => id}
-                />
-                <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    reset();
-                  }}
-                >
-                  Reset Project
-                </Button>
               </ItemsContainer>
             )}
+          </section>
+        )}
+        {organizationId !== "" && projectId !== "" && (
+          <section>
+            <h4 className="h4 mb-2">Jobs Related to Project</h4>
+            <ItemsContainer>
+              <BaseTable
+                columns={jobForProjectColumns}
+                data={project?.jobs ?? []}
+                getRowId={({ id }) => id}
+              />
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  reset();
+                }}
+              >
+                Reset Project
+              </Button>
+            </ItemsContainer>
           </section>
         )}
         {projectId !== "" && (
