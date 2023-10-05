@@ -67,7 +67,7 @@ export default function BaseTable<TData>({
             download(csvConfig)(csv);
           }}
         >
-          Export
+          Export to CSV
         </Button>
       )}
       <div className="rounded-md border overflow-hidden">

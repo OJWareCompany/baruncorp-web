@@ -427,21 +427,9 @@ export const lineItemColumns = [
       </p>
     ),
   }),
-  lineItemColumnHelper.accessor("dateSentToClient", {
-    header: "Date Sent to Client",
-    size: 200,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {formatDateTime(getValue())}
-      </p>
-    ),
-  }),
-  lineItemColumnHelper.accessor("mountingType", {
-    header: "Mounting Type",
-    size: 250,
+  lineItemColumnHelper.accessor("propertyType", {
+    header: "Property Type",
+    size: 150,
     cell: ({ getValue, column }) => (
       <p
         style={{ width: column.getSize() - 32 }}
@@ -451,9 +439,9 @@ export const lineItemColumns = [
       </p>
     ),
   }),
-  lineItemColumnHelper.accessor("propertyType", {
-    header: "Property Type",
-    size: 150,
+  lineItemColumnHelper.accessor("mountingType", {
+    header: "Mounting Type",
+    size: 250,
     cell: ({ getValue, column }) => (
       <p
         style={{ width: column.getSize() - 32 }}
@@ -514,45 +502,65 @@ export const lineItemColumns = [
       </p>
     ),
   }),
-  lineItemColumnHelper.accessor("containsRevisionTask", {
-    header: "Contains Revision Task",
+  lineItemColumnHelper.accessor("dateSentToClient", {
+    header: "Date Sent to Client",
     size: 200,
     cell: ({ getValue, column }) => (
       <p
         style={{ width: column.getSize() - 32 }}
         className={`whitespace-nowrap overflow-hidden text-ellipsis`}
       >
-        {getValue()}
+        {formatDateTime(getValue())}
       </p>
     ),
   }),
-  lineItemColumnHelper.accessor("taskSizeForRevision", {
-    header: "Task Size For Revision",
-    size: 200,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {getValue()}
-      </p>
-    ),
-  }),
+  // lineItemColumnHelper.accessor("containsRevisionTask", {
+  //   header: "Contains Revision Task",
+  //   size: 200,
+  //   cell: ({ getValue, column }) => (
+  //     <p
+  //       style={{ width: column.getSize() - 32 }}
+  //       className={`whitespace-nowrap overflow-hidden text-ellipsis`}
+  //     >
+  //       {getValue()}
+  //     </p>
+  //   ),
+  // }),
+  // lineItemColumnHelper.accessor("taskSizeForRevision", {
+  //   header: "Major / Minor",
+  //   size: 150,
+  //   cell: ({ getValue, column }) => {
+  //     const value = getValue();
+
+  //     if (value == null) {
+  //       return <p className="text-muted-foreground">-</p>;
+  //     }
+
+  //     return (
+  //       <p
+  //         style={{ width: column.getSize() - 32 }}
+  //         className={`whitespace-nowrap overflow-hidden text-ellipsis`}
+  //       >
+  //         {value}
+  //       </p>
+  //     );
+  //   },
+  // }),
 ];
 
 interface LineItemTableExportData {
   [index: string]: unknown;
   Organization: string;
   Description: string;
-  "Date Sent to Client": string;
-  "Mounting Type": string;
   "Property Type": string;
+  "Mounting Type": string;
   "Billing Codes": string;
   Price: string;
   "Pricing Type": string;
   State: string;
+  "Date Sent to Client": string;
   // "Contains Revision Task":string;
-  // "Task Size For Revision":string;
+  // "Major / Minor": string;
 }
 
 export function getLineItemTableExportDataFromLineItem(
@@ -561,14 +569,14 @@ export function getLineItemTableExportDataFromLineItem(
   return lineItem?.map<LineItemTableExportData>((value) => ({
     Organization: value.clientOrganization.name,
     Description: value.description,
-    "Date Sent to Client": formatDateTime(value.dateSentToClient),
-    "Mounting Type": value.mountingType,
     "Property Type": value.propertyType,
+    "Mounting Type": value.mountingType,
     "Billing Codes": value.billingCodes.map((value) => `(${value})`).join(" "),
     Price: `$${value.price}`,
     "Pricing Type": value.pricingType,
     State: value.state,
+    "Date Sent to Client": formatDateTime(value.dateSentToClient),
     // "Contains Revision Task":value.containsRevisionTask, TODO: check
-    // "Task Size For Revision":value.taskSizeForRevision,
+    // "Major / Minor": value.taskSizeForRevision ?? "-",
   }));
 }

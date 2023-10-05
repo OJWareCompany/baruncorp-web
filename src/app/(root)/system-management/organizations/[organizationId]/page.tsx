@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { AlertCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { OrganizationResponseDto } from "@/api";
 import {
   Form,
@@ -31,12 +31,16 @@ import {
   MountingTypeEnumWithEmptyString,
   PropertyTypeEnum,
   PropertyTypeEnumWithEmptyString,
+  transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
   transformNullishMountingTypeEnumIntoMountingTypeEnumWithEmptyString,
   transformNullishPropertyTypeEnumIntoPropertyTypeEnumWithEmptyString,
+  transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
+  transformStringIntoNullableString,
 } from "@/lib/constants";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import LoadingButton from "@/components/LoadingButton";
+import usePatchOrganizationMutation from "@/queries/usePatchOrganizationMutation";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -133,6 +137,8 @@ export default function Page({ params: { organizationId } }: Props) {
     useOrganizationQuery({
       organizationId,
     });
+  const { mutateAsync } = usePatchOrganizationMutation(organizationId);
+  const queryClient = useQueryClient();
 
   /**
    * useEffect
@@ -143,7 +149,39 @@ export default function Page({ params: { organizationId } }: Props) {
     }
   }, [form, organization]);
 
-  async function onSubmit(values: FieldValues) {}
+  async function onSubmit(values: FieldValues) {
+    await mutateAsync({
+      address: {
+        ...values.address,
+        country: transformStringIntoNullableString.parse(
+          values.address.country
+        ),
+        state: values.address.stateOrRegion,
+        street2: transformStringIntoNullableString.parse(
+          values.address.street2
+        ),
+      },
+      description: null,
+      email: transformStringIntoNullableString.parse(
+        values.emailAddressToReceiveInvoice
+      ),
+      mountingTypeDefaultValue:
+        transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum.parse(
+          values.defaultMountingType
+        ),
+      phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
+      projectPropertyTypeDefaultValue:
+        transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum.parse(
+          values.defaultPropertyType
+        ),
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["organizations", "detail", { organizationId }],
+        });
+      })
+      .catch(() => {});
+  }
 
   const title = organization?.name ?? "";
 
@@ -163,13 +201,6 @@ export default function Page({ params: { organizationId } }: Props) {
         ]}
         title={title}
       />
-      <Alert variant={"destructive"}>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Work in Progress</AlertTitle>
-        <AlertDescription>
-          Organization editing feature will be added.
-        </AlertDescription>
-      </Alert>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <RowItemsContainer>
@@ -354,13 +385,14 @@ export default function Page({ params: { organizationId } }: Props) {
               </div>
             )}
           />
-          {/* <LoadingButton
-              type="submit"
-              className="w-full"
-              isLoading={form.formState.isSubmitting}
-            >
-              Edit
-            </LoadingButton> */}
+          <LoadingButton
+            type="submit"
+            className="w-full"
+            isLoading={form.formState.isSubmitting}
+            disabled={!form.formState.isDirty}
+          >
+            Edit
+          </LoadingButton>
         </form>
       </Form>
     </div>
