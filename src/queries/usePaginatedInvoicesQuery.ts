@@ -14,7 +14,7 @@ const usePaginatedInvoicesQuery = ({
   const api = useApi();
 
   return useQuery<InvoicePaginatedResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["projects", "list", { pageIndex, pageSize }],
+    queryKey: ["invoices", "list", { pageIndex, pageSize }],
     queryFn: () =>
       api.invoices
         .findInvoicePaginatedHttpControllerGet({

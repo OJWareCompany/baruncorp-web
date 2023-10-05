@@ -17,7 +17,7 @@ const usePaginatedOrganizationsQuery = ({
     OrganizationPaginatedResponseDto,
     AxiosError<ErrorResponseData>
   >({
-    queryKey: ["projects", "list", { pageIndex, pageSize }],
+    queryKey: ["organizations", "list", { pageIndex, pageSize }],
     queryFn: () =>
       api.organizations
         .findOrganizationPaginatedHttpControllerGetOrganizationPaginated({
