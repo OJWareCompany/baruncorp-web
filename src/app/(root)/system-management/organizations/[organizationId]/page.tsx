@@ -274,7 +274,7 @@ export default function Page({ params: { organizationId } }: Props) {
             name="address"
             render={({ field }) => (
               <div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-2">
                   <div className="flex flex-col gap-2">
                     <FormItem>
                       <FormLabel required>Address</FormLabel>

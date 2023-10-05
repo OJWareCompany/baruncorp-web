@@ -48,7 +48,7 @@ export default function Page() {
             <Input value={organization?.phoneNumber ?? ""} readOnly />
           </Item>
         </RowItemsContainer>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2">
           <div className="flex flex-col gap-2">
             <Item>
               <Label>Address</Label>

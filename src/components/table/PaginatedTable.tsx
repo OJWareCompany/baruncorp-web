@@ -81,7 +81,7 @@ export default function PaginatedTable<TData>({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="rounded-md border overflow-hidden">
         <Table style={isEmpty ? {} : { minWidth: table.getTotalSize() }}>
           <TableHeader>

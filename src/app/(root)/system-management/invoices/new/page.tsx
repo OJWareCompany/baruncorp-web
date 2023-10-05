@@ -45,7 +45,6 @@ import { Textarea } from "@/components/ui/textarea";
 import LoadingButton from "@/components/LoadingButton";
 import usePostInvoiceMutation from "@/queries/usePostInvoiceMutation";
 import { useToast } from "@/components/ui/use-toast";
-import ItemsContainer from "@/components/ItemsContainer";
 import { AffixInput } from "@/components/AffixInput";
 
 const formSchema = z.object({
@@ -295,7 +294,7 @@ export default function Page() {
         {jobsToInvoice && (
           <section>
             <h4 className="h4 mb-2">Jobs</h4>
-            <ItemsContainer>
+            <div className="flex flex-col gap-2">
               <RowItemsContainer>
                 <Item>
                   <Label>Subtotal</Label>
@@ -333,7 +332,7 @@ export default function Page() {
                 data={jobsToInvoice.items ?? []}
                 getRowId={({ description }) => description}
               />
-            </ItemsContainer>
+            </div>
           </section>
         )}
       </div>

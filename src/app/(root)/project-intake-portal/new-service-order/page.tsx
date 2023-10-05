@@ -693,7 +693,7 @@ export default function Page() {
                     />
                   )}
                   {project?.propertyType === "Commercial" && (
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 gap-2">
                       <FormField
                         control={form.control}
                         name="systemSize"
@@ -1107,7 +1107,7 @@ export default function Page() {
                             </FormItem>
                           )}
                         />
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-3 gap-2">
                           <FormField
                             control={form.control}
                             name="numberOfWetStamp"
@@ -1129,7 +1129,7 @@ export default function Page() {
                           name="mailingAddress"
                           render={({ field }) => (
                             <div>
-                              <div className="grid grid-cols-3 gap-4">
+                              <div className="grid grid-cols-3 gap-2">
                                 <div className="flex flex-col gap-2">
                                   <FormItem>
                                     <FormLabel required>

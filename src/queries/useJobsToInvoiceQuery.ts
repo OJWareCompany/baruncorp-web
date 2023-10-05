@@ -30,6 +30,7 @@ const useJobsToInvoiceQuery = ({
         })
         .then(({ data }) => data),
     enabled: organizationId !== "" && servicePeriodMonth !== "",
+    keepPreviousData: organizationId !== "" && servicePeriodMonth !== "",
   });
 };
 

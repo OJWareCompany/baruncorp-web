@@ -92,7 +92,7 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full">
         <section>
           <h2 className="h4 mb-2">General</h2>
-          <div className="flex flex-col gap-4">
+          <ItemsContainer>
             <RowItemsContainer>
               <FormField
                 control={form.control}
@@ -173,11 +173,11 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                 )}
               />
             </RowItemsContainer>
-          </div>
+          </ItemsContainer>
         </section>
         <section>
           <h2 className="h4 mb-2">Design</h2>
-          <div className="flex flex-col gap-4">
+          <ItemsContainer>
             <RowItemsContainer>
               <FormField
                 control={form.control}
@@ -312,11 +312,11 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                 </FormItem>
               )}
             />
-          </div>
+          </ItemsContainer>
         </section>
         <section>
           <h2 className="h4 mb-2">Structural Engineering</h2>
-          <div className="flex flex-col gap-4">
+          <ItemsContainer>
             <RowItemsContainer>
               <FormField
                 control={form.control}
@@ -581,34 +581,36 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
                 </FormItem>
               )}
             />
-          </div>
+          </ItemsContainer>
         </section>
         <section>
           <h2 className="h4 mb-2">Electrical Engineering</h2>
-          <FormField
-            control={form.control}
-            name="electricalEngineering.engineeringNotes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Engineering Notes</FormLabel>
-                <FormControl>
-                  <Textarea {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          <ItemsContainer>
+            <FormField
+              control={form.control}
+              name="electricalEngineering.engineeringNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Engineering Notes</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <LoadingButton
+              type="submit"
+              disabled={!form.formState.isDirty}
+              isLoading={form.formState.isSubmitting}
+              className="w-full"
+            >
+              Edit
+            </LoadingButton>
+          </ItemsContainer>
         </section>
-        <LoadingButton
-          type="submit"
-          disabled={!form.formState.isDirty}
-          isLoading={form.formState.isSubmitting}
-          className="w-full"
-        >
-          Edit
-        </LoadingButton>
         <section>
           <h2 className="h4 mb-2">History</h2>
-          <ItemsContainer>
+          <div className="flex flex-col gap-2">
             <RowItemsContainer>
               <FormField
                 control={form.control}
@@ -641,7 +643,7 @@ export default function AhjNote({ geoId, initialAhjNote }: Props) {
               />
             </RowItemsContainer>
             <AhjNoteHistory geoId={geoId} />
-          </ItemsContainer>
+          </div>
         </section>
       </form>
     </Form>

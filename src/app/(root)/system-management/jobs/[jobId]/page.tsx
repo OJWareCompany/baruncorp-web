@@ -402,7 +402,7 @@ export default function Page({ params: { jobId } }: Props) {
                 <Input value={project?.projectNumber ?? ""} readOnly />
               </Item>
             </RowItemsContainer>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2">
               <div className="flex flex-col gap-2">
                 <Item>
                   <Label>Address</Label>
@@ -557,7 +557,7 @@ export default function Page({ params: { jobId } }: Props) {
                   }}
                 />
                 {project?.propertyType === "Commercial" && (
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-2">
                     <FormField
                       control={form.control}
                       name="systemSize"
@@ -624,7 +624,7 @@ export default function Page({ params: { jobId } }: Props) {
                 />
                 {hasWetStamp && (
                   <>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 gap-2">
                       <FormField
                         control={form.control}
                         name="numberOfWetStamp"
@@ -644,7 +644,7 @@ export default function Page({ params: { jobId } }: Props) {
                       name="mailingAddress"
                       render={({ field }) => (
                         <div>
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-3 gap-2">
                             <div className="flex flex-col gap-2">
                               <FormItem>
                                 <FormLabel required>Mailing Address</FormLabel>

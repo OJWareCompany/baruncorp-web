@@ -9,7 +9,7 @@ const title = "Project Intake Portal";
 
 export default function Page() {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       <PageHeader
         items={[{ href: "/project-intake-portal", name: title }]}
         title={title}

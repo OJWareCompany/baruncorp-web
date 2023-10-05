@@ -131,18 +131,23 @@ export default function InvoiceDocument({ invoice, organization }: Props) {
         </View>
         <View style={{ flexDirection: "row", gap: 16, marginBottom: 32 }}>
           <View
-            style={{ flex: 2, border: `1px solid #e2e8f0`, borderRadius: 6 }}
+            style={{
+              flex: 2,
+              border: `1px solid #e2e8f0`,
+              borderRadius: 6,
+              fontSize: 12,
+            }}
           >
             <View
               style={{
                 borderBottom: "1px solid #e2e8f0",
-                paddingHorizontal: 16,
+                paddingHorizontal: 12,
                 paddingVertical: 8,
               }}
             >
-              <Text style={{ lineHeight: 1 }}>Notes</Text>
+              <Text style={[styles.bold, { lineHeight: 1 }]}>Notes</Text>
             </View>
-            <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+            <View style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
               <Text>{invoice.notesToClient ?? "-"}</Text>
             </View>
           </View>
