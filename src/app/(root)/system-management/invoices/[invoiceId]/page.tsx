@@ -424,7 +424,7 @@ export default function Page({ params: { invoiceId } }: Props) {
                     }
 
                     patchInvoiceIssueMutateAsync({
-                      files: [
+                      attachments: [
                         {
                           path: base64,
                         },
