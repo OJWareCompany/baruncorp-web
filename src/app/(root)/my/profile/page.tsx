@@ -21,9 +21,7 @@ import usePatchProfileMutation from "@/queries/usePatchProfileMutation";
 import LoadingButton from "@/components/LoadingButton";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { UserResponseDto } from "@/api";
-import {
-  transformStringIntoNullableString,
-} from "@/lib/constants";
+import { transformStringIntoNullableString } from "@/lib/constants";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 
@@ -240,7 +238,7 @@ export default function Page() {
                                   remove(index);
                                 }}
                               >
-                                <X className="h-4 w-4" />
+                                <X className="h-4 w-4 text-destructive" />
                               </Button>
                             )}
                           </div>

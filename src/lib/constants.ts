@@ -1,5 +1,7 @@
 import {
   CheckCircle2,
+  Circle,
+  CircleDashed,
   CircleDot,
   CircleEllipsis,
   PauseCircle,
@@ -29,32 +31,47 @@ const STATUSES = {
   NOT_STARTED: {
     value: "Not Started",
     Icon: CircleDot,
-    color: "text-neutral-700",
+    color: "text-neutral-500",
   },
   IN_PROGRESS: {
     value: "In Progress",
     Icon: PlayCircle,
-    color: "text-blue-700",
+    color: "text-blue-500",
   },
   COMPLETED: {
     value: "Completed",
     Icon: CheckCircle2,
-    color: "text-green-700",
+    color: "text-green-500",
   },
   ON_HOLD: {
     value: "On Hold",
     Icon: PauseCircle,
-    color: "text-orange-700",
+    color: "text-yellow-500",
   },
   CANCELED: {
     value: "Canceled",
     Icon: XCircle,
-    color: "text-violet-700",
+    color: "text-red-500",
   },
   PENDING: {
     value: "Pending",
     Icon: CircleEllipsis,
-    color: "text-neutral-700",
+    color: "text-neutral-500",
+  },
+  UNISSUED: {
+    value: "Unissued",
+    Icon: CircleDashed,
+    color: "text-neutral-500",
+  },
+  ISSUED: {
+    value: "Issued",
+    Icon: Circle,
+    color: "text-neutral-500",
+  },
+  PAID: {
+    value: "Paid",
+    Icon: CheckCircle2,
+    color: "text-green-500",
   },
 };
 
@@ -70,6 +87,12 @@ export const orderedServiceStatuses = [
   STATUSES.PENDING,
   STATUSES.COMPLETED,
   STATUSES.CANCELED,
+];
+
+export const invoiceStatuses = [
+  STATUSES.UNISSUED,
+  STATUSES.ISSUED,
+  STATUSES.PAID,
 ];
 
 /**
@@ -245,6 +268,13 @@ export const TermsEnum = z.enum(["21", "30"], {
 
 /* -------------------------------------------------------------------------- */
 
+// "Credit" | "Direct"
+export const PaymentMethodEnum = z.enum(["Credit", "Direct"], {
+  errorMap: () => ({ message: "Payment Method is required" }),
+});
+
+/* -------------------------------------------------------------------------- */
+
 export const OTHER_SERVICE_ID = "2a2a256b-57a5-46f5-8cfb-1855cc29238a";
 export const ELECTRICAL_WET_STAMP_SERVICE_ID =
   "e95483bd-16ea-4a4d-8d68-81d2fa10a384";
@@ -275,3 +305,25 @@ export const STRUCTURAL_PE_STAMP_SERVICE_ID =
 export const ESS_STRUCTURAL_PE_STAMP_SERVICE_ID =
   "ab9cc5cf-62e4-4f27-8ffd-97488068f9fa";
 export const PV_DESIGN_SERVICE_ID = "e5d81943-3fef-416d-a85b-addb8be296c0";
+
+/* -------------------------------------------------------------------------- */
+
+export const billingCodes = [
+  { name: "ESS Electrical PE Stamp", code: "E6" },
+  { name: "ESS Structural PE Stamp", code: "S6" },
+  { name: "Electrical Load Calculation", code: "E2" },
+  { name: "Electrical Load Justification Letter", code: "E5" },
+  { name: "Electrical PE Stamp", code: "E3" },
+  { name: "Electrical Post Installed Letter", code: "E4" },
+  { name: "Electrical Wet Stamp", code: "WE" },
+  { name: "FL Statute Letter", code: "FL" },
+  { name: "PV Design", code: "PV" },
+  { name: "Shading Report", code: "SR" },
+  { name: "Special Inspection Form", code: "SI" },
+  { name: "Structural Calculation (Letter)", code: "S3" },
+  { name: "Structural Feasibility", code: "S1" },
+  { name: "Structural PE Stamp", code: "S4" },
+  { name: "Structural Post Installed Letter ", code: "S5" },
+  { name: "Structural Wet Stamp", code: "WS" },
+  { name: "Other", code: "O" },
+];

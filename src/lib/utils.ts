@@ -54,7 +54,7 @@ export function getValidChildren(children: React.ReactNode) {
 }
 
 export function formatDateTime(dateTimeString: string) {
-  if (typeof dateTimeString !== "string") {
+  if (typeof dateTimeString !== "string" && dateTimeString === "") {
     return "-";
   }
 

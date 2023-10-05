@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { format } from "date-fns";
 import useApi from "@/hook/useApi";
-import { LineItem } from "@/api";
+import { JobToInvoiceResponseDto } from "@/api";
 
 const useJobsToInvoiceQuery = ({
   organizationId,
@@ -13,7 +13,7 @@ const useJobsToInvoiceQuery = ({
 }) => {
   const api = useApi();
 
-  return useQuery<LineItem[], AxiosError<ErrorResponseData>>({
+  return useQuery<JobToInvoiceResponseDto, AxiosError<ErrorResponseData>>({
     queryKey: [
       "jobs-to-invoice",
       "list",
@@ -23,7 +23,10 @@ const useJobsToInvoiceQuery = ({
       api.jobsToInvoice
         .findJobToInvoiceHttpControllerFindJob({
           clientOrganizationId: organizationId,
-          serviceMonth: format(new Date(servicePeriodMonth), "yyyy-MM"),
+          serviceMonth: format(
+            new Date(servicePeriodMonth.slice(0, 7)),
+            "yyyy-MM"
+          ),
         })
         .then(({ data }) => data),
     enabled: organizationId !== "" && servicePeriodMonth !== "",

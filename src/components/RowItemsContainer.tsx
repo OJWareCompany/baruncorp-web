@@ -7,7 +7,7 @@ interface Props {
 
 export default function RowItemsContainer({ children, className }: Props) {
   return (
-    <div className={cn("flex space-x-4 [&>*]:w-full", className)}>
+    <div className={cn("flex space-x-2 [&>*]:w-full", className)}>
       {children}
     </div>
   );

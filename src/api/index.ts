@@ -721,6 +721,7 @@ export interface JobPaginatedResponseFields {
   isExpedited: boolean;
   /** @example "Please check this out." */
   additionalInformationFromClient: string | null;
+  jobName: string;
 }
 
 export interface JobPaginatedResponseDto {
@@ -747,16 +748,22 @@ export interface LineItem {
   /** @format date-time */
   dateSentToClient: string;
   mountingType: "Roof Mount" | "Ground Mount" | "Roof Mount & Ground Mount";
-  totalJobPriceOverride: number | null;
   clientOrganization: InvoiceClientOrganization;
   containsRevisionTask: boolean;
   propertyType: "Residential" | "Commercial";
   state: string;
   billingCodes: string[];
-  taskSizeForRevision: "Major" | "Minor";
+  taskSizeForRevision: "Major" | "Minor" | null;
   pricingType: "Standard" | "Tiered";
   price: number;
   taskSubtotal: number;
+}
+
+export interface JobToInvoiceResponseDto {
+  items: LineItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
 }
 
 export interface CreateJobNoteRequestDto {
@@ -839,6 +846,8 @@ export interface CreateOrderedServiceRequestDto {
 export interface UpdateOrderedServiceRequestDto {
   /** @default "" */
   priceOverride: number;
+  /** @default null */
+  sizeForRevision: "Major" | "Minor" | null;
   /** @default "" */
   description: string | null;
 }
@@ -944,8 +953,20 @@ export interface UpdateInvoiceRequestDto {
   notesToClient: string | null;
 }
 
+export interface InvoicePayments {
+  id: string;
+  paymentName: string;
+  invoiceId: string;
+  amount: number;
+  paymentMethod: "Credit" | "Direct";
+  notes: string | null;
+  paymentDate: string;
+  canceledAt: string | null;
+}
+
 export interface InvoiceResponseDto {
   id: string;
+  invoiceName: string;
   status: "Unissued" | "Issued" | "Paid";
   invoiceDate: string;
   terms: 21 | 30;
@@ -959,6 +980,8 @@ export interface InvoiceResponseDto {
   total: number;
   clientOrganization: InvoiceClientOrganization;
   lineItems: LineItem[];
+  payments: InvoicePayments[];
+  totalOfPayment: number;
 }
 
 export interface InvoicePaginatedResponseDto {
@@ -983,17 +1006,16 @@ export interface ClientToInvoiceResponseDto {
   clientToInvoices: ClientToInvoice[];
 }
 
+export interface IssueInvoiceRequestDto {
+  files: { path: string }[];
+}
+
 export interface CreatePaymentRequestDto {
   invoiceId: string;
   /** @default 100 */
   amount: number;
   paymentMethod: "Credit" | "Direct";
   notes: string | null;
-}
-
-export interface CancelPaymentRequestDto {
-  /** @default "" */
-  id: string;
 }
 
 export interface PaymentResponseDto {
@@ -2251,7 +2273,7 @@ export class Api<
       query: FindJobToInvoiceHttpControllerFindJobParams,
       params: RequestParams = {}
     ) =>
-      this.request<LineItem[], any>({
+      this.request<JobToInvoiceResponseDto, any>({
         path: `/jobs-to-invoice`,
         method: "GET",
         query: query,
@@ -2721,6 +2743,25 @@ export class Api<
         format: "json",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @name IssueInvoiceHttpControllerPatch
+     * @request PATCH:/invoices/{invoiceId}/issue
+     */
+    issueInvoiceHttpControllerPatch: (
+      invoiceId: string,
+      data: IssueInvoiceRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/invoices/${invoiceId}/issue`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
   invoicesClients = {
     /**
@@ -2783,14 +2824,11 @@ export class Api<
      */
     cancelPaymentHttpControllerPatch: (
       paymentId: string,
-      data: CancelPaymentRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
         path: `/payments/${paymentId}`,
         method: "PATCH",
-        body: data,
-        type: ContentType.Json,
         ...params,
       }),
 

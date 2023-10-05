@@ -68,7 +68,7 @@ const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
             {organizations &&
               (organizations.clientToInvoices.length === 0 ? (
                 <div className="py-6 text-center text-sm">
-                  No organization found.
+                  No organization to issue invoice.
                 </div>
               ) : (
                 <CommandList>

@@ -73,6 +73,10 @@ export default function OrderedServicesTable({
           subRows: assignedTasks
             .filter((value) => value.orderedServiceId === orderedServiceId)
             .map((value) => {
+              // console.log(
+              //   "🚀 ~ file: OrderedServicesTable.tsx:76 ~ .map ~ value:",
+              //   value
+              // );
               const {
                 assigneeId,
                 description,
@@ -150,10 +154,18 @@ export default function OrderedServicesTable({
             );
           }
 
+          let name = value;
+          if (
+            row.original.description != null &&
+            row.original.description !== ""
+          ) {
+            name = row.original.description;
+          }
+
           return (
             <div className="flex gap-4 items-center">
               <CornerDownRight className="h-4 w-4 text-muted-foreground" />
-              <p>{row.original.description ?? value}</p>
+              <p>{name}</p>
             </div>
           );
         },
@@ -343,7 +355,7 @@ function Action({ cellContext: { row }, jobId, projectId }: ActionProps) {
           <Button
             size={"sm"}
             variant={"outline"}
-            className="w-full"
+            className="w-full text-destructive hover:text-destructive"
             disabled={isCompleted}
           >
             Cancel

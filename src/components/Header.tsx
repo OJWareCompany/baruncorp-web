@@ -59,6 +59,10 @@ const systemManagementItems: {
     title: "Invoices",
     href: "/system-management/invoices",
   },
+  {
+    title: "Payments",
+    href: "/system-management/payments",
+  },
   // {
   //   title: "Tracking Numbers",
   //   href: "/system-management/tracking-numbers",

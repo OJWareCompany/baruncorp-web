@@ -531,7 +531,7 @@ export default function Page({ params: { jobId } }: Props) {
                                           );
                                         }}
                                       >
-                                        <X className="h-4 w-4" />
+                                        <X className="h-4 w-4 text-destructive" />
                                       </Button>
                                     )}
                                   </div>
@@ -841,6 +841,7 @@ export default function Page({ params: { jobId } }: Props) {
                       job?.jobStatus === "Completed" ||
                       job?.jobStatus === "Canceled"
                     }
+                    className="text-destructive hover:text-destructive"
                   >
                     Cancel
                   </Button>

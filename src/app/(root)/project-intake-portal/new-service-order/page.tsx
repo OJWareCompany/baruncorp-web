@@ -666,7 +666,7 @@ export default function Page() {
                                               );
                                             }}
                                           >
-                                            <X className="h-4 w-4" />
+                                            <X className="h-4 w-4 text-destructive" />
                                           </Button>
                                         )}
                                       </div>
@@ -990,7 +990,7 @@ export default function Page() {
                                           removeOtherTask(index);
                                         }}
                                       >
-                                        <X className="h-4 w-4" />
+                                        <X className="h-4 w-4 text-destructive" />
                                       </Button>
                                     )}
                                   </div>

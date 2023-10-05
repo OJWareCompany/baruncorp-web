@@ -273,7 +273,7 @@ export default function NewUserSheet({
                                     remove(index);
                                   }}
                                 >
-                                  <X className="h-4 w-4" />
+                                  <X className="h-4 w-4 text-destructive" />
                                 </Button>
                               )}
                             </div>

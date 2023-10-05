@@ -11,7 +11,7 @@ const useOrganizationQuery = ({
   const api = useApi();
 
   return useQuery<OrganizationResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["organizations", "detail", organizationId],
+    queryKey: ["organizations", "detail", { organizationId }],
     queryFn: () =>
       api.organizations
         .findOrganizationHttpControllerGet(organizationId)

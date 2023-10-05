@@ -180,7 +180,7 @@ export default function Page({ params: { organizationId } }: Props) {
                 <FormItem>
                   <FormLabel required>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} readOnly />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
