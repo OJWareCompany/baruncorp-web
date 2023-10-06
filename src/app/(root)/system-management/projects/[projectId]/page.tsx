@@ -213,7 +213,9 @@ export default function Page({ params: { projectId } }: Props) {
                 setTimeout(() => {
                   if (!openDesktopApp) {
                     window.alert(
-                      "Couldn't find the app. Please go to the app installation page."
+                      `Couldn't find the app.
+Please go to the app installation page.
+If it doesn't move, please check the pop-up.`
                     );
                     const installUrl = `http://ojw.synology.me:5000/sharing/amHYctCw5`;
                     const newWindow = window.open(installUrl, "_blank");
