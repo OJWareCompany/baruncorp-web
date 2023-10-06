@@ -151,7 +151,7 @@ const AddressSearchButton = React.forwardRef<HTMLButtonElement, Props>(
             Search Address
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="p-0 w-[440px]">
+        <PopoverContent align="start" className="p-0 w-[445px]">
           <Command shouldFilter={false}>
             <CommandInput
               placeholder="Search"
