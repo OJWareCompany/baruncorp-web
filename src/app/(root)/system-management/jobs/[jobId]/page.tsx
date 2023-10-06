@@ -56,7 +56,6 @@ import BaseTable from "@/components/table/BaseTable";
 import { jobNoteColumns } from "@/columns/jobNote";
 import useJobNotesQuery from "@/queries/useJobNotesQuery";
 
-
 import { jobForProjectColumns } from "@/columns/job";
 import PageLoading from "@/components/PageLoading";
 
@@ -367,7 +366,9 @@ export default function Page({ params: { jobId } }: Props) {
 
                 setTimeout(() => {
                   if (!openDesktopApp) {
-                    window.alert("앱 설치 페이지로 이동");
+                    window.alert(
+                      "Couldn't find the app. Please go to the app installation page."
+                    );
                     const installUrl = `http://ojw.synology.me:5000/sharing/amHYctCw5`;
                     const newWindow = window.open(installUrl, "_blank");
                     if (newWindow) {

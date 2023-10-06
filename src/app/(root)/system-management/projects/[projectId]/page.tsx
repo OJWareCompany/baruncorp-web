@@ -40,7 +40,6 @@ import {
 import BaseTable from "@/components/table/BaseTable";
 import PageHeader from "@/components/PageHeader";
 
-
 import { jobForProjectColumns } from "@/columns/job";
 import PageLoading from "@/components/PageLoading";
 
@@ -201,8 +200,41 @@ export default function Page({ params: { projectId } }: Props) {
                 <span>View AHJ Note</span>
               </Link>
             </Button>
-            <Button asChild size={"sm"} variant={"outline"}>
-              <a
+            <Button
+              size={"sm"}
+              variant={"outline"}
+              onClick={() => {
+                let openDesktopApp = false;
+
+                window.onblur = () => {
+                  openDesktopApp = true;
+                };
+
+                setTimeout(() => {
+                  if (!openDesktopApp) {
+                    window.alert(
+                      "Couldn't find the app. Please go to the app installation page."
+                    );
+                    const installUrl = `http://ojw.synology.me:5000/sharing/amHYctCw5`;
+                    const newWindow = window.open(installUrl, "_blank");
+                    if (newWindow) {
+                      newWindow.focus();
+                    }
+                  }
+                }, 2000);
+
+                const url = `barun://open-explorer?payload=${encodeURIComponent(
+                  JSON.stringify({
+                    organizationName: project?.clientOrganization,
+                    projectFolderName: project?.propertyAddress.fullAddress,
+                  })
+                )}`;
+                window.location.href = url;
+              }}
+            >
+              <FolderOpen className="mr-2 h-4 w-4" />
+              <span>Open Folder</span>
+              {/* <a
                 href={`barun://open-explorer?payload=${encodeURIComponent(
                   JSON.stringify({
                     organizationName: project?.clientOrganization,
@@ -210,9 +242,7 @@ export default function Page({ params: { projectId } }: Props) {
                   })
                 )}`}
               >
-                <FolderOpen className="mr-2 h-4 w-4" />
-                <span>Open Folder</span>
-              </a>
+              </a> */}
             </Button>
           </div>
         }
