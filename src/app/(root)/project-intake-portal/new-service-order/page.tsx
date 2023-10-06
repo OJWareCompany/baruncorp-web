@@ -98,7 +98,7 @@ export default function Page() {
             id: z
               .string()
               .trim()
-              .min(1, { message: "Client User Id is required" }),
+              .min(1, { message: "Client User is required" }),
             emailAddressesToReceiveDeliverables: z.array(
               z.object({
                 email: z
@@ -391,9 +391,13 @@ export default function Page() {
               .map((value) => ({ id: value.serviceId, description: null }))
           : [],
         descriptionForOtherServices: recentJob
-          ? recentJob.orderedServices
-              .filter((value) => value.serviceId === OTHER_SERVICE_ID)
-              .map((value) => ({ description: value.description ?? "" }))
+          ? recentJob.orderedServices.findIndex(
+              (value) => value.serviceId === OTHER_SERVICE_ID
+            ) === -1
+            ? [{ description: "" }]
+            : recentJob.orderedServices
+                .filter((value) => value.serviceId === OTHER_SERVICE_ID)
+                .map((value) => ({ description: value.description ?? "" }))
           : [{ description: "" }],
         typeOfWetStamp,
         numberOfWetStamp: "",
