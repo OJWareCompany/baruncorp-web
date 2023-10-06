@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { AxiosError } from "axios";
 import { UserResponseDto } from "@/api";
 import {
   Form,
@@ -142,7 +143,21 @@ export default function Page({ params: { userId } }: Props) {
           });
         }
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("10111")) {
+              form.setError(
+                "phoneNumber",
+                {
+                  message: `Phone Number is invalid`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            break;
+        }
+      });
   }
 
   const title = user?.fullName ?? "";

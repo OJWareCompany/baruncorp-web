@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -88,6 +88,11 @@ export default function Page() {
   const { toast } = useToast();
 
   /**
+   * State
+   */
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+
+  /**
    * Form
    */
   const form = useForm<z.infer<typeof formSchema>>({
@@ -110,7 +115,6 @@ export default function Page() {
       },
     },
   });
-  const { isSubmitSuccessful } = form.formState;
 
   /**
    * Query
@@ -120,6 +124,7 @@ export default function Page() {
   useEffect(() => {
     if (isSubmitSuccessful) {
       form.reset();
+      setIsSubmitSuccessful(false);
     }
   }, [form, isSubmitSuccessful]);
 
@@ -153,6 +158,7 @@ export default function Page() {
       phoneNumber,
     })
       .then(() => {
+        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });

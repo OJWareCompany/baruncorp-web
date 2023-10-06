@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -68,6 +69,13 @@ type FieldValues = z.infer<typeof formSchema>;
 
 export default function Page() {
   const { toast } = useToast();
+  const router = useRouter();
+
+  /**
+   * State
+   */
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+
   /**
    * Form
    */
@@ -85,7 +93,6 @@ export default function Page() {
   const watchOrganizationId = form.watch("organizationId");
   const watchTerms = form.watch("terms");
   const watchServicePeriodMonth = form.watch("servicePeriodMonth");
-  const { isSubmitSuccessful } = form.formState;
 
   /**
    * Query
@@ -103,6 +110,7 @@ export default function Page() {
   useEffect(() => {
     if (isSubmitSuccessful) {
       form.reset();
+      setIsSubmitSuccessful(false);
     }
   }, [form, isSubmitSuccessful]);
 
@@ -120,6 +128,7 @@ export default function Page() {
       terms: Number(values.terms) as 21 | 30,
     })
       .then(() => {
+        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });
@@ -330,7 +339,10 @@ export default function Page() {
               <BaseTable
                 columns={lineItemColumns}
                 data={jobsToInvoice.items ?? []}
-                getRowId={({ description }) => description}
+                getRowId={({ jobId }) => jobId}
+                onRowClick={(id) => {
+                  router.push(`/system-management/jobs/${id}`);
+                }}
               />
             </div>
           </section>

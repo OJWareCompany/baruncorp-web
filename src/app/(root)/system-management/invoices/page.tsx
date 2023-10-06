@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { Plus } from "lucide-react";
 import { initialPagination } from "./constants";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/PageHeader";
@@ -53,8 +54,11 @@ export default function Page() {
         items={[{ href: "/system-management/invoices", name: title }]}
         title={title}
         action={
-          <Button asChild size={"sm"}>
-            <Link href="/system-management/invoices/new">New Invoice</Link>
+          <Button asChild size={"sm"} variant={"outline"}>
+            <Link href="/system-management/invoices/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Invoice
+            </Link>
           </Button>
         }
       />

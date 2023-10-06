@@ -140,6 +140,17 @@ export default function NewUserSheet({
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("10111")) {
+              form.setError(
+                "phoneNumber",
+                {
+                  message: `Phone Number is invalid`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            break;
           case 409:
             if (error.response?.data.errorCode.includes("10017")) {
               form.setError(

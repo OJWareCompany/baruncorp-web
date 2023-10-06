@@ -73,20 +73,24 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
             setProgressState({ value: 100, error: true });
           });
       } else {
-        axios.post(
-          `${
-            process.env.NEXT_PUBLIC_NAS_API_URL
-          }/filesystem/${encodeURIComponent(
-            clientOrganizationName
-          )}/${encodeURIComponent(propertyFullAddress)}/${encodeURIComponent(
-            jobName
-          )}`
-        );
+        axios
+          .post(
+            `${
+              process.env.NEXT_PUBLIC_NAS_API_URL
+            }/filesystem/${encodeURIComponent(
+              clientOrganizationName
+            )}/${encodeURIComponent(propertyFullAddress)}/${encodeURIComponent(
+              jobName
+            )}`
+          )
+          .catch((error) => {
+            console.error(error);
+          });
       }
     } else {
       setProgressState({ value: 0, error: false });
     }
-  }, [dialogProps.open, files, job]);
+  }, [dialogProps.open, files, job, toast]);
 
   return (
     <Dialog

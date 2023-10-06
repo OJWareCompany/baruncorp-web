@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { initialPagination } from "./constants";
 import { Button } from "@/components/ui/button";
 import usePagination from "@/hook/usePagination";
@@ -53,8 +54,9 @@ export default function Page() {
         items={[{ href: "/system-management/organizations", name: title }]}
         title={title}
         action={
-          <Button asChild size={"sm"}>
+          <Button asChild size={"sm"} variant={"outline"}>
             <Link href="/system-management/organizations/new">
+              <Plus className="mr-2 h-4 w-4" />
               New Organization
             </Link>
           </Button>

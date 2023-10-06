@@ -40,6 +40,7 @@ import {
 } from "@/lib/constants";
 import LoadingButton from "@/components/LoadingButton";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   propertyType: PropertyTypeEnum,
@@ -107,6 +108,7 @@ export default function NewProjectSheet({
   onSelect,
   ...dialogProps
 }: Props) {
+  const { toast } = useToast();
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
@@ -167,22 +169,30 @@ export default function NewProjectSheet({
               organization?.name ?? ""
             )}/${encodeURIComponent(values.address.fullAddress)}`
           )
-          .then((value) => {
-            console.log(value);
+          .catch((error) => {
+            console.error(error);
           });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
           case 409:
             if (error.response?.data.errorCode.includes("30002")) {
-              form.setError("address", {
-                message: `${values.address.fullAddress} is already existed`,
-              });
+              form.setError(
+                "address",
+                {
+                  message: `${values.address.fullAddress} is already existed`,
+                },
+                { shouldFocus: true }
+              );
             }
             if (error.response?.data.errorCode.includes("30003")) {
-              form.setError("projectNumber", {
-                message: `${values.projectNumber} is already existed`,
-              });
+              form.setError(
+                "projectNumber",
+                {
+                  message: `${values.projectNumber} is already existed`,
+                },
+                { shouldFocus: true }
+              );
             }
             break;
         }

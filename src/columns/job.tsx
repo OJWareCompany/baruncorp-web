@@ -9,6 +9,7 @@ import { statuses } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 import { JobPaginatedResponseDto, LineItem, ProjectResponseDto } from "@/api";
 import { formatDateTime } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const jobPaginatedColumnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -440,6 +441,37 @@ export const lineItemColumns = [
       );
     },
   }),
+  lineItemColumnHelper.accessor("isContainsRevisionTask", {
+    header: "Has Revision Task",
+    size: 200,
+    cell: ({ getValue, column }) => {
+      return (
+        <div className="flex">
+          <Checkbox checked={getValue()} />
+        </div>
+      );
+    },
+  }),
+  lineItemColumnHelper.accessor("taskSizeForRevision", {
+    header: "Major / Minor",
+    size: 150,
+    cell: ({ getValue, column }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return (
+        <p
+          style={{ width: column.getSize() - 32 }}
+          className={`whitespace-nowrap overflow-hidden text-ellipsis`}
+        >
+          {value}
+        </p>
+      );
+    },
+  }),
   lineItemColumnHelper.accessor("price", {
     header: "Price",
     size: 150,
@@ -488,38 +520,6 @@ export const lineItemColumns = [
       </p>
     ),
   }),
-  // lineItemColumnHelper.accessor("containsRevisionTask", {
-  //   header: "Contains Revision Task",
-  //   size: 200,
-  //   cell: ({ getValue, column }) => (
-  //     <p
-  //       style={{ width: column.getSize() - 32 }}
-  //       className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-  //     >
-  //       {getValue()}
-  //     </p>
-  //   ),
-  // }),
-  // lineItemColumnHelper.accessor("taskSizeForRevision", {
-  //   header: "Major / Minor",
-  //   size: 150,
-  //   cell: ({ getValue, column }) => {
-  //     const value = getValue();
-
-  //     if (value == null) {
-  //       return <p className="text-muted-foreground">-</p>;
-  //     }
-
-  //     return (
-  //       <p
-  //         style={{ width: column.getSize() - 32 }}
-  //         className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-  //       >
-  //         {value}
-  //       </p>
-  //     );
-  //   },
-  // }),
 ];
 
 interface LineItemTableExportData {
@@ -529,12 +529,12 @@ interface LineItemTableExportData {
   "Property Type": string;
   "Mounting Type": string;
   "Billing Codes": string;
+  "Has Revision Task": boolean;
+  "Major / Minor": string;
   Price: string;
   "Pricing Type": string;
   State: string;
   "Date Sent to Client": string;
-  // "Contains Revision Task":string;
-  // "Major / Minor": string;
 }
 
 export function getLineItemTableExportDataFromLineItem(
@@ -546,11 +546,11 @@ export function getLineItemTableExportDataFromLineItem(
     "Property Type": value.propertyType,
     "Mounting Type": value.mountingType,
     "Billing Codes": value.billingCodes.map((value) => `(${value})`).join(" "),
+    "Has Revision Task": value.isContainsRevisionTask,
+    "Major / Minor": value.taskSizeForRevision ?? "-",
     Price: `$${value.price}`,
     "Pricing Type": value.pricingType,
     State: value.state,
     "Date Sent to Client": formatDateTime(value.dateSentToClient),
-    // "Contains Revision Task":value.containsRevisionTask, TODO: check
-    // "Major / Minor": value.taskSizeForRevision ?? "-",
   }));
 }

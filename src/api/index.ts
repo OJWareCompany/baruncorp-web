@@ -38,31 +38,6 @@ export interface SignUpRequestDto {
   address: string | null;
   /** @default "857-250-4567" */
   phoneNumber: string;
-  /**
-   * 필요한지 확인 필요
-   * @default true
-   */
-  isActiveWorkResource: boolean;
-  /**
-   * 필요한지 확인 필요
-   * @default true
-   */
-  isCurrentUser: boolean;
-  /**
-   * 필요한지 확인 필요
-   * @default true
-   */
-  isInactiveOrganizationUser: boolean;
-  /**
-   * 필요한지 확인 필요
-   * @default true
-   */
-  isRevenueShare: boolean;
-  /**
-   * 필요한지 확인 필요
-   * @default true
-   */
-  isRevisionRevenueShare: boolean;
 }
 
 export interface AccessTokenResponseDto {
@@ -560,7 +535,9 @@ export interface AssignedTaskResponseFields {
 export interface OrderedServiceResponseFields {
   orderedServiceId: string;
   serviceId: string;
+  sizeForRevision: "Major" | "Minor" | null;
   serviceName: string;
+  isRevision: boolean;
   description: string | null;
   price: number | null;
   priceOverride: number | null;
@@ -590,6 +567,10 @@ export interface JobResponseDto {
   id: string;
   /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
   projectId: string;
+  isContainsRevisionTask: boolean;
+  propertyType: "Residential" | "Commercial";
+  billingCodes: string[];
+  taskSizeForRevision: "Major" | "Minor" | null;
   /** @example 300.1 */
   systemSize: number | null;
   mailingAddressForWetStamp: AddressDto | null;
@@ -758,6 +739,7 @@ export interface InvoiceClientOrganization {
 }
 
 export interface LineItem {
+  jobId: string;
   /** @example 5 */
   jobRequestNumber: number;
   description: string;
@@ -765,7 +747,7 @@ export interface LineItem {
   dateSentToClient: string;
   mountingType: "Roof Mount" | "Ground Mount" | "Roof Mount & Ground Mount";
   clientOrganization: InvoiceClientOrganization;
-  containsRevisionTask: boolean;
+  isContainsRevisionTask: boolean;
   propertyType: "Residential" | "Commercial";
   state: string;
   billingCodes: string[];
@@ -881,11 +863,13 @@ export interface OrderedServiceResponseDto {
   id: string;
   serviceId: string;
   price: number | null;
+  priceOrverride: number | null;
   jobId: string;
   /** @default "Completed" */
   status: "Pending" | "Completed" | "Canceled" | null;
   orderedAt: string | null;
   doneAt: string | null;
+  isRevision: boolean;
   assignedTasks: OrderedServiceAssignedTaskResopnse[];
 }
 

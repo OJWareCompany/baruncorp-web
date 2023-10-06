@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Form,
   FormControl,
@@ -114,7 +115,21 @@ export default function Page() {
       .then(() => {
         queryClient.invalidateQueries({ queryKey: ["profile"] });
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("10111")) {
+              form.setError(
+                "phoneNumber",
+                {
+                  message: `Phone Number is invalid`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            break;
+        }
+      });
   }
 
   if (isProfileQueryLoading) {

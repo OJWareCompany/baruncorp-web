@@ -1,19 +1,31 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { CellContext, createColumnHelper } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Check,
   ChevronDown,
   ChevronsDown,
   CornerDownRight,
+  Pencil,
 } from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { AxiosError } from "axios";
 import {
   AssignedTaskResponseFields,
   OrderedServiceResponseFields,
 } from "@/api";
 import AssigneeCombobox from "@/components/combobox/AssigneeCombobox";
 import usePatchAssignedTaskMutation from "@/queries/usePatchAssignedTaskMutation";
-import { orderedServiceStatuses, statuses } from "@/lib/constants";
+import {
+  SizeForRevisionEnum,
+  SizeForRevisionEnumWithEmptyString,
+  orderedServiceStatuses,
+  statuses,
+  transformNullishSizeForRevisionEnumIntoSizeForRevisionEnumWithEmptyString,
+  transformSizeForRevisionEnumWithEmptyStringIntoNullableSizeForRevisionEnum,
+} from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import usePatchAssignedTaskCompleteMutation from "@/queries/usePatchAssignedTaskCompleteMutation";
@@ -23,6 +35,24 @@ import usePatchOrderedServiceReactivateMutation from "@/queries/usePatchOrderedS
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import CommonAlertDialogContent from "@/components/CommonAlertDialogContent";
 import ExpandableTable from "@/components/table/ExpandableTable";
+import { AffixInput } from "@/components/AffixInput";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+} from "@/components/ui/form";
+import usePatchOrderedServiceMutation from "@/queries/usePatchOrderedServiceMutation";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface RowData {
   id: string;
@@ -30,6 +60,9 @@ interface RowData {
   description: string | null;
   status: string;
   price: number | null;
+  priceOverride: number | null;
+  sizeForRevision: "Major" | "Minor" | null;
+  isRevision: boolean;
   assigneeId: string | null;
   serviceId: string | null;
   subRows?: RowData[];
@@ -60,6 +93,9 @@ export default function OrderedServicesTable({
           price,
           orderedServiceId,
           serviceId,
+          priceOverride,
+          sizeForRevision,
+          isRevision,
         } = value;
 
         return {
@@ -67,34 +103,26 @@ export default function OrderedServicesTable({
           id: orderedServiceId,
           name: serviceName,
           price,
+          priceOverride,
+          sizeForRevision,
+          isRevision,
           status,
           assigneeId: null,
           serviceId,
           subRows: assignedTasks
             .filter((value) => value.orderedServiceId === orderedServiceId)
-            .map((value) => {
-              // console.log(
-              //   "🚀 ~ file: OrderedServicesTable.tsx:76 ~ .map ~ value:",
-              //   value
-              // );
-              const {
-                assigneeId,
-                description,
-                assignTaskId,
-                taskName,
-                status,
-              } = value;
-
-              return {
-                assigneeId,
-                description,
-                id: assignTaskId,
-                name: taskName,
-                price: null,
-                status,
-                serviceId: null,
-              };
-            }),
+            .map((value) => ({
+              assigneeId: value.assigneeId,
+              description: value.description,
+              id: value.assignTaskId,
+              name: value.taskName,
+              price: null,
+              priceOverride: null,
+              sizeForRevision: null,
+              status: value.status,
+              serviceId: null,
+              isRevision,
+            })),
         };
       }),
     [assignedTasks, orderedServices]
@@ -136,6 +164,19 @@ export default function OrderedServicesTable({
           );
         },
       }),
+      columnHelper.accessor("isRevision", {
+        header: "Revision",
+        size: 110,
+        cell: ({ row, getValue }) => {
+          const isRevision = getValue();
+
+          if (row.depth > 0 || !isRevision) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <Badge>Revision</Badge>;
+        },
+      }),
       columnHelper.accessor("name", {
         header: "Name",
         size: 400,
@@ -145,9 +186,8 @@ export default function OrderedServicesTable({
           if (row.depth === 0) {
             return (
               <p
-                className={`w-[${
-                  column.getSize() - 32
-                }px] whitespace-nowrap overflow-hidden text-ellipsis`}
+                style={{ width: column.getSize() - 32 }}
+                className={`whitespace-nowrap overflow-hidden text-ellipsis`}
               >
                 {value}
               </p>
@@ -170,25 +210,30 @@ export default function OrderedServicesTable({
           );
         },
       }),
+      columnHelper.accessor("sizeForRevision", {
+        header: "Major / Minor",
+        size: 200,
+        cell: (cellContext) => {
+          const { row } = cellContext;
+
+          if (row.depth > 0 || !row.original.isRevision) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <SizeForRevision cellContext={cellContext} jobId={jobId} />;
+        },
+      }),
       columnHelper.accessor("price", {
         header: "Price",
-        size: 150,
-        cell: ({ getValue, row, column }) => {
-          const value = getValue();
+        size: 200,
+        cell: (cellContext) => {
+          const { row } = cellContext;
 
           if (row.depth > 0) {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return (
-            <p
-              className={`w-[${
-                column.getSize() - 32
-              }px] whitespace-nowrap overflow-hidden text-ellipsis`}
-            >
-              ${value}
-            </p>
-          );
+          return <Price cellContext={cellContext} jobId={jobId} />;
         },
       }),
       columnHelper.accessor("status", {
@@ -262,7 +307,7 @@ interface AssigneeProps {
 }
 
 function Assignee({
-  cellContext: { getValue, row },
+  cellContext: { getValue, row, column },
   jobId,
   projectId,
 }: AssigneeProps) {
@@ -283,7 +328,10 @@ function Assignee({
   const isOnHold = row.original.status === "On Hold";
 
   return (
-    <div className={cn("flex gap-2")}>
+    <div
+      style={{ width: column.getSize() - 32 }}
+      className={cn("flex gap-2 w-full")}
+    >
       <AssigneeCombobox
         userId={assigneeId ?? ""}
         onSelect={(newUserId) => {
@@ -300,7 +348,7 @@ function Assignee({
             })
             .catch(() => {});
         }}
-        buttonClassName="w-full"
+        buttonClassName="flex-1 overflow-hidden"
         buttonSize={"sm"}
         disabled={isCompleted || isOnHold || isCanceled}
       />
@@ -335,7 +383,11 @@ interface ActionProps {
   projectId: string;
 }
 
-function Action({ cellContext: { row }, jobId, projectId }: ActionProps) {
+function Action({
+  cellContext: { row, column },
+  jobId,
+  projectId,
+}: ActionProps) {
   const isCanceled = row.original.status === "Canceled";
   const isCompleted = row.original.status === "Completed";
 
@@ -355,8 +407,9 @@ function Action({ cellContext: { row }, jobId, projectId }: ActionProps) {
           <Button
             size={"sm"}
             variant={"outline"}
-            className="w-full text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive"
             disabled={isCompleted}
+            style={{ width: column.getSize() - 32 }}
           >
             Cancel
           </Button>
@@ -382,7 +435,11 @@ function Action({ cellContext: { row }, jobId, projectId }: ActionProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size={"sm"} variant={"outline"} className="w-full">
+        <Button
+          size={"sm"}
+          variant={"outline"}
+          style={{ width: column.getSize() - 32 }}
+        >
           Reactivate
         </Button>
       </AlertDialogTrigger>
@@ -401,5 +458,263 @@ function Action({ cellContext: { row }, jobId, projectId }: ActionProps) {
         }}
       />
     </AlertDialog>
+  );
+}
+
+interface PriceProps {
+  cellContext: CellContext<RowData, number | null>;
+  jobId: string;
+}
+
+const priceFormSchema = z.object({
+  price: z.string().trim(),
+});
+
+type PriceFormFieldValues = z.infer<typeof priceFormSchema>;
+
+function Price({ cellContext: { column, getValue, row }, jobId }: PriceProps) {
+  const price = getValue();
+  const { priceOverride } = row.original;
+  const { toast } = useToast();
+
+  /**
+   * Form
+   */
+  const form = useForm<PriceFormFieldValues>({
+    resolver: zodResolver(priceFormSchema),
+    defaultValues: {
+      price:
+        priceOverride != null
+          ? String(priceOverride)
+          : price == null
+          ? "0"
+          : String(price),
+    },
+  });
+
+  /**
+   * Query
+   */
+  const { mutateAsync } = usePatchOrderedServiceMutation(row.original.id);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    form.reset({
+      price:
+        priceOverride != null
+          ? String(priceOverride)
+          : price == null
+          ? "0"
+          : String(price),
+    });
+  }, [form, price, priceOverride]);
+
+  async function onSubmit(values: PriceFormFieldValues) {
+    const { price } = values;
+    if (price.length === 0) {
+      toast({
+        title: "Price is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(price)) {
+      toast({
+        title: "Price should be a number",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await mutateAsync({
+      description: row.original.description,
+      priceOverride: Number(price),
+      sizeForRevision: row.original.sizeForRevision,
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["jobs", "detail", { jobId }],
+        });
+        toast({
+          title: "Success",
+        });
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("40002")) {
+              toast({
+                title: "Job can not be updated after invoice is issued",
+                variant: "destructive",
+              });
+            } else {
+              toast({
+                title: "Price is invalid",
+                variant: "destructive",
+              });
+            }
+            break;
+        }
+      });
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        style={{ width: column.getSize() - 32 }}
+        className="flex gap-2"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        <FormField
+          control={form.control}
+          name="price"
+          render={({ field }) => (
+            <FormItem className="flex-row">
+              <FormControl>
+                <AffixInput
+                  prefixElement={
+                    <span className="text-muted-foreground">$</span>
+                  }
+                  {...field}
+                  className="h-9"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <Button
+          size={"icon"}
+          variant={"outline"}
+          className="w-9 h-9 flex-shrink-0"
+          type="submit"
+          disabled={!form.formState.isDirty}
+        >
+          <Pencil className="w-4 h-4" />
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+const sizeForRevisionFormSchema = z.object({
+  sizeForRevision: SizeForRevisionEnumWithEmptyString,
+});
+
+type SizeForRevisionFormFieldValues = z.infer<typeof sizeForRevisionFormSchema>;
+
+interface SizeForRevisionProps {
+  cellContext: CellContext<RowData, "Major" | "Minor" | null>;
+  jobId: string;
+}
+
+function SizeForRevision({ cellContext, jobId }: SizeForRevisionProps) {
+  const { getValue, row, column } = cellContext;
+  const sizeForRevision = getValue();
+  const { toast } = useToast();
+
+  /**
+   * Form
+   */
+  const form = useForm<SizeForRevisionFormFieldValues>({
+    resolver: zodResolver(sizeForRevisionFormSchema),
+    defaultValues: {
+      sizeForRevision: "",
+    },
+  });
+
+  /**
+   * Query
+   */
+  const { mutateAsync } = usePatchOrderedServiceMutation(row.original.id);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    form.reset({
+      sizeForRevision:
+        transformNullishSizeForRevisionEnumIntoSizeForRevisionEnumWithEmptyString.parse(
+          sizeForRevision
+        ),
+    });
+  }, [form, sizeForRevision]);
+
+  async function onSubmit(values: SizeForRevisionFormFieldValues) {
+    await mutateAsync({
+      description: row.original.description,
+      priceOverride:
+        row.original.priceOverride != null
+          ? Number(row.original.priceOverride)
+          : row.original.price != null
+          ? Number(row.original.price)
+          : 0,
+      sizeForRevision:
+        transformSizeForRevisionEnumWithEmptyStringIntoNullableSizeForRevisionEnum.parse(
+          values.sizeForRevision
+        ),
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["jobs", "detail", { jobId }],
+        });
+        toast({
+          title: "Success",
+        });
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("40002")) {
+              toast({
+                title: "Job can not be updated after invoice is issued",
+                variant: "destructive",
+              });
+            }
+            break;
+        }
+      });
+  }
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        style={{ width: column.getSize() - 32 }}
+        className="flex gap-2"
+      >
+        <FormField
+          control={form.control}
+          name="sizeForRevision"
+          render={({ field }) => (
+            <FormItem className="flex-row flex-1">
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger ref={field.ref} className="h-9">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {SizeForRevisionEnum.options.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <Button
+          size={"icon"}
+          variant={"outline"}
+          className="w-9 h-9 flex-shrink-0"
+          type="submit"
+          disabled={!form.formState.isDirty}
+        >
+          <Pencil className="w-4 h-4" />
+        </Button>
+      </form>
+    </Form>
   );
 }

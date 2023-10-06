@@ -44,10 +44,21 @@ const formSchema = z
     notes: z.string().trim(),
   })
   .superRefine((values, ctx) => {
-    if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(values.amount)) {
+    const { amount } = values;
+
+    if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(amount)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Amount should be a number",
+        path: [`amount`],
+      });
+      return;
+    }
+
+    if (Number(amount) <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Amount should be greater than 0",
         path: [`amount`],
       });
       return;
@@ -74,7 +85,7 @@ export default function PaymentDialog({ invoiceId }: Props) {
     defaultValues: {
       amount: "",
       notes: "",
-      paymentMethod: "Credit",
+      paymentMethod: "Direct",
     },
   });
 
@@ -102,9 +113,22 @@ export default function PaymentDialog({ invoiceId }: Props) {
         switch (error.response?.status) {
           case 400:
             if (error.response?.data.errorCode.includes("70200")) {
-              form.setError("amount", {
-                message: `Amount exceeded the total amount`,
-              });
+              form.setError(
+                "amount",
+                {
+                  message: `Amount exceeded the total amount`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            if (error.response?.data.errorCode.includes("70203")) {
+              form.setError(
+                "amount",
+                {
+                  message: `Amount should be greater than 0`,
+                },
+                { shouldFocus: true }
+              );
             }
             break;
         }
@@ -137,11 +161,15 @@ export default function PaymentDialog({ invoiceId }: Props) {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          {PaymentMethodEnum.options.map((option) => (
+                          <SelectItem value={"Direct"}>Direct</SelectItem>
+                          <SelectItem value={"Credit"} disabled>
+                            Credit
+                          </SelectItem>
+                          {/* {PaymentMethodEnum.options.map((option) => (
                             <SelectItem key={option} value={option}>
                               {option}
                             </SelectItem>
-                          ))}
+                          ))} */}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -188,133 +216,6 @@ export default function PaymentDialog({ invoiceId }: Props) {
             >
               Add
             </LoadingButton>
-            {/* <RowItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="servicePeriodMonth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel required>Service Period Month</FormLabel>
-                      <FormControl>
-                        <Input
-                          value={format(
-                            new Date(field.value.slice(0, 7)),
-                            "MMMM yyyy"
-                          )}
-                          readOnly
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </RowItemsContainer>
-              <RowItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="invoiceDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel required>Invoice Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "MM-dd-yyyy")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={(day) => {
-                              if (day == null) {
-                                return;
-                              }
-
-                              field.onChange(day);
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="terms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel required>Terms</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue placeholder="Select a property type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              {TermsEnum.options.map((option) => (
-                                <SelectItem key={option} value={option}>
-                                  {option}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Item>
-                  <Label>Due Date</Label>
-                  <Input
-                    value={format(
-                      addDays(watchInvoiceDate, Number(watchTerms)),
-                      "MM-dd-yyyy"
-                    )}
-                    readOnly
-                  />
-                </Item>
-              </RowItemsContainer>
-              <FormField
-                control={form.control}
-                name="notesToClient"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes to Client</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-            {/* <LoadingButton
-                type="submit"
-                isLoading={form.formState.isSubmitting}
-                className="w-full"
-                disabled={!form.formState.isDirty}
-              >
-                Edit
-              </LoadingButton> */}
           </form>
         </Form>
       </DialogContent>

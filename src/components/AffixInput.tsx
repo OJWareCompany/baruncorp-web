@@ -57,7 +57,7 @@ const AffixInput = React.forwardRef<HTMLInputElement, InputProps>(
         {prefixElement}
         <input
           className={cn(
-            "bg-background flex-1 h-full px-3 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed"
+            "bg-background flex-1 w-full min-w-0 h-full px-3 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed"
           )}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}

@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { FolderOpen, MoreHorizontal, ScrollText } from "lucide-react";
+import { FolderOpen, ScrollText } from "lucide-react";
 import JobNoteForm from "./JobNoteForm";
 import OrderedServicesTable from "./OrderedServicesTable";
 import { JobResponseDto } from "@/api";
@@ -55,12 +55,8 @@ import PageHeader from "@/components/PageHeader";
 import BaseTable from "@/components/table/BaseTable";
 import { jobNoteColumns } from "@/columns/jobNote";
 import useJobNotesQuery from "@/queries/useJobNotesQuery";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+
 import { jobForProjectColumns } from "@/columns/job";
 import PageLoading from "@/components/PageLoading";
 
@@ -264,7 +260,6 @@ export default function Page({ params: { jobId } }: Props) {
    */
   useEffect(() => {
     if (job) {
-      console.log("🚀 ~ file: page.tsx:268 ~ useEffect ~ job:", job);
       form.reset(getFieldValues(job));
     }
   }, [form, getFieldValues, job]);
@@ -313,6 +308,15 @@ export default function Page({ params: { jobId } }: Props) {
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
           case 400:
+            if (error.response?.data.errorCode.includes("40007")) {
+              form.setError(
+                "systemSize",
+                {
+                  message: `System Size should be less than 99999999`,
+                },
+                { shouldFocus: true }
+              );
+            }
             if (error.response?.data.errorCode.includes("40004")) {
               form.setError(
                 "numberOfWetStamp",
@@ -344,35 +348,58 @@ export default function Page({ params: { jobId } }: Props) {
         ]}
         title={title}
         action={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"outline"} size={"icon"} className="h-9 w-9">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/system-management/jobs/${job?.id}/ahj`}>
-                  <ScrollText className="mr-2 h-4 w-4" />
-                  <span>View AHJ Note</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a
-                  href={`barun://open-explorer?payload=${encodeURIComponent(
-                    JSON.stringify({
-                      organizationName: project?.clientOrganization,
-                      projectFolderName: project?.propertyAddress.fullAddress,
-                      jobFolderName: job?.jobName,
-                    })
-                  )}`}
-                >
-                  <FolderOpen className="mr-2 h-4 w-4" />
-                  <span>Open Folder</span>
-                </a>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex gap-2">
+            <Button asChild size={"sm"} variant={"outline"}>
+              <Link href={`/system-management/jobs/${job?.id}/ahj`}>
+                <ScrollText className="mr-2 h-4 w-4" />
+                <span>View AHJ Note</span>
+              </Link>
+            </Button>
+            <Button
+              size={"sm"}
+              variant={"outline"}
+              onClick={() => {
+                let openDesktopApp = false;
+
+                window.onblur = () => {
+                  openDesktopApp = true;
+                };
+
+                setTimeout(() => {
+                  if (!openDesktopApp) {
+                    window.alert("앱 설치 페이지로 이동");
+                    const installUrl = `http://ojw.synology.me:5000/sharing/amHYctCw5`;
+                    const newWindow = window.open(installUrl, "_blank");
+                    if (newWindow) {
+                      newWindow.focus();
+                    }
+                  }
+                }, 2000);
+
+                const url = `barun://open-explorer?payload=${encodeURIComponent(
+                  JSON.stringify({
+                    organizationName: project?.clientOrganization,
+                    projectFolderName: project?.propertyAddress.fullAddress,
+                    jobFolderName: job?.jobName,
+                  })
+                )}`;
+                window.location.href = url;
+              }}
+            >
+              <FolderOpen className="mr-2 h-4 w-4" />
+              <span>Open Folder</span>
+              {/* <a
+                href={`barun://open-explorer?payload=${encodeURIComponent(
+                  JSON.stringify({
+                    organizationName: project?.clientOrganization,
+                    projectFolderName: project?.propertyAddress.fullAddress,
+                    jobFolderName: job?.jobName,
+                  })
+                )}`}
+              >
+              </a> */}
+            </Button>
+          </div>
         }
       />
       <div className="space-y-6">

@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  AhjNoteResponseDto,
-} from "@/api";
+import { AhjNoteResponseDto } from "@/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useProjectQuery from "@/queries/useProjectQuery";
 import useApi from "@/hook/useApi";

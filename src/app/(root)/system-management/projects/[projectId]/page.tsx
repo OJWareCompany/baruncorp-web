@@ -7,7 +7,7 @@ import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { FolderOpen, MoreHorizontal, ScrollText } from "lucide-react";
+import { FolderOpen, ScrollText } from "lucide-react";
 import { ProjectResponseDto } from "@/api";
 import {
   Form,
@@ -39,12 +39,8 @@ import {
 } from "@/lib/constants";
 import BaseTable from "@/components/table/BaseTable";
 import PageHeader from "@/components/PageHeader";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+
 import { jobForProjectColumns } from "@/columns/job";
 import PageLoading from "@/components/PageLoading";
 
@@ -156,14 +152,22 @@ export default function Page({ params: { projectId } }: Props) {
         switch (error.response?.status) {
           case 409:
             if (error.response?.data.errorCode.includes("30002")) {
-              form.setError("address", {
-                message: `${values.address.fullAddress} is already existed`,
-              });
+              form.setError(
+                "address",
+                {
+                  message: `${values.address.fullAddress} is already existed`,
+                },
+                { shouldFocus: true }
+              );
             }
             if (error.response?.data.errorCode.includes("30003")) {
-              form.setError("projectNumber", {
-                message: `${values.projectNumber} is already existed`,
-              });
+              form.setError(
+                "projectNumber",
+                {
+                  message: `${values.projectNumber} is already existed`,
+                },
+                { shouldFocus: true }
+              );
             }
             break;
         }
@@ -188,36 +192,29 @@ export default function Page({ params: { projectId } }: Props) {
         ]}
         title={title}
         action={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"outline"} size={"icon"} className="h-9 w-9">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/system-management/projects/${project?.projectId}/ahj`}
-                >
-                  <ScrollText className="mr-2 h-4 w-4" />
-                  <span>View AHJ Note</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a
-                  href={`barun://open-explorer?payload=${encodeURIComponent(
-                    JSON.stringify({
-                      organizationName: project?.clientOrganization,
-                      projectFolderName: project?.propertyAddress.fullAddress,
-                    })
-                  )}`}
-                >
-                  <FolderOpen className="mr-2 h-4 w-4" />
-                  <span>Open Folder</span>
-                </a>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex gap-2">
+            <Button asChild size={"sm"} variant={"outline"}>
+              <Link
+                href={`/system-management/projects/${project?.projectId}/ahj`}
+              >
+                <ScrollText className="mr-2 h-4 w-4" />
+                <span>View AHJ Note</span>
+              </Link>
+            </Button>
+            <Button asChild size={"sm"} variant={"outline"}>
+              <a
+                href={`barun://open-explorer?payload=${encodeURIComponent(
+                  JSON.stringify({
+                    organizationName: project?.clientOrganization,
+                    projectFolderName: project?.propertyAddress.fullAddress,
+                  })
+                )}`}
+              >
+                <FolderOpen className="mr-2 h-4 w-4" />
+                <span>Open Folder</span>
+              </a>
+            </Button>
+          </div>
         }
       />
       <div className="space-y-6">

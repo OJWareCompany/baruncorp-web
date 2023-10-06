@@ -275,6 +275,23 @@ export const PaymentMethodEnum = z.enum(["Credit", "Direct"], {
 
 /* -------------------------------------------------------------------------- */
 
+// "Major" | "Minor"
+export const SizeForRevisionEnum = z.enum(["Major", "Minor"], {
+  errorMap: () => ({ message: "Payment Method is required" }),
+});
+// "Major" | "Minor" | ""
+export const SizeForRevisionEnumWithEmptyString = SizeForRevisionEnum.or(
+  z.literal("")
+);
+// "Major" | "Minor" | "" => "Major" | "Minor" | null
+export const transformSizeForRevisionEnumWithEmptyStringIntoNullableSizeForRevisionEnum =
+  SizeForRevisionEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+// "Major" | "Minor" | null | undefined => "Major" | "Minor" | ""
+export const transformNullishSizeForRevisionEnumIntoSizeForRevisionEnumWithEmptyString =
+  SizeForRevisionEnum.nullish().transform((v) => v ?? "");
+
+/* -------------------------------------------------------------------------- */
+
 export const OTHER_SERVICE_ID = "2a2a256b-57a5-46f5-8cfb-1855cc29238a";
 export const ELECTRICAL_WET_STAMP_SERVICE_ID =
   "e95483bd-16ea-4a4d-8d68-81d2fa10a384";

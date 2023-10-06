@@ -4,6 +4,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
+import { AxiosError } from "axios";
 import NewProjectSheet from "./NewProjectSheet";
 import ExistingProjectSheet from "./ExistingProjectSheet";
 import ResultDialog from "./ResultDialog";
@@ -393,7 +394,7 @@ export default function Page() {
           ? recentJob.orderedServices
               .filter((value) => value.serviceId === OTHER_SERVICE_ID)
               .map((value) => ({ description: value.description ?? "" }))
-          : [],
+          : [{ description: "" }],
         typeOfWetStamp,
         numberOfWetStamp: "",
         mailingAddress: {
@@ -499,7 +500,30 @@ export default function Page() {
         // TODO: client인 경우 어떻게? project-management/jobs/:jobId로 이동?
         setResult({ open: true, jobId: id });
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("40007")) {
+              form.setError(
+                "systemSize",
+                {
+                  message: `System Size should be less than 99999999`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            if (error.response?.data.errorCode.includes("40004")) {
+              form.setError(
+                "numberOfWetStamp",
+                {
+                  message: `Number of Wet Stamp should be less than 255`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            break;
+        }
+      });
   }
 
   function reset() {
@@ -817,7 +841,9 @@ export default function Page() {
                                                       },
                                                     ],
                                                     {
-                                                      shouldValidate: true,
+                                                      shouldValidate:
+                                                        form.formState
+                                                          .isSubmitted,
                                                     }
                                                   );
                                                 } else {
@@ -829,7 +855,9 @@ export default function Page() {
                                                         ELECTRICAL_WET_STAMP_SERVICE_ID
                                                     ),
                                                     {
-                                                      shouldValidate: true,
+                                                      shouldValidate:
+                                                        form.formState
+                                                          .isSubmitted,
                                                     }
                                                   );
                                                 }
@@ -850,7 +878,9 @@ export default function Page() {
                                                       },
                                                     ],
                                                     {
-                                                      shouldValidate: true,
+                                                      shouldValidate:
+                                                        form.formState
+                                                          .isSubmitted,
                                                     }
                                                   );
                                                 } else {
@@ -862,7 +892,9 @@ export default function Page() {
                                                         STRUCTURAL_WET_STAMP_SERVICE_ID
                                                     ),
                                                     {
-                                                      shouldValidate: true,
+                                                      shouldValidate:
+                                                        form.formState
+                                                          .isSubmitted,
                                                     }
                                                   );
                                                 }

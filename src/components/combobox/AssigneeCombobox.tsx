@@ -52,7 +52,7 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
             disabled={isUsersQueryLoading || disabled}
             size={buttonSize}
           >
-            <span className="flex-1 text-start">
+            <span className="flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap">
               {userId === ""
                 ? "Select an assignee"
                 : users?.items.find((value) => value.id === userId)?.fullName}

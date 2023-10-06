@@ -4,7 +4,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -59,6 +59,11 @@ export default function Page() {
   const { toast } = useToast();
 
   /**
+   * State
+   */
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+
+  /**
    * Form
    */
   const form = useForm<FieldValues>({
@@ -76,7 +81,6 @@ export default function Page() {
     control: form.control,
     name: "emailAddressesToReceiveDeliverables",
   });
-  const { isSubmitSuccessful } = form.formState;
 
   /**
    * Query
@@ -86,6 +90,7 @@ export default function Page() {
   useEffect(() => {
     if (isSubmitSuccessful) {
       form.reset();
+      setIsSubmitSuccessful(false);
     }
   }, [form, isSubmitSuccessful]);
 
@@ -113,9 +118,21 @@ export default function Page() {
         toast({
           title: "Success",
         });
+        setIsSubmitSuccessful(true);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("10111")) {
+              form.setError(
+                "phoneNumber",
+                {
+                  message: `Phone Number is invalid`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            break;
           case 409:
             if (error.response?.data.errorCode.includes("10017")) {
               form.setError(

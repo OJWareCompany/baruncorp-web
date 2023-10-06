@@ -1,5 +1,4 @@
 "use client";
-
 import {
   MutationCache,
   QueryCache,
@@ -27,6 +26,20 @@ export default function Providers({ children }: Props) {
         defaultOptions: {
           queries: {
             refetchOnWindowFocus: false,
+            retry: (failureCount, error) => {
+              if (failureCount > 2) {
+                return false;
+              }
+
+              if (
+                isAxiosError<ErrorResponseData>(error) &&
+                error.response?.status === 404
+              ) {
+                return false;
+              }
+
+              return true;
+            },
           },
         },
         queryCache: new QueryCache({

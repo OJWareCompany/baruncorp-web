@@ -6,12 +6,11 @@ import { addDays, format } from "date-fns";
 import {
   ArrowDownToLine,
   CalendarIcon,
-  Loader2,
-  MoreHorizontal,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePDF } from "@react-pdf/renderer";
+import { useRouter } from "next/navigation";
 import PaymentDialog from "./PaymentDialog";
 import InvoiceDocument from "./InvoiceDocument";
 import {
@@ -64,14 +63,11 @@ import { paymentForInvoiceColumns } from "@/columns/payment";
 import CommonAlertDialogContent from "@/components/CommonAlertDialogContent";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import usePatchInvoiceIssueMutation from "@/queries/usePatchInvoiceIssueMutation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import { AffixInput } from "@/components/AffixInput";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   organization: z
@@ -115,6 +111,9 @@ interface Props {
 }
 
 export default function Page({ params: { invoiceId } }: Props) {
+  const { toast } = useToast();
+  const router = useRouter();
+
   /**
    * Form
    */
@@ -136,8 +135,10 @@ export default function Page({ params: { invoiceId } }: Props) {
   });
   const { mutateAsync: patchInvoiceMutateAsync } =
     usePatchInvoiceMutation(invoiceId);
-  const { mutateAsync: patchInvoiceIssueMutateAsync } =
-    usePatchInvoiceIssueMutation(invoiceId);
+  const {
+    mutateAsync: patchInvoiceIssueMutateAsync,
+    isLoading: isPatchInvoiceIssueMutationLoading,
+  } = usePatchInvoiceIssueMutation(invoiceId);
   const queryClient = useQueryClient();
   const [instance, updateInstance] = usePDF({});
 
@@ -204,40 +205,22 @@ export default function Page({ params: { invoiceId } }: Props) {
         ]}
         title={title}
         action={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant={"outline"} size={"icon"} className="h-9 w-9">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                asChild
-                disabled={
-                  instance.loading ||
-                  instance.error != null ||
-                  instance.url == null
-                }
-              >
-                {instance.loading ? (
-                  <div>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    <span>Download PDF</span>
-                  </div>
-                ) : instance.error != null || instance.url == null ? (
-                  <div>
-                    <ArrowDownToLine className="mr-2 h-4 w-4" />
-                    <span>Download PDF</span>
-                  </div>
-                ) : (
-                  <a href={instance.url} download={"test.pdf"}>
-                    <ArrowDownToLine className="mr-2 h-4 w-4" />
-                    <span>Download PDF</span>
-                  </a>
-                )}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            size={"sm"}
+            disabled={
+              instance.loading || instance.error != null || instance.url == null
+            }
+            variant={"outline"}
+          >
+            <a
+              className="flex items-center"
+              href={instance.url!}
+              download={"test.pdf"}
+            >
+              <ArrowDownToLine className="mr-2 h-4 w-4" />
+              <span>Download PDF</span>
+            </a>
+          </Button>
         }
       />
       <div className="space-y-6">
@@ -400,12 +383,13 @@ export default function Page({ params: { invoiceId } }: Props) {
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
+                <LoadingButton
                   variant={"outline"}
                   disabled={invoice?.status !== "Unissued"}
+                  isLoading={isPatchInvoiceIssueMutationLoading}
                 >
                   Issue
-                </Button>
+                </LoadingButton>
               </AlertDialogTrigger>
               <CommonAlertDialogContent
                 onContinue={() => {
@@ -434,6 +418,9 @@ export default function Page({ params: { invoiceId } }: Props) {
                         queryClient.invalidateQueries({
                           queryKey: ["invoices", "detail", { invoiceId }],
                         });
+                        toast({
+                          title: "Success",
+                        });
                       })
                       .catch(() => {});
                   };
@@ -442,17 +429,29 @@ export default function Page({ params: { invoiceId } }: Props) {
             </AlertDialog>
           </div>
         </section>
-        <section>
-          <h4 className="h4 mb-2">Payments</h4>
-          <div className="flex flex-col gap-2">
-            <BaseTable
-              columns={paymentForInvoiceColumns}
-              data={invoice?.payments ?? []}
-              getRowId={({ id }) => id}
-            />
-            <PaymentDialog invoiceId={invoiceId} />
-          </div>
-        </section>
+        {invoice?.status !== "Unissued" && (
+          <section>
+            <h4 className="h4 mb-2">Payments</h4>
+            <div className="flex flex-col gap-2">
+              <Item>
+                <Label>Total</Label>
+                <AffixInput
+                  prefixElement={
+                    <span className="text-muted-foreground">$</span>
+                  }
+                  value={invoice?.totalOfPayment}
+                  readOnly
+                />
+              </Item>
+              <BaseTable
+                columns={paymentForInvoiceColumns}
+                data={invoice?.payments ?? []}
+                getRowId={({ id }) => id}
+              />
+              <PaymentDialog invoiceId={invoiceId} />
+            </div>
+          </section>
+        )}
         <section>
           <h4 className="h4 mb-2">Jobs</h4>
           <div className="flex flex-col gap-2">
@@ -491,9 +490,12 @@ export default function Page({ params: { invoiceId } }: Props) {
             <BaseTable
               columns={lineItemColumns}
               data={invoice?.lineItems ?? []}
-              getRowId={({ description }) => description}
+              getRowId={({ jobId }) => jobId}
               exportData={lineItemTableExportData ?? []}
-              exportFileName="Jobs on invoice"
+              exportFileName={invoice?.invoiceName ?? "Jobs on Invoice"}
+              onRowClick={(id) => {
+                router.push(`/system-management/jobs/${id}`);
+              }}
             />
           </div>
         </section>
