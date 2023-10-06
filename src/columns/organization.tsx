@@ -29,9 +29,9 @@ export const organizationColumns = [
       </p>
     ),
   }),
-  columnHelper.accessor("phoneNumber", {
-    header: "Phone Number",
-    size: 200,
+  columnHelper.accessor("email", {
+    header: "Email Address to Receive Invoice",
+    size: 300,
     cell: ({ getValue, column }) => (
       <p
         style={{ width: column.getSize() - 32 }}
@@ -41,9 +41,9 @@ export const organizationColumns = [
       </p>
     ),
   }),
-  columnHelper.accessor("email", {
-    header: "Email Address to Receive Invoice",
-    size: 300,
+  columnHelper.accessor("phoneNumber", {
+    header: "Phone Number",
+    size: 200,
     cell: ({ getValue, column }) => (
       <p
         style={{ width: column.getSize() - 32 }}
@@ -59,8 +59,8 @@ interface OrganizationTableExportData {
   [index: string]: unknown;
   Name: string;
   Address: string;
-  "Phone Number": string;
   "Email Address to Receive Invoice": string;
+  "Phone Number": string;
 }
 
 export function getOrganizationTableExportDataFromOrganizations(
@@ -69,7 +69,7 @@ export function getOrganizationTableExportDataFromOrganizations(
   return organizations?.items.map<OrganizationTableExportData>((value) => ({
     Name: value.name,
     Address: value.fullAddress,
-    "Phone Number": value.phoneNumber ?? "-",
     "Email Address to Receive Invoice": value.email ?? "-",
+    "Phone Number": value.phoneNumber ?? "-",
   }));
 }
