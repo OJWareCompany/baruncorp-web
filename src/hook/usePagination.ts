@@ -22,10 +22,20 @@ export default function usePagination(
   });
 
   useEffect(() => {
-    router.replace(
-      `${pathname}?pageIndex=${pagination.pageIndex}&pageSize=${pagination.pageSize}`
-    );
-  }, [pagination.pageIndex, pagination.pageSize, pathname, router]);
+    const urlSearchParams = new URLSearchParams(searchParams);
+    urlSearchParams.set("pageIndex", String(pagination.pageIndex));
+    urlSearchParams.set("pageSize", String(pagination.pageSize));
+
+    router.replace(`${pathname}?${urlSearchParams.toString()}`, {
+      scroll: false,
+    });
+  }, [
+    pagination.pageIndex,
+    pagination.pageSize,
+    pathname,
+    router,
+    searchParams,
+  ]);
 
   return [pagination, setPagination] as const;
 }

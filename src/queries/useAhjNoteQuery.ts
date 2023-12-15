@@ -3,22 +3,22 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { AhjNoteResponseDto } from "@/api";
 
-const useAhjNoteQuery = ({
+export const getAhjNoteQueryKey = (geoId: string) => [
+  "ahj-notes",
+  "detail",
   geoId,
-  initialData,
-}: {
-  geoId: string;
-  initialData?: AhjNoteResponseDto;
-}) => {
+];
+
+const useAhjNoteQuery = (geoId: string) => {
   const api = useApi();
 
   return useQuery<AhjNoteResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["ahj-notes", "detail", { geoId }],
+    queryKey: getAhjNoteQueryKey(geoId),
     queryFn: () =>
       api.geography
         .geographyControllerGetFindNoteByGeoId(geoId)
         .then(({ data }) => data),
-    initialData: initialData == null ? undefined : initialData,
+    enabled: geoId !== "",
   });
 };
 

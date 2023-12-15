@@ -3,11 +3,13 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { JobResponseDto } from "@/api";
 
-const useJobQuery = ({ jobId }: { jobId: string }) => {
+export const getJobQueryKey = (jobId: string) => ["jobs", "detail", jobId];
+
+const useJobQuery = (jobId: string) => {
   const api = useApi();
 
   return useQuery<JobResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["jobs", "detail", { jobId }],
+    queryKey: getJobQueryKey(jobId),
     queryFn: () =>
       api.jobs.findJobHttpControllerFindJob(jobId).then(({ data }) => data),
     enabled: jobId !== "",

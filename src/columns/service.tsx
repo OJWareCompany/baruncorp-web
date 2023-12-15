@@ -29,16 +29,16 @@ export const serviceColumns = [
       </p>
     ),
   }),
-  columnHelper.accessor("basePrice", {
-    header: "Price",
-    size: 200,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        ${getValue()}
-      </p>
-    ),
-  }),
+  // columnHelper.accessor("basePrice", {
+  //   header: "Price",
+  //   size: 200,
+  //   cell: ({ getValue, column }) => (
+  //     <p
+  //       style={{ width: column.getSize() - 32 }}
+  //       className={`whitespace-nowrap overflow-hidden text-ellipsis`}
+  //     >
+  //       ${getValue()}
+  //     </p>
+  //   ),
+  // }),
 ];

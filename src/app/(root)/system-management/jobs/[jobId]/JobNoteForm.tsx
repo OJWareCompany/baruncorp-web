@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import LoadingButton from "@/components/LoadingButton";
-import usePostJobNoteMutation from "@/queries/usePostJobNoteMutation";
+import usePostJobNoteMutation from "@/mutations/usePostJobNoteMutation";
+import { getJobNotesQueryKey } from "@/queries/useJobNotesQuery";
 
 const formSchema = z.object({
   content: z.string().trim().min(1, {
@@ -46,7 +47,7 @@ export default function JobNoteForm({ jobId }: Props) {
       .then(() => {
         form.reset();
         queryClient.invalidateQueries({
-          queryKey: ["job-notes", "list", { jobId }],
+          queryKey: getJobNotesQueryKey(jobId),
         });
       })
       .catch(() => {});

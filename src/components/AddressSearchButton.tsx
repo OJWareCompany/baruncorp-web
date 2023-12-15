@@ -22,10 +22,10 @@ import {
 interface Props {
   onSelect: (data: {
     street1: string;
-    city?: string;
-    stateOrRegion?: string;
-    postalCode?: string;
-    country?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
     fullAddress: string;
     coordinates: number[];
   }) => void;
@@ -120,10 +120,10 @@ const AddressSearchButton = React.forwardRef<HTMLButtonElement, Props>(
 
                     onSelect({
                       street1,
-                      city: place,
-                      stateOrRegion: region,
-                      postalCode: postcode,
-                      country,
+                      city: place ?? "",
+                      state: region ?? "",
+                      postalCode: postcode ?? "",
+                      country: country ?? "",
                       fullAddress: place_name,
                       coordinates,
                     });

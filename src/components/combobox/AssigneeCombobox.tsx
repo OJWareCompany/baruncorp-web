@@ -16,7 +16,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import useAllUsersByOrganizationIdQuery from "@/queries/useAllUsersByOrganizationIdQuery";
+import useUsersQuery from "@/queries/useUsersQuery";
 
 interface Props {
   userId: string;
@@ -31,16 +31,12 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
     { userId, onSelect, buttonClassName, buttonSize, disabled = false },
     ref
   ) => {
-    /**
-     * State
-     */
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    /**
-     * Query
-     */
-    const { data: users, isLoading: isUsersQueryLoading } =
-      useAllUsersByOrganizationIdQuery("asda");
+    const { data: users, isLoading: isUsersQueryLoading } = useUsersQuery({
+      organizationId: "asda",
+      limit: Number.MAX_SAFE_INTEGER,
+    });
 
     return (
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>

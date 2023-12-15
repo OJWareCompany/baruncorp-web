@@ -1,5 +1,5 @@
 import Authenticate from "./Authenticate";
-import Header from "@/components/Header";
+import Header from "./Header";
 
 export default async function Layout({
   children,

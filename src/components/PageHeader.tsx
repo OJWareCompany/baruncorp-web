@@ -1,35 +1,26 @@
-import Link from "next/link";
 import { ReactElement } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "./ui/breadcrumb";
 
 interface Props {
   items: { href: string; name: string }[];
-  title: string;
   action?: ReactElement;
 }
 
-export default function PageHeader({ items, title, action }: Props) {
+export default function PageHeader({ items, action }: Props) {
   return (
     <div className="py-2">
       <Breadcrumb>
-        {items.map((item, index) => (
-          <BreadcrumbItem
-            key={item.name}
-            isCurrentPage={items.length - 1 === index}
-          >
-            <BreadcrumbLink as={Link} href={item.href}>
-              {item.name}
-            </BreadcrumbLink>
+        {items.map((item) => (
+          <BreadcrumbItem key={item.name}>
+            <BreadcrumbLink href={item.href}>{item.name}</BreadcrumbLink>
           </BreadcrumbItem>
         ))}
       </Breadcrumb>
-      <div className="flex justify-between items-center h-9">
-        <h3 className="h3">{title}</h3>
-        {action}
+      <div className="flex justify-between items-center h-9 gap-2">
+        <h3 className="h3 text-ellipsis overflow-hidden whitespace-nowrap">
+          {items[items.length - 1].name}
+        </h3>
+        {action && <div className="shrink-0">{action}</div>}
       </div>
     </div>
   );

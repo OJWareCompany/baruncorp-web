@@ -27,7 +27,8 @@ import {
 import RowItemsContainer from "@/components/RowItemsContainer";
 import LoadingButton from "@/components/LoadingButton";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
-import usePostUserMutation from "@/queries/usePostUserMutation";
+import usePostUserMutation from "@/mutations/usePostUserMutation";
+import { getUsersQueryKey } from "@/queries/useUsersQuery";
 
 const formSchema = z.object({
   organization: z
@@ -61,12 +62,12 @@ const formSchema = z.object({
 
 interface Props extends DialogProps {
   organizationId: string;
-  onAdd: (newUserId: string) => void;
+  onUserIdChange: (newUserId: string) => void;
 }
 
-export default function NewUserSheet({
+export default function NewUserByOrganizationSheet({
   organizationId,
-  onAdd,
+  onUserIdChange,
   ...dialogProps
 }: Props) {
   /**
@@ -93,7 +94,7 @@ export default function NewUserSheet({
    */
   const queryClient = useQueryClient();
   const { mutateAsync } = usePostUserMutation();
-  const { data: organization } = useOrganizationQuery({ organizationId });
+  const { data: organization } = useOrganizationQuery(organizationId);
 
   /**
    * useEffect
@@ -129,13 +130,14 @@ export default function NewUserSheet({
       lastName,
       phoneNumber,
       organizationId,
+      isVendor: false, // TODO
     })
       .then(({ id }) => {
         dialogProps.onOpenChange?.(false);
         form.reset();
-        onAdd(id);
+        onUserIdChange(id);
         queryClient.invalidateQueries({
-          queryKey: ["users", "list", "all", { organizationId }],
+          queryKey: getUsersQueryKey({ organizationId }),
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
@@ -175,7 +177,14 @@ export default function NewUserSheet({
           <SheetTitle>New User</SheetTitle>
         </SheetHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={(event) => {
+              event.stopPropagation();
+
+              return form.handleSubmit(onSubmit)(event);
+            }}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="organization"
@@ -183,7 +192,7 @@ export default function NewUserSheet({
                 <FormItem>
                   <FormLabel required>Organization</FormLabel>
                   <FormControl>
-                    <Input {...field} readOnly />
+                    <Input {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -273,7 +282,7 @@ export default function NewUserSheet({
                           <FormItem>
                             <div className="flex flex-row gap-2">
                               <FormControl>
-                                <Input {...field} readOnly={index === 0} />
+                                <Input {...field} disabled={index === 0} />
                               </FormControl>
                               {index !== 0 && (
                                 <Button
@@ -284,7 +293,7 @@ export default function NewUserSheet({
                                     remove(index);
                                   }}
                                 >
-                                  <X className="h-4 w-4 text-destructive" />
+                                  <X className="h-4 w-4" />
                                 </Button>
                               )}
                             </div>

@@ -1,9 +1,9 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import Providers from "./Providers";
+import { Toaster } from "@/components/Toaster";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./globals.css";
-import { Toaster } from "@/components/Toaster";
-import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 const GTM_ID = "GTM-5L5C7VQ9";

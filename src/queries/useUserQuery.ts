@@ -3,11 +3,13 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { UserResponseDto } from "@/api";
 
-const useUserQuery = ({ userId }: { userId: string }) => {
+export const getUserQueryKey = (userId: string) => ["users", "detail", userId];
+
+const useUserQuery = (userId: string) => {
   const api = useApi();
 
   return useQuery<UserResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["users", "detail", { userId }],
+    queryKey: getUserQueryKey(userId),
     queryFn: () =>
       api.users
         .usersControllerGetUserInfoByUserId(userId)

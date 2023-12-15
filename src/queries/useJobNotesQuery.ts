@@ -3,15 +3,17 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { JobNoteListResponseDto } from "@/api";
 
-interface Props {
-  jobId: string;
-}
+export const getJobNotesQueryKey = (jobId: string) => [
+  "job-notes",
+  "list",
+  jobId,
+];
 
-const useJobNotesQuery = ({ jobId }: Props) => {
+const useJobNotesQuery = (jobId: string) => {
   const api = useApi();
 
   return useQuery<JobNoteListResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["job-notes", "list", { jobId }],
+    queryKey: getJobNotesQueryKey(jobId),
     queryFn: () =>
       api.orderedJobNotes
         .findJobNotesHttpControllerFind(jobId)

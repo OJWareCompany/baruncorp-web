@@ -104,6 +104,28 @@ export const invoiceStatuses = [
 /**
  * "" => null
  * "  " => null
+ * "  123  " => 123
+ * "123" => 123
+ */
+export const transformStringIntoNullableNumber = z
+  .string()
+  .trim()
+  .transform((v) => {
+    if (v === "") {
+      return null;
+    }
+
+    const number = Number(v);
+    if (Number.isNaN(number)) {
+      return 0;
+    }
+
+    return number;
+  });
+
+/**
+ * "" => null
+ * "  " => null
  * "  abc  " => "abc"
  * "abc" => "abc"
  */
@@ -111,6 +133,7 @@ export const transformStringIntoNullableString = z
   .string()
   .trim()
   .transform((v) => (v === "" ? null : v));
+
 /**
  * undefined => ""
  * null => ""
@@ -147,7 +170,11 @@ export const transformNullishPropertyTypeEnumIntoPropertyTypeEnumWithEmptyString
 
 // "Roof Mount" | "Ground Mount" | "Roof Mount & Ground Mount"
 export const MountingTypeEnum = z.enum(
-  ["Roof Mount", "Ground Mount", "Roof Mount & Ground Mount"],
+  [
+    "Roof Mount",
+    "Ground Mount",
+    // "Roof Mount & Ground Mount",
+  ],
   {
     errorMap: () => ({ message: "Mounting Type is required" }),
   }
@@ -344,3 +371,55 @@ export const billingCodes = [
   { name: "Structural Wet Stamp", code: "WS" },
   { name: "Other", code: "O" },
 ];
+
+/* -------------------------------------------------------------------------- */
+
+// "Standard" | "Fixed"
+export const ServicePricingTypeEnum = z.enum(["Standard", "Fixed"], {
+  errorMap: () => ({ message: "Pricing Type is required" }),
+});
+
+// "Tier" | "Flat"
+export const ResidentialNewPriceChargeTypeEnum = z.enum(["Tier", "Flat"], {
+  errorMap: () => ({ message: "Charge Type is required" }),
+});
+
+// "Tier" | "Flat" | ""
+export const ResidentialNewPriceChargeTypeEnumWithEmptyString =
+  ResidentialNewPriceChargeTypeEnum.or(z.literal(""));
+
+// "Tier" | "Flat" | "" => "Tier" | "Flat" | null
+export const transformResidentialNewPriceChargeTypeEnumWithEmptyStringIntoNullableResidentialNewPriceChargeTypeEnum =
+  ResidentialNewPriceChargeTypeEnumWithEmptyString.transform((v) =>
+    v === "" ? null : v
+  );
+
+// "Tier" | "Flat" | null | undefined => "Tier" | "Flat" | ""
+export const transformNullishResidentialNewPriceChargeTypeEnumIntoResidentialNewPriceChargeTypeEnumWithEmptyString =
+  ResidentialNewPriceChargeTypeEnum.nullish().transform((v) => v ?? "");
+
+// "Fixed" | "Percentage"
+export const ExpenseTypeEnum = z.enum(["Fixed", "Percentage"], {
+  errorMap: () => ({ message: "Expense Type is required" }),
+});
+
+// "Fixed" | "Percentage" | ""
+export const ExpenseTypeEnumWithEmptyString = ExpenseTypeEnum.or(z.literal(""));
+
+// "Fixed" | "Percentage" | "" => "Fixed" | "Percentage" | null
+export const transformExpenseTypeEnumWithEmptyStringIntoNullableExpenseTypeEnum =
+  ExpenseTypeEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+
+/* -------------------------------------------------------------------------- */
+
+/**
+ * 1
+ * 11
+ * 11.
+ * 11.1
+ * 11.11
+ * .1
+ * .11
+ */
+export const toTwoDecimalRegExp = new RegExp(/^\d+(\.\d{0,2})?$/);
+export const digitRegExp = new RegExp(/^\d+$/);

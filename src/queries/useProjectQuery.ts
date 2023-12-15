@@ -3,11 +3,17 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { ProjectResponseDto } from "@/api";
 
-const useProjectQuery = ({ projectId }: { projectId: string }) => {
+export const getProjectQueryKey = (projectId: string) => [
+  "projects",
+  "detail",
+  projectId,
+];
+
+const useProjectQuery = (projectId: string) => {
   const api = useApi();
 
   return useQuery<ProjectResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["projects", "detail", { projectId }],
+    queryKey: getProjectQueryKey(projectId),
     queryFn: () =>
       api.projects
         .findProjectDetailHttpControllerFindProjectDetail(projectId)

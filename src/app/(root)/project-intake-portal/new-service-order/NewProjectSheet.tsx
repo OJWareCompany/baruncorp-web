@@ -1,12 +1,11 @@
 "use client";
-
 import * as z from "zod";
 import { DefaultValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -33,7 +32,7 @@ import {
 import RowItemsContainer from "@/components/RowItemsContainer";
 import AddressSearchButton from "@/components/AddressSearchButton";
 import Minimap from "@/components/Minimap";
-import usePostProjectMutation from "@/queries/usePostProjectMutation";
+import usePostProjectMutation from "@/mutations/usePostProjectMutation";
 import {
   PropertyTypeEnum,
   transformStringIntoNullableString,
@@ -41,6 +40,7 @@ import {
 import LoadingButton from "@/components/LoadingButton";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import { useToast } from "@/components/ui/use-toast";
+import { getProjectsQueryKey } from "@/queries/useProjectsQuery";
 
 const formSchema = z.object({
   propertyType: PropertyTypeEnum,
@@ -48,25 +48,14 @@ const formSchema = z.object({
   projectNumber: z.string().trim(),
   address: z
     .object({
-      street1: z.string().trim().min(1, { message: "Street 1 is required" }),
+      street1: z.string().trim(),
       street2: z.string().trim(),
-      city: z.string().trim().min(1, { message: "City required" }),
-      stateOrRegion: z
-        .string()
-        .trim()
-        .min(1, { message: "State / Region is required" }),
-      postalCode: z
-        .string()
-        .trim()
-        .min(1, { message: "Postal Code is required" }),
-      country: z.string().trim().min(1, { message: "Country is required" }),
-      fullAddress: z
-        .string()
-        .trim()
-        .min(1, { message: "Full Address is required" }),
-      coordinates: z
-        .array(z.number())
-        .min(1, { message: "Coordinates is required" }),
+      city: z.string().trim(),
+      state: z.string().trim(),
+      postalCode: z.string().trim(),
+      country: z.string().trim(),
+      fullAddress: z.string().trim(),
+      coordinates: z.array(z.number()),
     })
     .superRefine((value, ctx) => {
       if (value.fullAddress.length === 0) {
@@ -88,7 +77,7 @@ const defaultValues: DefaultValues<FieldValues> = {
     street1: "",
     street2: "",
     city: "",
-    stateOrRegion: "",
+    state: "",
     postalCode: "",
     country: "",
     fullAddress: "",
@@ -98,14 +87,14 @@ const defaultValues: DefaultValues<FieldValues> = {
 
 interface Props extends DialogProps {
   organizationId: string;
-  onSelect: (newProjectId: string) => void;
+  onProjectIdChange: (newProjectId: string) => void;
 }
 
 // TODO: 주소 수정은 언제 가능해야 하는지? 주소는 중요한 키라서 수정하도록 하는 것은 영향이 끼칠 수 있다. draggable?
 // TODO: default property type을 org마다 설정할 수 있도록 해서, 그 값이 new project의 기본값으로 들어갈 수 있게
 export default function NewProjectSheet({
   organizationId,
-  onSelect,
+  onProjectIdChange,
   ...dialogProps
 }: Props) {
   const { toast } = useToast();
@@ -115,7 +104,7 @@ export default function NewProjectSheet({
   });
   const { mutateAsync } = usePostProjectMutation();
   const queryClient = useQueryClient();
-  const { data: organization } = useOrganizationQuery({ organizationId });
+  const { data: organization } = useOrganizationQuery(organizationId);
 
   useEffect(() => {
     if (organization && organization.projectPropertyTypeDefaultValue) {
@@ -147,7 +136,7 @@ export default function NewProjectSheet({
         country: transformStringIntoNullableString.parse(
           values.address.country
         ),
-        state: values.address.stateOrRegion,
+        state: values.address.state,
         street2: transformStringIntoNullableString.parse(
           values.address.street2
         ),
@@ -155,23 +144,26 @@ export default function NewProjectSheet({
     })
       .then(({ id }) => {
         dialogProps.onOpenChange?.(false);
-        onSelect(id);
+        onProjectIdChange(id);
         form.reset();
         queryClient.invalidateQueries({
-          queryKey: ["projects", "list", "all", { organizationId }],
+          queryKey: getProjectsQueryKey({
+            organizationName: organization?.name,
+            limit: Number.MAX_SAFE_INTEGER,
+          }),
         });
 
-        axios
-          .post(
-            `${
-              process.env.NEXT_PUBLIC_NAS_API_URL
-            }/filesystem/${encodeURIComponent(
-              organization?.name ?? ""
-            )}/${encodeURIComponent(values.address.fullAddress)}`
-          )
-          .catch((error) => {
-            console.error(error);
-          });
+        // axios
+        //   .post(
+        //     `${
+        //       process.env.NEXT_PUBLIC_NAS_API_URL
+        //     }/filesystem/${encodeURIComponent(
+        //       organization?.name ?? ""
+        //     )}/${encodeURIComponent(values.address.fullAddress)}`
+        //   )
+        //   .catch((error) => {
+        //     console.error(error);
+        //   });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
@@ -276,26 +268,12 @@ export default function NewProjectSheet({
                         <AddressSearchButton
                           ref={field.ref}
                           format="us"
-                          onSelect={({
-                            street1,
-                            city,
-                            stateOrRegion,
-                            postalCode,
-                            country,
-                            fullAddress,
-                            coordinates,
-                          }) => {
+                          onSelect={(value) => {
                             form.setValue(
                               "address",
                               {
-                                street1,
+                                ...value,
                                 street2: "",
-                                city: city ?? "",
-                                stateOrRegion: stateOrRegion ?? "",
-                                postalCode: postalCode ?? "",
-                                country: country ?? "",
-                                fullAddress,
-                                coordinates,
                               },
                               { shouldValidate: true, shouldDirty: true }
                             );
@@ -303,7 +281,7 @@ export default function NewProjectSheet({
                         />
                         <Input
                           value={field.value.street1}
-                          readOnly
+                          disabled
                           placeholder="Street 1"
                         />
                         <Input
@@ -318,22 +296,22 @@ export default function NewProjectSheet({
                         />
                         <Input
                           value={field.value.city}
-                          readOnly
+                          disabled
                           placeholder="City"
                         />
                         <Input
-                          value={field.value.stateOrRegion}
-                          readOnly
+                          value={field.value.state}
+                          disabled
                           placeholder="State Or Region"
                         />
                         <Input
                           value={field.value.postalCode}
-                          readOnly
+                          disabled
                           placeholder="Postal Code"
                         />
                         <Input
                           value={field.value.country}
-                          readOnly
+                          disabled
                           placeholder="Country"
                         />
                       </FormItem>

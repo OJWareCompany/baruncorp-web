@@ -3,15 +3,17 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { OrganizationResponseDto } from "@/api";
 
-const useOrganizationQuery = ({
+export const getOrganizationQueryKey = (organizationId: string) => [
+  "organizations",
+  "detail",
   organizationId,
-}: {
-  organizationId: string;
-}) => {
+];
+
+const useOrganizationQuery = (organizationId: string) => {
   const api = useApi();
 
   return useQuery<OrganizationResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: ["organizations", "detail", { organizationId }],
+    queryKey: getOrganizationQueryKey(organizationId),
     queryFn: () =>
       api.organizations
         .findOrganizationHttpControllerGet(organizationId)

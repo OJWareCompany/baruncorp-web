@@ -1,36 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { format } from "date-fns";
 import useApi from "@/hook/useApi";
-import { JobToInvoiceResponseDto } from "@/api";
+import {
+  FindJobToInvoiceHttpControllerFindJobParams,
+  JobToInvoiceResponseDto,
+} from "@/api";
 
-const useJobsToInvoiceQuery = ({
-  organizationId,
-  servicePeriodMonth,
-}: {
-  organizationId: string;
-  servicePeriodMonth: string;
-}) => {
+export const getJobsToInvoiceQueryKey = (
+  params: FindJobToInvoiceHttpControllerFindJobParams
+) => ["jobs-to-invoice", "list", params];
+
+const useJobsToInvoiceQuery = (
+  params: FindJobToInvoiceHttpControllerFindJobParams
+) => {
   const api = useApi();
 
   return useQuery<JobToInvoiceResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: [
-      "jobs-to-invoice",
-      "list",
-      { organizationId, servicePeriodMonth },
-    ],
+    queryKey: getJobsToInvoiceQueryKey(params),
     queryFn: () =>
       api.jobsToInvoice
-        .findJobToInvoiceHttpControllerFindJob({
-          clientOrganizationId: organizationId,
-          serviceMonth: format(
-            new Date(servicePeriodMonth.slice(0, 7)),
-            "yyyy-MM"
-          ),
-        })
+        .findJobToInvoiceHttpControllerFindJob(params)
         .then(({ data }) => data),
-    enabled: organizationId !== "" && servicePeriodMonth !== "",
-    keepPreviousData: organizationId !== "" && servicePeriodMonth !== "",
   });
 };
 

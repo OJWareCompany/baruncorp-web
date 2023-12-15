@@ -12,7 +12,7 @@ import {
 } from "@/api";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
-import usePatchPaymentCancelMutation from "@/queries/usePatchPaymentCancelMutation";
+import usePatchPaymentCancelMutation from "@/mutations/usePatchPaymentCancelMutation";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import CommonAlertDialogContent from "@/components/CommonAlertDialogContent";
 
@@ -44,9 +44,9 @@ function CancelButtonForPaymentPaginated({
         onContinue={() => {
           mutateAsync()
             .then(() => {
-              queryClient.invalidateQueries({
-                queryKey: ["payments", "list", pagination],
-              });
+              // queryClient.invalidateQueries({
+              //   queryKey: ["payments", "list", pagination],
+              // });
             })
             .catch(() => {});
         }}
@@ -203,13 +203,13 @@ function CancelButtonForPaymentForInvoice({
         onContinue={() => {
           mutateAsync()
             .then(() => {
-              queryClient.invalidateQueries({
-                queryKey: [
-                  "invoices",
-                  "detail",
-                  { invoiceId: row.original.invoiceId },
-                ],
-              });
+              // queryClient.invalidateQueries({
+              //   queryKey: [
+              //     "invoices",
+              //     "detail",
+              //     { invoiceId: row.original.invoiceId },
+              //   ],
+              // });
             })
             .catch(() => {});
         }}
