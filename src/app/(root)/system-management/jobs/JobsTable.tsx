@@ -1,7 +1,7 @@
 "use client";
-import * as React from "react";
 import {
   PaginationState,
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -14,6 +14,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { z } from "zod";
 import {
   Table,
   TableBody,
@@ -30,8 +32,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { jobColumns } from "@/columns/jobColumns";
 import useJobsQuery from "@/queries/useJobsQuery";
+import { JobPaginatedResponseDto } from "@/api";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  JobStatusEnum,
+  JobStatusEnumWithEmptyString,
+  MountingTypeEnum,
+  MountingTypeEnumWithEmptyString,
+  PropertyTypeEnum,
+  PropertyTypeEnumWithEmptyString,
+  YesOrNoEnum,
+  jobStatuses,
+  transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
+  transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
+  transformNullableYesOrNoEnumIntoNullableBoolean,
+  transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
+} from "@/lib/constants";
+import TasksBadge from "@/components/badge/TasksBadge";
+import { formatInEST } from "@/lib/utils";
+import SearchHeader from "@/components/table/SearchHeader";
+import EnumHeader from "@/components/table/EnumHeader";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+const columnHelper =
+  createColumnHelper<JobPaginatedResponseDto["items"][number]>();
 
 export default function JobsTable() {
   const router = useRouter();
@@ -46,15 +75,248 @@ export default function JobsTable() {
       ? Number(searchParams.get("pageSize"))
       : 10,
   };
+  const nameSearchParam = searchParams.get("name") ?? "";
+  const statusSearchParam =
+    (searchParams.get("status") as z.infer<
+      typeof JobStatusEnumWithEmptyString
+    >) ?? "";
+  const propertyTypeSearchParam =
+    (searchParams.get("propertyType") as z.infer<
+      typeof PropertyTypeEnumWithEmptyString
+    >) ?? "";
+  const mountingTypeSearchParam =
+    (searchParams.get("mountingType") as z.infer<
+      typeof MountingTypeEnumWithEmptyString
+    >) ?? "";
+  const expediteSearchParamParseResult = YesOrNoEnum.safeParse(
+    searchParams.get("expedite")
+  );
+  const expediteSearchParam = expediteSearchParamParseResult.success
+    ? expediteSearchParamParseResult.data
+    : null;
 
-  const { data, isLoading } = useJobsQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-  });
+  const { data, isLoading } = useJobsQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      jobName: nameSearchParam,
+      jobStatus:
+        transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
+          statusSearchParam
+        ),
+      mountingType:
+        transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum.parse(
+          mountingTypeSearchParam
+        ),
+      projectPropertyType:
+        transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum.parse(
+          propertyTypeSearchParam
+        ),
+      isExpedited:
+        transformNullableYesOrNoEnumIntoNullableBoolean.parse(
+          expediteSearchParam
+        ),
+    },
+    true
+  );
+
+  const columns = useMemo(() => {
+    return [
+      columnHelper.accessor("isExpedited", {
+        header: () => (
+          <EnumHeader
+            buttonText="Expedite"
+            isFiltered={expediteSearchParam !== null}
+            items={YesOrNoEnum.options}
+            selectedValue={expediteSearchParam ?? ""}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("expedite", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("expedite");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+      }),
+      columnHelper.accessor("clientInfo.clientOrganizationName", {
+        header: "Organization",
+      }),
+      columnHelper.accessor("jobName", {
+        header: () => {
+          return (
+            <SearchHeader
+              initialValue={nameSearchParam}
+              buttonText="Name"
+              onFilterButtonClick={(value) => {
+                const newSearchParams = new URLSearchParams(searchParams);
+                newSearchParams.set("name", value);
+                newSearchParams.set("pageIndex", "0");
+                router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                  scroll: false,
+                });
+              }}
+              isFiltered={nameSearchParam !== ""}
+              onResetButtonClick={() => {
+                const newSearchParams = new URLSearchParams(searchParams);
+                newSearchParams.delete("name");
+                newSearchParams.set("pageIndex", "0");
+                router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                  scroll: false,
+                });
+              }}
+            />
+          );
+        },
+      }),
+      columnHelper.accessor("jobStatus", {
+        header: () => (
+          <EnumHeader
+            buttonText="Status"
+            isFiltered={statusSearchParam !== ""}
+            items={JobStatusEnum.options}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("status", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("status");
+              newSearchParams.set("pageIndex", "0");
+
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            selectedValue={statusSearchParam}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = jobStatuses[value];
+
+          return (
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("assignedTasks", {
+        header: "Tasks",
+        cell: ({ getValue }) => <TasksBadge tasks={getValue()} />,
+      }),
+      columnHelper.accessor("projectPropertyType", {
+        header: () => (
+          <EnumHeader
+            buttonText="Property Type"
+            isFiltered={propertyTypeSearchParam !== ""}
+            items={PropertyTypeEnum.options}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("propertyType", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("propertyType");
+              newSearchParams.set("pageIndex", "0");
+
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            selectedValue={propertyTypeSearchParam}
+          />
+        ),
+      }),
+      columnHelper.accessor("mountingType", {
+        header: () => (
+          <EnumHeader
+            buttonText="Mounting Type"
+            isFiltered={mountingTypeSearchParam !== ""}
+            items={MountingTypeEnum.options}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("mountingType", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("mountingType");
+              newSearchParams.set("pageIndex", "0");
+
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            selectedValue={mountingTypeSearchParam}
+          />
+        ),
+      }),
+      columnHelper.accessor("additionalInformationFromClient", {
+        header: "Additional Information",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return (
+            <HoverCard openDelay={0} closeDelay={100}>
+              <HoverCardTrigger className="underline">
+                View Detail
+              </HoverCardTrigger>
+              <HoverCardContent className="w-[auto] cursor-default" side="top">
+                {value}
+              </HoverCardContent>
+            </HoverCard>
+          );
+        },
+      }),
+      columnHelper.accessor("clientInfo.clientUserName", {
+        header: "Client User",
+      }),
+      columnHelper.accessor("receivedAt", {
+        header: "Date Received (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+    ];
+  }, [
+    expediteSearchParam,
+    mountingTypeSearchParam,
+    nameSearchParam,
+    pathname,
+    propertyTypeSearchParam,
+    router,
+    searchParams,
+    statusSearchParam,
+  ]);
 
   const table = useReactTable({
     data: data?.items ?? [],
-    columns: jobColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
@@ -98,7 +360,7 @@ export default function JobsTable() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={jobColumns.length} className="h-24">
+                <TableCell colSpan={columns.length} className="h-24">
                   <div className="flex justify-center">
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
@@ -107,7 +369,7 @@ export default function JobsTable() {
             ) : table.getRowModel().rows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={jobColumns.length}
+                  colSpan={columns.length}
                   className="h-24 text-center"
                 >
                   No results.

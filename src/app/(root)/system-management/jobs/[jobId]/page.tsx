@@ -6,12 +6,14 @@ import JobNotesTable from "./JobNoteTable";
 import JobNoteForm from "./JobNoteForm";
 import TasksTable from "./TasksTable";
 import JobsTable from "./JobsTable";
+import JobStatus from "./JobStatus";
 import useProjectQuery from "@/queries/useProjectQuery";
 import useJobQuery from "@/queries/useJobQuery";
 import PageHeader from "@/components/PageHeader";
 import useJobNotesQuery from "@/queries/useJobNotesQuery";
 import PageLoading from "@/components/PageLoading";
 import ItemsContainer from "@/components/ItemsContainer";
+import useNotFound from "@/hook/useNotFound";
 
 interface Props {
   params: {
@@ -20,12 +22,25 @@ interface Props {
 }
 
 export default function Page({ params: { jobId } }: Props) {
-  const { data: job, isLoading: isJobQueryLoading } = useJobQuery(jobId);
+  const {
+    data: job,
+    isLoading: isJobQueryLoading,
+    error: jobQueryError,
+  } = useJobQuery(jobId);
   const projectId = job?.projectId ?? "";
-  const { data: project, isLoading: isProjectQueryLoading } =
-    useProjectQuery(projectId);
-  const { data: jobNotes, isLoading: isJobNotesQueryLoading } =
-    useJobNotesQuery(jobId);
+  const {
+    data: project,
+    isLoading: isProjectQueryLoading,
+    error: projectQueryError,
+  } = useProjectQuery(projectId);
+  const {
+    data: jobNotes,
+    isLoading: isJobNotesQueryLoading,
+    error: jobNotesQueryError,
+  } = useJobNotesQuery(jobId);
+  useNotFound(jobQueryError);
+  useNotFound(projectQueryError);
+  useNotFound(jobNotesQueryError);
 
   // const { mutateAsync: patchJobCancelMutateAsync } =
   //   usePatchJobCancelMutation(jobId);
@@ -44,8 +59,6 @@ export default function Page({ params: { jobId } }: Props) {
   ) {
     return <PageLoading />;
   }
-
-  console.log(job.orderedServices[0]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -69,18 +82,17 @@ export default function Page({ params: { jobId } }: Props) {
         <section>
           <h4 className="h4 mb-2">Job Note</h4>
           <ItemsContainer>
-            <JobNotesTable data={jobNotes.notes} />
-            <JobNoteForm jobId={job.id} />
+            <JobNotesTable jobNotes={jobNotes} />
+            <JobNoteForm job={job} />
           </ItemsContainer>
         </section>
         <section>
+          <h4 className="h4 mb-2">Status</h4>
+          <JobStatus job={job} />
+        </section>
+        <section>
           <h4 className="h4 mb-2">Tasks</h4>
-          <TasksTable
-            assignedTasks={job.assignedTasks}
-            orderedServices={job.orderedServices}
-            jobId={job.id}
-            projectId={project.projectId}
-          />
+          <TasksTable job={job} project={project} />
         </section>
         {/* 
         <section>

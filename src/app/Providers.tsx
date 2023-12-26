@@ -49,6 +49,18 @@ export default function Providers({ children }: Props) {
               return;
             }
 
+            if (
+              isAxiosError<ErrorResponseData>(error) &&
+              error.response?.status === 404
+            ) {
+              toast({
+                title: "Not Found",
+                description: "Could not find requested resource",
+                variant: "destructive",
+              });
+              return;
+            }
+
             toast(defaultErrorToast);
           },
         }),

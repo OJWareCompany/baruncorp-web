@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -15,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -34,46 +34,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
+import SearchHeader from "@/components/table/SearchHeader";
+import EnumHeader from "@/components/table/EnumHeader";
+import {
+  YesOrNoEnum,
+  transformNullableYesOrNoEnumIntoNullableBoolean,
+} from "@/lib/constants";
 
 const columnHelper =
   createColumnHelper<OrganizationPaginatedResponseDto["items"][number]>();
-
-export const columns = [
-  columnHelper.accessor("name", {
-    header: "Name",
-  }),
-  columnHelper.accessor("fullAddress", {
-    header: "Address",
-  }),
-  columnHelper.accessor("email", {
-    header: "Email Address to Receive Invoice",
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      if (value == null) {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return value;
-    },
-  }),
-  columnHelper.accessor("phoneNumber", {
-    header: "Phone Number",
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      if (value == null) {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return value;
-    },
-  }),
-  columnHelper.accessor("isVendor", {
-    header: "Vendor",
-    cell: ({ getValue }) => <Checkbox checked={getValue()} />,
-  }),
-];
 
 export default function OrganizationsTable() {
   const router = useRouter();
@@ -88,11 +57,190 @@ export default function OrganizationsTable() {
       ? Number(searchParams.get("pageSize"))
       : 10,
   };
+  const addressSearchParam = searchParams.get("address") ?? "";
+  const nameSearchParam = searchParams.get("name") ?? "";
+  const emailSearchParam = searchParams.get("email") ?? "";
+  const phoneNumberSearchParam = searchParams.get("phoneNumber") ?? "";
+  const vendorSearchParamParseResult = YesOrNoEnum.safeParse(
+    searchParams.get("vendor")
+  );
+  const vendorSearchParam = vendorSearchParamParseResult.success
+    ? vendorSearchParamParseResult.data
+    : null;
 
-  const { data, isLoading } = useOrganizationsQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-  });
+  const { data, isLoading } = useOrganizationsQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      fullAddress: addressSearchParam,
+      name: nameSearchParam,
+      phoneNumber: phoneNumberSearchParam,
+      email: emailSearchParam,
+      isVendor:
+        transformNullableYesOrNoEnumIntoNullableBoolean.parse(
+          vendorSearchParam
+        ),
+    },
+    true
+  );
+
+  const columns = useMemo(() => {
+    return [
+      columnHelper.accessor("name", {
+        header: () => (
+          <SearchHeader
+            initialValue={nameSearchParam}
+            buttonText="Name"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("name", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={nameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("name");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("fullAddress", {
+        header: () => (
+          <SearchHeader
+            initialValue={addressSearchParam}
+            buttonText="Address"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("address", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={addressSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("address");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("email", {
+        header: () => (
+          <SearchHeader
+            initialValue={emailSearchParam}
+            buttonText="Email Address to Receive Invoice"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("email", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={emailSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("email");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
+      columnHelper.accessor("phoneNumber", {
+        header: () => (
+          <SearchHeader
+            initialValue={phoneNumberSearchParam}
+            buttonText="Phone Number"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("phoneNumber", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={phoneNumberSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("phoneNumber");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
+      columnHelper.accessor("isVendor", {
+        header: () => (
+          <EnumHeader
+            buttonText="Vendor"
+            isFiltered={vendorSearchParam !== null}
+            items={YesOrNoEnum.options}
+            selectedValue={vendorSearchParam ?? ""}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("vendor", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("vendor");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+      }),
+    ];
+  }, [
+    addressSearchParam,
+    emailSearchParam,
+    nameSearchParam,
+    pathname,
+    phoneNumberSearchParam,
+    router,
+    searchParams,
+    vendorSearchParam,
+  ]);
 
   const table = useReactTable({
     data: data?.items ?? [],

@@ -11,7 +11,8 @@ export const getOrganizationsQueryKey = (
 ) => ["organizations", "list", params];
 
 const useOrganizationsQuery = (
-  params: FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams
+  params: FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams,
+  keepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -24,7 +25,7 @@ const useOrganizationsQuery = (
       api.organizations
         .findOrganizationPaginatedHttpControllerGetOrganizationPaginated(params)
         .then(({ data }) => data),
-    keepPreviousData: true,
+    keepPreviousData,
   });
 };
 

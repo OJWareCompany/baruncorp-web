@@ -1,0 +1,27 @@
+{
+  "version": "0.2",
+  "ignorePaths": [],
+  "dictionaryDefinitions": [],
+  "dictionaries": [],
+  "words": [
+    "acacode",
+    "Barun",
+    "baruncorp",
+    "clsx",
+    "cmdk",
+    "commitlint",
+    "derated",
+    "hookform",
+    "lucide",
+    "mapbox",
+    "nextjs",
+    "Pricings",
+    "Resi",
+    "tailwindcss",
+    "tanstack",
+    "wip",
+    "Yunwoo"
+  ],
+  "ignoreWords": [],
+  "import": []
+}

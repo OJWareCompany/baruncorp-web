@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transformProjectAssociatedRegulatoryBodyIntoArray } from "@/lib/ahj";
 import AhjNoteForm from "@/components/form/AhjNoteForm";
 import useAhjNoteQuery from "@/queries/useAhjNoteQuery";
+import useNotFound from "@/hook/useNotFound";
 
 interface AhjTabsContentProps {
   geoId: string;
@@ -10,8 +11,12 @@ interface AhjTabsContentProps {
 }
 
 function AhjTabsContent({ geoId, value }: AhjTabsContentProps) {
-  const { data: ahjNote, isLoading: isAhjNoteQueryLoading } =
-    useAhjNoteQuery(geoId);
+  const {
+    data: ahjNote,
+    isLoading: isAhjNoteQueryLoading,
+    error: ahjNoteQueryError,
+  } = useAhjNoteQuery(geoId);
+  useNotFound(ahjNoteQueryError);
 
   if (isAhjNoteQueryLoading || ahjNote == null) {
     return null;

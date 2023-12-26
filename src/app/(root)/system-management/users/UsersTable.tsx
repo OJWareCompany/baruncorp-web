@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -15,6 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -34,43 +34,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import useUsersQuery from "@/queries/useUsersQuery";
+import {
+  BARUNCORP_ORGANIZATION_ID,
+  YesOrNoEnum,
+  transformNullableYesOrNoEnumIntoNullableBoolean,
+} from "@/lib/constants";
+import SearchHeader from "@/components/table/SearchHeader";
+import EnumHeader from "@/components/table/EnumHeader";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
-
-export const columns = [
-  columnHelper.accessor("organization", {
-    header: "Organization",
-  }),
-  columnHelper.accessor("email", {
-    header: "Email",
-  }),
-  columnHelper.accessor("fullName", {
-    header: "Full Name",
-  }),
-  columnHelper.accessor("phoneNumber", {
-    header: "Phone Number",
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      if (value == null) {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return value;
-    },
-  }),
-  columnHelper.accessor("isVendor", {
-    header: "Contractor",
-    cell: ({ getValue, row }) => {
-      if (row.original.organizationId === "asda") {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return <Checkbox checked={getValue()} />;
-    },
-  }),
-];
 
 export default function UsersTable() {
   const router = useRouter();
@@ -85,11 +58,163 @@ export default function UsersTable() {
       ? Number(searchParams.get("pageSize"))
       : 10,
   };
+  const emailSearchParam = searchParams.get("email") ?? "";
+  const nameSearchParam = searchParams.get("name") ?? "";
+  const organizationNameSearchParam =
+    searchParams.get("organizationName") ?? "";
+  const contractorSearchParamParseResult = YesOrNoEnum.safeParse(
+    searchParams.get("contractor")
+  );
+  const contractorSearchParam = contractorSearchParamParseResult.success
+    ? contractorSearchParamParseResult.data
+    : null;
 
-  const { data, isLoading } = useUsersQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-  });
+  const { data, isLoading } = useUsersQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      email: emailSearchParam,
+      userName: nameSearchParam,
+      isContractor: transformNullableYesOrNoEnumIntoNullableBoolean.parse(
+        contractorSearchParam
+      ),
+      organizationName: organizationNameSearchParam,
+    },
+    true
+  );
+
+  const columns = useMemo(() => {
+    return [
+      columnHelper.accessor("organization", {
+        header: () => (
+          <SearchHeader
+            initialValue={emailSearchParam}
+            buttonText="Organization"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("organizationName", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={organizationNameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("organizationName");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("fullName", {
+        header: () => (
+          <SearchHeader
+            initialValue={nameSearchParam}
+            buttonText="Name"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("name", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={nameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("name");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("email", {
+        header: () => (
+          <SearchHeader
+            initialValue={emailSearchParam}
+            buttonText="Email"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("email", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={emailSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("email");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("phoneNumber", {
+        header: "Phone Number",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
+      columnHelper.accessor("isVendor", {
+        header: () => (
+          <EnumHeader
+            buttonText="Contractor"
+            isFiltered={contractorSearchParam !== null}
+            items={YesOrNoEnum.options}
+            selectedValue={contractorSearchParam ?? ""}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("contractor", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("contractor");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+        cell: ({ getValue, row }) => {
+          if (row.original.organizationId === BARUNCORP_ORGANIZATION_ID) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <Checkbox checked={getValue()} />;
+        },
+      }),
+    ];
+  }, [
+    contractorSearchParam,
+    emailSearchParam,
+    nameSearchParam,
+    organizationNameSearchParam,
+    pathname,
+    router,
+    searchParams,
+  ]);
 
   const table = useReactTable({
     data: data?.items ?? [],

@@ -47,10 +47,13 @@ export default function JobsTable() {
       : 10,
   };
 
-  const { data, isLoading } = useMyActiveJobsQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-  });
+  const { data, isLoading } = useMyActiveJobsQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+    },
+    true
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],

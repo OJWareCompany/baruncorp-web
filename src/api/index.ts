@@ -21,36 +21,23 @@ export interface TokenResponseDto {
   refreshToken: string;
 }
 
+export interface AccessTokenResponseDto {
+  accessToken: string;
+}
+
 export interface SignUpRequestDto {
+  /** @default "hyomin@ojware.com" */
+  email: string;
   /** @default "Emma" */
   firstName: string;
   /** @default "Smith" */
   lastName: string;
   /** @default "hyomin@ojware.com" */
-  email: string;
-  /** @default false */
-  isVendor: boolean;
-  /** @default "hyomin@ojware.com" */
   deliverablesEmails: string[];
   /** @default "thisistestPass123!" */
   password: string;
-  /** @default "AE2DE" */
-  code: string;
-  /** @default "176 Morningmist Road, Naugatuck, Connecticut 06770" */
-  address: string | null;
   /** @default "857-250-4567" */
   phoneNumber: string;
-}
-
-export interface SignUpTestRequestDto {
-  /** @default "Emma" */
-  name: string;
-  /** @default "hyomin@ojware.com" */
-  email: string;
-}
-
-export interface AccessTokenResponseDto {
-  accessToken: string;
 }
 
 export interface UserPositionResponseDto {
@@ -58,27 +45,24 @@ export interface UserPositionResponseDto {
   name: string;
 }
 
-export interface RelatedTaskResponseDto {
+export interface AvailableTaskResponseDto {
   /** @default "" */
   id: string;
   /** @default "" */
   name: string;
+  /** @default "Residential / Commercial" */
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
 }
 
-export interface UserServiceResponseDto {
-  id: string;
-  name: string;
-  billingCode: string;
-  basePrice: number;
-  relatedTasks: RelatedTaskResponseDto[];
-}
-
-export interface LincenseResponseDto {
-  type: "Electrical" | "Structural";
+export interface UserLicenseResponseDto {
+  type: "Structural" | "Electrical";
   ownerName: string;
   issuingCountryName: string;
   abbreviation: string;
-  priority: number | null;
   expiryDate: string | null;
 }
 
@@ -92,11 +76,13 @@ export interface UserResponseDto {
   organization: string;
   organizationId: string;
   position: UserPositionResponseDto | null;
-  services: UserServiceResponseDto[];
-  licenses: LincenseResponseDto[];
+  availableTasks: AvailableTaskResponseDto[];
+  licenses: UserLicenseResponseDto[];
   role: string;
   deliverablesEmails: string[];
   isVendor: boolean;
+  /** @default "Active" */
+  status: "Sign Up Not Completed" | "Invitation Sent" | "Inactive" | "Active";
 }
 
 export interface UpdateUserRequestDto {
@@ -115,28 +101,6 @@ export interface UpdateUserRequestDto {
 export interface GiveRoleRequestDto {
   /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
   userId: string;
-}
-
-export interface CreateInvitationMailRequestDto {
-  /** @default "OJ Tech" */
-  organizationName: string;
-  /** @default "hyomin@ojware.com" */
-  email: string;
-}
-
-export interface CreateLicenseRequestDto {
-  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
-  userId: string;
-  /** @default "Electrical" */
-  type: "Electrical" | "Structural";
-  /** @default "FLORIDA" */
-  issuingCountryName: string;
-  /** @default "FL" */
-  abbreviation: string;
-  /** @default 9 */
-  priority: number;
-  /** @default "2023-09-04T07:31:27.217Z" */
-  expiryDate: string | null;
 }
 
 export interface CreateUserRequestDto {
@@ -171,6 +135,49 @@ export interface UserPaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: UserResponseDto[];
+}
+
+export interface AppointUserLicenseRequestDto {
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  userId: string;
+  /** @default "Structural" */
+  type: "Structural" | "Electrical";
+  /**
+   * @format date-time
+   * @default "2023-09-04T07:31:27.217Z"
+   */
+  expiryDate: string | null;
+}
+
+export interface AddAvailableTaskRequestDto {
+  /** @default "b2ccaea3-20c2-4563-9025-9571c7e9776d" */
+  taskId: string;
+  /** @default "Residential" */
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface ModifyAssignmentTypeOfAvailableTaskRequestDto {
+  /** @default "Residential" */
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface HandsStatusResponseDto {
+  status: boolean;
+}
+
+export interface InviteRequestDto {
+  /** @default "" */
+  organizationId: string;
+  /** @default "hyomin@ojware.com" */
+  email: string;
 }
 
 export interface AddressDto {
@@ -272,34 +279,13 @@ export interface UpdateOrganizationRequestDto {
   numberOfFreeRevisionCount: number | null;
 }
 
-export interface PositionResponseDto {
-  id: string;
-  name: string;
-  description: string | null;
-  department: string;
-}
-
-export interface StatesResponseDto {
-  /** @default "CALIFORNIA" */
-  stateName: string;
-  /** @default "CA" */
-  abbreviation: string | null;
-  /** @default "06" */
-  geoId: string | null;
-  /** @default "06" */
-  stateCode: string | null;
-  /** @default "01779778" */
-  ansiCode: string | null;
-  /** @default "California" */
-  stateLongName: string | null;
-}
-
 export interface AhjNoteListResponseDto {
   geoId: string;
   name: string;
   fullAhjName: string;
   updatedBy: string;
   updatedAt: string;
+  type: string | null;
 }
 
 export interface AhjNotePaginatedResponseDto {
@@ -545,6 +531,7 @@ export interface AssignedTaskResponseFields {
   assigneeId: string | null;
   doneAt: string | null;
   description: string | null;
+  duration: number | null;
 }
 
 export interface OrderedServiceResponseFields {
@@ -583,7 +570,7 @@ export interface JobResponseDto {
   /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
   projectId: string;
   isContainsRevisionTask: boolean;
-  propertyType: "Residential" | "Commercial";
+  projectPropertyType: "Residential" | "Commercial";
   billingCodes: string[];
   taskSizeForRevision: "Major" | "Minor" | null;
   /** @example 300.1 */
@@ -608,8 +595,6 @@ export interface JobResponseDto {
     | "On Hold"
     | "Completed"
     | "Canceled";
-  /** @example "Residential" */
-  projectType: string;
   assignedTasks: AssignedTaskResponseFields[];
   orderedServices: OrderedServiceResponseFields[];
   clientInfo: ClientInformationFields;
@@ -709,6 +694,8 @@ export interface UpdateJobRequestDto {
 export interface JobPaginatedResponseFields {
   /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
   id: string;
+  /** @example "Residential" */
+  projectPropertyType: "Residential" | "Commercial";
   /** @example "176 Morningmist Road, Naugatuck, Connecticut 06770" */
   propertyFullAddress: string;
   /** @example 5 */
@@ -720,8 +707,6 @@ export interface JobPaginatedResponseFields {
     | "On Hold"
     | "Completed"
     | "Canceled";
-  /** @example "Residential" */
-  projectType: string;
   /** @example "Ground Mount" */
   mountingType: string;
   orderedServices: OrderedServiceResponseFields[];
@@ -852,13 +837,45 @@ export interface UpdateServiceRequestDto {
   fixedPrice: number | null;
 }
 
+export interface TaskPosition {
+  positionId: string;
+  positionName: string;
+  order: number;
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface PrerequisiteTask {
+  taskId: string;
+  taskName: string;
+}
+
+export interface TaskWorker {
+  userId: string;
+  userName: string;
+  email: string;
+  position: string | null;
+  organizationName: string;
+  organizationId: string;
+}
+
 export interface TaskResponseDto {
   /** @default "" */
   id: string;
   /** @default "" */
+  name: string;
+  /** @default "" */
   serviceId: string;
   /** @default "" */
-  name: string;
+  serviceName: string;
+  /** @default "Structural" */
+  licenseType: "Structural" | "Electrical" | null;
+  taskPositions: TaskPosition[];
+  prerequisiteTask: PrerequisiteTask[];
+  taskWorker: TaskWorker[];
 }
 
 export interface ServiceResponseDto {
@@ -915,7 +932,7 @@ export interface OrderedServiceResponseDto {
   organizationName: string;
   jobName: string;
   price: number | null;
-  priceOrverride: number | null;
+  priceOverride: number | null;
   jobId: string;
   /** @default "Completed" */
   status: "Pending" | "Completed" | "Canceled";
@@ -937,16 +954,47 @@ export interface UpdateRevisionSizeRequestDto {
   sizeForRevision: "Major" | "Minor" | null;
 }
 
+export interface OrderedServicePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: OrderedServiceResponseDto[];
+}
+
 export interface CreateTaskRequestDto {
   /** @default "618d6167-0cff-4c0f-bbf6-ed7d6e14e2f1" */
   serviceId: string;
   /** @default "PV Design QA/QC" */
   name: string;
+  /** @default "Structural" */
+  licenseType: "Structural" | "Electrical" | null;
 }
 
 export interface UpdateTaskRequestDto {
   /** @default "" */
   name: string;
+  /** @default "Structural" */
+  licenseTyp: "Structural" | "Electrical" | null;
+}
+
+export interface TaskPaginatedResponseFields {
+  /** @default "" */
+  id: string;
+  /** @default "" */
+  name: string;
+  /** @default "" */
+  serviceId: string;
+  /** @default "" */
+  serviceName: string;
+  /** @default "Structural" */
+  licenseType: "Structural" | "Electrical" | null;
+  taskPositions: TaskPosition[];
+  prerequisiteTask: PrerequisiteTask[];
 }
 
 export interface TaskPaginatedResponseDto {
@@ -958,7 +1006,33 @@ export interface TaskPaginatedResponseDto {
   totalCount: number;
   /** @example 500 */
   totalPage: number;
-  items: TaskResponseDto[];
+  items: TaskPaginatedResponseFields[];
+}
+
+export interface AddPrerequisiteTaskRequestDto {
+  /** @default "911fe9ac-94b8-4a0e-b478-56e88f4aa7d7" */
+  prerequisiteTaskId: string;
+}
+
+export interface UpdatePositionOrderRequestDto {
+  taskPositions: TaskPosition[];
+}
+
+export interface UnregisteredUserForTaskResponseDto {
+  userId: string;
+  userName: string;
+}
+
+export interface UnregisteredUserForTaskPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: UnregisteredUserForTaskResponseDto[];
 }
 
 export interface AssignTaskRequestDto {
@@ -1014,6 +1088,38 @@ export interface UpdateTaskDurationRequestDto {
 export interface UpdateTaskCostRequestDto {
   /** @default null */
   cost: number | null;
+}
+
+export interface AvailableWorkerResponseDto {
+  id: string;
+  name: string;
+  position: string;
+}
+
+export interface RejectedTaskReasonResponseDto {
+  userId: string;
+  userName: string;
+  taskName: string;
+  rejectedTaskId: string;
+  reason: string;
+  /** @format date-time */
+  rejectedAt: string;
+}
+
+export interface RejectedTaskReasonPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: RejectedTaskReasonResponseDto[];
+}
+
+export interface RejectAssignedTaskRequestDto {
+  reason: string;
 }
 
 export interface CreateInvoiceRequestDto {
@@ -1140,7 +1246,7 @@ export interface Tier {
   /** @default 0.01 */
   startingPoint: number;
   /** @default 100 */
-  finishingPoint: number;
+  finishingPoint: number | null;
   /** @default 10 */
   price: number;
   /** @default 10 */
@@ -1323,7 +1429,7 @@ export interface CreateVendorInvoiceRequestDto {
   organizationId: string;
   /**
    * @format date-time
-   * @default "2023-12-14T09:52:06.869Z"
+   * @default "2023-12-19T11:57:01.688Z"
    */
   invoiceDate: string;
   /**
@@ -1414,7 +1520,7 @@ export interface VendorInvoiceLineItemResponse {
   projectId: string;
   projectNumber: string | null;
   jobDescription: string | null;
-  propertyOwnerName: string;
+  propertyOwnerName: string | null;
   serviceName: string;
   serviceDescription: string | null;
   taskExpenseTotal: number;
@@ -1467,6 +1573,145 @@ export interface VendorPaymentPaginatedResponseDto {
   items: VendorPaymentResponseDto[];
 }
 
+export interface CreatePositionRequestDto {
+  /** @default "Sr. Designer Test" */
+  name: string;
+  /** @default 5 */
+  maxAssignedTasksLimit: number | null;
+  /**
+   * TODO: UPDATE license type (워커와 태스크가 등록된경우 변경 불가하도록)
+   * @default null
+   */
+  licenseType: "Structural" | "Electrical" | null;
+  /** @default null */
+  description?: string | null;
+}
+
+export interface UpdatePositionRequestDto {
+  /** @default "Sr. Designer Update Test" */
+  name: string;
+  /** @default 777 */
+  maxAssignedTasksLimit: number | null;
+  /** @default null */
+  description?: string | null;
+}
+
+export interface PositionTask {
+  taskId: string;
+  taskName: string;
+  autoAssignmentType: string;
+}
+
+export interface Worker {
+  userId: string;
+  userName: string;
+  email: string;
+}
+
+export interface PositionResponseDto {
+  /** @default "" */
+  id: string;
+  /** @default "Sr. Designer" */
+  name: string;
+  /** @default null */
+  description: string | null;
+  /** @default null */
+  maxAssignedTasksLimit: number | null;
+  tasks: PositionTask[];
+  workers: Worker[];
+}
+
+export interface PositionPaginatedResponseFields {
+  /** @default "" */
+  id: string;
+  /** @default "Sr. Designer" */
+  name: string;
+  /** @default null */
+  description: string | null;
+  /** @default null */
+  maxAssignedTasksLimit: number | null;
+  tasks: PositionTask[];
+}
+
+export interface PositionPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PositionPaginatedResponseFields[];
+}
+
+export interface AddPositionTaskRequestDto {
+  /** @default "911fe9ac-94b8-4a0e-b478-56e88f4aa7d7" */
+  taskId: string;
+  /** @default "Residential / Commercial" */
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface UpdatePositionTaskAutoAssignmentTypeRequestDto {
+  /** @default "Residential / Commercial" */
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface AddPositionWorkerRequestDto {
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  userId: string;
+}
+
+export interface PositionUnregisteredUserResponseFields {
+  userId: string;
+  userName: string;
+  email: string;
+}
+
+export interface PositionUnregisteredUserResponseDto {
+  items: PositionUnregisteredUserResponseFields[];
+}
+
+export interface LicensedWorker {
+  userId: string;
+  userName: string;
+  /** @default "Structural" */
+  type: string;
+  expiryDate: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface LicenseResponseDto {
+  /** @default "Structural" */
+  type: "Structural" | "Electrical";
+  /** @default "ALASKA" */
+  state: string;
+  /** @default "AK" */
+  abbreviation: string;
+  workers: LicensedWorker[];
+}
+
+export interface LicensePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: LicenseResponseDto[];
+}
+
 export interface AuthenticationControllerPostSignInTimeParams {
   /** @default 20 */
   jwt: number;
@@ -1477,8 +1722,20 @@ export interface AuthenticationControllerPostSignInTimeParams {
 export interface FindUsersHttpControllerGetFindUsersParams {
   /** @default "hyomin@ojware.com" */
   email?: string | null;
-  /** @default "" */
+  /** @default null */
   organizationId?: string | null;
+  /** @default "BarunCorp" */
+  organizationName?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default null
+   */
+  isContractor?: boolean | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default null
+   */
+  userName?: string | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -1493,14 +1750,35 @@ export interface FindUsersHttpControllerGetFindUsersParams {
   page?: number;
 }
 
+export interface FindLicenseHttpControllerGetParams {
+  /** @default "Structural" */
+  type: "Structural" | "Electrical";
+  /** @default "" */
+  abbreviation: string;
+}
+
+export interface RevokeUserLicenseHttpControllerPostParams {
+  /** @default "Electrical" */
+  type: "Structural" | "Electrical";
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  userId: string;
+  /** @default "ALASKA" */
+  abbreviation: string;
+}
+
 export interface FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams {
+  /** Using LIKE (중간 값 검색) */
   name?: string | null;
+  /** Using LIKE (중간 값 검색) */
   fullAddress?: string | null;
+  /** Using LIKE (중간 값 검색) */
   email?: string | null;
+  /** Using LIKE (중간 값 검색) */
   phoneNumber?: string | null;
   organizationType?: string | null;
   projectPropertyTypeDefaultValue?: string | null;
   mountingTypeDefaultValue?: string | null;
+  isVendor?: boolean | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -1561,9 +1839,9 @@ export interface GeographyControllerGetFindNotesParams {
   page?: number;
   /** @default "1239525" */
   geoId?: string | null;
-  /** @default "city" */
+  /** Using LIKE (중간 값 검색) */
   fullAhjName?: string | null;
-  /** @default "city" */
+  /** Using LIKE (중간 값 검색) */
   name?: string | null;
 }
 
@@ -1585,6 +1863,8 @@ export interface GeographyControllerGetFindNoteUpdateHistoryParams {
 }
 
 export interface FindProjectsHttpControllerFindUsersParams {
+  /** @default "" */
+  organizationId?: string | null;
   /**
    * Using LIKE (중간 값 검색)
    * @default ""
@@ -1595,6 +1875,11 @@ export interface FindProjectsHttpControllerFindUsersParams {
    * @default null
    */
   projectNumber?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default null
+   */
+  projectPropertyOwner?: string | null;
   /**
    * Using LIKE (중간 값 검색)
    * @default "3480 Northwest 33rd Court"
@@ -1633,7 +1918,7 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
    */
   propertyFullAddress?: string | null;
   /** @default "Commercial" */
-  propertyPropertyType?: "Residential" | "Commercial" | null;
+  projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Completed" */
   jobStatus?:
     | "Not Started"
@@ -1751,6 +2036,22 @@ export interface FindTaskPaginatedHttpControllerGetParams {
    * @example 1
    */
   page?: number;
+}
+
+export interface FindUnregisteredUsersForTaskHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  taskId: string;
 }
 
 export interface FindAssignedTaskPaginatedHttpControllerGetParams {
@@ -1897,8 +2198,6 @@ export interface FindVendorInvoicePaginatedHttpControllerGetParams {
    * @default ""
    */
   organizationName?: string | null;
-  /** @default "Issued" */
-  status?: "Unissued" | "Issued" | "Paid" | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -1953,6 +2252,38 @@ export interface FindVendorInvoiceLineItemHttpControllerGetParams {
 }
 
 export interface FindVendorPaymentPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindPositionPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindLicensePaginatedHttpControllerGetParams {
+  /** @default "Structural" */
+  type: "Structural" | "Electrical";
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2208,42 +2539,6 @@ export class Api<
     /**
      * No description
      *
-     * @name AuthenticationControllerPostSignUp
-     * @request POST:/auth/signup
-     */
-    authenticationControllerPostSignUp: (
-      data: SignUpRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/auth/signup`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AuthenticationControllerPostSignUpTest
-     * @request POST:/auth/signup-test
-     */
-    authenticationControllerPostSignUpTest: (
-      data: SignUpTestRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/auth/signup-test`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name AuthenticationControllerGetMe
      * @request GET:/auth/me
      */
@@ -2265,6 +2560,26 @@ export class Api<
         path: `/auth/refresh`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+  };
+  signUp = {
+    /**
+     * No description
+     *
+     * @name SignUpHttpControllerPost
+     * @request POST:/sign-up/{userId}
+     */
+    signUpHttpControllerPost: (
+      userId: string,
+      data: SignUpRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/sign-up/${userId}`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
@@ -2371,43 +2686,6 @@ export class Api<
     /**
      * No description
      *
-     * @name UsersControllerPostSendInvitationMail
-     * @request POST:/users/invitations
-     */
-    usersControllerPostSendInvitationMail: (
-      data: CreateInvitationMailRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<object, any>({
-        path: `/users/invitations`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description 등록된 모든 라이센스 조회 라이센스: 특정 State에서 작업 허가 받은 Member의 자격증
-     *
-     * @name UsersControllerPostRegisterMemberLicense
-     * @request POST:/users/member-licenses
-     */
-    usersControllerPostRegisterMemberLicense: (
-      data: CreateLicenseRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/users/member-licenses`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CreateUserHttpContollerCreateUnregisteredUser
      * @request POST:/users
      */
@@ -2439,6 +2717,199 @@ export class Api<
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddAvailableTaskHttpControllerPost
+     * @request POST:/users/{userId}/available-tasks
+     */
+    addAvailableTaskHttpControllerPost: (
+      userId: string,
+      data: AddAvailableTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/${userId}/available-tasks`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeleteAvailableTaskHttpControllerDelete
+     * @request DELETE:/users/{userId}/available-tasks/{taskId}
+     */
+    deleteAvailableTaskHttpControllerDelete: (
+      userId: string,
+      taskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/${userId}/available-tasks/${taskId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ModifyAssignmentTypeOfAvailableTaskHttpControllerPatch
+     * @request PATCH:/users/{userId}/available-tasks/{taskId}
+     */
+    modifyAssignmentTypeOfAvailableTaskHttpControllerPatch: (
+      userId: string,
+      taskId: string,
+      data: ModifyAssignmentTypeOfAvailableTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/${userId}/available-tasks/${taskId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name HandsDownHttpControllerPatch
+     * @request POST:/users/hands/down
+     */
+    handsDownHttpControllerPatch: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/users/hands/down`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name HandsUpHttpControllerPatch
+     * @request POST:/users/hands/up
+     */
+    handsUpHttpControllerPatch: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/users/hands/up`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CheckHandsStatusHttpControllerGet
+     * @request GET:/users/hands/status
+     */
+    checkHandsStatusHttpControllerGet: (params: RequestParams = {}) =>
+      this.request<HandsStatusResponseDto, any>({
+        path: `/users/hands/status`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  licenses = {
+    /**
+     * No description
+     *
+     * @name AppointUserLicenseHttpControllerPost
+     * @request POST:/licenses/{abbreviation}
+     */
+    appointUserLicenseHttpControllerPost: (
+      abbreviation: string,
+      data: AppointUserLicenseRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/licenses/${abbreviation}`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindLicenseHttpControllerGet
+     * @request GET:/licenses/{abbreviation}
+     */
+    findLicenseHttpControllerGet: (
+      { abbreviation, ...query }: FindLicenseHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<LicenseResponseDto, any>({
+        path: `/licenses/${abbreviation}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RevokeUserLicenseHttpControllerPost
+     * @request DELETE:/licenses/{abbreviation}/users/{userId}
+     */
+    revokeUserLicenseHttpControllerPost: (
+      {
+        userId,
+        abbreviation,
+        ...query
+      }: RevokeUserLicenseHttpControllerPostParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/licenses/${abbreviation}/users/${userId}`,
+        method: "DELETE",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindLicensePaginatedHttpControllerGet
+     * @request GET:/licenses
+     */
+    findLicensePaginatedHttpControllerGet: (
+      query: FindLicensePaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<LicensePaginatedResponseDto, any>({
+        path: `/licenses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
+  invitations = {
+    /**
+     * No description
+     *
+     * @name InviteHttpControllerPost
+     * @request POST:/invitations
+     */
+    inviteHttpControllerPost: (
+      data: InviteRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/invitations`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
@@ -2552,35 +3023,6 @@ export class Api<
         path: `/organizations/members/my`,
         method: "GET",
         query: query,
-        format: "json",
-        ...params,
-      }),
-  };
-  departments = {
-    /**
-     * No description
-     *
-     * @name DepartmentControllerGetFindAllPositions
-     * @request GET:/departments/positions
-     */
-    departmentControllerGetFindAllPositions: (params: RequestParams = {}) =>
-      this.request<PositionResponseDto[], any>({
-        path: `/departments/positions`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DepartmentControllerGetFindAllStates
-     * @request GET:/departments/states
-     */
-    departmentControllerGetFindAllStates: (params: RequestParams = {}) =>
-      this.request<StatesResponseDto[], any>({
-        path: `/departments/states`,
-        method: "GET",
         format: "json",
         ...params,
       }),
@@ -3184,7 +3626,7 @@ export class Api<
       }: FindOrderedServicePaginatedHttpControllerGetParams,
       params: RequestParams = {}
     ) =>
-      this.request<OrderedServiceResponseDto, any>({
+      this.request<OrderedServicePaginatedResponseDto, any>({
         path: `/ordered-services`,
         method: "GET",
         query: query,
@@ -3358,22 +3800,6 @@ export class Api<
     /**
      * No description
      *
-     * @name DeleteTaskHttpControllerDelete
-     * @request DELETE:/tasks/{taskId}
-     */
-    deleteTaskHttpControllerDelete: (
-      taskId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/tasks/${taskId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name FindTaskHttpControllerGet
      * @request GET:/tasks/{taskId}
      */
@@ -3381,6 +3807,79 @@ export class Api<
       this.request<TaskResponseDto, any>({
         path: `/tasks/${taskId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddPrerequisiteTaskHttpControllerPost
+     * @request POST:/tasks/{taskId}/pre-tasks
+     */
+    addPrerequisiteTaskHttpControllerPost: (
+      taskId: string,
+      data: AddPrerequisiteTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tasks/${taskId}/pre-tasks`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePrerequisiteTaskHttpControllerDelete
+     * @request DELETE:/tasks/{taskId}/pre-task/{prerequisiteTaskId}
+     */
+    deletePrerequisiteTaskHttpControllerDelete: (
+      taskId: string,
+      prerequisiteTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tasks/${taskId}/pre-task/${prerequisiteTaskId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePositionOrderHttpControllerPatch
+     * @request PATCH:/tasks/{taskId}/position-order
+     */
+    updatePositionOrderHttpControllerPatch: (
+      taskId: string,
+      data: UpdatePositionOrderRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tasks/${taskId}/position-order`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindUnregisteredUsersForTaskHttpControllerGet
+     * @request GET:/tasks/{taskId}/unregistered-users
+     */
+    findUnregisteredUsersForTaskHttpControllerGet: (
+      { taskId, ...query }: FindUnregisteredUsersForTaskHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<UnregisteredUserForTaskPaginatedResponseDto, any>({
+        path: `/tasks/${taskId}/unregistered-users`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -3491,6 +3990,73 @@ export class Api<
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindAvailableWorkersHttpControllerGet
+     * @request GET:/assigned-tasks/{assignedTaskId}/available-workers
+     */
+    findAvailableWorkersHttpControllerGet: (
+      assignedTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<AvailableWorkerResponseDto[], any>({
+        path: `/assigned-tasks/${assignedTaskId}/available-workers`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UnassignAssignedTaskHttpControllerPatch
+     * @request PATCH:/assigned-tasks/{assignedTaskId}/unassign
+     */
+    unassignAssignedTaskHttpControllerPatch: (
+      assignedTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/assigned-tasks/${assignedTaskId}/unassign`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RejectAssignedTaskHttpControllerPatch
+     * @request PATCH:/assigned-tasks/{assignedTaskId}/reject
+     */
+    rejectAssignedTaskHttpControllerPatch: (
+      assignedTaskId: string,
+      data: RejectAssignedTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/assigned-tasks/${assignedTaskId}/reject`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  rejectedTaskReasons = {
+    /**
+     * No description
+     *
+     * @name FindRejectedTaskReasonHttpControllerGet
+     * @request GET:/rejected-task-reasons
+     */
+    findRejectedTaskReasonHttpControllerGet: (params: RequestParams = {}) =>
+      this.request<RejectedTaskReasonPaginatedResponseDto, any>({
+        path: `/rejected-task-reasons`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };
@@ -4149,12 +4715,224 @@ export class Api<
         ...params,
       }),
   };
+  positions = {
+    /**
+     * No description
+     *
+     * @name CreatePositionHttpControllerPost
+     * @request POST:/positions
+     */
+    createPositionHttpControllerPost: (
+      data: CreatePositionRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/positions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPositionPaginatedHttpControllerGet
+     * @request GET:/positions
+     */
+    findPositionPaginatedHttpControllerGet: (
+      query: FindPositionPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PositionPaginatedResponseDto, any>({
+        path: `/positions`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePositionHttpControllerPatch
+     * @request PATCH:/positions/{positionId}
+     */
+    updatePositionHttpControllerPatch: (
+      positionId: string,
+      data: UpdatePositionRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePositionHttpControllerDelete
+     * @request DELETE:/positions/{positionId}
+     */
+    deletePositionHttpControllerDelete: (
+      positionId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPositionHttpControllerGet
+     * @request GET:/positions/{positionId}
+     */
+    findPositionHttpControllerGet: (
+      positionId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<PositionResponseDto, any>({
+        path: `/positions/${positionId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddPositionTaskHttpControllerPost
+     * @request POST:/positions/{positionId}/tasks
+     */
+    addPositionTaskHttpControllerPost: (
+      positionId: string,
+      data: AddPositionTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/tasks`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePositionTaskHttpControllerDelete
+     * @request DELETE:/positions/{positionId}/tasks/{taskId}
+     */
+    deletePositionTaskHttpControllerDelete: (
+      positionId: string,
+      taskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/tasks/${taskId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePositionTaskAutoAssignmentTypeHttpControllerPatch
+     * @request PATCH:/positions/{positionId}/tasks/{taskId}
+     */
+    updatePositionTaskAutoAssignmentTypeHttpControllerPatch: (
+      positionId: string,
+      taskId: string,
+      data: UpdatePositionTaskAutoAssignmentTypeRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/tasks/${taskId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddPositionWorkerHttpControllerPost
+     * @request POST:/positions/{positionId}/users
+     */
+    addPositionWorkerHttpControllerPost: (
+      positionId: string,
+      data: AddPositionWorkerRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/users`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePositionWorkerHttpControllerDelete
+     * @request DELETE:/positions/{positionId}/users/{userId}
+     */
+    deletePositionWorkerHttpControllerDelete: (
+      positionId: string,
+      userId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/users/${userId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPositionUnRegisteredUsersHttpControllerGet
+     * @request GET:/positions/{positionId}/unregistered-users
+     */
+    findPositionUnRegisteredUsersHttpControllerGet: (
+      positionId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<PositionUnregisteredUserResponseDto, any>({
+        path: `/positions/${positionId}/unregistered-users`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
 }
 
 /* -------------------------------------------------------------------------- */
 /*               위의 코드는 백엔드 코드로부터 Copy & Paste 한 내용입니다.               */
 /*               수정이 필요한 경우, 백엔드 코드로부터 Copy & Paste 합니다.              */
 /* -------------------------------------------------------------------------- */
-const api = new Api({ baseURL: process.env.NEXT_PUBLIC_API_URL });
+import QueryString from "qs";
+
+const api = new Api({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  paramsSerializer: (params) => {
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(([k, v]) => {
+        return v !== "";
+      })
+    );
+
+    return QueryString.stringify(filteredParams, { skipNulls: true });
+  },
+});
 
 export default api;

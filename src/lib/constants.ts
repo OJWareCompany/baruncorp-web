@@ -4,6 +4,7 @@ import {
   CircleDashed,
   CircleDot,
   CircleEllipsis,
+  LucideIcon,
   PauseCircle,
   PlayCircle,
   XCircle,
@@ -27,73 +28,90 @@ export const serverErrorToast: ToastProps & { description: string } = {
   variant: "destructive",
 };
 
-const STATUSES = {
-  NOT_STARTED: {
-    value: "Not Started",
-    Icon: CircleDot,
-    color: "text-neutral-500",
-  },
-  IN_PROGRESS: {
-    value: "In Progress",
-    Icon: PlayCircle,
-    color: "text-blue-500",
-  },
-  COMPLETED: {
-    value: "Completed",
-    Icon: CheckCircle2,
-    color: "text-green-500",
-  },
-  ON_HOLD: {
-    value: "On Hold",
-    Icon: PauseCircle,
-    color: "text-yellow-500",
-  },
-  CANCELED: {
-    value: "Canceled",
-    Icon: XCircle,
-    color: "text-red-500",
-  },
-  PENDING: {
+export const orderedServiceStatuses: Record<
+  OrderedServiceStatusEnum,
+  {
+    value: OrderedServiceStatusEnum;
+    Icon: LucideIcon;
+    color: string;
+  }
+> = {
+  Pending: {
     value: "Pending",
     Icon: CircleEllipsis,
     color: "text-neutral-500",
   },
-  UNISSUED: {
+  Completed: {
+    value: "Completed",
+    Icon: CheckCircle2,
+    color: "text-green-500",
+  },
+  Canceled: {
+    value: "Canceled",
+    Icon: XCircle,
+    color: "text-red-500",
+  },
+};
+
+export const jobStatuses: Record<
+  JobStatusEnum,
+  {
+    value: JobStatusEnum;
+    Icon: LucideIcon;
+    color: string;
+  }
+> = {
+  "Not Started": {
+    value: "Not Started",
+    Icon: CircleDot,
+    color: "text-neutral-500",
+  },
+  "In Progress": {
+    value: "In Progress",
+    Icon: PlayCircle,
+    color: "text-blue-500",
+  },
+  Completed: {
+    value: "Completed",
+    Icon: CheckCircle2,
+    color: "text-green-500",
+  },
+  Canceled: {
+    value: "Canceled",
+    Icon: XCircle,
+    color: "text-red-500",
+  },
+  "On Hold": {
+    value: "On Hold",
+    Icon: PauseCircle,
+    color: "text-yellow-500",
+  },
+};
+
+export const invoiceStatuses: Record<
+  InvoiceStatusEnum,
+  {
+    value: InvoiceStatusEnum;
+    Icon: LucideIcon;
+    color: string;
+  }
+> = {
+  Unissued: {
     value: "Unissued",
     Icon: CircleDashed,
     color: "text-neutral-500",
   },
-  ISSUED: {
+  Issued: {
     value: "Issued",
     Icon: Circle,
     color: "text-neutral-500",
   },
-  PAID: {
+  Paid: {
     value: "Paid",
     Icon: CheckCircle2,
     color: "text-green-500",
   },
 };
-
-export const statuses = [
-  STATUSES.NOT_STARTED,
-  STATUSES.IN_PROGRESS,
-  STATUSES.COMPLETED,
-  STATUSES.ON_HOLD,
-  STATUSES.CANCELED,
-];
-
-export const orderedServiceStatuses = [
-  STATUSES.PENDING,
-  STATUSES.COMPLETED,
-  STATUSES.CANCELED,
-];
-
-export const invoiceStatuses = [
-  STATUSES.UNISSUED,
-  STATUSES.ISSUED,
-  STATUSES.PAID,
-];
 
 /**
  * Transformer
@@ -285,6 +303,23 @@ export const transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum =
 // "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | null | undefined => "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | ""
 export const transformNullishJobStatusEnumIntoJobStatusEnumWithEmptyString =
   JobStatusEnum.nullish().transform((v) => v ?? "");
+export type JobStatusEnum = z.infer<typeof JobStatusEnum>;
+
+/* -------------------------------------------------------------------------- */
+
+// "Pending" | "Completed" | "Canceled"
+export const OrderedServiceStatusEnum = z.enum([
+  "Pending",
+  "Completed",
+  "Canceled",
+]);
+export type OrderedServiceStatusEnum = z.infer<typeof OrderedServiceStatusEnum>;
+
+/* -------------------------------------------------------------------------- */
+
+// "Unissued" | "Issued" | "Paid"
+export const InvoiceStatusEnum = z.enum(["Unissued", "Issued", "Paid"]);
+export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
@@ -379,36 +414,71 @@ export const ServicePricingTypeEnum = z.enum(["Standard", "Fixed"], {
   errorMap: () => ({ message: "Pricing Type is required" }),
 });
 
+/* -------------------------------------------------------------------------- */
+
 // "Tier" | "Flat"
 export const ResidentialNewPriceChargeTypeEnum = z.enum(["Tier", "Flat"], {
   errorMap: () => ({ message: "Charge Type is required" }),
 });
-
 // "Tier" | "Flat" | ""
 export const ResidentialNewPriceChargeTypeEnumWithEmptyString =
   ResidentialNewPriceChargeTypeEnum.or(z.literal(""));
-
 // "Tier" | "Flat" | "" => "Tier" | "Flat" | null
 export const transformResidentialNewPriceChargeTypeEnumWithEmptyStringIntoNullableResidentialNewPriceChargeTypeEnum =
   ResidentialNewPriceChargeTypeEnumWithEmptyString.transform((v) =>
     v === "" ? null : v
   );
-
 // "Tier" | "Flat" | null | undefined => "Tier" | "Flat" | ""
 export const transformNullishResidentialNewPriceChargeTypeEnumIntoResidentialNewPriceChargeTypeEnumWithEmptyString =
   ResidentialNewPriceChargeTypeEnum.nullish().transform((v) => v ?? "");
+
+/* -------------------------------------------------------------------------- */
 
 // "Fixed" | "Percentage"
 export const ExpenseTypeEnum = z.enum(["Fixed", "Percentage"], {
   errorMap: () => ({ message: "Expense Type is required" }),
 });
-
 // "Fixed" | "Percentage" | ""
 export const ExpenseTypeEnumWithEmptyString = ExpenseTypeEnum.or(z.literal(""));
-
 // "Fixed" | "Percentage" | "" => "Fixed" | "Percentage" | null
 export const transformExpenseTypeEnumWithEmptyStringIntoNullableExpenseTypeEnum =
   ExpenseTypeEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+
+export type ExpenseTypeEnum = z.infer<typeof ExpenseTypeEnum>;
+
+/* -------------------------------------------------------------------------- */
+
+// "Structural" | "Electrical"
+export const LicenseTypeEnum = z.enum(["Structural", "Electrical"], {
+  errorMap: () => ({ message: "License Type is required" }),
+});
+// "Structural" | "Electrical" | ""
+export const LicenseTypeEnumWithEmptyString = LicenseTypeEnum.or(z.literal(""));
+// "Structural" | "Electrical" | "" => "Structural" | "Electrical" | null
+export const transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum =
+  LicenseTypeEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+// "Structural" | "Electrical" | null | undefined => "Structural" | "Electrical" | ""
+export const transformNullishLicenseTypeEnumIntoLicenseTypeEnumWithEmptyString =
+  LicenseTypeEnum.nullish().transform((v) => v ?? "");
+
+export type LicenseTypeEnum = z.infer<typeof LicenseTypeEnum>;
+
+/* -------------------------------------------------------------------------- */
+
+// "None" | "Residential" | "Commercial" | "Residential / Commercial"
+export const AutoAssignmentPropertyTypeEnum = z.enum(
+  ["None", "Residential", "Commercial", "Residential / Commercial"],
+  {
+    errorMap: () => ({ message: "Auto Assignment Property Type is required" }),
+  }
+);
+// "None" | "Residential" | "Commercial" | "Residential / Commercial" | ""
+export const AutoAssignmentPropertyTypeEnumWithEmptyString =
+  AutoAssignmentPropertyTypeEnum.or(z.literal(""));
+
+export type AutoAssignmentPropertyTypeEnum = z.infer<
+  typeof AutoAssignmentPropertyTypeEnum
+>;
 
 /* -------------------------------------------------------------------------- */
 
@@ -423,3 +493,239 @@ export const transformExpenseTypeEnumWithEmptyStringIntoNullableExpenseTypeEnum 
  */
 export const toTwoDecimalRegExp = new RegExp(/^\d+(\.\d{0,2})?$/);
 export const digitRegExp = new RegExp(/^\d+$/);
+
+/* -------------------------------------------------------------------------- */
+
+export const BARUNCORP_ORGANIZATION_ID = "asda";
+
+/* -------------------------------------------------------------------------- */
+
+// "Yes" | "No"
+export const YesOrNoEnum = z.enum(["Yes", "No"]);
+
+// "Yes" | "No" | null => true | false | null
+export const transformNullableYesOrNoEnumIntoNullableBoolean =
+  YesOrNoEnum.nullable().transform((v) => {
+    if (v == null) {
+      return null;
+    }
+
+    if (v === "Yes") {
+      return true;
+    }
+
+    return false;
+  });
+
+/* -------------------------------------------------------------------------- */
+
+export const STATES = [
+  {
+    stateName: "ALABAMA",
+    abbreviation: "AL",
+  },
+  {
+    stateName: "ALASKA",
+    abbreviation: "AK",
+  },
+  {
+    stateName: "ARIZONA",
+    abbreviation: "AZ",
+  },
+  {
+    stateName: "ARKANSAS",
+    abbreviation: "AR",
+  },
+  {
+    stateName: "CALIFORNIA",
+    abbreviation: "CA",
+  },
+  {
+    stateName: "COLORADO",
+    abbreviation: "CO",
+  },
+  {
+    stateName: "CONNECTICUT",
+    abbreviation: "CT",
+  },
+  {
+    stateName: "DELAWARE",
+    abbreviation: "DE",
+  },
+  {
+    stateName: "DISTRICT OF COLUMBIA",
+    abbreviation: "DC",
+  },
+  {
+    stateName: "FLORIDA",
+    abbreviation: "FL",
+  },
+  {
+    stateName: "GEORGIA",
+    abbreviation: "GA",
+  },
+  {
+    stateName: "HAWAII",
+    abbreviation: "HI",
+  },
+  {
+    stateName: "IDAHO",
+    abbreviation: "ID",
+  },
+  {
+    stateName: "ILLINOIS",
+    abbreviation: "IL",
+  },
+  {
+    stateName: "INDIANA",
+    abbreviation: "IN",
+  },
+  {
+    stateName: "IOWA",
+    abbreviation: "IA",
+  },
+  {
+    stateName: "KANSAS",
+    abbreviation: "KS",
+  },
+  {
+    stateName: "KENTUCKY",
+    abbreviation: "KY",
+  },
+  {
+    stateName: "LOUISIANA",
+    abbreviation: "LA",
+  },
+  {
+    stateName: "MAINE",
+    abbreviation: "ME",
+  },
+  {
+    stateName: "MARYLAND",
+    abbreviation: "MD",
+  },
+  {
+    stateName: "MASSACHUSETTS",
+    abbreviation: "MA",
+  },
+  {
+    stateName: "MICHIGAN",
+    abbreviation: "MI",
+  },
+  {
+    stateName: "MINNESOTA",
+    abbreviation: "MN",
+  },
+  {
+    stateName: "MISSISSIPPI",
+    abbreviation: "MS",
+  },
+  {
+    stateName: "MISSOURI",
+    abbreviation: "MO",
+  },
+  {
+    stateName: "MONTANA",
+    abbreviation: "MT",
+  },
+  {
+    stateName: "NEBRASKA",
+    abbreviation: "NE",
+  },
+  {
+    stateName: "NEVADA",
+    abbreviation: "NV",
+  },
+  {
+    stateName: "NEW HAMPSHIRE",
+    abbreviation: "NH",
+  },
+  {
+    stateName: "NEW JERSEY",
+    abbreviation: "NJ",
+  },
+  {
+    stateName: "NEW MEXICO",
+    abbreviation: "NM",
+  },
+  {
+    stateName: "NEW YORK",
+    abbreviation: "NY",
+  },
+  {
+    stateName: "NORTH CAROLINA",
+    abbreviation: "NC",
+  },
+  {
+    stateName: "NORTH DAKOTA",
+    abbreviation: "ND",
+  },
+  {
+    stateName: "OHIO",
+    abbreviation: "OH",
+  },
+  {
+    stateName: "OKLAHOMA",
+    abbreviation: "OK",
+  },
+  {
+    stateName: "OREGON",
+    abbreviation: "OR",
+  },
+  {
+    stateName: "PENNSYLVANIA",
+    abbreviation: "PA",
+  },
+  {
+    stateName: "PUERTO RICO",
+    abbreviation: "PR",
+  },
+  {
+    stateName: "RHODE ISLAND",
+    abbreviation: "RI",
+  },
+  {
+    stateName: "SOUTH CAROLINA",
+    abbreviation: "SC",
+  },
+  {
+    stateName: "SOUTH DAKOTA",
+    abbreviation: "SD",
+  },
+  {
+    stateName: "TENNESSEE",
+    abbreviation: "TN",
+  },
+  {
+    stateName: "TEXAS",
+    abbreviation: "TX",
+  },
+  {
+    stateName: "UTAH",
+    abbreviation: "UT",
+  },
+  {
+    stateName: "VERMONT",
+    abbreviation: "VT",
+  },
+  {
+    stateName: "VIRGINIA",
+    abbreviation: "VA",
+  },
+  {
+    stateName: "WASHINGTON",
+    abbreviation: "WA",
+  },
+  {
+    stateName: "WEST VIRGINIA",
+    abbreviation: "WV",
+  },
+  {
+    stateName: "WISCONSIN",
+    abbreviation: "WI",
+  },
+  {
+    stateName: "WYOMING",
+    abbreviation: "WY",
+  },
+];

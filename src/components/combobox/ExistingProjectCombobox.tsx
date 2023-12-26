@@ -19,17 +19,17 @@ import { cn } from "@/lib/utils";
 import useProjectsQuery from "@/queries/useProjectsQuery";
 
 interface Props {
-  organizationName: string;
+  organizationId: string;
   projectId: string;
   onProjectIdChange: (newProjectId: string) => void;
 }
 
 const ExistingProjectCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ organizationName, projectId, onProjectIdChange }, ref) => {
+  ({ organizationId, projectId, onProjectIdChange }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const { data: projects, isLoading: isProjectsQueryLoading } =
-      useProjectsQuery({ organizationName, limit: Number.MAX_SAFE_INTEGER });
+      useProjectsQuery({ organizationId, limit: Number.MAX_SAFE_INTEGER });
 
     const placeholderText = "Select an existing project";
 

@@ -1,13 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import JobsTable from "./JobsTable";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Sheet,
@@ -28,11 +28,8 @@ import { Calendar } from "@/components/ui/calendar";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
 import ServicePeriodMonthByOrganizationSelect from "@/components/combobox/ServicePeriodMonthByOrganizationSelect";
-import useJobsToInvoiceQuery from "@/queries/useJobsToInvoiceQuery";
 import { Textarea } from "@/components/ui/textarea";
 import LoadingButton from "@/components/LoadingButton";
-import usePostInvoiceMutation from "@/mutations/usePostInvoiceMutation";
-import { AffixInput } from "@/components/AffixInput";
 import {
   Form,
   FormControl,
@@ -52,6 +49,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TermsEnum, transformStringIntoNullableString } from "@/lib/constants";
+import useJobsToInvoiceQuery from "@/queries/useJobsToInvoiceQuery";
+import { AffixInput } from "@/components/AffixInput";
+import usePostInvoiceMutation from "@/mutations/usePostInvoiceMutation";
 
 const formSchema = z.object({
   organizationId: z
@@ -91,22 +91,25 @@ export default function NewClientInvoiceSheet() {
   const watchTerms = form.watch("terms");
   const watchServicePeriodMonth = form.watch("servicePeriodMonth");
 
-  const { data: jobsToInvoice } = useJobsToInvoiceQuery({
-    clientOrganizationId: watchOrganizationId,
-    serviceMonth: format(
-      new Date(watchServicePeriodMonth.slice(0, 7)),
-      "yyyy-MM"
-    ),
-  });
+  const { data: jobsToInvoice } = useJobsToInvoiceQuery(
+    {
+      clientOrganizationId: watchOrganizationId,
+      serviceMonth:
+        watchServicePeriodMonth !== ""
+          ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
+          : "",
+    },
+    true
+  );
   const { mutateAsync } = usePostInvoiceMutation();
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      form.reset();
-      setIsSubmitSuccessful(false);
-    }
-  }, [form, isSubmitSuccessful]);
+  // useEffect(() => {
+  //   if (isSubmitSuccessful) {
+  //     form.reset();
+  //     setIsSubmitSuccessful(false);
+  //   }
+  // }, [form, isSubmitSuccessful]);
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
@@ -163,7 +166,7 @@ export default function NewClientInvoiceSheet() {
                         <FormControl>
                           <InvoiceOrganizationsCombobox
                             organizationId={field.value}
-                            onSelect={(organizationId) => {
+                            onOrganizationIdChange={(organizationId) => {
                               field.onChange(organizationId);
                               form.setValue("servicePeriodMonth", "", {
                                 shouldValidate: form.formState.isSubmitted,
@@ -274,7 +277,7 @@ export default function NewClientInvoiceSheet() {
                         addDays(watchInvoiceDate, Number(watchTerms)),
                         "MM-dd-yyyy"
                       )}
-                      readOnly
+                      disabled
                     />
                   </Item>
                 </RowItemsContainer>
@@ -296,7 +299,7 @@ export default function NewClientInvoiceSheet() {
                   isLoading={form.formState.isSubmitting}
                   className="w-full"
                 >
-                  Create
+                  Submit
                 </LoadingButton>
               </form>
             </Form>
@@ -313,7 +316,7 @@ export default function NewClientInvoiceSheet() {
                         <span className="text-muted-foreground">$</span>
                       }
                       value={jobsToInvoice.subtotal}
-                      readOnly
+                      disabled
                     />
                   </Item>
                   <Item>
@@ -323,7 +326,7 @@ export default function NewClientInvoiceSheet() {
                         <span className="text-muted-foreground">$</span>
                       }
                       value={jobsToInvoice.discount}
-                      readOnly
+                      disabled
                     />
                   </Item>
                   <Item>
@@ -333,10 +336,11 @@ export default function NewClientInvoiceSheet() {
                         <span className="text-muted-foreground">$</span>
                       }
                       value={jobsToInvoice.total}
-                      readOnly
+                      disabled
                     />
                   </Item>
                 </RowItemsContainer>
+                <JobsTable jobsToInvoice={jobsToInvoice} />
                 {/* <BaseTable
                   columns={lineItemColumns}
                   data={jobsToInvoice.items ?? []}

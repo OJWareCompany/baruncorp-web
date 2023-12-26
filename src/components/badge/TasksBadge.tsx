@@ -5,7 +5,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { AssignedTaskResponseFields } from "@/api";
-import { statuses } from "@/lib/constants";
+import { jobStatuses } from "@/lib/constants";
 
 interface Props {
   tasks: AssignedTaskResponseFields[];
@@ -24,9 +24,7 @@ export default function TasksBadge({ tasks }: Props) {
       <HoverCardContent className="p-0 w-[auto] cursor-default" side="right">
         <div>
           {tasks.map((task) => {
-            const status = statuses.find(
-              (status) => status.value === task.status
-            );
+            const status = jobStatuses[task.status];
 
             return (
               <div

@@ -201,7 +201,7 @@
 
 //   return (
 //     <Sheet {...dialogProps}>
-//       <SheetContent className="sm:max-w-[1400px] w-full overflow-auto">
+//       <SheetContent className="sm:max-w-[1400px] w-full">
 //         <SheetHeader className="mb-6">
 //           <SheetTitle>New Project</SheetTitle>
 //         </SheetHeader>

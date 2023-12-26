@@ -6,8 +6,8 @@ import { useProvidedRefOrCreate } from "@/hook/useProvidedRefOrCreate";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
-  prefixElement?: React.ReactElement;
-  suffixElement?: React.ReactElement;
+  prefixElement?: React.ReactElement | null;
+  suffixElement?: React.ReactElement | null;
 }
 
 /**
@@ -57,7 +57,7 @@ const AffixInput = React.forwardRef<HTMLInputElement, InputProps>(
         {prefixElement}
         <input
           className={cn(
-            "bg-background flex-1 w-full min-w-0 h-full px-3 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed"
+            "bg-background flex-1 w-full min-w-0 h-full px-3 placeholder:text-muted-foreground focus-visible:outline-none disabled:pointer-events-none"
           )}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}

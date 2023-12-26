@@ -5,6 +5,7 @@ import JobsTable from "./JobsTable";
 import useProjectQuery from "@/queries/useProjectQuery";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
+import useNotFound from "@/hook/useNotFound";
 
 interface Props {
   params: {
@@ -13,8 +14,13 @@ interface Props {
 }
 
 export default function Page({ params: { projectId } }: Props) {
-  const { data: project, isLoading: isProjectQueryLoading } =
-    useProjectQuery(projectId);
+  const {
+    data: project,
+    isLoading: isProjectQueryLoading,
+    error: projectQueryError,
+  } = useProjectQuery(projectId);
+  console.log("🚀 ~ file: page.tsx:22 ~ Page ~ project:", project);
+  useNotFound(projectQueryError);
 
   if (isProjectQueryLoading || project == null) {
     return <PageLoading />;

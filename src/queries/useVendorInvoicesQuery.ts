@@ -11,7 +11,8 @@ export const getVendorInvoicesQueryKey = (
 ) => ["vendor-invoices", "list", params];
 
 const useVendorInvoicesQuery = (
-  params: FindVendorInvoicePaginatedHttpControllerGetParams
+  params: FindVendorInvoicePaginatedHttpControllerGetParams,
+  keepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -24,7 +25,7 @@ const useVendorInvoicesQuery = (
       api.vendorInvoices
         .findVendorInvoicePaginatedHttpControllerGet(params)
         .then(({ data }) => data),
-    keepPreviousData: true,
+    keepPreviousData,
   });
 };
 

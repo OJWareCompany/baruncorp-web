@@ -1,18 +1,29 @@
-// import { useQuery } from "@tanstack/react-query";
-// import { AxiosError } from "axios";
-// import useApi from "@/hook/useApi";
-// import { PositionResponseDto } from "@/api";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import useApi from "@/hook/useApi";
+import {
+  FindPositionPaginatedHttpControllerGetParams,
+  PositionPaginatedResponseDto,
+} from "@/api";
 
-// const usePositionsQuery = () => {
-//   const api = useApi();
+export const getPositionsQueryKey = (
+  params: FindPositionPaginatedHttpControllerGetParams
+) => ["positions", "list", params];
 
-//   return useQuery<PositionResponseDto[], AxiosError<ErrorResponseData>>({
-//     queryKey: ["positions", "list"],
-//     queryFn: () =>
-//       api.departments
-//         .departmentControllerGetFindAllPositions()
-//         .then(({ data }) => data),
-//   });
-// };
+const usePositionsQuery = (
+  params: FindPositionPaginatedHttpControllerGetParams,
+  keepPreviousData?: boolean
+) => {
+  const api = useApi();
 
-// export default usePositionsQuery;
+  return useQuery<PositionPaginatedResponseDto, AxiosError<ErrorResponseData>>({
+    queryKey: getPositionsQueryKey(params),
+    queryFn: () =>
+      api.positions
+        .findPositionPaginatedHttpControllerGet(params)
+        .then(({ data }) => data),
+    keepPreviousData,
+  });
+};
+
+export default usePositionsQuery;

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useEffect } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, RotateCcw } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -26,13 +26,42 @@ import ItemsContainer from "@/components/ItemsContainer";
 import { ServiceResponseDto, TaskResponseDto } from "@/api";
 import usePatchTaskMutation from "@/mutations/usePatchTaskMutation";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
+import {
+  LicenseTypeEnum,
+  LicenseTypeEnumWithEmptyString,
+  transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum,
+  transformNullishLicenseTypeEnumIntoLicenseTypeEnumWithEmptyString,
+} from "@/lib/constants";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
+  licenseType: LicenseTypeEnumWithEmptyString,
   service: z.string().trim().min(1, { message: "Service is required" }),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
+
+const getFieldValues = (
+  task: TaskResponseDto,
+  service: ServiceResponseDto
+): FieldValues => {
+  return {
+    name: task.name,
+    licenseType:
+      transformNullishLicenseTypeEnumIntoLicenseTypeEnumWithEmptyString.parse(
+        task.licenseType
+      ),
+    service: service.name,
+  };
+};
 
 interface Props {
   task: TaskResponseDto;
@@ -47,15 +76,17 @@ export default function TaskForm({ task, service }: Props) {
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: task.name,
-      service: service.name,
-    },
+    defaultValues: getFieldValues(task, service),
   });
+  const watchLicenseType = form.watch("licenseType");
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
       name: values.name.trim(),
+      licenseTyp:
+        transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum.parse(
+          values.licenseType
+        ),
     })
       .then(() => {
         queryClient.invalidateQueries({
@@ -89,13 +120,8 @@ export default function TaskForm({ task, service }: Props) {
   }
 
   useEffect(() => {
-    form.reset((prev) => {
-      return {
-        ...prev,
-        name: task.name,
-      };
-    });
-  }, [form, service.name, task.name]);
+    form.reset(getFieldValues(task, service));
+  }, [form, service, task]);
 
   return (
     <Form {...form}>
@@ -134,6 +160,51 @@ export default function TaskForm({ task, service }: Props) {
                       <Link href={`/system-management/services/${service.id}`}>
                         <ExternalLink className="h-4 w-4" />
                       </Link>
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="licenseType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>License Type</FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue placeholder="Select a license type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {LicenseTypeEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <Button
+                      size={"icon"}
+                      variant={"outline"}
+                      className="shrink-0"
+                      disabled={watchLicenseType === ""}
+                      onClick={() => {
+                        form.setValue("licenseType", "", {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                    >
+                      <RotateCcw className="h-4 w-4" />
                     </Button>
                   </div>
                   <FormMessage />

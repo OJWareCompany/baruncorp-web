@@ -518,7 +518,7 @@ export default function NewServiceOrderForm() {
               form.setError(
                 "numberOfWetStamp",
                 {
-                  message: `Number of Wet Stamp should be less than 255`,
+                  message: `Number of Wet Stamp should be less than 256`,
                 },
                 { shouldFocus: true }
               );
@@ -555,7 +555,7 @@ export default function NewServiceOrderForm() {
               <Item>
                 <Label>Existing Project</Label>
                 <ExistingProjectCombobox
-                  organizationName={organization?.name ?? ""}
+                  organizationId={organizationId}
                   projectId={projectId}
                   onProjectIdChange={(newProjectId) => {
                     setProjectId(newProjectId);
@@ -1292,17 +1292,6 @@ export default function NewServiceOrderForm() {
           setProjectId(newProjectId);
         }}
       />
-      {/* <NewUserByOrganizationSheet
-        open={newUserSheetOpen}
-        onOpenChange={setNewUserSheetOpen}
-        organizationId={organizationId}
-        onAdd={(newUserId) => {
-          form.setValue("clientUser.id", newUserId, {
-            shouldValidate: true,
-            shouldDirty: true,
-          });
-        }}
-      /> */}
       <ResultDialog
         files={files}
         open={result.open}

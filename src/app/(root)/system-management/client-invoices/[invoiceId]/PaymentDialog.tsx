@@ -215,7 +215,7 @@ export default function PaymentDialog({ invoiceId }: Props) {
               isLoading={form.formState.isSubmitting}
               className="w-full"
             >
-              Add
+              Submit
             </LoadingButton>
           </form>
         </Form>

@@ -11,7 +11,8 @@ export const getProjectsQueryKey = (
 ) => ["projects", "list", params];
 
 const useProjectsQuery = (
-  params: FindProjectsHttpControllerFindUsersParams
+  params: FindProjectsHttpControllerFindUsersParams,
+  keepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -21,6 +22,7 @@ const useProjectsQuery = (
       api.projects
         .findProjectsHttpControllerFindUsers(params)
         .then(({ data }) => data),
+    keepPreviousData,
   });
 };
 

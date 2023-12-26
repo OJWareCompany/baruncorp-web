@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -15,6 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -34,22 +34,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatInEST } from "@/lib/utils";
 import useAhjNotesQuery from "@/queries/useAhjNotesQuery";
+import SearchHeader from "@/components/table/SearchHeader";
 
 const columnHelper =
   createColumnHelper<AhjNotePaginatedResponseDto["items"][number]>();
-
-const columns = [
-  columnHelper.accessor("name", {
-    header: "Name",
-  }),
-  columnHelper.accessor("fullAhjName", {
-    header: "Full Name",
-  }),
-  columnHelper.accessor("updatedAt", {
-    header: "Date Updated (EST)",
-    cell: ({ getValue }) => formatInEST(getValue()),
-  }),
-];
 
 export default function AhjNotesTable() {
   const router = useRouter();
@@ -64,11 +52,96 @@ export default function AhjNotesTable() {
       ? Number(searchParams.get("pageSize"))
       : 10,
   };
+  const fullNameSearchParam = searchParams.get("fullName") ?? "";
+  const nameSearchParam = searchParams.get("name") ?? "";
 
-  const { data, isLoading } = useAhjNotesQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-  });
+  const { data, isLoading } = useAhjNotesQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      fullAhjName: fullNameSearchParam,
+      name: nameSearchParam,
+    },
+    true
+  );
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("name", {
+        header: () => (
+          <SearchHeader
+            initialValue={nameSearchParam}
+            buttonText="Name"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("name", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={nameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("name");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("fullAhjName", {
+        header: () => (
+          <SearchHeader
+            initialValue={fullNameSearchParam}
+            buttonText="Full Name"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("fullName", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={fullNameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("fullName");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("type", {
+        header: "Type",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value === "PLACE") {
+            return "Place";
+          } else if (value === "COUNTY SUBDIVISIONS") {
+            return "County Subdivision";
+          } else if (value === "COUNTY") {
+            return "County";
+          } else if (value === "STATE") {
+            return "State";
+          } else {
+            <p className="text-muted-foreground">-</p>;
+          }
+        },
+      }),
+      columnHelper.accessor("updatedAt", {
+        header: "Date Updated (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+    ],
+    [fullNameSearchParam, nameSearchParam, pathname, router, searchParams]
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],

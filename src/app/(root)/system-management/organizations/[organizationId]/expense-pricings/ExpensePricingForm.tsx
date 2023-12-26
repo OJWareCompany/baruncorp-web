@@ -88,12 +88,15 @@ const formSchema = z
         path: [`comRevValue`],
       });
     }
-  })
-  .superRefine((values, ctx) => {});
+  });
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function ExpensePricingForm() {
+interface Props {
+  onSuccess?: () => void;
+}
+
+export default function ExpensePricingForm({ onSuccess }: Props) {
   const { organizationId } = useParams() as { organizationId: string };
   const { toast } = useToast();
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
@@ -141,6 +144,7 @@ export default function ExpensePricingForm() {
       comRevValue: Number(values.comRevValue),
     })
       .then(() => {
+        onSuccess?.();
         setIsSubmitSuccessful(true);
         toast({
           title: "Success",
@@ -604,7 +608,7 @@ export default function ExpensePricingForm() {
           className="w-full"
           isLoading={form.formState.isSubmitting}
         >
-          Create
+          Submit
         </LoadingButton>
       </form>
     </Form>
@@ -1452,7 +1456,7 @@ export default function ExpensePricingForm() {
 //           className="w-full"
 //           isLoading={form.formState.isSubmitting}
 //         >
-//           Create
+//           Submit
 //         </LoadingButton>
 //       </form>
 //     </Form>

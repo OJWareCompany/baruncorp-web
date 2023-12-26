@@ -4,10 +4,11 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { UserResponseDto } from "@/api";
 import {
   Form,
@@ -20,7 +21,10 @@ import {
 import { Input } from "@/components/ui/input";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import LoadingButton from "@/components/LoadingButton";
-import { transformStringIntoNullableString } from "@/lib/constants";
+import {
+  BARUNCORP_ORGANIZATION_ID,
+  transformStringIntoNullableString,
+} from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import usePatchProfileByUserIdMutation from "@/mutations/usePatchProfileByUserIdMutation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -60,7 +64,7 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-function getFieldValues(user: UserResponseDto): FieldValues {
+const getFieldValues = (user: UserResponseDto): FieldValues => {
   return {
     emailAddress: user.email ?? "",
     emailAddressesToReceiveDeliverables: (user.deliverablesEmails ?? []).map(
@@ -74,7 +78,7 @@ function getFieldValues(user: UserResponseDto): FieldValues {
     phoneNumber: user.phoneNumber ?? "",
     isContractor: user.isVendor,
   };
-}
+};
 
 interface Props {
   user: UserResponseDto;
@@ -95,6 +99,7 @@ export default function UserForm({ user }: Props) {
 
   const { mutateAsync } = usePatchProfileByUserIdMutation(userId);
   const queryClient = useQueryClient();
+  const watchIsContractor = form.watch("isContractor");
 
   useEffect(() => {
     if (user) {
@@ -103,20 +108,13 @@ export default function UserForm({ user }: Props) {
   }, [form, user]);
 
   async function onSubmit(values: FieldValues) {
-    const {
-      phoneNumber,
-      emailAddressesToReceiveDeliverables,
-      firstName,
-      lastName,
-    } = values;
-
     await mutateAsync({
-      deliverablesEmails: emailAddressesToReceiveDeliverables.map(
+      deliverablesEmails: values.emailAddressesToReceiveDeliverables.map(
         ({ email }) => email
       ),
-      firstName,
-      lastName,
-      phoneNumber: transformStringIntoNullableString.parse(phoneNumber),
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
       isVendor: values.isContractor,
     })
       .then(() => {
@@ -160,9 +158,23 @@ export default function UserForm({ user }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel required>Organization</FormLabel>
-              <FormControl>
-                <Input {...field} disabled />
-              </FormControl>
+              <div className="flex gap-2">
+                <FormControl>
+                  <Input {...field} disabled />
+                </FormControl>
+                <Button
+                  size={"icon"}
+                  variant={"outline"}
+                  className="shrink-0"
+                  asChild
+                >
+                  <Link
+                    href={`/system-management/organizations/${user.organizationId}`}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -286,7 +298,7 @@ export default function UserForm({ user }: Props) {
             );
           }}
         />
-        {user.organizationId !== "asda" && (
+        {user.organizationId !== BARUNCORP_ORGANIZATION_ID && (
           <FormField
             control={form.control}
             name="isContractor"

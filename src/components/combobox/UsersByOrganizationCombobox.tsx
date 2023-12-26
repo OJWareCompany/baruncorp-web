@@ -2,7 +2,7 @@
 import { forwardRef, useState } from "react";
 import { Check, ChevronsUpDown, Loader2, Plus } from "lucide-react";
 import { Button } from "../ui/button";
-import NewUserByOrganizationSheet from "../sheet/NewUserByOrganizationSheet";
+import NewUserByOrganizationSheet from "./NewUserByOrganizationSheet";
 import {
   Popover,
   PopoverContent,

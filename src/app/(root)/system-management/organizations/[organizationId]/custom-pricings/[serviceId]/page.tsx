@@ -5,6 +5,7 @@ import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import PageLoading from "@/components/PageLoading";
 import useCustomPricingQuery from "@/queries/useCustomPricingQuery";
 import useServiceQuery from "@/queries/useServiceQuery";
+import useNotFound from "@/hook/useNotFound";
 
 interface Props {
   params: {
@@ -14,13 +15,24 @@ interface Props {
 }
 
 export default function Page({ params: { organizationId, serviceId } }: Props) {
-  const { data: organization, isLoading: isOrganizationQueryLoading } =
-    useOrganizationQuery(organizationId);
-  const { data: customPricing, isLoading: isCustomPricingQueryLoading } =
-    useCustomPricingQuery(organizationId, serviceId);
-  const { data: service, isLoading: isServiceQueryLoading } = useServiceQuery(
-    customPricing?.serviceId ?? ""
-  );
+  const {
+    data: organization,
+    isLoading: isOrganizationQueryLoading,
+    error: organizationQueryError,
+  } = useOrganizationQuery(organizationId);
+  const {
+    data: customPricing,
+    isLoading: isCustomPricingQueryLoading,
+    error: customPricingError,
+  } = useCustomPricingQuery(organizationId, serviceId);
+  const {
+    data: service,
+    isLoading: isServiceQueryLoading,
+    error: serviceQueryError,
+  } = useServiceQuery(customPricing?.serviceId ?? "");
+  useNotFound(organizationQueryError);
+  useNotFound(customPricingError);
+  useNotFound(serviceQueryError);
 
   if (
     isOrganizationQueryLoading ||

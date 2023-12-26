@@ -19,7 +19,7 @@ import { ServiceResponseDto, TaskResponseDto } from "@/api";
 
 const columnHelper = createColumnHelper<TaskResponseDto>();
 
-export const columns = [
+const columns = [
   columnHelper.accessor("name", {
     header: "Name",
   }),

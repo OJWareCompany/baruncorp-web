@@ -16,7 +16,7 @@ export default function EditDialog() {
       <DialogTrigger asChild>
         <Pencil className="w-4 h-4 cursor-pointer" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Information</DialogTitle>
         </DialogHeader>

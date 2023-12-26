@@ -11,7 +11,8 @@ export const getJobsToInvoiceQueryKey = (
 ) => ["jobs-to-invoice", "list", params];
 
 const useJobsToInvoiceQuery = (
-  params: FindJobToInvoiceHttpControllerFindJobParams
+  params: FindJobToInvoiceHttpControllerFindJobParams,
+  keepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -21,6 +22,8 @@ const useJobsToInvoiceQuery = (
       api.jobsToInvoice
         .findJobToInvoiceHttpControllerFindJob(params)
         .then(({ data }) => data),
+    enabled: params.clientOrganizationId !== "" && params.serviceMonth !== "",
+    keepPreviousData,
   });
 };
 

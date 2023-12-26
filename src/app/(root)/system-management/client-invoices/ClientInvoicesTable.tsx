@@ -91,10 +91,13 @@ export default function ClientInvoicesTable() {
       : 10,
   };
 
-  const { data, isLoading } = useClientInvoicesQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-  });
+  const { data, isLoading } = useClientInvoicesQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+    },
+    true
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],

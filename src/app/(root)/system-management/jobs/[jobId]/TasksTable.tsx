@@ -8,12 +8,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import {
-  ChevronDown,
-  ChevronsDown,
-  CornerDownRight,
-  MoreHorizontal,
-} from "lucide-react";
+import { ChevronDown, ChevronsDown, CornerDownRight } from "lucide-react";
+import AssigneeField from "./AssigneeField";
+import AssignedTaskActionField from "./AssignedTaskActionField";
+import OrderedServiceActionField from "./OrderedServiceActionField";
+import SizeForRevisionField from "./SizeForRevisionField";
+import PriceField from "./PriceField";
+import DurationField from "./DurationField";
 import {
   Table,
   TableBody,
@@ -22,53 +23,168 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  AssignedTaskResponseFields,
-  OrderedServiceResponseFields,
-} from "@/api";
+import { JobResponseDto, ProjectResponseDto } from "@/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { orderedServiceStatuses, statuses } from "@/lib/constants";
+import {
+  JobStatusEnum,
+  OrderedServiceStatusEnum,
+  jobStatuses,
+  orderedServiceStatuses,
+} from "@/lib/constants";
+import { cn } from "@/lib/utils";
+
+// function Price() {
+//   // const price = getValue();
+//   // const { priceOverride } = row.original;
+//   // const { toast } = useToast();
+
+//   const form = useForm<PriceFormFieldValues>({
+//     resolver: zodResolver(priceFormSchema),
+//     defaultValues: {
+//       price:
+//         priceOverride != null
+//           ? String(priceOverride)
+//           : price == null
+//           ? "0"
+//           : String(price),
+//     },
+//   });
+
+//   /**
+//    * Query
+//    */
+//   const { mutateAsync } = usePatchOrderedServiceMutation(row.original.id);
+//   const queryClient = useQueryClient();
+
+//   useEffect(() => {
+//     form.reset({
+//       price:
+//         priceOverride != null
+//           ? String(priceOverride)
+//           : price == null
+//           ? "0"
+//           : String(price),
+//     });
+//   }, [form, price, priceOverride]);
+
+//   async function onSubmit(values: PriceFormFieldValues) {
+//     const { price } = values;
+//     if (price.length === 0) {
+//       toast({
+//         title: "Price is required",
+//         variant: "destructive",
+//       });
+//       return;
+//     }
+
+//     if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(price)) {
+//       toast({
+//         title: "Price should be a number",
+//         variant: "destructive",
+//       });
+//       return;
+//     }
+
+//     await mutateAsync({
+//       description: row.original.description,
+//       priceOverride: Number(price),
+//       sizeForRevision: row.original.sizeForRevision,
+//     })
+//       .then(() => {
+//         queryClient.invalidateQueries({
+//           queryKey: ["jobs", "detail", { jobId }],
+//         });
+//         toast({
+//           title: "Success",
+//         });
+//       })
+//       .catch((error: AxiosError<ErrorResponseData>) => {
+//         switch (error.response?.status) {
+//           case 400:
+//             if (error.response?.data.errorCode.includes("40002")) {
+//               toast({
+//                 title: "Job can not be updated after invoice is issued",
+//                 variant: "destructive",
+//               });
+//             } else {
+//               toast({
+//                 title: "Price is invalid",
+//                 variant: "destructive",
+//               });
+//             }
+//             break;
+//         }
+//       });
+//   }
+
+//   return (
+//     <Form {...form}>
+//       <form
+//         style={{ width: column.getSize() - 32 }}
+//         className="flex gap-2"
+//         onSubmit={form.handleSubmit(onSubmit)}
+//       >
+//         <FormField
+//           control={form.control}
+//           name="price"
+//           render={({ field }) => (
+//             <FormItem className="flex-row">
+//               <FormControl>
+//                 <AffixInput
+//                   prefixElement={
+//                     <span className="text-muted-foreground">$</span>
+//                   }
+//                   {...field}
+//                   className="h-9"
+//                 />
+//               </FormControl>
+//             </FormItem>
+//           )}
+//         />
+//         <Button
+//           size={"icon"}
+//           variant={"outline"}
+//           className="w-9 h-9 flex-shrink-0"
+//           type="submit"
+//           disabled={!form.formState.isDirty}
+//         >
+//           <Pencil className="w-4 h-4" />
+//         </Button>
+//       </form>
+//     </Form>
+//   );
+// }
 
 interface Data {
   id: string;
   name: string;
   description: string | null;
-  status: string;
+  status: JobStatusEnum | OrderedServiceStatusEnum;
   price: number | null;
   priceOverride: number | null;
   sizeForRevision: "Major" | "Minor" | null;
+  duration: number | null;
   isRevision: boolean;
   assigneeId: string | null;
   serviceId: string | null;
   subRows?: Data[];
+  // basePrice: number | null;
 }
 
 const columnHelper = createColumnHelper<Data>();
 
 interface Props {
-  assignedTasks: AssignedTaskResponseFields[];
-  orderedServices: OrderedServiceResponseFields[];
-  jobId: string;
-  projectId: string;
+  job: JobResponseDto;
+  project: ProjectResponseDto;
 }
 
-export default function TasksTable({
-  assignedTasks,
-  orderedServices,
-  projectId,
-  jobId,
-}: Props) {
-  console.log(
-    "🚀 ~ file: TasksTable.tsx:56 ~ orderedServices:",
-    orderedServices
-  );
-  console.log("🚀 ~ file: TasksTable.tsx:56 ~ assignedTasks:", assignedTasks);
+export default function TasksTable({ job, project }: Props) {
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
   const data = useMemo(
     () =>
-      orderedServices.map<Data>((value) => {
+      job.orderedServices.map<Data>((value) => {
         const {
           status,
           description,
@@ -79,7 +195,12 @@ export default function TasksTable({
           priceOverride,
           sizeForRevision,
           isRevision,
+          // basePrice,
         } = value;
+
+        const filteredAssignedTasks = job.assignedTasks.filter(
+          (value) => value.orderedServiceId === orderedServiceId
+        );
 
         return {
           description,
@@ -87,28 +208,42 @@ export default function TasksTable({
           name: serviceName,
           price,
           priceOverride,
-          sizeForRevision,
+          sizeForRevision:
+            project.propertyType === "Residential" ? sizeForRevision : null,
+          duration: filteredAssignedTasks.reduce<number | null>((prev, cur) => {
+            if (cur.duration != null) {
+              if (prev == null) {
+                return cur.duration;
+              }
+
+              return prev + cur.duration;
+            }
+
+            return prev;
+          }, null),
           isRevision,
           status,
           assigneeId: null,
           serviceId,
-          subRows: assignedTasks
-            .filter((value) => value.orderedServiceId === orderedServiceId)
-            .map((value) => ({
-              assigneeId: value.assigneeId,
-              description: value.description,
-              id: value.assignTaskId,
-              name: value.taskName,
-              price: null,
-              priceOverride: null,
-              sizeForRevision: null,
-              status: value.status,
-              serviceId: null,
-              isRevision,
-            })),
+          // basePrice,
+          subRows: filteredAssignedTasks.map<Data>((value) => ({
+            assigneeId: value.assigneeId,
+            description: value.description,
+            id: value.assignTaskId,
+            name: value.taskName,
+            price: null,
+            priceOverride: null,
+            sizeForRevision: null,
+            duration:
+              project.propertyType === "Commercial" ? value.duration : null,
+            status: value.status,
+            serviceId: null,
+            isRevision,
+            // basePrice: null,
+          })),
         };
       }),
-    [assignedTasks, orderedServices]
+    [job.assignedTasks, job.orderedServices, project.propertyType]
   );
 
   const columns = useMemo(
@@ -185,43 +320,69 @@ export default function TasksTable({
           );
         },
       }),
-      columnHelper.accessor("sizeForRevision", {
-        header: "Major / Minor",
-        // size: 200,
-        // cell: (cellContext) => {
-        //   const { row } = cellContext;
+      project.propertyType === "Residential"
+        ? columnHelper.accessor("sizeForRevision", {
+            header: "Major / Minor",
+            cell: ({ row, getValue }) => {
+              if (row.depth > 0) {
+                return;
+              }
 
-        //   if (row.depth > 0 || !row.original.isRevision) {
-        //     return <p className="text-muted-foreground">-</p>;
-        //   }
+              if (!row.original.isRevision) {
+                return <p className="text-muted-foreground">-</p>;
+              }
 
-        //   return <SizeForRevision cellContext={cellContext} jobId={jobId} />;
-        // },
-      }),
+              return (
+                <SizeForRevisionField
+                  sizeForRevision={getValue()}
+                  jobId={job.id}
+                  orderedServiceId={row.id}
+                />
+              );
+            },
+          })
+        : columnHelper.accessor("duration", {
+            header: "Duration",
+            cell: ({ row, getValue }) => {
+              const duration = getValue();
+
+              if (row.depth === 0) {
+                return <DurationField duration={duration} disabled />;
+              }
+
+              return <DurationField duration={duration} />;
+
+              // if (!row.original.isRevision) {
+              //   return <p className="text-muted-foreground">-</p>;
+              // }
+
+              // return (
+              //   <SizeForRevisionField
+              //     sizeForRevision={getValue()}
+              //     jobId={job.id}
+              //     orderedServiceId={row.id}
+              //   />
+              // );
+            },
+          }),
       columnHelper.accessor("price", {
         header: "Price",
-        // size: 200,
-        // cell: (cellContext) => {
-        //   const { row } = cellContext;
+        cell: ({ row }) => {
+          if (row.depth > 0) {
+            return;
+          }
 
-        //   if (row.depth > 0) {
-        //     return <p className="text-muted-foreground">-</p>;
-        //   }
-
-        //   return <Price cellContext={cellContext} jobId={jobId} />;
-        // },
+          return <PriceField />;
+        },
       }),
       columnHelper.accessor("status", {
         header: "Status",
         cell: ({ getValue, row }) => {
           const value = getValue();
+
           if (row.depth === 0) {
-            const status = orderedServiceStatuses.find(
-              (status) => status.value === value
-            );
-            if (status == null) {
-              return null;
-            }
+            const status =
+              orderedServiceStatuses[value as OrderedServiceStatusEnum];
 
             return (
               <div className="flex items-center">
@@ -231,10 +392,7 @@ export default function TasksTable({
             );
           }
 
-          const status = statuses.find((status) => status.value === value);
-          if (status == null) {
-            return null;
-          }
+          const status = jobStatuses[value as JobStatusEnum];
 
           return (
             <div className="flex items-center">
@@ -244,41 +402,50 @@ export default function TasksTable({
           );
         },
       }),
-      //   columnHelper.accessor("assigneeId", {
-      //     header: "Action",
-      //     size: 300,
-      //     cell: (cellContext) => {
-      //       if (cellContext.row.depth === 0) {
-      //         return (
-      //           <Action
-      //             cellContext={cellContext}
-      //             projectId={projectId}
-      //             jobId={jobId}
-      //           />
-      //         );
-      //       }
+      columnHelper.accessor("assigneeId", {
+        header: "Assignee",
+        cell: ({ row, getValue }) => {
+          if (row.depth === 0) {
+            return;
+          }
 
-      //       return (
-      //         <Assignee
-      //           cellContext={cellContext}
-      //           projectId={projectId}
-      //           jobId={jobId}
-      //         />
-      //       );
-      //     },
-      //   }),
+          return (
+            <AssigneeField
+              assignedTaskId={row.id}
+              userId={getValue() ?? ""}
+              status={row.original.status as JobStatusEnum}
+              jobId={job.id}
+              projectId={job.projectId}
+            />
+          );
+        },
+      }),
       columnHelper.display({
         id: "action",
         cell: ({ row }) => {
+          if (row.depth === 0) {
+            return (
+              <OrderedServiceActionField
+                orderedServiceId={row.id}
+                status={row.original.status as OrderedServiceStatusEnum}
+                jobId={job.id}
+                projectId={job.projectId}
+              />
+            );
+          }
+
           return (
-            <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
+            <AssignedTaskActionField
+              assignedTaskId={row.id}
+              status={row.original.status as JobStatusEnum}
+              jobId={job.id}
+              projectId={job.projectId}
+            />
           );
         },
       }),
     ],
-    []
+    [job.id, job.projectId, project.propertyType]
   );
 
   const table = useReactTable({
@@ -319,6 +486,7 @@ export default function TasksTable({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className={cn(row.depth > 0 && "bg-muted/50")}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

@@ -2,8 +2,8 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { JobPaginatedResponseDto, JobResponseDto } from "@/api";
 import TasksBadge from "@/components/badge/TasksBadge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { statuses } from "@/lib/constants";
 import { formatInEST } from "@/lib/utils";
+import { jobStatuses } from "@/lib/constants";
 
 const columnHelper = createColumnHelper<
   JobResponseDto | JobPaginatedResponseDto["items"][number]
@@ -41,7 +41,7 @@ export const jobColumns = [
     header: "Status",
     cell: ({ getValue }) => {
       const value = getValue();
-      const status = statuses.find((status) => status.value === value);
+      const status = jobStatuses[value];
 
       if (status == null) {
         return null;

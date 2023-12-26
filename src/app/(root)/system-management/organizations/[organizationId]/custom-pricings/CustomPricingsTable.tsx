@@ -25,7 +25,7 @@ import useCustomPricingsQuery from "@/queries/useCustomPricingsQuery";
 const columnHelper =
   createColumnHelper<CustomPricingPaginatedResponseDto["items"][number]>();
 
-export const columns = [
+const columns = [
   columnHelper.accessor("serviceName", {
     header: "Name",
   }),

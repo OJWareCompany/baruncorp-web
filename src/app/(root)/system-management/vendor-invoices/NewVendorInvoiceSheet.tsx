@@ -264,7 +264,7 @@ export default function NewVendorInvoiceSheet() {
                   isLoading={form.formState.isSubmitting}
                   className="w-full"
                 >
-                  Create
+                  Submit
                 </LoadingButton>
               </form>
             </Form>

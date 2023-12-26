@@ -21,7 +21,7 @@ import useServicesQuery from "@/queries/useServicesQuery";
 
 const columnHelper = createColumnHelper<ServiceResponseDto>();
 
-export const columns = [
+const columns = [
   columnHelper.accessor("name", {
     header: "Name",
   }),

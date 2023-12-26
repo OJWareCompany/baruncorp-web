@@ -25,7 +25,7 @@ import useExpensePricingsQuery from "@/queries/useExpensePricingsQuery";
 const columnHelper =
   createColumnHelper<ExpensePricingPaginatedResponseDto["items"][number]>();
 
-export const columns = [
+const columns = [
   columnHelper.accessor("taskName", {
     header: "Name",
   }),

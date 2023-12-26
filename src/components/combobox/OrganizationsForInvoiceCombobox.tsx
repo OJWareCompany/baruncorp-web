@@ -20,21 +20,33 @@ import useOrganizationsToInvoiceQuery from "@/queries/useOrganizationsToInvoiceQ
 
 interface Props {
   organizationId: string;
-  onSelect: (newOrganizationId: string) => void;
+  onOrganizationIdChange: (newOrganizationId: string) => void;
 }
 
 const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ organizationId, onSelect }, ref) => {
-    /**
-     * State
-     */
+  ({ organizationId, onOrganizationIdChange }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
-
-    /**
-     * Query
-     */
     const { data: organizations, isLoading: isOrganizationsQueryLoading } =
       useOrganizationsToInvoiceQuery();
+
+    const placeholderText = "Select an organization";
+
+    if (isOrganizationsQueryLoading || organizations == null) {
+      return (
+        <Button
+          variant="outline"
+          className="px-3 font-normal gap-2"
+          ref={ref}
+          disabled
+        >
+          <span className="flex-1 text-start">{placeholderText}</span>
+          <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
+        </Button>
+      );
+    }
+
+    const isSelected = organizationId !== "";
+    const isEmpty = organizations.clientToInvoices.length === 0;
 
     return (
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -43,34 +55,27 @@ const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
             variant="outline"
             className="px-3 font-normal gap-2"
             ref={ref}
-            disabled={isOrganizationsQueryLoading}
           >
             <span className="flex-1 text-start">
-              {organizationId === ""
-                ? "Select an organization"
-                : organizations?.clientToInvoices.find(
+              {!isSelected
+                ? placeholderText
+                : organizations.clientToInvoices.find(
                     (value) => value.id === organizationId
-                  )?.name}
+                  )?.name ?? placeholderText}
             </span>
-            {isOrganizationsQueryLoading ? (
-              <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
-            ) : (
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            )}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" align="start">
           <Command>
             <CommandInput placeholder="Search" />
-            {organizations && organizations.clientToInvoices.length !== 0 && (
-              <CommandEmpty>No organization found.</CommandEmpty>
-            )}
-            {organizations &&
-              (organizations.clientToInvoices.length === 0 ? (
-                <div className="py-6 text-center text-sm">
-                  No organization to issue invoice.
-                </div>
-              ) : (
+            {isEmpty ? (
+              <div className="py-6 text-center text-sm">
+                No organization to issue invoice.
+              </div>
+            ) : (
+              <>
+                <CommandEmpty>No organization found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
                     {organizations.clientToInvoices.map((organization) => (
@@ -78,7 +83,7 @@ const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
                         key={organization.id}
                         value={organization.name}
                         onSelect={() => {
-                          onSelect(organization.id);
+                          onOrganizationIdChange(organization.id);
                           setPopoverOpen(false);
                         }}
                       >
@@ -95,7 +100,8 @@ const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
                     ))}
                   </CommandGroup>
                 </CommandList>
-              ))}
+              </>
+            )}
           </Command>
         </PopoverContent>
       </Popover>

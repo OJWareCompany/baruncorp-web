@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import CustomPricingForm from "./CustomPricingForm";
 import {
   Sheet,
@@ -33,6 +34,7 @@ const formSchema = z.object({
 type FieldValues = z.infer<typeof formSchema>;
 
 export default function NewCustomPricingSheet() {
+  const [open, setOpen] = useState(false);
   const { organizationId } = useParams() as { organizationId: string };
 
   const form = useForm<FieldValues>({
@@ -52,7 +54,7 @@ export default function NewCustomPricingSheet() {
     useOrganizationQuery(organizationId);
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant={"outline"} size={"sm"}>
           <Plus className="mr-2 h-4 w-4" />
@@ -94,6 +96,9 @@ export default function NewCustomPricingSheet() {
         )}
         {isServiceQuerySuccess && isOrganizationQuerySuccess && (
           <CustomPricingForm
+            onSuccess={() => {
+              setOpen(false);
+            }}
             service={service}
             organization={organization}
             serviceIdForm={form}

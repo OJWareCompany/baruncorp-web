@@ -21,10 +21,11 @@ import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
 interface Props {
   organizationId: string;
   onOrganizationIdChange: (newOrganizationId: string) => void;
+  disabled?: boolean;
 }
 
 const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ organizationId, onOrganizationIdChange }, ref) => {
+  ({ organizationId, onOrganizationIdChange, disabled = false }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const { data: organizations, isLoading: isOrganizationsQueryLoading } =
@@ -58,6 +59,7 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
             variant="outline"
             className="px-3 font-normal gap-2"
             ref={ref}
+            disabled={disabled}
           >
             <span className="flex-1 text-start">
               {!isSelected

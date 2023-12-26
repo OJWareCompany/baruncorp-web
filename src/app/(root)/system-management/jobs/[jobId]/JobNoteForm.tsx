@@ -15,6 +15,7 @@ import {
 import LoadingButton from "@/components/LoadingButton";
 import usePostJobNoteMutation from "@/mutations/usePostJobNoteMutation";
 import { getJobNotesQueryKey } from "@/queries/useJobNotesQuery";
+import { JobResponseDto } from "@/api";
 
 const formSchema = z.object({
   content: z.string().trim().min(1, {
@@ -25,10 +26,10 @@ const formSchema = z.object({
 type FieldValues = z.infer<typeof formSchema>;
 
 interface Props {
-  jobId: string;
+  job: JobResponseDto;
 }
 
-export default function JobNoteForm({ jobId }: Props) {
+export default function JobNoteForm({ job }: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,13 +42,13 @@ export default function JobNoteForm({ jobId }: Props) {
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
-      jobId,
+      jobId: job.id,
       content: values.content,
     })
       .then(() => {
         form.reset();
         queryClient.invalidateQueries({
-          queryKey: getJobNotesQueryKey(jobId),
+          queryKey: getJobNotesQueryKey(job.id),
         });
       })
       .catch(() => {});

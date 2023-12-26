@@ -3,6 +3,7 @@ import React from "react";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import useJobQuery from "@/queries/useJobQuery";
+import useNotFound from "@/hook/useNotFound";
 
 interface Props {
   params: {
@@ -11,7 +12,12 @@ interface Props {
 }
 
 export default function Page({ params: { jobId } }: Props) {
-  const { data: job, isLoading: isJobQueryLoading } = useJobQuery(jobId);
+  const {
+    data: job,
+    isLoading: isJobQueryLoading,
+    error: jobQueryError,
+  } = useJobQuery(jobId);
+  useNotFound(jobQueryError);
 
   if (isJobQueryLoading || job == null) {
     return <PageLoading />;

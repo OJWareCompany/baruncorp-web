@@ -37,11 +37,7 @@ export const invoiceColumns = [
     size: 200,
     cell: ({ getValue, column }) => {
       const value = getValue();
-      const status = invoiceStatuses.find((status) => status.value === value);
-
-      if (status == null) {
-        return null;
-      }
+      const status = invoiceStatuses[value];
 
       return (
         <div className={`flex items-center`}>

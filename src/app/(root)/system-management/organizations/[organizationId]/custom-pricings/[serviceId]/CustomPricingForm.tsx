@@ -2,10 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { X } from "lucide-react";
-import { AxiosError } from "axios";
+import { Infinity, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CustomPricingResponseDto, OrganizationResponseDto } from "@/api";
+import { AxiosError } from "axios";
+import { CustomPricingResponseDto, OrganizationResponseDto, Tier } from "@/api";
 import {
   ResidentialNewPriceChargeTypeEnum,
   ResidentialNewPriceChargeTypeEnumWithEmptyString,
@@ -36,7 +36,7 @@ import {
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { AffixInput } from "@/components/AffixInput";
 import LoadingButton from "@/components/LoadingButton";
-import usePutCustomPricingMutation from "@/mutations/usePatchCustomPricingMutation";
+import usePutCustomPricingMutation from "@/mutations/usePutCustomPricingMutation";
 import { getCustomPricingQueryKey } from "@/queries/useCustomPricingQuery";
 
 interface Props {
@@ -88,10 +88,7 @@ export default function CustomPricingForm({
                   .string()
                   .trim()
                   .min(1, { message: "Starting Point is required" }),
-                finishingPoint: z
-                  .string()
-                  .trim()
-                  .min(1, { message: "Finishing Point is required" }),
+                finishingPoint: z.string().trim(),
                 price: z
                   .string()
                   .trim()
@@ -207,8 +204,21 @@ export default function CustomPricingForm({
             values.standardPricing.residentialNewServicePricingType === "Tier"
           ) {
             const { residentialNewServiceTiers } = values.standardPricing;
+
+            for (let i = 0; i < residentialNewServiceTiers.length - 1; i++) {
+              if (residentialNewServiceTiers[i].finishingPoint.length === 0) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: `Finishing Point is required`,
+                  path: [
+                    `standardPricing.residentialNewServiceTiers.${i}.finishingPoint`,
+                  ],
+                });
+              }
+            }
+
             if (
-              residentialNewServiceTiers.length !== 0 &&
+              residentialNewServiceTiers.length > 1 &&
               Number(residentialNewServiceTiers[0].finishingPoint) <= 1
             ) {
               ctx.addIssue({
@@ -219,7 +229,8 @@ export default function CustomPricingForm({
                 ],
               });
             }
-            for (let i = 1; i < residentialNewServiceTiers.length; i++) {
+
+            for (let i = 1; i < residentialNewServiceTiers.length - 1; i++) {
               const current = Number(
                 residentialNewServiceTiers[i].finishingPoint
               );
@@ -354,12 +365,18 @@ export default function CustomPricingForm({
           gmPrice: Number(value.gmPrice),
         })),
       residentialNewServiceTiers:
-        values.standardPricing.residentialNewServiceTiers.map((value) => ({
-          startingPoint: Number(value.startingPoint),
-          finishingPoint: Number(value.finishingPoint),
-          price: Number(value.price),
-          gmPrice: Number(value.gmPrice),
-        })),
+        values.standardPricing.residentialNewServiceTiers.map<Tier>(
+          (value, index) => ({
+            startingPoint: Number(value.startingPoint),
+            finishingPoint:
+              index ===
+              values.standardPricing.residentialNewServiceTiers.length - 1
+                ? null
+                : transformStringIntoNullableNumber.parse(value.finishingPoint),
+            price: Number(value.price),
+            gmPrice: Number(value.gmPrice),
+          })
+        ),
       residentialRevisionPrice: transformStringIntoNullableNumber.parse(
         values.standardPricing.residentialRevisionPrice
       ),
@@ -647,39 +664,45 @@ export default function CustomPricingForm({
                                 <FormField
                                   control={form.control}
                                   name={`standardPricing.residentialNewServiceTiers.${index}.finishingPoint`}
-                                  render={({ field, formState }) => (
-                                    <FormItem>
-                                      {index === 0 && (
-                                        <FormLabel required>
-                                          Finishing Point
-                                        </FormLabel>
-                                      )}
-                                      <FormControl>
-                                        <AffixInput
-                                          suffixElement={
-                                            <span className="text-muted-foreground">
-                                              Volume
-                                            </span>
-                                          }
-                                          {...field}
-                                          onChange={(event) => {
-                                            const { value } = event.target;
-                                            if (
-                                              value === "" ||
-                                              toTwoDecimalRegExp.test(value)
-                                            ) {
-                                              field.onChange(event);
-                                              const {
-                                                standardPricing: {
-                                                  residentialNewServiceTiers,
-                                                },
-                                              } = form.getValues();
+                                  render={({ field }) => {
+                                    const isLast =
+                                      residentialNewServiceTiersFields.length -
+                                        1 ===
+                                      index;
+
+                                    return (
+                                      <FormItem>
+                                        {index === 0 && (
+                                          <FormLabel required>
+                                            Finishing Point
+                                          </FormLabel>
+                                        )}
+                                        <FormControl>
+                                          <AffixInput
+                                            suffixElement={
+                                              <span className="text-muted-foreground">
+                                                Volume
+                                              </span>
+                                            }
+                                            {...field}
+                                            prefixElement={
+                                              isLast ? (
+                                                <Infinity className="w-4 h-4" />
+                                              ) : null
+                                            }
+                                            disabled={isLast}
+                                            value={isLast ? "" : field.value}
+                                            onChange={(event) => {
+                                              const { value } = event.target;
+                                              if (isLast) {
+                                                return;
+                                              }
 
                                               if (
-                                                residentialNewServiceTiers.length -
-                                                  1 !==
-                                                index
+                                                value === "" ||
+                                                toTwoDecimalRegExp.test(value)
                                               ) {
+                                                field.onChange(event);
                                                 form.setValue(
                                                   `standardPricing.residentialNewServiceTiers.${
                                                     index + 1
@@ -696,13 +719,13 @@ export default function CustomPricingForm({
                                                   }
                                                 );
                                               }
-                                            }
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
+                                            }}
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    );
+                                  }}
                                 />
                                 <FormField
                                   control={form.control}
@@ -767,18 +790,20 @@ export default function CustomPricingForm({
                                             }}
                                           />
                                         </FormControl>
-                                        <Button
-                                          size={"icon"}
-                                          className="shrink-0"
-                                          variant={"outline"}
-                                          onClick={() => {
-                                            removeResidentialNewServiceTiers(
-                                              index
-                                            );
-                                          }}
-                                        >
-                                          <X className="h-4 w-4" />
-                                        </Button>
+                                        {index !== 0 && (
+                                          <Button
+                                            size={"icon"}
+                                            className="shrink-0"
+                                            variant={"outline"}
+                                            onClick={() => {
+                                              removeResidentialNewServiceTiers(
+                                                index
+                                              );
+                                            }}
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </Button>
+                                        )}
                                       </div>
                                       <FormMessage />
                                     </FormItem>
@@ -794,6 +819,16 @@ export default function CustomPricingForm({
                               const {
                                 standardPricing: { residentialNewServiceTiers },
                               } = form.getValues();
+
+                              form.setValue(
+                                `standardPricing.residentialNewServiceTiers.${
+                                  residentialNewServiceTiersFields.length - 1
+                                }.finishingPoint`,
+                                "",
+                                {
+                                  shouldValidate: form.formState.isSubmitted,
+                                }
+                              );
 
                               appendResidentialNewServiceTiers({
                                 startingPoint: String(
@@ -1017,39 +1052,38 @@ export default function CustomPricingForm({
                             <FormField
                               control={form.control}
                               name={`standardPricing.commercialNewServiceTiers.${index}.finishingPoint`}
-                              render={({ field, formState }) => (
-                                <FormItem>
-                                  {index === 0 && (
-                                    <FormLabel required>
-                                      Finishing Point
-                                    </FormLabel>
-                                  )}
-                                  <FormControl>
-                                    <AffixInput
-                                      suffixElement={
-                                        <span className="text-muted-foreground">
-                                          kW
-                                        </span>
-                                      }
-                                      {...field}
-                                      onChange={(event) => {
-                                        const { value } = event.target;
-                                        if (
-                                          value === "" ||
-                                          toTwoDecimalRegExp.test(value)
-                                        ) {
-                                          field.onChange(event);
-                                          const {
-                                            standardPricing: {
-                                              commercialNewServiceTiers,
-                                            },
-                                          } = form.getValues();
+                              render={({ field }) => {
+                                const isLast =
+                                  commercialNewServiceTiersFields.length - 1 ===
+                                  index;
 
+                                return (
+                                  <FormItem>
+                                    {index === 0 && (
+                                      <FormLabel required>
+                                        Finishing Point
+                                      </FormLabel>
+                                    )}
+                                    <FormControl>
+                                      <AffixInput
+                                        suffixElement={
+                                          <span className="text-muted-foreground">
+                                            kW
+                                          </span>
+                                        }
+                                        {...field}
+                                        onChange={(event) => {
+                                          const { value } = event.target;
                                           if (
-                                            commercialNewServiceTiers.length -
-                                              1 !==
-                                            index
+                                            value === "" ||
+                                            toTwoDecimalRegExp.test(value)
                                           ) {
+                                            field.onChange(event);
+
+                                            if (isLast) {
+                                              return;
+                                            }
+
                                             form.setValue(
                                               `standardPricing.commercialNewServiceTiers.${
                                                 index + 1
@@ -1065,13 +1099,13 @@ export default function CustomPricingForm({
                                               }
                                             );
                                           }
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                );
+                              }}
                             />
                             <FormField
                               control={form.control}
@@ -1132,16 +1166,20 @@ export default function CustomPricingForm({
                                         }}
                                       />
                                     </FormControl>
-                                    <Button
-                                      size={"icon"}
-                                      className="shrink-0"
-                                      variant={"outline"}
-                                      onClick={() => {
-                                        removeCommercialNewServiceTiers(index);
-                                      }}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
+                                    {index !== 0 && (
+                                      <Button
+                                        size={"icon"}
+                                        className="shrink-0"
+                                        variant={"outline"}
+                                        onClick={() => {
+                                          removeCommercialNewServiceTiers(
+                                            index
+                                          );
+                                        }}
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    )}
                                   </div>
                                   <FormMessage />
                                 </FormItem>

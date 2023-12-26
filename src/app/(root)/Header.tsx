@@ -58,6 +58,14 @@ const systemManagementItems: {
     title: "Payments",
     href: "/system-management/payments",
   },
+  {
+    title: "Positions",
+    href: "/system-management/positions",
+  },
+  {
+    title: "Licenses",
+    href: "/system-management/licenses",
+  },
   // {
   //   title: "Tracking Numbers",
   //   href: "/system-management/tracking-numbers",

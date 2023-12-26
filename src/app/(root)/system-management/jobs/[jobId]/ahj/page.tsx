@@ -9,6 +9,7 @@ import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import { transformProjectAssociatedRegulatoryBodyIntoArray } from "@/lib/ahj";
 import AhjTabs from "@/components/tab/AhjTabs";
+import useNotFound from "@/hook/useNotFound";
 
 interface Props {
   params: {
@@ -20,10 +21,19 @@ export default function Page({ params: { jobId } }: Props) {
   const api = useApi();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(true);
-  const { data: job, isLoading: isJobQueryLoading } = useJobQuery(jobId);
+  const {
+    data: job,
+    isLoading: isJobQueryLoading,
+    error: jobQueryError,
+  } = useJobQuery(jobId);
   const projectId = job?.projectId ?? "";
-  const { data: project, isLoading: isProjectQueryLoading } =
-    useProjectQuery(projectId);
+  const {
+    data: project,
+    isLoading: isProjectQueryLoading,
+    error: projectQueryError,
+  } = useProjectQuery(projectId);
+  useNotFound(jobQueryError);
+  useNotFound(projectQueryError);
 
   useEffect(() => {
     if (project) {

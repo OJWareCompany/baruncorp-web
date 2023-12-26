@@ -4,6 +4,7 @@ import TasksTable from "./TasksTable";
 import PageHeader from "@/components/PageHeader";
 import useServiceQuery from "@/queries/useServiceQuery";
 import PageLoading from "@/components/PageLoading";
+import useNotFound from "@/hook/useNotFound";
 
 interface Props {
   params: {
@@ -12,8 +13,13 @@ interface Props {
 }
 
 export default function Page({ params: { serviceId } }: Props) {
-  const { data: service, isLoading: isServiceQueryLoading } =
-    useServiceQuery(serviceId);
+  const {
+    data: service,
+    isLoading: isServiceQueryLoading,
+    error: serviceQueryError,
+  } = useServiceQuery(serviceId);
+  console.log("🚀 ~ file: page.tsx:21 ~ Page ~ service:", service);
+  useNotFound(serviceQueryError);
 
   if (isServiceQueryLoading || service == null) {
     return <PageLoading />;

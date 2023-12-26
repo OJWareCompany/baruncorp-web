@@ -1,12 +1,8 @@
 "use client";
 import { forwardRef, useState } from "react";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { Button, ButtonProps } from "../ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Button } from "../ui/button";
+
 import {
   Command,
   CommandEmpty,
@@ -15,104 +11,167 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import useUsersQuery from "@/queries/useUsersQuery";
 
 interface Props {
+  assignedTaskId: string;
   userId: string;
-  onSelect: (newUserId: string) => void;
-  buttonClassName?: ButtonProps["className"];
-  buttonSize?: ButtonProps["size"];
+  onUserIdChange: (newUserId: string) => void;
   disabled?: boolean;
 }
 
 const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
-  (
-    { userId, onSelect, buttonClassName, buttonSize, disabled = false },
-    ref
-  ) => {
-    const [popoverOpen, setPopoverOpen] = useState(false);
+  ({ assignedTaskId, userId, onUserIdChange, disabled = false }, ref) => {
+    const [open, setOpen] = useState(false);
 
-    const { data: users, isLoading: isUsersQueryLoading } = useUsersQuery({
-      organizationId: "asda",
-      limit: Number.MAX_SAFE_INTEGER,
-    });
+    // const {
+    //   data: availableWorkers,
+    //   isLoading: isAvailableWorkersQueryLoading,
+    // } = useAvailableWorkersQuery(assignedTaskId);
+
+    const placeholderText = "Select an assignee";
+
+    // if (isAvailableWorkersQueryLoading || availableWorkers == null) {
+    //   return (
+    //     <Button
+    //       variant="outline"
+    //       className="w-full px-3 font-normal gap-2 whitespace-nowrap"
+    //       ref={ref}
+    //       disabled
+    //     >
+    //       <span className="flex-1 text-start">{placeholderText}</span>
+    //       <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
+    //     </Button>
+    //   );
+    // }
+
+    /* -------------------------------------------------------------------------- */
+
+    const availableWorkers: {
+      id: string;
+      name: string;
+      position: string;
+    }[] = [
+      {
+        id: "01680255-89c7-4c51-8e8c-2d8bebd353f2",
+        name: "Yunwoo Ji",
+        position: "Sr. Designer",
+      },
+      {
+        id: "07ec8e89-6877-4fa1-a029-c58360b57f43",
+        name: "John",
+        position: "Sr. Designer",
+      },
+      {
+        id: "08f39744-f617-48af-a101-efc7ce5d9b3c",
+        name: "Jane",
+        position: "Sr. Designer",
+      },
+      {
+        id: "0df1ab9c-e644-42b2-88d7-77bfab7026b5",
+        name: "A",
+        position: "Jr. Designer",
+      },
+      {
+        id: "161d1db4-14ff-4c1c-977f-861690745901",
+        name: "B",
+        position: "Jr. Designer",
+      },
+      {
+        id: "1d052e7c-fc76-450c-bca5-110e63eadc8b",
+        name: "C",
+        position: "Jr. EIT",
+      },
+      {
+        id: "26b4b95d-450d-426b-9f73-1a66adf11a30",
+        name: "D",
+        position: "Jr. EIT",
+      },
+    ];
+
+    /* -------------------------------------------------------------------------- */
+
+    const isSelected = userId !== "";
+    const isEmpty = availableWorkers.length === 0;
 
     return (
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className={cn("px-3 font-normal gap-2", buttonClassName)}
+            className="w-full px-3 font-normal gap-2 whitespace-nowrap"
             ref={ref}
-            disabled={isUsersQueryLoading || disabled}
-            size={buttonSize}
+            disabled={disabled}
           >
-            <span className="flex-1 text-start text-ellipsis overflow-hidden whitespace-nowrap">
-              {userId === ""
-                ? "Select an assignee"
-                : users?.items.find((value) => value.id === userId)?.fullName}
+            <span className="flex-1 text-start">
+              {!isSelected
+                ? placeholderText
+                : availableWorkers.find((value) => value.id === userId)?.name ??
+                  placeholderText}
             </span>
-            {isUsersQueryLoading ? (
-              <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
-            ) : (
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            )}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="p-0" align="start">
-          <Command
-            filter={(value, search) => {
-              if (value === "-1") {
-                return 0;
-              }
-
-              if (value.includes(search)) {
-                return 1;
-              }
-
-              return 0;
-            }}
-          >
-            <CommandInput placeholder="Search" />
-            {users && users.items.length !== 0 && (
-              <CommandEmpty>No user found.</CommandEmpty>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[200px]">
+          <DropdownMenuGroup>
+            {isEmpty ? (
+              <DropdownMenuItem disabled className="w-full justify-center">
+                No available worker
+              </DropdownMenuItem>
+            ) : (
+              Array.from(
+                new Set(availableWorkers.map((value) => value.position))
+              ).map((position) => (
+                <DropdownMenuSub key={position}>
+                  <DropdownMenuSubTrigger>{position}</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="p-0">
+                    <Command>
+                      <CommandInput placeholder="Search" autoFocus={true} />
+                      <CommandEmpty>No available worker found.</CommandEmpty>
+                      <CommandList>
+                        <CommandGroup>
+                          {availableWorkers
+                            .filter((value) => value.position === position)
+                            .map((value) => (
+                              <CommandItem
+                                key={value.id}
+                                value={value.name}
+                                onSelect={() => {
+                                  onUserIdChange(value.id);
+                                  setOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    userId === value.id
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {value.name}
+                              </CommandItem>
+                            ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              ))
             )}
-            {users &&
-              (users.items.length === 0 ? (
-                <div className="py-6 text-center text-sm">No user found.</div>
-              ) : (
-                <CommandList>
-                  <CommandGroup>
-                    {users.items.map((user) => (
-                      <CommandItem
-                        key={user.id}
-                        value={`${user.fullName} ${user.email}`}
-                        onSelect={() => {
-                          onSelect(user.id);
-                          setPopoverOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            userId === user.id ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        <div>
-                          <p className="font-medium">{user.fullName}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {user.email}
-                          </p>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              ))}
-          </Command>
-        </PopoverContent>
-      </Popover>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 );

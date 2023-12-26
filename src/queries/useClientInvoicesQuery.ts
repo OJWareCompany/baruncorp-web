@@ -11,7 +11,8 @@ export const getClientInvoicesQueryKey = (
 ) => ["client-invoices", "list", params];
 
 const useClientInvoicesQuery = (
-  params: FindInvoicePaginatedHttpControllerGetParams
+  params: FindInvoicePaginatedHttpControllerGetParams,
+  keepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -21,7 +22,7 @@ const useClientInvoicesQuery = (
       api.invoices
         .findInvoicePaginatedHttpControllerGet(params)
         .then(({ data }) => data),
-    keepPreviousData: true,
+    keepPreviousData,
   });
 };
 

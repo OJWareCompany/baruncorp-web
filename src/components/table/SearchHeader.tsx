@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronsUpDown, RotateCw } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Popover,
@@ -12,6 +12,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 interface Props {
   buttonText: string;
@@ -28,51 +29,50 @@ export default function SearchHeader({
   isFiltered,
   initialValue,
 }: Props) {
-  const [open, setOpen] = useState(false);
   const [value, setValue] = useState(initialValue);
 
   return (
-    <div className="flex">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            size={"sm"}
-            variant={"ghost"}
-            className="-ml-3 focus-visible:ring-0 whitespace-nowrap"
-          >
-            {buttonText}
-            <ChevronsUpDown className="h-4 w-4 ml-2" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="p-0 w-auto" align="start">
-          <Command shouldFilter={false}>
-            <CommandInput value={value} onValueChange={setValue} />
-            <CommandGroup>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          size={"sm"}
+          variant={"ghost"}
+          className={cn(
+            "-ml-3 focus-visible:ring-0 whitespace-nowrap",
+            isFiltered && "underline decoration-2 underline-offset-2"
+          )}
+        >
+          {buttonText}
+          <ChevronsUpDown className="h-4 w-4 ml-2" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-auto" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput value={value} onValueChange={setValue} />
+          <CommandGroup>
+            <CommandItem
+              onSelect={() => {
+                onFilterButtonClick(value);
+              }}
+              className="justify-center"
+            >
+              Search
+            </CommandItem>
+          </CommandGroup>
+          {isFiltered && (
+            <CommandGroup className="border-t">
               <CommandItem
                 onSelect={() => {
-                  onFilterButtonClick(value);
-                  setOpen(false);
+                  onResetButtonClick();
                 }}
                 className="justify-center"
               >
-                Search
+                Reset
               </CommandItem>
             </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      {isFiltered && (
-        <Button
-          size={"icon"}
-          variant={"ghost"}
-          className="h-9 w-9"
-          onClick={() => {
-            onResetButtonClick();
-          }}
-        >
-          <RotateCw className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
+          )}
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

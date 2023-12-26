@@ -1,5 +1,6 @@
 "use client";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import ExpensePricingForm from "./ExpensePricingForm";
 import {
   Sheet,
@@ -11,8 +12,10 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function NewExpensePricingSheet() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant={"outline"} size={"sm"}>
           <Plus className="mr-2 h-4 w-4" />
@@ -23,7 +26,11 @@ export default function NewExpensePricingSheet() {
         <SheetHeader className="mb-6">
           <SheetTitle>New Expense Pricing</SheetTitle>
         </SheetHeader>
-        <ExpensePricingForm />
+        <ExpensePricingForm
+          onSuccess={() => {
+            setOpen(false);
+          }}
+        />
       </SheetContent>
     </Sheet>
   );

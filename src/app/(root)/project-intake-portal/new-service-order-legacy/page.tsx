@@ -520,7 +520,7 @@
 //               form.setError(
 //                 "numberOfWetStamp",
 //                 {
-//                   message: `Number of Wet Stamp should be less than 255`,
+//                   message: `Number of Wet Stamp should be less than 256`,
 //                 },
 //                 { shouldFocus: true }
 //               );

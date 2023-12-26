@@ -1,8 +1,7 @@
 "use client";
 import { forwardRef } from "react";
-
 import { format } from "date-fns";
-import useInvoiceOrganizationsQuery from "@/queries/useOrganizationsToInvoiceQuery";
+import useOrganizationsToInvoiceQuery from "@/queries/useOrganizationsToInvoiceQuery";
 import {
   Select,
   SelectContent,
@@ -22,11 +21,8 @@ const ServicePeriodMonthByOrganizationSelect = forwardRef<
   HTMLButtonElement,
   Props
 >(({ organizationId, servicePeriodMonth, onServicePeriodMonthChange }, ref) => {
-  /**
-   * Query
-   */
   const { data: organizations, isLoading: isOrganizationsQueryLoading } =
-    useInvoiceOrganizationsQuery();
+    useOrganizationsToInvoiceQuery();
 
   const organization = organizations?.clientToInvoices.find(
     (value) => value.id === organizationId

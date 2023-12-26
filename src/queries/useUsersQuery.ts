@@ -10,7 +10,10 @@ export const getUsersQueryKey = (
   params: FindUsersHttpControllerGetFindUsersParams
 ) => ["users", "list", params];
 
-const useUsersQuery = (params: FindUsersHttpControllerGetFindUsersParams) => {
+const useUsersQuery = (
+  params: FindUsersHttpControllerGetFindUsersParams,
+  keepPreviousData?: boolean
+) => {
   const api = useApi();
 
   return useQuery<UserPaginatedResponseDto, AxiosError<ErrorResponseData>>({
@@ -19,7 +22,7 @@ const useUsersQuery = (params: FindUsersHttpControllerGetFindUsersParams) => {
       api.users
         .findUsersHttpControllerGetFindUsers(params)
         .then(({ data }) => data),
-    keepPreviousData: true,
+    keepPreviousData,
   });
 };
 

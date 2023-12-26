@@ -1,9 +1,11 @@
 "use client";
+import ExpensePricingForm from "./ExpensePricingForm";
 import PageHeader from "@/components/PageHeader";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import PageLoading from "@/components/PageLoading";
 import useExpensePricingQuery from "@/queries/useExpensePricingQuery";
 import useTaskQuery from "@/queries/useTaskQuery";
+import useNotFound from "@/hook/useNotFound";
 
 interface Props {
   params: {
@@ -13,13 +15,24 @@ interface Props {
 }
 
 export default function Page({ params: { organizationId, taskId } }: Props) {
-  const { data: organization, isLoading: isOrganizationQueryLoading } =
-    useOrganizationQuery(organizationId);
-  const { data: expensePricing, isLoading: isExpensePricingQueryLoading } =
-    useExpensePricingQuery(organizationId, taskId);
-  const { data: task, isLoading: isTaskQueryLoading } = useTaskQuery(
-    expensePricing?.taskId ?? ""
-  );
+  const {
+    data: organization,
+    isLoading: isOrganizationQueryLoading,
+    error: organizationQueryError,
+  } = useOrganizationQuery(organizationId);
+  const {
+    data: expensePricing,
+    isLoading: isExpensePricingQueryLoading,
+    error: expensePricingQueryError,
+  } = useExpensePricingQuery(organizationId, taskId);
+  const {
+    data: task,
+    isLoading: isTaskQueryLoading,
+    error: taskQueryError,
+  } = useTaskQuery(expensePricing?.taskId ?? "");
+  useNotFound(organizationQueryError);
+  useNotFound(expensePricingQueryError);
+  useNotFound(taskQueryError);
 
   if (
     isOrganizationQueryLoading ||
@@ -51,10 +64,10 @@ export default function Page({ params: { organizationId, taskId } }: Props) {
           },
         ]}
       />
-      {/* <ExpensePricingForm
+      <ExpensePricingForm
         expensePricing={expensePricing}
         organization={organization}
-      /> */}
+      />
     </div>
   );
 }

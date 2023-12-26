@@ -705,39 +705,38 @@ export default function ServiceForm({ service }: Props) {
                             <FormField
                               control={form.control}
                               name={`standardPricing.commercialNewServiceTiers.${index}.finishingPoint`}
-                              render={({ field, formState }) => (
-                                <FormItem>
-                                  {index === 0 && (
-                                    <FormLabel required>
-                                      Finishing Point
-                                    </FormLabel>
-                                  )}
-                                  <FormControl>
-                                    <AffixInput
-                                      suffixElement={
-                                        <span className="text-muted-foreground">
-                                          kW
-                                        </span>
-                                      }
-                                      {...field}
-                                      onChange={(event) => {
-                                        const { value } = event.target;
-                                        if (
-                                          value === "" ||
-                                          toTwoDecimalRegExp.test(value)
-                                        ) {
-                                          field.onChange(event);
-                                          const {
-                                            standardPricing: {
-                                              commercialNewServiceTiers,
-                                            },
-                                          } = form.getValues();
+                              render={({ field }) => {
+                                const isLast =
+                                  commercialNewServiceTiersFields.length - 1 ===
+                                  index;
 
+                                return (
+                                  <FormItem>
+                                    {index === 0 && (
+                                      <FormLabel required>
+                                        Finishing Point
+                                      </FormLabel>
+                                    )}
+                                    <FormControl>
+                                      <AffixInput
+                                        suffixElement={
+                                          <span className="text-muted-foreground">
+                                            kW
+                                          </span>
+                                        }
+                                        {...field}
+                                        onChange={(event) => {
+                                          const { value } = event.target;
                                           if (
-                                            commercialNewServiceTiers.length -
-                                              1 !==
-                                            index
+                                            value === "" ||
+                                            toTwoDecimalRegExp.test(value)
                                           ) {
+                                            field.onChange(event);
+
+                                            if (isLast) {
+                                              return;
+                                            }
+
                                             form.setValue(
                                               `standardPricing.commercialNewServiceTiers.${
                                                 index + 1
@@ -753,13 +752,13 @@ export default function ServiceForm({ service }: Props) {
                                               }
                                             );
                                           }
-                                        }
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                );
+                              }}
                             />
                             <FormField
                               control={form.control}
@@ -820,16 +819,20 @@ export default function ServiceForm({ service }: Props) {
                                         }}
                                       />
                                     </FormControl>
-                                    <Button
-                                      size={"icon"}
-                                      className="shrink-0"
-                                      variant={"outline"}
-                                      onClick={() => {
-                                        removeCommercialNewServiceTiers(index);
-                                      }}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
+                                    {index !== 0 && (
+                                      <Button
+                                        size={"icon"}
+                                        className="shrink-0"
+                                        variant={"outline"}
+                                        onClick={() => {
+                                          removeCommercialNewServiceTiers(
+                                            index
+                                          );
+                                        }}
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    )}
                                   </div>
                                   <FormMessage />
                                 </FormItem>

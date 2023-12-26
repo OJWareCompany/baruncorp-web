@@ -4,6 +4,7 @@ import NewExpensePricingSheet from "./NewExpensePricingSheet";
 import PageHeader from "@/components/PageHeader";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import PageLoading from "@/components/PageLoading";
+import useNotFound from "@/hook/useNotFound";
 // import NewExpensePricingSheet from "./NewExpensePricingSheet";
 
 interface Props {
@@ -13,8 +14,12 @@ interface Props {
 }
 
 export default function Page({ params: { organizationId } }: Props) {
-  const { data: organization, isLoading: isOrganizationQueryLoading } =
-    useOrganizationQuery(organizationId);
+  const {
+    data: organization,
+    isLoading: isOrganizationQueryLoading,
+    error: organizationQueryError,
+  } = useOrganizationQuery(organizationId);
+  useNotFound(organizationQueryError);
 
   if (isOrganizationQueryLoading || organization == null) {
     return <PageLoading />;

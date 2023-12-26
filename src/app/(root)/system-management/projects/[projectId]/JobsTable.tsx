@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import {
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -14,8 +15,80 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ProjectResponseDto } from "@/api";
-import { jobColumns } from "@/columns/jobColumns";
+import { JobResponseDto, ProjectResponseDto } from "@/api";
+import { Checkbox } from "@/components/ui/checkbox";
+import TasksBadge from "@/components/badge/TasksBadge";
+import { formatInEST } from "@/lib/utils";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { jobStatuses } from "@/lib/constants";
+
+const columnHelper = createColumnHelper<JobResponseDto>();
+
+const columns = [
+  columnHelper.accessor("isExpedited", {
+    header: "Expedite",
+    cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+  }),
+  columnHelper.accessor("clientInfo.clientOrganizationName", {
+    header: "Organization",
+  }),
+  columnHelper.accessor("jobName", {
+    header: "Name",
+  }),
+  columnHelper.accessor("jobStatus", {
+    header: "Status",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      const status = jobStatuses[value];
+
+      return (
+        <div className={`flex items-center`}>
+          <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+          <span className="whitespace-nowrap">{status.value}</span>
+        </div>
+      );
+    },
+  }),
+  columnHelper.accessor("assignedTasks", {
+    header: "Tasks",
+    cell: ({ getValue }) => <TasksBadge tasks={getValue()} />,
+  }),
+  columnHelper.accessor("projectPropertyType", {
+    header: "Property Type",
+  }),
+  columnHelper.accessor("mountingType", {
+    header: "Mounting Type",
+  }),
+  columnHelper.accessor("additionalInformationFromClient", {
+    header: "Additional Information",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return (
+        <HoverCard openDelay={0} closeDelay={100}>
+          <HoverCardTrigger className="underline">View Detail</HoverCardTrigger>
+          <HoverCardContent className="w-[auto] cursor-default" side="top">
+            {value}
+          </HoverCardContent>
+        </HoverCard>
+      );
+    },
+  }),
+  columnHelper.accessor("clientInfo.clientUserName", {
+    header: "Client User",
+  }),
+  columnHelper.accessor("receivedAt", {
+    header: "Date Received (EST)",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+];
 
 interface Props {
   project: ProjectResponseDto;
@@ -26,7 +99,7 @@ export default function JobsTable({ project }: Props) {
 
   const table = useReactTable({
     data: project.jobs,
-    columns: jobColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
   });
@@ -53,10 +126,7 @@ export default function JobsTable({ project }: Props) {
         <TableBody>
           {table.getRowModel().rows.length === 0 ? (
             <TableRow>
-              <TableCell
-                colSpan={jobColumns.length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>

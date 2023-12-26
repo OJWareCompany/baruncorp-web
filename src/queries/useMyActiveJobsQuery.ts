@@ -11,7 +11,8 @@ export const getMyActiveJobsQueryKey = (
 ) => ["my-active-jobs", "list", params];
 
 const useMyActiveJobsQuery = (
-  params: FindMyActiveJobPaginatedHttpControllerFindJobParams
+  params: FindMyActiveJobPaginatedHttpControllerFindJobParams,
+  keepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -21,7 +22,7 @@ const useMyActiveJobsQuery = (
       api.myActiveJobs
         .findMyActiveJobPaginatedHttpControllerFindJob(params)
         .then(({ data }) => data),
-    keepPreviousData: true,
+    keepPreviousData,
   });
 };
 

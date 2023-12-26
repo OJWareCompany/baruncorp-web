@@ -36,7 +36,7 @@
 
 //   return (
 //     <Sheet {...dialogProps}>
-//       <SheetContent className="w-full max-w-[1400px] sm:max-w-[1400px] overflow-y-auto">
+//       <SheetContent className="w-full max-w-[1400px] sm:max-w-[1400px]">
 //         <Form {...form}>
 //           <form className="space-y-6 w-full">
 //             <section>

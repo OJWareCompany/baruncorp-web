@@ -14,11 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobNoteResponseDto } from "@/api";
+import { JobNoteListResponseDto } from "@/api";
 
-const columnHelper = createColumnHelper<JobNoteResponseDto>();
+const columnHelper =
+  createColumnHelper<JobNoteListResponseDto["notes"][number]>();
 
-export const columns = [
+const columns = [
   columnHelper.accessor("content", {
     header: "Content",
   }),
@@ -31,12 +32,12 @@ export const columns = [
 ];
 
 interface Props {
-  data: JobNoteResponseDto[];
+  jobNotes: JobNoteListResponseDto;
 }
 
-export default function JobNotesTable({ data }: Props) {
+export default function JobNotesTable({ jobNotes }: Props) {
   const table = useReactTable({
-    data,
+    data: jobNotes.notes,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ jobNoteId }) => jobNoteId,

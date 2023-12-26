@@ -10,7 +10,10 @@ export const getAhjNotesQueryKey = (
   params: GeographyControllerGetFindNotesParams
 ) => ["ahj-notes", "list", params];
 
-const useAhjNotesQuery = (params: GeographyControllerGetFindNotesParams) => {
+const useAhjNotesQuery = (
+  params: GeographyControllerGetFindNotesParams,
+  keepPreviousData?: boolean
+) => {
   const api = useApi();
 
   return useQuery<AhjNotePaginatedResponseDto, AxiosError<ErrorResponseData>>({
@@ -19,7 +22,7 @@ const useAhjNotesQuery = (params: GeographyControllerGetFindNotesParams) => {
       api.geography
         .geographyControllerGetFindNotes(params)
         .then(({ data }) => data),
-    keepPreviousData: true,
+    keepPreviousData,
   });
 };
 

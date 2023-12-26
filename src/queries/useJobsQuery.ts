@@ -10,7 +10,10 @@ export const getJobsQueryKey = (
   params: FindJobPaginatedHttpControllerFindJobParams
 ) => ["jobs", "list", params];
 
-const useJobsQuery = (params: FindJobPaginatedHttpControllerFindJobParams) => {
+const useJobsQuery = (
+  params: FindJobPaginatedHttpControllerFindJobParams,
+  keepPreviousData?: boolean
+) => {
   const api = useApi();
 
   return useQuery<JobPaginatedResponseDto, AxiosError<ErrorResponseData>>({
@@ -19,7 +22,7 @@ const useJobsQuery = (params: FindJobPaginatedHttpControllerFindJobParams) => {
       api.jobs
         .findJobPaginatedHttpControllerFindJob(params)
         .then(({ data }) => data),
-    keepPreviousData: true,
+    keepPreviousData,
   });
 };
 

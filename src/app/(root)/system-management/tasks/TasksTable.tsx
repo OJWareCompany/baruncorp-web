@@ -16,14 +16,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TaskResponseDto } from "@/api";
+import { TaskPaginatedResponseFields } from "@/api";
 import useTasksQuery from "@/queries/useTasksQuery";
 
-const columnHelper = createColumnHelper<TaskResponseDto>();
+const columnHelper = createColumnHelper<TaskPaginatedResponseFields>();
 
-export const columns = [
+const columns = [
   columnHelper.accessor("name", {
     header: "Name",
+  }),
+  columnHelper.accessor("licenseType", {
+    header: "License Type",
+  }),
+  columnHelper.accessor("serviceName", {
+    header: "Service",
+  }),
+  columnHelper.accessor("taskPositions", {
+    header: "Positions",
+    cell: ({ getValue }) => {
+      return getValue()
+        .map((value) => value.positionName)
+        .join(", ");
+    },
+  }),
+  columnHelper.accessor("prerequisiteTask", {
+    header: "Prerequisite Tasks",
+    cell: ({ getValue }) => {
+      return getValue()
+        .map((value) => value.taskName)
+        .join(", ");
+    },
   }),
 ];
 

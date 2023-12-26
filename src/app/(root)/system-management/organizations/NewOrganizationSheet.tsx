@@ -107,6 +107,7 @@ type FieldValues = z.infer<typeof formSchema>;
 export default function NewOrganizationSheet() {
   const { toast } = useToast();
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -179,6 +180,7 @@ export default function NewOrganizationSheet() {
         toast({
           title: "Success",
         });
+        setOpen(false);
         queryClient.invalidateQueries({
           queryKey: getOrganizationsQueryKey({}),
         });
@@ -203,7 +205,7 @@ export default function NewOrganizationSheet() {
   }
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant={"outline"} size={"sm"}>
           <Plus className="mr-2 h-4 w-4" />
@@ -452,7 +454,7 @@ export default function NewOrganizationSheet() {
               className="w-full"
               isLoading={form.formState.isSubmitting}
             >
-              Create
+              Submit
             </LoadingButton>
           </form>
         </Form>

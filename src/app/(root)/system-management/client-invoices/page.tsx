@@ -1,4 +1,5 @@
 import ClientInvoicesTable from "./ClientInvoicesTable";
+import NewClientInvoiceSheet from "./NewClientInvoiceSheet";
 import PageHeader from "@/components/PageHeader";
 
 export default function Page() {
@@ -11,7 +12,7 @@ export default function Page() {
             name: "Client Invoices",
           },
         ]}
-        // action={<NewClientInvoiceSheet />}
+        action={<NewClientInvoiceSheet />}
       />
       <ClientInvoicesTable />
     </div>

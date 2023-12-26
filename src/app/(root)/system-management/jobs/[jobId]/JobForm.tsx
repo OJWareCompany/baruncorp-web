@@ -36,6 +36,7 @@ import {
 import useUserQuery from "@/queries/useUserQuery";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Props {
   project: ProjectResponseDto;
@@ -43,6 +44,7 @@ interface Props {
 }
 
 export default function JobForm({ project, job }: Props) {
+  const { toast } = useToast();
   const hasWetStamp = useMemo(
     () =>
       job &&
@@ -275,10 +277,16 @@ export default function JobForm({ project, job }: Props) {
               form.setError(
                 "numberOfWetStamp",
                 {
-                  message: `Number of Wet Stamp should be less than 255`,
+                  message: `Number of Wet Stamp should be less than 256`,
                 },
                 { shouldFocus: true }
               );
+            }
+            if (error.response?.data.errorCode.includes("40006")) {
+              toast({
+                title: "Completed jobs cannot be modified",
+                variant: "destructive",
+              });
             }
             break;
         }

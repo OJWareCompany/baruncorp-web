@@ -60,10 +60,13 @@ export default function VendorInvoicesTable() {
       : 10,
   };
 
-  const { data, isLoading } = useVendorInvoicesQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-  });
+  const { data, isLoading } = useVendorInvoicesQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+    },
+    true
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],

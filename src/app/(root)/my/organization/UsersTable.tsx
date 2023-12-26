@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -15,6 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -33,30 +33,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useUsersQuery from "@/queries/useUsersQuery";
+import SearchHeader from "@/components/table/SearchHeader";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
-
-export const columns = [
-  columnHelper.accessor("email", {
-    header: "Email",
-  }),
-  columnHelper.accessor("fullName", {
-    header: "Full Name",
-  }),
-  columnHelper.accessor("phoneNumber", {
-    header: "Phone Number",
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      if (value == null) {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return value;
-    },
-  }),
-];
 
 interface Props {
   organization: OrganizationResponseDto;
@@ -75,12 +55,87 @@ export default function UsersTable({ organization }: Props) {
       ? Number(searchParams.get("pageSize"))
       : 10,
   };
+  const nameSearchParam = searchParams.get("name") ?? "";
+  const emailSearchParam = searchParams.get("email") ?? "";
 
-  const { data, isLoading } = useUsersQuery({
-    page: pagination.pageIndex + 1,
-    limit: pagination.pageSize,
-    organizationId: organization.id,
-  });
+  const { data, isLoading } = useUsersQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+      organizationId: organization.id,
+      userName: nameSearchParam,
+      email: emailSearchParam,
+    },
+    true
+  );
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("fullName", {
+        header: () => (
+          <SearchHeader
+            initialValue={nameSearchParam}
+            buttonText="Name"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("name", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={nameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("name");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("email", {
+        header: () => (
+          <SearchHeader
+            initialValue={emailSearchParam}
+            buttonText="Email"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set("email", value);
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={emailSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete("email");
+              newSearchParams.set("pageIndex", "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+          />
+        ),
+      }),
+      columnHelper.accessor("phoneNumber", {
+        header: "Phone Number",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
+    ],
+    [emailSearchParam, nameSearchParam, pathname, router, searchParams]
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],
