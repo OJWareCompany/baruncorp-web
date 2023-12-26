@@ -2,12 +2,15 @@ import Link from "next/link";
 import { FolderOpen, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JobResponseDto } from "@/api";
+import useProjectQuery from "@/queries/useProjectQuery";
 
 interface Props {
   job: JobResponseDto;
 }
 
 export default function PageHeaderAction({ job }: Props) {
+  const { data: project } = useProjectQuery(job.projectId);
+
   return (
     <div className="flex gap-2">
       <Button asChild size={"sm"} variant={"outline"}>
@@ -43,12 +46,14 @@ export default function PageHeaderAction({ job }: Props) {
             }
           }, 2000);
 
+          if (!project) return;
+
           const url = `barun://open-job?payload=${encodeURIComponent(
             JSON.stringify({
               organization: job.clientInfo.clientOrganizationName,
-              type: job.propertyType,
+              type: project.propertyType,
               project: job.propertyFullAddress,
-              job: job.jobName,
+              job: `Job ${job.jobRequestNumber}`,
               // Hard data
               // organization: "1 Earth Solar",
               // type: "Commercial",
