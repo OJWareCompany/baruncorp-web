@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -184,6 +184,21 @@ export default function NewOrganizationSheet() {
         queryClient.invalidateQueries({
           queryKey: getOrganizationsQueryKey({}),
         });
+
+        /**
+         * @TODO 삭제 예정
+         * 파일 서버 - 공유 드라이브 생성 API 연동
+         * 이 API는 추후 바른 서버 백엔드에서 재연동 되어야 한다
+         */
+        const organizationName = values.name.trim();
+        axios
+          .post(
+            `${
+              process.env.NEXT_PUBLIC_FILE_API_URL
+            }/filesystem/${encodeURIComponent(organizationName)}`
+          )
+          .then(console.log)
+          .catch(console.error);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {

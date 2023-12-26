@@ -1,6 +1,8 @@
 "use client";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +12,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/components/ui/use-toast";
+import useJobQuery from "@/queries/useJobQuery";
+import { errorToastDescription } from "@/lib/constants";
 
 interface Props extends DialogProps {
   onOpenChange: (open: boolean) => void;
@@ -19,79 +26,82 @@ interface Props extends DialogProps {
 
 export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
   const router = useRouter();
-  // const { toast } = useToast();
-  // const [progressState, setProgressState] = useState({
-  //   value: 0,
-  //   error: false,
-  // });
-  // const { data: job } = useJobQuery({ jobId: jobId ?? "" });
+  const { toast } = useToast();
+  const [progressState, setProgressState] = useState({
+    value: 0,
+    error: false,
+  });
+  const { data: job } = useJobQuery(jobId ?? "");
 
-  // useEffect(() => {
-  //   if (dialogProps.open && job) {
-  //     const {
-  //       clientInfo: { clientOrganizationName },
-  //       jobName,
-  //       propertyFullAddress,
-  //     } = job;
+  useEffect(() => {
+    if (dialogProps.open && job) {
+      const {
+        clientInfo: { clientOrganizationName },
+        projectPropertyType,
+        propertyFullAddress,
+        jobRequestNumber,
+      } = job;
 
-  //     if (files.length !== 0) {
-  //       const url = `${
-  //         process.env.NEXT_PUBLIC_NAS_API_URL
-  //       }/filesystem/${encodeURIComponent(
-  //         clientOrganizationName
-  //       )}/${encodeURIComponent(propertyFullAddress)}/${encodeURIComponent(
-  //         jobName
-  //       )}/files`;
+      if (files.length !== 0) {
+        const url = `${
+          process.env.NEXT_PUBLIC_FILE_API_URL
+        }/filesystem/${encodeURIComponent(
+          clientOrganizationName
+        )}/${projectPropertyType}/${encodeURIComponent(
+          propertyFullAddress
+        )}/${encodeURIComponent(`Job ${jobRequestNumber}`)}/files-hack`;
 
-  //       const formData = new FormData();
-  //       for (const file of files) {
-  //         formData.append("files", file);
-  //       }
+        const formData = new FormData();
+        for (const file of files) {
+          formData.append("files", file);
+        }
 
-  //       axios
-  //         .post(url, formData, {
-  //           onUploadProgress: (axiosProgressEvent) => {
-  //             setProgressState({
-  //               value: (axiosProgressEvent?.progress ?? 0) * 100,
-  //               error: false,
-  //             });
-  //           },
-  //         })
-  //         .catch(() => {
-  //           toast({
-  //             title: "Upload failed",
-  //             description: errorToastDescription,
-  //             variant: "destructive",
-  //           });
-  //           setProgressState({ value: 100, error: true });
-  //         });
-  //     } else {
-  //       axios
-  //         .post(
-  //           `${
-  //             process.env.NEXT_PUBLIC_NAS_API_URL
-  //           }/filesystem/${encodeURIComponent(
-  //             clientOrganizationName
-  //           )}/${encodeURIComponent(propertyFullAddress)}/${encodeURIComponent(
-  //             jobName
-  //           )}`
-  //         )
-  //         .catch((error) => {
-  //           console.error(error);
-  //         });
-  //     }
-  //   } else {
-  //     setProgressState({ value: 0, error: false });
-  //   }
-  // }, [dialogProps.open, files, job, toast]);
+        axios
+          .post(url, formData, {
+            onUploadProgress: (axiosProgressEvent) => {
+              setProgressState({
+                value: (axiosProgressEvent?.progress ?? 0) * 100,
+                error: false,
+              });
+            },
+          })
+          .then(console.log)
+          .catch(() => {
+            toast({
+              title: "Upload failed",
+              description: errorToastDescription,
+              variant: "destructive",
+            });
+            setProgressState({ value: 100, error: true });
+          });
+      } else {
+        /**
+         * @TODO 삭제 예정
+         * 파일 서버 - 잡 폴더 생성 API 연동
+         * 이 API는 추후 바른 서버 백엔드에서 재연동 되어야 한다
+         */
+        const url = `${
+          process.env.NEXT_PUBLIC_FILE_API_URL
+        }/filesystem/${encodeURIComponent(
+          clientOrganizationName
+        )}/${projectPropertyType}/${encodeURIComponent(
+          propertyFullAddress
+        )}/${encodeURIComponent(`Job ${jobRequestNumber}`)}`;
+
+        axios.post(url).then(console.log).catch(console.error);
+      }
+    } else {
+      setProgressState({ value: 0, error: false });
+    }
+  }, [dialogProps.open, files, job, toast]);
 
   return (
     <Dialog
       {...dialogProps}
       onOpenChange={(newOpen) => {
-        // if (files.length !== 0 && progressState.value !== 100) {
-        //   return;
-        // }
+        if (files.length !== 0 && progressState.value !== 100) {
+          return;
+        }
 
         dialogProps.onOpenChange(newOpen);
       }}
@@ -104,7 +114,7 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
             details.
           </DialogDescription>
         </DialogHeader>
-        {/* {files.length !== 0 && (
+        {files.length !== 0 && (
           <div className="flex flex-col gap-1">
             <Progress value={progressState.value} />
             <p
@@ -120,14 +130,14 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
                 : "Upload completed"}
             </p>
           </div>
-        )} */}
+        )}
         <DialogFooter>
           <Button
             variant={"outline"}
             onClick={() => {
               dialogProps.onOpenChange(false);
             }}
-            // disabled={files.length !== 0 && progressState.value !== 100}
+            disabled={files.length !== 0 && progressState.value !== 100}
           >
             Order More
           </Button>
@@ -139,7 +149,7 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
 
               router.push(`/system-management/jobs/${jobId}`);
             }}
-            // disabled={files.length !== 0 && progressState.value !== 100}
+            disabled={files.length !== 0 && progressState.value !== 100}
           >
             View Detail
           </Button>
