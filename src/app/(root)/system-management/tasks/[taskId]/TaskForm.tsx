@@ -83,7 +83,7 @@ export default function TaskForm({ task, service }: Props) {
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
       name: values.name.trim(),
-      licenseTyp:
+      licenseType:
         transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum.parse(
           values.licenseType
         ),

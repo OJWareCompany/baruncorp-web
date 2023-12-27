@@ -377,7 +377,7 @@ export default function TasksTable({ job, project }: Props) {
           }),
       columnHelper.accessor("price", {
         header: "Price",
-        cell: ({ row }) => {
+        cell: ({ row, getValue }) => {
           if (row.depth > 0) {
             return;
           }
@@ -389,6 +389,9 @@ export default function TasksTable({ job, project }: Props) {
                   (value) => value.assigneeId === session?.id
                 )
               }
+              orderedServiceId={row.id}
+              price={getValue()}
+              jobId={job.id}
             />
           );
         },

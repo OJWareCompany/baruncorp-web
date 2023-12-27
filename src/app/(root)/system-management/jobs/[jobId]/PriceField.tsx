@@ -53,6 +53,9 @@ export default function PriceField({ orderedServiceId, price, jobId }: Props) {
     }
 
     await mutateAsync({ price: Number(price) }).then(() => {
+      toast({
+        title: "Success",
+      });
       queryClient.invalidateQueries({ queryKey: getJobQueryKey(jobId) });
     });
   }

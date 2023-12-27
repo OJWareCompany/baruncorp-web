@@ -2,9 +2,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { AffixInput } from "@/components/AffixInput";
+import usePatchOrderedServiceManualPriceMutation from "@/mutations/usePatchOrderedServiceManualPriceMutation";
+import { useToast } from "@/components/ui/use-toast";
+import { getJobQueryKey } from "@/queries/useJobQuery";
 
 const formSchema = z.object({
   price: z.string().trim(),
@@ -12,29 +17,67 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
+const getFieldValues = (price: number | null): FieldValues => {
+  return {
+    price: price ? String(price) : "",
+  };
+};
+
 interface Props {
   disabled?: boolean;
+  orderedServiceId: string;
+  price: number | null;
+  jobId: string;
 }
 
-export default function PriceField({ disabled = false }: Props) {
+export default function PriceField({
+  disabled = false,
+  jobId,
+  orderedServiceId,
+  price,
+}: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      price: "",
-    },
+    defaultValues: getFieldValues(price),
   });
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  async function onSubmit(values: FieldValues) {}
+  const { mutateAsync } =
+    usePatchOrderedServiceManualPriceMutation(orderedServiceId);
+
+  useEffect(() => {
+    form.reset(getFieldValues(price));
+  }, [form, price]);
 
   if (disabled) {
     return (
       <AffixInput
         prefixElement={<span className="text-muted-foreground">$</span>}
-        value={"TODO"}
+        value={price ? String(price) : ""}
         className="h-9 w-[150px]"
         disabled
       />
     );
+  }
+
+  async function onSubmit(values: FieldValues) {
+    const { price } = values;
+
+    if (price === "") {
+      toast({
+        title: "Price is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await mutateAsync({ price: Number(price) }).then(() => {
+      toast({
+        title: "Success",
+      });
+      queryClient.invalidateQueries({ queryKey: getJobQueryKey(jobId) });
+    });
   }
 
   return (

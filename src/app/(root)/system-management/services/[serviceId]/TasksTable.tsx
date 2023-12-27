@@ -15,9 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ServiceResponseDto, TaskResponseDto } from "@/api";
+import { ServiceResponseDto } from "@/api";
 
-const columnHelper = createColumnHelper<TaskResponseDto>();
+const columnHelper =
+  createColumnHelper<ServiceResponseDto["relatedTasks"][number]>();
 
 const columns = [
   columnHelper.accessor("name", {

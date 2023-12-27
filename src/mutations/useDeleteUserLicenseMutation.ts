@@ -1,13 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { IdResponse, RevokeUserLicenseHttpControllerPostParams } from "@/api";
+import { RevokeUserLicenseHttpControllerPostParams } from "@/api";
 
 const useDeleteUserLicenseMutation = () => {
   const api = useApi();
 
   return useMutation<
-    IdResponse,
+    void,
     AxiosError<ErrorResponseData>,
     RevokeUserLicenseHttpControllerPostParams
   >((reqData) => {
