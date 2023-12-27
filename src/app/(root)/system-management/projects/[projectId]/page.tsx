@@ -19,7 +19,6 @@ export default function Page({ params: { projectId } }: Props) {
     isLoading: isProjectQueryLoading,
     error: projectQueryError,
   } = useProjectQuery(projectId);
-  console.log("🚀 ~ file: page.tsx:22 ~ Page ~ project:", project);
   useNotFound(projectQueryError);
 
   if (isProjectQueryLoading || project == null) {

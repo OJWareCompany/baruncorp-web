@@ -41,9 +41,7 @@ export default function PositionForm({ positionId }: Props) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (positionId !== "") {
-      form.reset({ positionId });
-    }
+    form.reset({ positionId });
   }, [form, positionId]);
 
   return (
@@ -70,6 +68,17 @@ export default function PositionForm({ positionId }: Props) {
                           case 400:
                             if (
                               error.response?.data.errorCode.includes("20208")
+                            ) {
+                              form.setError(
+                                "positionId",
+                                {
+                                  message: `Electrical License is required for ${name}`,
+                                },
+                                { shouldFocus: true }
+                              );
+                            }
+                            if (
+                              error.response?.data.errorCode.includes("20209")
                             ) {
                               form.setError(
                                 "positionId",

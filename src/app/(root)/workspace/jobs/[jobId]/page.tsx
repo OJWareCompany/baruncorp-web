@@ -1,8 +1,18 @@
 "use client";
-import React from "react";
-import PageHeader from "@/components/PageHeader";
-import PageLoading from "@/components/PageLoading";
+import PageHeaderAction from "./PageHeaderAction";
+import ProjectSection from "./ProjectSection";
+import JobForm from "./JobForm";
+import JobNotesTable from "./JobNoteTable";
+import JobNoteForm from "./JobNoteForm";
+import TasksTable from "./TasksTable";
+import JobsTable from "./JobsTable";
+import JobStatus from "./JobStatus";
+import useProjectQuery from "@/queries/useProjectQuery";
 import useJobQuery from "@/queries/useJobQuery";
+import PageHeader from "@/components/PageHeader";
+import useJobNotesQuery from "@/queries/useJobNotesQuery";
+import PageLoading from "@/components/PageLoading";
+import ItemsContainer from "@/components/ItemsContainer";
 import useNotFound from "@/hook/useNotFound";
 
 interface Props {
@@ -17,9 +27,29 @@ export default function Page({ params: { jobId } }: Props) {
     isLoading: isJobQueryLoading,
     error: jobQueryError,
   } = useJobQuery(jobId);
+  const projectId = job?.projectId ?? "";
+  const {
+    data: project,
+    isLoading: isProjectQueryLoading,
+    error: projectQueryError,
+  } = useProjectQuery(projectId);
+  const {
+    data: jobNotes,
+    isLoading: isJobNotesQueryLoading,
+    error: jobNotesQueryError,
+  } = useJobNotesQuery(jobId);
   useNotFound(jobQueryError);
+  useNotFound(projectQueryError);
+  useNotFound(jobNotesQueryError);
 
-  if (isJobQueryLoading || job == null) {
+  if (
+    isJobQueryLoading ||
+    job == null ||
+    isProjectQueryLoading ||
+    project == null ||
+    isJobNotesQueryLoading ||
+    jobNotes == null
+  ) {
     return <PageLoading />;
   }
 
@@ -30,8 +60,34 @@ export default function Page({ params: { jobId } }: Props) {
           { href: "/workspace", name: "Workspace" },
           { href: `/workspace/jobs/${job.id}`, name: job.jobName },
         ]}
+        action={<PageHeaderAction job={job} project={project} />}
       />
-      🚧 TODO: Job Detail Page for Worker 🚧
+      <div className="space-y-6">
+        <ProjectSection project={project} />
+        <section>
+          <h4 className="h4 mb-2">Jobs Related to Project</h4>
+          <JobsTable project={project} />
+        </section>
+        <section>
+          <h4 className="h4 mb-2">Job</h4>
+          <JobForm job={job} project={project} />
+        </section>
+        <section>
+          <h4 className="h4 mb-2">Job Note</h4>
+          <ItemsContainer>
+            <JobNotesTable jobNotes={jobNotes} />
+            <JobNoteForm job={job} />
+          </ItemsContainer>
+        </section>
+        <section>
+          <h4 className="h4 mb-2">Status</h4>
+          <JobStatus job={job} />
+        </section>
+        <section>
+          <h4 className="h4 mb-2">Tasks</h4>
+          <TasksTable job={job} project={project} />
+        </section>
+      </div>
     </div>
   );
 }

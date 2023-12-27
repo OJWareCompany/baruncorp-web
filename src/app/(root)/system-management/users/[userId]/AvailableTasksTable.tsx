@@ -18,7 +18,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { UserResponseDto } from "@/api";
-
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -32,6 +31,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import useDeleteUserAvailableTaskMutation from "@/mutations/useDeleteUserAvailableTaskMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
+import usePatchUserAvailableTaskMutation from "@/mutations/usePatchUserAvailableTaskMutation";
 
 const columnHelper =
   createColumnHelper<UserResponseDto["availableTasks"][number]>();
@@ -41,32 +51,13 @@ interface Props {
 }
 
 export default function AvailableTasksTable({ user }: Props) {
+  const { toast } = useToast();
   const router = useRouter();
-  const { mutateAsync } = useDeleteUserAvailableTaskMutation();
+  const { mutateAsync: deleteUserAvailableTaskMutateAsync } =
+    useDeleteUserAvailableTaskMutation();
+  const { mutateAsync: patchUserAvailableTaskMutateAsync } =
+    usePatchUserAvailableTaskMutation(user.id);
   const queryClient = useQueryClient();
-  // const pathname = usePathname();
-  // const searchParams = useSearchParams();
-
-  // const pagination: PaginationState = {
-  //   pageIndex: searchParams.get("pageIndex")
-  //     ? Number(searchParams.get("pageIndex"))
-  //     : 0,
-  //   pageSize: searchParams.get("pageSize")
-  //     ? Number(searchParams.get("pageSize"))
-  //     : 10,
-  // };
-  // const typeSearchParam =
-  //   (searchParams.get("type") as TLicenseTypeEnum) ??
-  //   LicenseTypeEnum.Values.Structural;
-
-  // const { data, isLoading } = useLicensesQuery(
-  //   {
-  //     page: pagination.pageIndex + 1,
-  //     limit: pagination.pageSize,
-  //     type: typeSearchParam,
-  //   },
-  //   true
-  // );
 
   const columns = useMemo(
     () => [
@@ -75,6 +66,40 @@ export default function AvailableTasksTable({ user }: Props) {
       }),
       columnHelper.accessor("autoAssignmentType", {
         header: "Auto Assignment Property Type",
+        cell: ({ getValue, row }) => {
+          return (
+            <Select
+              value={getValue()}
+              onValueChange={(newValue) => {
+                patchUserAvailableTaskMutateAsync({
+                  taskId: row.original.id,
+                  autoAssignmentType:
+                    newValue as AutoAssignmentPropertyTypeEnum,
+                }).then(() => {
+                  toast({
+                    title: "Success",
+                  });
+                  queryClient.invalidateQueries({
+                    queryKey: getUserQueryKey(user.id),
+                  });
+                });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a property type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {AutoAssignmentPropertyTypeEnum.options.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          );
+        },
       }),
       columnHelper.display({
         id: "action",
@@ -101,7 +126,7 @@ export default function AvailableTasksTable({ user }: Props) {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => {
-                          mutateAsync({
+                          deleteUserAvailableTaskMutateAsync({
                             userId: user.id,
                             taskId: row.original.id,
                           }).then(() => {
@@ -122,7 +147,13 @@ export default function AvailableTasksTable({ user }: Props) {
         },
       }),
     ],
-    [mutateAsync, queryClient, user.id]
+    [
+      deleteUserAvailableTaskMutateAsync,
+      patchUserAvailableTaskMutateAsync,
+      queryClient,
+      toast,
+      user.id,
+    ]
   );
 
   const table = useReactTable({

@@ -1,5 +1,6 @@
 import Authenticate from "./Authenticate";
 import Header from "./Header";
+import SocketProvider from "./SocketProvider";
 
 export default async function Layout({
   children,
@@ -8,8 +9,10 @@ export default async function Layout({
 }) {
   return (
     <Authenticate>
-      <Header />
-      <main className="container px-6 pb-12">{children}</main>
+      <SocketProvider>
+        <Header />
+        <main className="container px-6 pb-12">{children}</main>
+      </SocketProvider>
     </Authenticate>
   );
 }

@@ -2,6 +2,8 @@ import { useListData } from "react-stately";
 import { GridList, GridListItem, useDragAndDrop } from "react-aria-components";
 import { AlignJustify, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { TaskResponseDto } from "@/api";
 import {
@@ -25,39 +27,24 @@ import {
 } from "@/components/ui/alert-dialog";
 import useDeletePositionTaskMutation from "@/mutations/useDeletePositionTaskMutation";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
+import usePatchTaskPositionOrderMutation from "@/mutations/usePatchTaskPositionOrderMutation";
 
 interface Props {
   task: TaskResponseDto;
 }
 
 export default function PositionsTable({ task }: Props) {
+  const session = useSession();
   const list = useListData({
-    // initialItems: task.taskPositions,
-    initialItems: [
-      {
-        order: 1,
-        positionId: "1",
-        positionName: "Sr. Designer",
-        autoAssignmentType: "Residential / Commercial",
-      },
-      {
-        order: 2,
-        positionId: "2",
-        positionName: "Jr. Designer",
-        autoAssignmentType: "Residential / Commercial",
-      },
-      {
-        order: 3,
-        positionId: "3",
-        positionName: "Jr. EIT",
-        autoAssignmentType: "Residential / Commercial",
-      },
-    ],
+    initialItems: task.taskPositions,
     getKey: ({ positionId }) => positionId,
   });
 
   const queryClient = useQueryClient();
-  const { mutateAsync } = useDeletePositionTaskMutation();
+  const { mutateAsync: deletePositionTaskMutateAsync } =
+    useDeletePositionTaskMutation();
+  const { mutateAsync: patchTaskPositionOrderMutateAsync } =
+    usePatchTaskPositionOrderMutation(task.id);
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: (keys) =>
@@ -73,6 +60,24 @@ export default function PositionsTable({ task }: Props) {
     },
   });
 
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      patchTaskPositionOrderMutateAsync({
+        taskPositions: list.items,
+      }).then(() => {
+        queryClient.invalidateQueries({
+          queryKey: getTaskQueryKey(task.id),
+        });
+      });
+    }
+  }, [
+    list.items,
+    patchTaskPositionOrderMutateAsync,
+    queryClient,
+    session.status,
+    task.id,
+  ]);
+
   return (
     <div className="border rounded-md text-sm">
       <div className="flex items-center border-b transition-colors hover:bg-muted/50 last:border-none font-medium h-12 text-muted-foreground">
@@ -82,80 +87,86 @@ export default function PositionsTable({ task }: Props) {
         <div className="px-4 flex-1">Auto Assignment Property Type</div>
         <div className="basis-[68px]"></div>
       </div>
-      <GridList
-        dragAndDropHooks={dragAndDropHooks}
-        items={list.items}
-        className="[&>div.react-aria-DropIndicator]:outline [&>div.react-aria-DropIndicator]:outline-1 [&>div.react-aria-DropIndicator]:outline-primary"
-      >
-        {(item) => (
-          <GridListItem
-            id={item.positionId}
-            className={
-              "flex items-center border-b transition-colors hover:bg-muted/50 last:border-none outline-none"
-            }
-          >
-            <div className="p-4">
-              <Button size={"icon"} className="h-9 w-9" variant={"ghost"}>
-                <AlignJustify className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="px-4 basis-[81px] text-muted-foreground">
-              {item.order}.
-            </div>
-            <div className="p-4 flex-1">{item.positionName}</div>
-            <div className="p-4 flex-1">
-              <Select
-                value={item.autoAssignmentType}
-                // onValueChange={field.onChange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a property type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {AutoAssignmentPropertyTypeEnum.options.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="p-4">
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                    <X className="w-4 h-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        mutateAsync({
-                          positionId: item.positionId,
-                          taskId: task.id,
-                        }).then(() => {
-                          queryClient.invalidateQueries({
-                            queryKey: getTaskQueryKey(task.id),
+      {list.items.length === 0 ? (
+        <div className="h-24 flex items-center justify-center transition-colors hover:bg-muted/50">
+          No results.
+        </div>
+      ) : (
+        <GridList
+          dragAndDropHooks={dragAndDropHooks}
+          items={list.items}
+          className="[&>div.react-aria-DropIndicator]:outline [&>div.react-aria-DropIndicator]:outline-1 [&>div.react-aria-DropIndicator]:outline-primary"
+        >
+          {(item) => (
+            <GridListItem
+              id={item.positionId}
+              className={
+                "flex items-center border-b transition-colors hover:bg-muted/50 last:border-none outline-none"
+              }
+            >
+              <div className="p-4">
+                <Button size={"icon"} className="h-9 w-9" variant={"ghost"}>
+                  <AlignJustify className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="px-4 basis-[81px] text-muted-foreground">
+                {item.order}.
+              </div>
+              <div className="p-4 flex-1">{item.positionName}</div>
+              <div className="p-4 flex-1">
+                <Select
+                  value={item.autoAssignmentType}
+                  // onValueChange={field.onChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a property type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {AutoAssignmentPropertyTypeEnum.options.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          deletePositionTaskMutateAsync({
+                            positionId: item.positionId,
+                            taskId: task.id,
+                          }).then(() => {
+                            queryClient.invalidateQueries({
+                              queryKey: getTaskQueryKey(task.id),
+                            });
                           });
-                        });
-                      }}
-                    >
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </GridListItem>
-        )}
-      </GridList>
+                        }}
+                      >
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </GridListItem>
+          )}
+        </GridList>
+      )}
     </div>
   );
 }

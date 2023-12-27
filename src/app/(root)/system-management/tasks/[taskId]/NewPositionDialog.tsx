@@ -4,7 +4,8 @@ import { z } from "zod";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +23,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import {
   Select,
@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/select";
 import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import usePostPositionTaskMutation from "@/mutations/usePostPositionTaskMutation";
+import PositionsCombobox from "@/components/combobox/PositionsCombobox";
+import { TaskResponseDto } from "@/api";
 
 const formSchema = z.object({
   positionId: z.string().trim().min(1, { message: "Position is required" }),
@@ -42,10 +44,15 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function NewPositionDialog() {
+interface Props {
+  task: TaskResponseDto;
+}
+
+export default function NewPositionDialog({ task }: Props) {
   const { taskId } = useParams() as { taskId: string };
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -69,11 +76,31 @@ export default function NewPositionDialog() {
           queryKey: getTaskQueryKey(taskId),
         });
         setOpen(false);
+        setIsSubmitSuccessful(true);
       })
-      .catch(() => {
-        // TODO
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 409:
+            if (error.response?.data.errorCode.includes("20204")) {
+              form.setError(
+                "positionId",
+                {
+                  message: `This position is already existed`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            break;
+        }
       });
   }
+
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      form.reset();
+      setIsSubmitSuccessful(false);
+    }
+  }, [form, isSubmitSuccessful]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -100,9 +127,16 @@ export default function NewPositionDialog() {
                 <FormItem>
                   <FormLabel required>Position</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      value={"TODO: 태스크가 가지고 있지 않은 포지션들 목록"}
+                    <PositionsCombobox
+                      positionId={field.value}
+                      onPositionChange={({ id }) => {
+                        field.onChange(id);
+                      }}
+                      ref={field.ref}
+                      modal
+                      filteringIds={task.taskPositions.map(
+                        (value) => value.positionId
+                      )}
                     />
                   </FormControl>
                   <FormMessage />

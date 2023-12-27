@@ -162,7 +162,6 @@ interface Data {
   description: string | null;
   status: JobStatusEnum | OrderedServiceStatusEnum;
   price: number | null;
-  priceOverride: number | null;
   sizeForRevision: "Major" | "Minor" | null;
   duration: number | null;
   isRevision: boolean;
@@ -192,7 +191,6 @@ export default function TasksTable({ job, project }: Props) {
           price,
           orderedServiceId,
           serviceId,
-          priceOverride,
           sizeForRevision,
           isRevision,
           // basePrice,
@@ -207,7 +205,6 @@ export default function TasksTable({ job, project }: Props) {
           id: orderedServiceId,
           name: serviceName,
           price,
-          priceOverride,
           sizeForRevision:
             project.propertyType === "Residential" ? sizeForRevision : null,
           duration: filteredAssignedTasks.reduce<number | null>((prev, cur) => {
@@ -232,7 +229,6 @@ export default function TasksTable({ job, project }: Props) {
             id: value.assignTaskId,
             name: value.taskName,
             price: null,
-            priceOverride: null,
             sizeForRevision: null,
             duration:
               project.propertyType === "Commercial" ? value.duration : null,
@@ -367,12 +363,18 @@ export default function TasksTable({ job, project }: Props) {
           }),
       columnHelper.accessor("price", {
         header: "Price",
-        cell: ({ row }) => {
+        cell: ({ row, getValue }) => {
           if (row.depth > 0) {
             return;
           }
 
-          return <PriceField />;
+          return (
+            <PriceField
+              orderedServiceId={row.id}
+              price={getValue()}
+              jobId={job.id}
+            />
+          );
         },
       }),
       columnHelper.accessor("status", {

@@ -35,6 +35,7 @@ import {
 import usePostPositionTaskMutation from "@/mutations/usePostPositionTaskMutation";
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import TasksCombobox from "@/components/combobox/TasksCombobox";
+import { PositionResponseDto } from "@/api";
 
 const formSchema = z.object({
   taskId: z.string().trim().min(1, { message: "Task is required" }),
@@ -43,7 +44,11 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function NewTaskDialog() {
+interface Props {
+  position: PositionResponseDto;
+}
+
+export default function NewTaskDialog({ position }: Props) {
   const { positionId } = useParams() as { positionId: string };
   const { mutateAsync } = usePostPositionTaskMutation(positionId);
   const [open, setOpen] = useState(false);
@@ -75,7 +80,7 @@ export default function NewTaskDialog() {
               form.setError(
                 "taskId",
                 {
-                  message: `This Position already has this task`,
+                  message: `This task is already existed`,
                 },
                 { shouldFocus: true }
               );
@@ -116,6 +121,7 @@ export default function NewTaskDialog() {
                       onTaskIdChange={field.onChange}
                       ref={field.ref}
                       modal
+                      filteringIds={position.tasks.map(({ taskId }) => taskId)}
                     />
                   </FormControl>
                   <FormMessage />

@@ -146,7 +146,13 @@ export default function TasksTable({ position }: Props) {
         },
       }),
     ],
-    [deletePositionTaskMutateAsync, position.id, queryClient]
+    [
+      deletePositionTaskMutateAsync,
+      patchPositionTaskMutateAsync,
+      position.id,
+      queryClient,
+      toast,
+    ]
   );
 
   const table = useReactTable({

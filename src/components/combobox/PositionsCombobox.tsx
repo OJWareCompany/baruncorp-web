@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -22,10 +22,11 @@ interface Props {
   positionId: string;
   onPositionChange: (newPosition: { id: string; name: string }) => void;
   modal?: boolean;
+  filteringIds?: string[];
 }
 
 const PositionsCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ positionId, onPositionChange, modal = false }, ref) => {
+  ({ positionId, onPositionChange, filteringIds, modal = false }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const { data: positions, isLoading: isPositionsQueryLoading } =
@@ -34,6 +35,20 @@ const PositionsCombobox = forwardRef<HTMLButtonElement, Props>(
       });
 
     const placeholderText = "Select a position";
+
+    const items = useMemo(() => {
+      if (positions == null) {
+        return [];
+      }
+
+      if (filteringIds == null) {
+        return positions.items;
+      }
+
+      return positions.items.filter(
+        (value) => !filteringIds.includes(value.id)
+      );
+    }, [filteringIds, positions]);
 
     if (isPositionsQueryLoading || positions == null) {
       return (
@@ -79,7 +94,7 @@ const PositionsCombobox = forwardRef<HTMLButtonElement, Props>(
                 <CommandEmpty>No position found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
-                    {positions.items.map((position) => (
+                    {items.map((position) => (
                       <CommandItem
                         key={position.id}
                         value={position.name}

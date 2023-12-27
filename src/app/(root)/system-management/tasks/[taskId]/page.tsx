@@ -59,16 +59,19 @@ export default function Page({ params: { taskId } }: Props) {
         <section className="space-y-2">
           <div className="flex items-center justify-between">
             <h2 className="h4">Prerequisite Tasks</h2>
-            <NewPrerequisiteTaskDialog />
+            <NewPrerequisiteTaskDialog task={task} />
           </div>
           <PrerequisiteTasksTable task={task} />
         </section>
         <section className="space-y-2">
           <div className="flex items-center justify-between">
             <h2 className="h4">Positions</h2>
-            <NewPositionDialog />
+            <NewPositionDialog task={task} />
           </div>
-          <PositionsTable task={task} />
+          <PositionsTable
+            task={task}
+            key={JSON.stringify(task.taskPositions)}
+          />
         </section>
         <section className="space-y-2">
           <h2 className="h4">Workers</h2>

@@ -1,7 +1,5 @@
 "use client";
-import * as React from "react";
 import {
-  OnChangeFn,
   PaginationState,
   flexRender,
   getCoreRowModel,
@@ -12,8 +10,12 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Loader2,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSocketContext } from "../SocketProvider";
 import {
   Table,
   TableBody,
@@ -22,7 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobPaginatedResponseDto } from "@/api";
 import {
   Select,
   SelectContent,
@@ -32,31 +33,68 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { jobColumns } from "@/columns/jobColumns";
+import useMyActiveJobsQuery, {
+  getMyActiveJobsQueryKey,
+} from "@/queries/useMyActiveJobsQuery";
 
-interface Props {
-  data: JobPaginatedResponseDto;
-  pagination: PaginationState;
-  onPaginationChange: OnChangeFn<PaginationState>;
-}
-
-export default function JobsTable({
-  data,
-  onPaginationChange,
-  pagination,
-}: Props) {
+export default function JobsTable() {
+  const socket = useSocketContext();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+
+  const pagination: PaginationState = {
+    pageIndex: searchParams.get("pageIndex")
+      ? Number(searchParams.get("pageIndex"))
+      : 0,
+    pageSize: searchParams.get("pageSize")
+      ? Number(searchParams.get("pageSize"))
+      : 10,
+  };
+
+  const { data, isLoading } = useMyActiveJobsQuery(
+    {
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+    },
+    true
+  );
+
   const table = useReactTable({
     data: data?.items ?? [],
     columns: jobColumns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange,
+    onPaginationChange: (updater) => {
+      if (typeof updater === "function") {
+        const { pageIndex, pageSize } = updater(pagination);
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set("pageIndex", String(pageIndex));
+        newSearchParams.set("pageSize", String(pageSize));
+        router.replace(`${pathname}?${newSearchParams.toString()}`, {
+          scroll: false,
+        });
+      }
+    },
     manualPagination: true,
     state: {
       pagination,
     },
   });
+
+  useEffect(() => {
+    if (socket == null) {
+      return;
+    }
+
+    socket.on("task-assigned", () => {
+      queryClient.invalidateQueries({
+        queryKey: getMyActiveJobsQueryKey({}),
+      });
+    });
+  }, [queryClient, socket]);
 
   return (
     <div className="space-y-2">
@@ -79,7 +117,24 @@ export default function JobsTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={jobColumns.length} className="h-24">
+                  <div className="flex justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={jobColumns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            ) : (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -99,15 +154,6 @@ export default function JobsTable({
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={jobColumns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
             )}
           </TableBody>
         </Table>

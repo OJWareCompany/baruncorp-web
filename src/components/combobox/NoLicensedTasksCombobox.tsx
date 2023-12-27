@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -34,6 +34,21 @@ const NoLicensedTasksCombobox = forwardRef<HTMLButtonElement, Props>(
     });
 
     const placeholderText = "Select a task";
+
+    const items = useMemo(() => {
+      if (tasks == null) {
+        return [];
+      }
+
+      if (filteringIds == null) {
+        return tasks.items.filter((value) => value.licenseType === null);
+      }
+
+      return tasks.items.filter(
+        (value) =>
+          value.licenseType === null && !filteringIds.includes(value.id)
+      );
+    }, [filteringIds, tasks]);
 
     if (isTasksQueryLoading || tasks == null) {
       return (
@@ -79,36 +94,24 @@ const NoLicensedTasksCombobox = forwardRef<HTMLButtonElement, Props>(
                 <CommandEmpty>No task found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
-                    {tasks.items
-                      .filter((value) => {
-                        if (filteringIds?.includes(value.id)) {
-                          return false;
-                        }
-
-                        if (value.licenseType === null) {
-                          return true;
-                        }
-
-                        return false;
-                      })
-                      .map((task) => (
-                        <CommandItem
-                          key={task.id}
-                          value={task.name}
-                          onSelect={() => {
-                            onTaskIdChange(task.id);
-                            setPopoverOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              taskId === task.id ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {task.name}
-                        </CommandItem>
-                      ))}
+                    {items.map((task) => (
+                      <CommandItem
+                        key={task.id}
+                        value={task.name}
+                        onSelect={() => {
+                          onTaskIdChange(task.id);
+                          setPopoverOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            taskId === task.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {task.name}
+                      </CommandItem>
+                    ))}
                   </CommandGroup>
                 </CommandList>
               </>

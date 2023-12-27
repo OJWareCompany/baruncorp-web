@@ -1,5 +1,7 @@
 "use client";
 import { Bell, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSocketContext } from "./SocketProvider";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -8,8 +10,21 @@ import {
 } from "@/components/ui/popover";
 
 export default function Notification() {
+  const socket = useSocketContext();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (socket == null) {
+      return;
+    }
+
+    socket.on("task-assigned", () => {
+      setOpen(true);
+    });
+  }, [socket]);
+
   return (
-    <Popover modal>
+    <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size={"icon"}>
           <Bell className="h-4 w-4" />

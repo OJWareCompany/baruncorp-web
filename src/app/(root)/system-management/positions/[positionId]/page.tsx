@@ -44,7 +44,7 @@ export default function Page({ params: { positionId } }: Props) {
         <section className="space-y-2">
           <div className="flex items-center justify-between">
             <h2 className="h4">Tasks</h2>
-            <NewTaskDialog />
+            <NewTaskDialog position={position} />
           </div>
           <TasksTable position={position} />
         </section>

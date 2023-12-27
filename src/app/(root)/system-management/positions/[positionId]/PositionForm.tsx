@@ -23,7 +23,6 @@ import ItemsContainer from "@/components/ItemsContainer";
 import { PositionResponseDto } from "@/api";
 import usePatchPositionMutation from "@/mutations/usePatchPositionMutation";
 import {
-  LicenseTypeEnumWithEmptyString,
   transformNullishStringIntoString,
   transformStringIntoNullableNumber,
   transformStringIntoNullableString,
@@ -34,7 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
   maximumNumberOfTasksHeld: z.string(),
-  licenseType: LicenseTypeEnumWithEmptyString,
+  licenseType: z.string(),
   description: z.string().trim(),
 });
 
@@ -46,7 +45,7 @@ const getFieldValues = (position: PositionResponseDto): FieldValues => {
     maximumNumberOfTasksHeld: position.maxAssignedTasksLimit
       ? String(position.maxAssignedTasksLimit)
       : "",
-    licenseType: "Electrical", // TODO
+    licenseType: position.licenseType ?? "-",
     description: transformNullishStringIntoString.parse(position.description),
   };
 };

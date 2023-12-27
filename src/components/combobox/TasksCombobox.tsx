@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -22,10 +22,11 @@ interface Props {
   taskId: string;
   onTaskIdChange: (newTaskId: string) => void;
   modal?: boolean;
+  filteringIds?: string[];
 }
 
 const TasksCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ taskId, onTaskIdChange, modal = false }, ref) => {
+  ({ taskId, onTaskIdChange, filteringIds, modal = false }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const { data: tasks, isLoading: isTasksQueryLoading } = useTasksQuery({
@@ -33,6 +34,18 @@ const TasksCombobox = forwardRef<HTMLButtonElement, Props>(
     });
 
     const placeholderText = "Select a task";
+
+    const items = useMemo(() => {
+      if (tasks == null) {
+        return [];
+      }
+
+      if (filteringIds == null) {
+        return tasks.items;
+      }
+
+      return tasks.items.filter((value) => !filteringIds.includes(value.id));
+    }, [filteringIds, tasks]);
 
     if (isTasksQueryLoading || tasks == null) {
       return (
@@ -78,7 +91,7 @@ const TasksCombobox = forwardRef<HTMLButtonElement, Props>(
                 <CommandEmpty>No task found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
-                    {tasks.items.map((task) => (
+                    {items.map((task) => (
                       <CommandItem
                         key={task.id}
                         value={task.name}

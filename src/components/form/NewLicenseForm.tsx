@@ -2,10 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Input } from "../ui/input";
 import LoadingButton from "../LoadingButton";
 import DatePicker from "../DatePicker";
 import StatesCombobox from "../combobox/StatesCombobox";
+import UsersByOrganizationCombobox from "../combobox/UsersByOrganizationCombobox";
 import {
   Form,
   FormControl,
@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { LicenseTypeEnum } from "@/lib/constants";
+import { BARUNCORP_ORGANIZATION_ID, LicenseTypeEnum } from "@/lib/constants";
 import usePostUserLicenseMutation from "@/mutations/usePostUserLicenseMutation";
 import {
   Select,
@@ -83,10 +83,12 @@ export default function NewLicenseForm({
             <FormItem>
               <FormLabel required>User</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  value={"TODO: Worker Combobox"}
-                  disabled={userId !== undefined}
+                {/* TODO: Worker Combobox */}
+                <UsersByOrganizationCombobox
+                  organizationId={BARUNCORP_ORGANIZATION_ID}
+                  userId={field.value}
+                  onUserIdChange={field.onChange}
+                  ref={field.ref}
                 />
               </FormControl>
               <FormMessage />

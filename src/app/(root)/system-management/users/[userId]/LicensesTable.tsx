@@ -113,7 +113,7 @@ export default function LicensesTable({ licenses }: Props) {
         },
       }),
     ],
-    []
+    [mutateAsync, queryClient, userId]
   );
 
   const table = useReactTable({

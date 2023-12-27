@@ -4,7 +4,8 @@ import { z } from "zod";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
 import usePostPrerequisiteTaskMutation from "@/mutations/usePostPrerequisiteTaskMutation";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import TasksCombobox from "@/components/combobox/TasksCombobox";
+import { TaskResponseDto } from "@/api";
 
 const formSchema = z.object({
   taskId: z.string().trim().min(1, { message: "Task is required" }),
@@ -32,11 +34,16 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function NewPrerequisiteTaskDialog() {
+interface Props {
+  task: TaskResponseDto;
+}
+
+export default function NewPrerequisiteTaskDialog({ task }: Props) {
   const { taskId } = useParams() as { taskId: string };
   const { mutateAsync } = usePostPrerequisiteTaskMutation(taskId);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -54,11 +61,31 @@ export default function NewPrerequisiteTaskDialog() {
           queryKey: getTaskQueryKey(taskId),
         });
         setOpen(false);
+        setIsSubmitSuccessful(true);
       })
-      .catch(() => {
-        // TODO
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 409:
+            if (error.response?.data.errorCode.includes("20301")) {
+              form.setError(
+                "taskId",
+                {
+                  message: `This task is already existed`,
+                },
+                { shouldFocus: true }
+              );
+            }
+            break;
+        }
       });
   }
+
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      form.reset();
+      setIsSubmitSuccessful(false);
+    }
+  }, [form, isSubmitSuccessful]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -91,6 +118,10 @@ export default function NewPrerequisiteTaskDialog() {
                       onTaskIdChange={field.onChange}
                       ref={field.ref}
                       modal
+                      filteringIds={[
+                        ...task.prerequisiteTask.map(({ taskId }) => taskId),
+                        task.id,
+                      ]}
                     />
                   </FormControl>
                   <FormMessage />

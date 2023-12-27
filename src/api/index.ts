@@ -837,45 +837,9 @@ export interface UpdateServiceRequestDto {
   fixedPrice: number | null;
 }
 
-export interface TaskPosition {
-  positionId: string;
-  positionName: string;
-  order: number;
-  autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
-}
-
-export interface PrerequisiteTask {
-  taskId: string;
-  taskName: string;
-}
-
-export interface TaskWorker {
-  userId: string;
-  userName: string;
-  email: string;
-  position: string | null;
-  organizationName: string;
-  organizationId: string;
-}
-
-export interface TaskResponseDto {
-  /** @default "" */
+export interface ServiceTaskResponseDto {
   id: string;
-  /** @default "" */
   name: string;
-  /** @default "" */
-  serviceId: string;
-  /** @default "" */
-  serviceName: string;
-  /** @default "Structural" */
-  licenseType: "Structural" | "Electrical" | null;
-  taskPositions: TaskPosition[];
-  prerequisiteTask: PrerequisiteTask[];
-  taskWorker: TaskWorker[];
 }
 
 export interface ServiceResponseDto {
@@ -887,7 +851,7 @@ export interface ServiceResponseDto {
   standardPricing: StandardPricingRequestDtoFields | null;
   /** @default null */
   fixedPrice: number | null;
-  relatedTasks: TaskResponseDto[];
+  relatedTasks: ServiceTaskResponseDto[];
 }
 
 export interface ServicePaginatedResponseDto {
@@ -979,7 +943,48 @@ export interface UpdateTaskRequestDto {
   /** @default "" */
   name: string;
   /** @default "Structural" */
-  licenseTyp: "Structural" | "Electrical" | null;
+  licenseType: "Structural" | "Electrical" | null;
+}
+
+export interface TaskPosition {
+  positionId: string;
+  positionName: string;
+  order: number;
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface PrerequisiteTask {
+  taskId: string;
+  taskName: string;
+}
+
+export interface TaskWorker {
+  userId: string;
+  userName: string;
+  email: string;
+  position: string | null;
+  organizationName: string;
+  organizationId: string;
+}
+
+export interface TaskResponseDto {
+  /** @default "" */
+  id: string;
+  /** @default "" */
+  name: string;
+  /** @default "" */
+  serviceId: string;
+  /** @default "" */
+  serviceName: string;
+  /** @default "Structural" */
+  licenseType: "Structural" | "Electrical" | null;
+  taskPositions: TaskPosition[];
+  prerequisiteTask: PrerequisiteTask[];
+  taskWorker: TaskWorker[];
 }
 
 export interface TaskPaginatedResponseFields {
@@ -1064,6 +1069,8 @@ export interface AssignedTaskResponseDto {
   startedAt: string | null;
   /** @format date-time */
   doneAt: string | null;
+  /** @format date-time */
+  createdAt: string | null;
   duration: number | null;
   cost: number | null;
 }
@@ -1093,7 +1100,7 @@ export interface UpdateTaskCostRequestDto {
 export interface AvailableWorkerResponseDto {
   id: string;
   name: string;
-  position: string;
+  position: string | null;
 }
 
 export interface RejectedTaskReasonResponseDto {
@@ -1513,8 +1520,8 @@ export interface VendorToInvoiceResponseDto {
 export interface VendorInvoiceLineItemResponse {
   vendorInvoiceId: string;
   taskId: string;
-  assgineeId: string;
-  assgineeName: string;
+  assigneeId: string;
+  assigneeName: string;
   clientOrganizationId: string;
   clientOrganizationName: string;
   projectId: string;
@@ -1618,6 +1625,7 @@ export interface PositionResponseDto {
   /** @default null */
   maxAssignedTasksLimit: number | null;
   tasks: PositionTask[];
+  licenseType: "Structural" | "Electrical" | null;
   workers: Worker[];
 }
 
@@ -1631,6 +1639,7 @@ export interface PositionPaginatedResponseFields {
   /** @default null */
   maxAssignedTasksLimit: number | null;
   tasks: PositionTask[];
+  licenseType: "Structural" | "Electrical" | null;
 }
 
 export interface PositionPaginatedResponseDto {
@@ -2112,6 +2121,10 @@ export interface FindAssignedTaskPaginatedHttpControllerGetParams {
   page?: number;
 }
 
+export interface FindRejectedTaskReasonHttpControllerGetParams {
+  userName?: string | null;
+}
+
 export interface FindInvoicePaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
@@ -2296,6 +2309,13 @@ export interface FindLicensePaginatedHttpControllerGetParams {
    * @example 1
    */
   page?: number;
+}
+
+export interface FindWorkersForLicenseHttpControllerGetParams {
+  /** @default "Structural" */
+  type: "Structural" | "Electrical";
+  /** @default "AK" */
+  abbreviation: string;
 }
 
 import type {
@@ -2815,6 +2835,22 @@ export class Api<
         format: "json",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @name ResetDefaultTasksHttpControllerPost
+     * @request POST:/users/{userId}/reset-default-tasks
+     */
+    resetDefaultTasksHttpControllerPost: (
+      userId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/${userId}/reset-default-tasks`,
+        method: "POST",
+        ...params,
+      }),
   };
   licenses = {
     /**
@@ -2868,11 +2904,10 @@ export class Api<
       }: RevokeUserLicenseHttpControllerPostParams,
       params: RequestParams = {}
     ) =>
-      this.request<IdResponse, any>({
+      this.request<void, any>({
         path: `/licenses/${abbreviation}/users/${userId}`,
         method: "DELETE",
         query: query,
-        format: "json",
         ...params,
       }),
 
@@ -2888,6 +2923,24 @@ export class Api<
     ) =>
       this.request<LicensePaginatedResponseDto, any>({
         path: `/licenses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindWorkersForLicenseHttpControllerGet
+     * @request GET:/licenses/{abbreviation}/workers
+     */
+    findWorkersForLicenseHttpControllerGet: (
+      { abbreviation, ...query }: FindWorkersForLicenseHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PositionUnregisteredUserResponseDto, any>({
+        path: `/licenses/${abbreviation}/workers`,
         method: "GET",
         query: query,
         format: "json",
@@ -4052,10 +4105,14 @@ export class Api<
      * @name FindRejectedTaskReasonHttpControllerGet
      * @request GET:/rejected-task-reasons
      */
-    findRejectedTaskReasonHttpControllerGet: (params: RequestParams = {}) =>
+    findRejectedTaskReasonHttpControllerGet: (
+      query: FindRejectedTaskReasonHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
       this.request<RejectedTaskReasonPaginatedResponseDto, any>({
         path: `/rejected-task-reasons`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

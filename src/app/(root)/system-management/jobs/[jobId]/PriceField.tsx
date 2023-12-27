@@ -2,9 +2,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { AffixInput } from "@/components/AffixInput";
+import usePatchOrderedServiceManualPriceMutation from "@/mutations/usePatchOrderedServiceManualPriceMutation";
+import { useToast } from "@/components/ui/use-toast";
+import { toTwoDecimalRegExp } from "@/lib/constants";
+import { getJobQueryKey } from "@/queries/useJobQuery";
 
 const formSchema = z.object({
   price: z.string().trim(),
@@ -12,15 +18,48 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function PriceField() {
+const getFieldValues = (price: number | null): FieldValues => {
+  return {
+    price: price ? String(price) : "",
+  };
+};
+
+interface Props {
+  orderedServiceId: string;
+  price: number | null;
+  jobId: string;
+}
+
+export default function PriceField({ orderedServiceId, price, jobId }: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      price: "",
-    },
+    defaultValues: getFieldValues(price),
   });
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  async function onSubmit(values: FieldValues) {}
+  const { mutateAsync } =
+    usePatchOrderedServiceManualPriceMutation(orderedServiceId);
+
+  async function onSubmit(values: FieldValues) {
+    const { price } = values;
+
+    if (price === "") {
+      toast({
+        title: "Price is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await mutateAsync({ price: Number(price) }).then(() => {
+      queryClient.invalidateQueries({ queryKey: getJobQueryKey(jobId) });
+    });
+  }
+
+  useEffect(() => {
+    form.reset(getFieldValues(price));
+  }, [form, price]);
 
   return (
     <Form {...form}>
@@ -39,6 +78,12 @@ export default function PriceField() {
                     <span className="text-muted-foreground">$</span>
                   }
                   {...field}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    if (value === "" || toTwoDecimalRegExp.test(value)) {
+                      field.onChange(event);
+                    }
+                  }}
                   className="h-9"
                 />
               </FormControl>
