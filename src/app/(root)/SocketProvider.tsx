@@ -21,7 +21,7 @@ export default function SocketProvider({ children }: Props) {
     const socket = io(
       `${process.env.NEXT_PUBLIC_SOCKET_URL}?token=${session.accessToken}`,
       {
-        path: "/socket.dev", // OR /socket.pub
+        path: process.env.NEXT_PUBLIC_SOCKET_PATH,
       }
     );
 
