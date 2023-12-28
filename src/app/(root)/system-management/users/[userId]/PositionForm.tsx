@@ -16,6 +16,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import usePostUserPositionResetMutation from "@/mutations/usePostUserPositionResetMutation";
 
 const formSchema = z.object({
   positionId: z.string().trim(),
@@ -38,6 +39,8 @@ export default function PositionForm({ positionId }: Props) {
   const { toast } = useToast();
 
   const { mutateAsync } = usePostUserPositionMutation();
+  const { mutateAsync: postUserPositionResetMutateAsync } =
+    usePostUserPositionResetMutation(userId);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -58,9 +61,11 @@ export default function PositionForm({ positionId }: Props) {
                   onPositionChange={({ id, name }) => {
                     mutateAsync({ positionId: id, userId })
                       .then(() => {
-                        toast({ title: "Success" });
-                        queryClient.invalidateQueries({
-                          queryKey: getUserQueryKey(userId),
+                        postUserPositionResetMutateAsync().then(() => {
+                          toast({ title: "Success" });
+                          queryClient.invalidateQueries({
+                            queryKey: getUserQueryKey(userId),
+                          });
                         });
                       })
                       .catch((error: AxiosError<ErrorResponseData>) => {
