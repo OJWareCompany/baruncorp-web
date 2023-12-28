@@ -14,10 +14,10 @@ export default function PageHeaderAction({ project }: Props) {
       <Button asChild size={"sm"} variant={"outline"}>
         <Link href={`/system-management/projects/${project.projectId}/ahj`}>
           <ScrollText className="mr-2 h-4 w-4" />
-          <span>View AHJ Note</span>
+          View AHJ Note
         </Link>
-        <OpenProjectFolderButton project={project} />
       </Button>
+      <OpenProjectFolderButton project={project} />
     </div>
   );
 }
