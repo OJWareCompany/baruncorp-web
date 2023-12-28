@@ -81,7 +81,7 @@ export default function Page({ params: { jobId } }: Props) {
         </section>
         <section>
           <h4 className="h4 mb-2">Status</h4>
-          <JobStatus job={job} />
+          <JobStatus job={job} project={project} />
         </section>
         <section>
           <h4 className="h4 mb-2">Tasks</h4>

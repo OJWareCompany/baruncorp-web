@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { PositionPaginatedResponseDto } from "@/api";
 import usePositionsQuery from "@/queries/usePositionsQuery";
+import { Badge } from "@/components/ui/badge";
 
 const columnHelper =
   createColumnHelper<PositionPaginatedResponseDto["items"][number]>();
@@ -31,10 +32,16 @@ const columns = [
   }),
   columnHelper.accessor("tasks", {
     header: "Tasks",
-    cell: ({ getValue }) => {
-      return getValue()
-        .map((value) => value.taskName)
-        .join(", ");
+    cell: ({ getValue, column }) => {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {getValue().map((value) => (
+            <Badge key={value.taskId} variant={"outline"}>
+              {value.taskName}
+            </Badge>
+          ))}
+        </div>
+      );
     },
   }),
 ];

@@ -90,6 +90,7 @@ export default function Page({ params: { jobId } }: Props) {
                 (value) => value.assigneeId === session?.id
               )
             }
+            project={project}
           />
         </section>
         <section>

@@ -6,7 +6,7 @@ export default function Page() {
     <div className="flex flex-col gap-4">
       <PageHeader items={[{ href: "/workspace", name: "Workspace" }]} />
       <section>
-        <h4 className="h4 mb-2">My Active Jobs</h4>
+        <h4 className="h4 mb-2">In Progress</h4>
         <JobsTable />
       </section>
     </div>

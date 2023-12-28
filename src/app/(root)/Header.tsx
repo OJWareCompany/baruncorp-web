@@ -152,7 +152,7 @@ export default function Header() {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
-                {/* <NavigationMenuItem>
+                <NavigationMenuItem>
                   <Link href="/invoices" legacyBehavior passHref>
                     <NavigationMenuLink
                       className={navigationMenuTriggerStyle()}
@@ -160,7 +160,7 @@ export default function Header() {
                       Invoices
                     </NavigationMenuLink>
                   </Link>
-                </NavigationMenuItem> */}
+                </NavigationMenuItem>
                 {/* <NavigationMenuItem>
                   <Link href="/project-management" legacyBehavior passHref>
                     <NavigationMenuLink

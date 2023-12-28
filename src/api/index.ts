@@ -766,6 +766,10 @@ export interface JobToInvoiceResponseDto {
   total: number;
 }
 
+export interface SendDeliverablesRequestDto {
+  deliverablesLink: string;
+}
+
 export interface CreateJobNoteRequestDto {
   /** @default "what do you think about Jazz?" */
   content: string;
@@ -3467,6 +3471,25 @@ export class Api<
       this.request<void, any>({
         path: `/jobs/hold/${jobId}`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SendDeliverablesHttpControllerUpdateJob
+     * @request PATCH:/jobs/{jobId}/send-deliverables
+     */
+    sendDeliverablesHttpControllerUpdateJob: (
+      jobId: string,
+      data: SendDeliverablesRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/jobs/${jobId}/send-deliverables`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

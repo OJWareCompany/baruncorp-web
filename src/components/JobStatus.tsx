@@ -1,7 +1,9 @@
 import { MoreHorizontal } from "lucide-react";
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { JobResponseDto } from "@/api";
+import axios from "axios";
+import { useToast } from "./ui/use-toast";
+import { JobResponseDto, ProjectResponseDto } from "@/api";
 import { Button } from "@/components/ui/button";
 import { JobStatusEnum, jobStatuses } from "@/lib/constants";
 import {
@@ -24,16 +26,18 @@ import usePatchJobCancelMutation from "@/mutations/usePatchJobCancelMutation";
 import usePatchJobHoldMutation from "@/mutations/usePatchJobHoldMutation";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
+import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 
 interface Props {
   job: JobResponseDto;
+  project: ProjectResponseDto;
   readOnly?: boolean;
 }
 
-export default function JobStatus({ job, readOnly = false }: Props) {
+export default function JobStatus({ job, project, readOnly = false }: Props) {
   const [state, setState] = useState<
     | { alertDialogOpen: false }
-    | { alertDialogOpen: true; type: "Hold" | "Cancel" }
+    | { alertDialogOpen: true; type: "Hold" | "Cancel" | "Send to Client" }
   >({ alertDialogOpen: false });
   const queryClient = useQueryClient();
   const { mutateAsync: patchJobCancelMutateAsync } = usePatchJobCancelMutation(
@@ -43,6 +47,8 @@ export default function JobStatus({ job, readOnly = false }: Props) {
     job.id
   );
   const status = jobStatuses[job.jobStatus];
+  const { mutateAsync } = usePatchJobSendMutation(job.id);
+  const { toast } = useToast();
 
   const isNotStarted = job.jobStatus === JobStatusEnum.Values["Not Started"];
   const isInProgress = job.jobStatus === JobStatusEnum.Values["In Progress"];
@@ -50,7 +56,7 @@ export default function JobStatus({ job, readOnly = false }: Props) {
   const isCanceled = job.jobStatus === JobStatusEnum.Values["Canceled"];
   const isCompleted = job.jobStatus === JobStatusEnum.Values["Completed"];
 
-  if (readOnly || isCompleted) {
+  if (readOnly) {
     return (
       <div className="flex gap-2">
         <div className="flex h-10 px-3 py-2 rounded-md text-sm border border-input bg-background flex-1">
@@ -78,6 +84,15 @@ export default function JobStatus({ job, readOnly = false }: Props) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {isCompleted && (
+            <DropdownMenuItem
+              onClick={() => {
+                setState({ alertDialogOpen: true, type: "Send to Client" });
+              }}
+            >
+              Send to Client
+            </DropdownMenuItem>
+          )}
           {(isNotStarted || isInProgress) && (
             <>
               <DropdownMenuItem
@@ -153,6 +168,48 @@ export default function JobStatus({ job, readOnly = false }: Props) {
                       // TODO: error handling
                     });
                   return;
+                }
+
+                if (state.type === "Send to Client") {
+                  axios
+                    .get(
+                      `${
+                        process.env.NEXT_PUBLIC_FILE_API_URL
+                      }/filesystem/${encodeURIComponent(
+                        job.clientInfo.clientOrganizationName
+                      )}/${encodeURIComponent(
+                        project.propertyType
+                      )}/${encodeURIComponent(
+                        project.propertyAddress.fullAddress
+                      )}/${encodeURIComponent(
+                        `Job ${job.jobRequestNumber}`
+                      )}/deliverables/sharelink`
+                    )
+                    .then((value) => {
+                      mutateAsync({
+                        deliverablesLink: value.data.data.shareLink,
+                      })
+                        .then(() => {
+                          toast({
+                            title: "Success",
+                          });
+                        })
+                        .catch(() => {});
+                    })
+                    .catch(console.error);
+                  // patchJobCancelMutateAsync()
+                  //   .then(() => {
+                  //     queryClient.invalidateQueries({
+                  //       queryKey: getJobQueryKey(job.id),
+                  //     });
+                  //     queryClient.invalidateQueries({
+                  //       queryKey: getProjectQueryKey(job.projectId),
+                  //     });
+                  //   })
+                  //   .catch(() => {
+                  //     // TODO: error handling
+                  //   });
+                  // return;
                 }
               }}
             >

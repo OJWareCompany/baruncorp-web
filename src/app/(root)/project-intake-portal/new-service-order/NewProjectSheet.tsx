@@ -148,7 +148,7 @@ export default function NewProjectSheet({
         form.reset();
         queryClient.invalidateQueries({
           queryKey: getProjectsQueryKey({
-            organizationName: organization?.name,
+            organizationId: organizationId,
             limit: Number.MAX_SAFE_INTEGER,
           }),
         });

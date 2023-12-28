@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { TaskPaginatedResponseFields } from "@/api";
 import useTasksQuery from "@/queries/useTasksQuery";
+import { Badge } from "@/components/ui/badge";
 
 const columnHelper = createColumnHelper<TaskPaginatedResponseFields>();
 
@@ -33,18 +34,30 @@ const columns = [
   }),
   columnHelper.accessor("taskPositions", {
     header: "Positions",
-    cell: ({ getValue }) => {
-      return getValue()
-        .map((value) => value.positionName)
-        .join(", ");
+    cell: ({ getValue, column }) => {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {getValue().map((value) => (
+            <Badge key={value.positionId} variant={"outline"}>
+              {value.positionName}
+            </Badge>
+          ))}
+        </div>
+      );
     },
   }),
   columnHelper.accessor("prerequisiteTask", {
     header: "Prerequisite Tasks",
-    cell: ({ getValue }) => {
-      return getValue()
-        .map((value) => value.taskName)
-        .join(", ");
+    cell: ({ getValue, column }) => {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {getValue().map((value) => (
+            <Badge key={value.taskId} variant={"outline"}>
+              {value.taskName}
+            </Badge>
+          ))}
+        </div>
+      );
     },
   }),
 ];
