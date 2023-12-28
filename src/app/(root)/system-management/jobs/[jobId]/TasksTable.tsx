@@ -387,6 +387,10 @@ export default function TasksTable({ job, project }: Props) {
 
           return (
             <PriceField
+              disabled={
+                row.original.isRevision &&
+                row.original.sizeForRevision === "Minor"
+              }
               orderedServiceId={row.id}
               price={getValue()}
               jobId={job.id}

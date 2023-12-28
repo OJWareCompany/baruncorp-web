@@ -405,7 +405,9 @@ export default function TasksTable({ job, project }: Props) {
               disabled={
                 !row.original.subRows?.some(
                   (value) => value.assigneeId === session?.id
-                )
+                ) ||
+                (row.original.isRevision &&
+                  row.original.sizeForRevision === "Minor")
               }
               orderedServiceId={row.id}
               price={getValue()}
