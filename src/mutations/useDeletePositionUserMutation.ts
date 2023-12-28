@@ -2,20 +2,20 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 
-const usePatchPaymentCancelMutation = () => {
+const useDeletePositionUserMutation = (positionId: string) => {
   const api = useApi();
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
     {
-      paymentId: string;
+      userId: string;
     }
   >((reqData) => {
-    return api.payments
-      .cancelPaymentHttpControllerPatch(reqData.paymentId)
+    return api.positions
+      .deletePositionWorkerHttpControllerDelete(positionId, reqData.userId)
       .then(({ data: resData }) => resData);
   });
 };
 
-export default usePatchPaymentCancelMutation;
+export default useDeletePositionUserMutation;

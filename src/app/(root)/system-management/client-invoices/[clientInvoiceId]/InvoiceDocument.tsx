@@ -4,7 +4,7 @@ import { InvoiceResponseDto, OrganizationResponseDto } from "@/api";
 import { billingCodes } from "@/lib/constants";
 
 interface Props {
-  invoice: InvoiceResponseDto;
+  clientInvoice: InvoiceResponseDto;
   organization: OrganizationResponseDto;
 }
 
@@ -23,7 +23,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function InvoiceDocument({ invoice, organization }: Props) {
+export default function InvoiceDocument({
+  clientInvoice,
+  organization,
+}: Props) {
   return (
     <Document>
       <Page
@@ -52,11 +55,15 @@ export default function InvoiceDocument({ invoice, organization }: Props) {
           <View>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Invoice Date: </Text>
-              <Text>{format(new Date(invoice.invoiceDate), "MM-dd-yyyy")}</Text>
+              <Text>
+                {format(new Date(clientInvoice.invoiceDate), "MM-dd-yyyy")}
+              </Text>
             </View>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Due Date: </Text>
-              <Text>{format(new Date(invoice.dueDate), "MM-dd-yyyy")}</Text>
+              <Text>
+                {format(new Date(clientInvoice.dueDate), "MM-dd-yyyy")}
+              </Text>
             </View>
           </View>
         </View>
@@ -108,7 +115,7 @@ export default function InvoiceDocument({ invoice, organization }: Props) {
               Date{"  "} Completed
             </Text>
           </View>
-          {invoice.lineItems.map((value, index) => (
+          {clientInvoice.lineItems.map((value, index) => (
             <View key={index} style={styles.tableRow}>
               <Text style={[styles.tableCell, { flexBasis: 20 }]}>{index}</Text>
               <Text style={[styles.tableCell, { flex: 1 }]}>
@@ -148,7 +155,7 @@ export default function InvoiceDocument({ invoice, organization }: Props) {
               <Text style={[styles.bold, { lineHeight: 1 }]}>Notes</Text>
             </View>
             <View style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
-              <Text>{invoice.notesToClient ?? "-"}</Text>
+              <Text>{clientInvoice.notesToClient ?? "-"}</Text>
             </View>
           </View>
           <View style={{ flex: 1 }}>
@@ -156,19 +163,19 @@ export default function InvoiceDocument({ invoice, organization }: Props) {
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text>Subtotal</Text>
-              <Text>${invoice.subtotal}</Text>
+              <Text>${clientInvoice.subtotal}</Text>
             </View>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text>Discount</Text>
-              <Text>${invoice.discount}</Text>
+              <Text>${clientInvoice.discount}</Text>
             </View>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text>Total</Text>
-              <Text>${invoice.total}</Text>
+              <Text>${clientInvoice.total}</Text>
             </View>
           </View>
         </View>

@@ -51,7 +51,6 @@ export default function Page({ params: { taskId } }: Props) {
           },
         ]}
       />
-
       <div className="space-y-6">
         <section>
           <TaskForm task={task} service={service} />

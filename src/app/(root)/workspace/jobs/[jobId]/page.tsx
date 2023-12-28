@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import PageHeaderAction from "./PageHeaderAction";
 import ProjectSection from "./ProjectSection";
 import JobForm from "./JobForm";
@@ -6,7 +7,6 @@ import JobNotesTable from "./JobNoteTable";
 import JobNoteForm from "./JobNoteForm";
 import TasksTable from "./TasksTable";
 import JobsTable from "./JobsTable";
-import JobStatus from "./JobStatus";
 import useProjectQuery from "@/queries/useProjectQuery";
 import useJobQuery from "@/queries/useJobQuery";
 import PageHeader from "@/components/PageHeader";
@@ -14,6 +14,7 @@ import useJobNotesQuery from "@/queries/useJobNotesQuery";
 import PageLoading from "@/components/PageLoading";
 import ItemsContainer from "@/components/ItemsContainer";
 import useNotFound from "@/hook/useNotFound";
+import JobStatus from "@/components/JobStatus";
 
 interface Props {
   params: {
@@ -41,6 +42,7 @@ export default function Page({ params: { jobId } }: Props) {
   useNotFound(jobQueryError);
   useNotFound(projectQueryError);
   useNotFound(jobNotesQueryError);
+  const { data: session } = useSession();
 
   if (
     isJobQueryLoading ||
@@ -81,7 +83,14 @@ export default function Page({ params: { jobId } }: Props) {
         </section>
         <section>
           <h4 className="h4 mb-2">Status</h4>
-          <JobStatus job={job} />
+          <JobStatus
+            job={job}
+            readOnly={
+              !job.assignedTasks.some(
+                (value) => value.assigneeId === session?.id
+              )
+            }
+          />
         </section>
         <section>
           <h4 className="h4 mb-2">Tasks</h4>

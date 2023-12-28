@@ -6,7 +6,6 @@ import JobNotesTable from "./JobNoteTable";
 import JobNoteForm from "./JobNoteForm";
 import TasksTable from "./TasksTable";
 import JobsTable from "./JobsTable";
-import JobStatus from "./JobStatus";
 import useProjectQuery from "@/queries/useProjectQuery";
 import useJobQuery from "@/queries/useJobQuery";
 import PageHeader from "@/components/PageHeader";
@@ -14,6 +13,7 @@ import useJobNotesQuery from "@/queries/useJobNotesQuery";
 import PageLoading from "@/components/PageLoading";
 import ItemsContainer from "@/components/ItemsContainer";
 import useNotFound from "@/hook/useNotFound";
+import JobStatus from "@/components/JobStatus";
 
 interface Props {
   params: {

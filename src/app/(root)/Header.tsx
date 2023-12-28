@@ -50,14 +50,14 @@ const systemManagementItems: {
     title: "Client Invoices",
     href: "/system-management/client-invoices",
   },
-  {
-    title: "Vendor Invoices",
-    href: "/system-management/vendor-invoices",
-  },
-  {
-    title: "Payments",
-    href: "/system-management/payments",
-  },
+  // {
+  //   title: "Vendor Invoices",
+  //   href: "/system-management/vendor-invoices",
+  // },
+  // {
+  //   title: "Payments",
+  //   href: "/system-management/payments",
+  // },
   {
     title: "Positions",
     href: "/system-management/positions",
@@ -152,7 +152,7 @@ export default function Header() {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
-                <NavigationMenuItem>
+                {/* <NavigationMenuItem>
                   <Link href="/invoices" legacyBehavior passHref>
                     <NavigationMenuLink
                       className={navigationMenuTriggerStyle()}
@@ -160,7 +160,7 @@ export default function Header() {
                       Invoices
                     </NavigationMenuLink>
                   </Link>
-                </NavigationMenuItem>
+                </NavigationMenuItem> */}
                 {/* <NavigationMenuItem>
                   <Link href="/project-management" legacyBehavior passHref>
                     <NavigationMenuLink

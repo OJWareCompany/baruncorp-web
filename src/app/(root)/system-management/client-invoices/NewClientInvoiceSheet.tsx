@@ -1,12 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import JobsTable from "./JobsTable";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -52,6 +52,8 @@ import { TermsEnum, transformStringIntoNullableString } from "@/lib/constants";
 import useJobsToInvoiceQuery from "@/queries/useJobsToInvoiceQuery";
 import { AffixInput } from "@/components/AffixInput";
 import usePostInvoiceMutation from "@/mutations/usePostInvoiceMutation";
+import { getOrganizationsToInvoiceQueryKey } from "@/queries/useOrganizationsToInvoiceQuery";
+import { getClientInvoicesQueryKey } from "@/queries/useClientInvoicesQuery";
 
 const formSchema = z.object({
   organizationId: z
@@ -71,9 +73,8 @@ const formSchema = z.object({
 type FieldValues = z.infer<typeof formSchema>;
 
 export default function NewClientInvoiceSheet() {
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
-
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
@@ -102,14 +103,14 @@ export default function NewClientInvoiceSheet() {
     true
   );
   const { mutateAsync } = usePostInvoiceMutation();
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-  // useEffect(() => {
-  //   if (isSubmitSuccessful) {
-  //     form.reset();
-  //     setIsSubmitSuccessful(false);
-  //   }
-  // }, [form, isSubmitSuccessful]);
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      form.reset();
+      setIsSubmitSuccessful(false);
+    }
+  }, [form, isSubmitSuccessful]);
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
@@ -129,16 +130,19 @@ export default function NewClientInvoiceSheet() {
         toast({
           title: "Success",
         });
-        // TODO
-        // queryClient.invalidateQueries({
-        //   queryKey: ["organizations-to-invoice", "list"],
-        // });
+        queryClient.invalidateQueries({
+          queryKey: getOrganizationsToInvoiceQueryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: getClientInvoicesQueryKey({}),
+        });
+        setOpen(false);
       })
       .catch(() => {});
   }
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant={"outline"} size={"sm"}>
           <Plus className="mr-2 h-4 w-4" />
@@ -304,54 +308,48 @@ export default function NewClientInvoiceSheet() {
               </form>
             </Form>
           </section>
-          {jobsToInvoice && (
-            <section>
-              <h4 className="h4 mb-2">Jobs</h4>
-              <div className="flex flex-col gap-2">
-                <RowItemsContainer>
-                  <Item>
-                    <Label>Subtotal</Label>
-                    <AffixInput
-                      prefixElement={
-                        <span className="text-muted-foreground">$</span>
-                      }
-                      value={jobsToInvoice.subtotal}
-                      disabled
-                    />
-                  </Item>
-                  <Item>
-                    <Label>Discount</Label>
-                    <AffixInput
-                      prefixElement={
-                        <span className="text-muted-foreground">$</span>
-                      }
-                      value={jobsToInvoice.discount}
-                      disabled
-                    />
-                  </Item>
-                  <Item>
-                    <Label>Total</Label>
-                    <AffixInput
-                      prefixElement={
-                        <span className="text-muted-foreground">$</span>
-                      }
-                      value={jobsToInvoice.total}
-                      disabled
-                    />
-                  </Item>
-                </RowItemsContainer>
-                <JobsTable jobsToInvoice={jobsToInvoice} />
-                {/* <BaseTable
-                  columns={lineItemColumns}
-                  data={jobsToInvoice.items ?? []}
-                  getRowId={({ jobId }) => jobId}
-                  onRowClick={(id) => {
-                    router.push(`/system-management/jobs/${id}`);
-                  }}
-                /> */}
-              </div>
-            </section>
-          )}
+          {watchOrganizationId !== "" &&
+            watchServicePeriodMonth !== "" &&
+            jobsToInvoice && (
+              <section>
+                <h4 className="h4 mb-2">Jobs</h4>
+                <div className="flex flex-col gap-2">
+                  <RowItemsContainer>
+                    <Item>
+                      <Label>Subtotal</Label>
+                      <AffixInput
+                        prefixElement={
+                          <span className="text-muted-foreground">$</span>
+                        }
+                        value={jobsToInvoice.subtotal}
+                        disabled
+                      />
+                    </Item>
+                    <Item>
+                      <Label>Discount</Label>
+                      <AffixInput
+                        prefixElement={
+                          <span className="text-muted-foreground">$</span>
+                        }
+                        value={jobsToInvoice.discount}
+                        disabled
+                      />
+                    </Item>
+                    <Item>
+                      <Label>Total</Label>
+                      <AffixInput
+                        prefixElement={
+                          <span className="text-muted-foreground">$</span>
+                        }
+                        value={jobsToInvoice.total}
+                        disabled
+                      />
+                    </Item>
+                  </RowItemsContainer>
+                  <JobsTable jobsToInvoice={jobsToInvoice} />
+                </div>
+              </section>
+            )}
         </div>
       </SheetContent>
     </Sheet>

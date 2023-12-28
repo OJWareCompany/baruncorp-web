@@ -65,7 +65,7 @@ const PositionsCombobox = forwardRef<HTMLButtonElement, Props>(
     }
 
     const isSelected = positionId !== "";
-    const isEmpty = positions.items.length === 0;
+    const isEmpty = items.length === 0;
 
     return (
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal={modal}>
@@ -78,8 +78,8 @@ const PositionsCombobox = forwardRef<HTMLButtonElement, Props>(
             <span className="flex-1 text-start">
               {!isSelected
                 ? placeholderText
-                : positions.items.find((value) => value.id === positionId)
-                    ?.name ?? placeholderText}
+                : items.find((value) => value.id === positionId)?.name ??
+                  placeholderText}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>

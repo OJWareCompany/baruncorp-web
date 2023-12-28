@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useParams } from "next/navigation";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import usePostPaymentMutation from "@/mutations/usePostPaymentMutation";
 import { AffixInput } from "@/components/AffixInput";
+import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 
 const formSchema = z
   .object({
@@ -67,19 +69,9 @@ const formSchema = z
 
 type FieldValues = z.infer<typeof formSchema>;
 
-interface Props {
-  invoiceId: string;
-}
-
-export default function PaymentDialog({ invoiceId }: Props) {
-  /**
-   * State
-   */
+export default function PaymentDialog() {
+  const { clientInvoiceId } = useParams() as { clientInvoiceId: string };
   const [open, setOpen] = useState(false);
-
-  /**
-   * Form
-   */
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -88,10 +80,6 @@ export default function PaymentDialog({ invoiceId }: Props) {
       paymentMethod: "Direct",
     },
   });
-
-  /**
-   * Query
-   */
   const { mutateAsync } = usePostPaymentMutation();
   const queryClient = useQueryClient();
 
@@ -100,14 +88,13 @@ export default function PaymentDialog({ invoiceId }: Props) {
       amount: Number(values.amount),
       notes: transformStringIntoNullableString.parse(values.notes),
       paymentMethod: values.paymentMethod,
-      invoiceId,
+      invoiceId: clientInvoiceId,
     })
       .then((value) => {
         setOpen(false);
-        // TODO
-        // queryClient.invalidateQueries({
-        //   queryKey: ["client-invoices", "detail", invoiceId],
-        // });
+        queryClient.invalidateQueries({
+          queryKey: getClientInvoiceQueryKey(clientInvoiceId),
+        });
         form.reset();
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

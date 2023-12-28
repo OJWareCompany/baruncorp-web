@@ -18,6 +18,7 @@ import { JobToInvoiceResponseDto } from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { Badge } from "@/components/ui/badge";
+import { formatInEST } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<JobToInvoiceResponseDto["items"][number]>();
@@ -51,13 +52,11 @@ const columns = [
   }),
   columnHelper.accessor("isContainsRevisionTask", {
     header: "Has Revision Task",
-    cell: ({ getValue, column }) => {
-      return (
-        <div className="flex">
-          <Checkbox checked={getValue()} />
-        </div>
-      );
-    },
+    cell: ({ getValue, column }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
   }),
   columnHelper.accessor("taskSizeForRevision", {
     header: "Major / Minor",
@@ -68,26 +67,12 @@ const columns = [
         return <p className="text-muted-foreground">-</p>;
       }
 
-      return (
-        <p
-          style={{ width: column.getSize() - 32 }}
-          className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-        >
-          {value}
-        </p>
-      );
+      return value;
     },
   }),
   columnHelper.accessor("price", {
     header: "Price",
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        ${getValue()}
-      </p>
-    ),
+    cell: ({ getValue, column }) => `$${getValue()}`,
   }),
   columnHelper.accessor("pricingType", {
     header: "Pricing Type",
@@ -96,18 +81,11 @@ const columns = [
     header: "State",
   }),
   columnHelper.accessor("dateSentToClient", {
-    header: "Date Sent to Client",
-    // cell: ({ getValue, column }) => (
-    //   <p
-    //     style={{ width: column.getSize() - 32 }}
-    //     className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-    //   >
-    //     {formatDateTime(getValue())}
-    //   </p>
-    // ),
+    header: "Date Sent to Client (EST)",
+    cell: ({ getValue }) => formatInEST(getValue()),
   }),
   columnHelper.accessor("taskSubtotal", {
-    header: "Subtotal?",
+    header: "Subtotal",
   }),
 ];
 

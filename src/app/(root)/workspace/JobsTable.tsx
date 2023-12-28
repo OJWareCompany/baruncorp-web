@@ -89,11 +89,17 @@ export default function JobsTable() {
       return;
     }
 
-    socket.on("task-assigned", () => {
+    const listener = () => {
       queryClient.invalidateQueries({
         queryKey: getMyActiveJobsQueryKey({}),
       });
-    });
+    };
+
+    socket.on("task-assigned", listener);
+
+    return () => {
+      socket.off("task-assigned", listener);
+    };
   }, [queryClient, socket]);
 
   return (

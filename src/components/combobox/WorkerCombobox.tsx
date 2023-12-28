@@ -15,42 +15,44 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import useTasksQuery from "@/queries/useTasksQuery";
 import { cn } from "@/lib/utils";
+import useWorkersQuery from "@/queries/useWorkersQuery";
 
 interface Props {
-  taskId: string;
-  onTaskIdChange: (newTaskId: string) => void;
+  userId: string;
+  onUserIdChange: (newUserId: string) => void;
   modal?: boolean;
   filteringIds?: string[];
+  disabled?: boolean;
 }
 
-const NoLicensedTasksCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ taskId, onTaskIdChange, filteringIds, modal = false }, ref) => {
+const WorkersCombobox = forwardRef<HTMLButtonElement, Props>(
+  (
+    { userId, onUserIdChange, filteringIds, disabled = false, modal = false },
+    ref
+  ) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const { data: tasks, isLoading: isTasksQueryLoading } = useTasksQuery({
-      limit: Number.MAX_SAFE_INTEGER,
-    });
+    const { data: workers, isLoading: isWorkersQueryLoading } =
+      useWorkersQuery();
 
-    const placeholderText = "Select a task";
+    const placeholderText = "Select a user";
 
     const items = useMemo(() => {
-      if (tasks == null) {
+      if (workers == null) {
         return [];
       }
 
       if (filteringIds == null) {
-        return tasks.items.filter((value) => value.licenseType === null);
+        return workers.items;
       }
 
-      return tasks.items.filter(
-        (value) =>
-          value.licenseType === null && !filteringIds.includes(value.id)
+      return workers.items.filter(
+        (value) => !filteringIds.includes(value.userId)
       );
-    }, [filteringIds, tasks]);
+    }, [filteringIds, workers]);
 
-    if (isTasksQueryLoading || tasks == null) {
+    if (isWorkersQueryLoading || workers == null) {
       return (
         <Button
           variant="outline"
@@ -64,7 +66,7 @@ const NoLicensedTasksCombobox = forwardRef<HTMLButtonElement, Props>(
       );
     }
 
-    const isSelected = taskId !== "";
+    const isSelected = userId !== "";
     const isEmpty = items.length === 0;
 
     return (
@@ -74,11 +76,12 @@ const NoLicensedTasksCombobox = forwardRef<HTMLButtonElement, Props>(
             variant="outline"
             className="px-3 font-normal gap-2"
             ref={ref}
+            disabled={disabled}
           >
             <span className="flex-1 text-start">
               {!isSelected
                 ? placeholderText
-                : items.find((value) => value.id === taskId)?.name ??
+                : items.find((value) => value.userId === userId)?.userName ??
                   placeholderText}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -88,28 +91,28 @@ const NoLicensedTasksCombobox = forwardRef<HTMLButtonElement, Props>(
           <Command>
             <CommandInput placeholder="Search" />
             {isEmpty ? (
-              <div className="py-6 text-center text-sm">No task found.</div>
+              <div className="py-6 text-center text-sm">No user found.</div>
             ) : (
               <>
-                <CommandEmpty>No task found.</CommandEmpty>
+                <CommandEmpty>No user found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
-                    {items.map((task) => (
+                    {items.map((user) => (
                       <CommandItem
-                        key={task.id}
-                        value={task.name}
+                        key={user.userId}
+                        value={user.userName}
                         onSelect={() => {
-                          onTaskIdChange(task.id);
+                          onUserIdChange(user.userId);
                           setPopoverOpen(false);
                         }}
                       >
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            taskId === task.id ? "opacity-100" : "opacity-0"
+                            userId === user.userId ? "opacity-100" : "opacity-0"
                           )}
                         />
-                        {task.name}
+                        {user.userName}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -122,6 +125,6 @@ const NoLicensedTasksCombobox = forwardRef<HTMLButtonElement, Props>(
     );
   }
 );
-NoLicensedTasksCombobox.displayName = "NoLicensedTasksCombobox";
+WorkersCombobox.displayName = "WorkersCombobox";
 
-export default NoLicensedTasksCombobox;
+export default WorkersCombobox;

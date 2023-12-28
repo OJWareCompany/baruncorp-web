@@ -88,7 +88,9 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
                 new Set(availableWorkers.map((value) => value.position))
               ).map((position) => (
                 <DropdownMenuSub key={position}>
-                  <DropdownMenuSubTrigger>{position}</DropdownMenuSubTrigger>
+                  <DropdownMenuSubTrigger>
+                    {position ?? "No Position"}
+                  </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="p-0">
                     <Command>
                       <CommandInput placeholder="Search" autoFocus={true} />

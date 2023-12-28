@@ -4,12 +4,7 @@ import {
   PaginationState,
   createColumnHelper,
 } from "@tanstack/react-table";
-import {
-  InvoicePayments,
-  InvoiceResponseDto,
-  PaymentPaginatedResponseDto,
-  PaymentResponseDto,
-} from "@/api";
+import { PaymentPaginatedResponseDto, PaymentResponseDto } from "@/api";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
 import usePatchPaymentCancelMutation from "@/mutations/usePatchPaymentCancelMutation";
@@ -176,129 +171,6 @@ export function getPaymentTableExportDataFromPayments(
     "Date Canceled": value.canceledAt ? formatDateTime(value.canceledAt) : "-",
   }));
 }
-
-function CancelButtonForPaymentForInvoice({
-  cellContext: { row },
-}: {
-  cellContext: CellContext<InvoicePayments, unknown>;
-}) {
-  const isCanceled = row.original.canceledAt == null;
-
-  const { mutateAsync } = usePatchPaymentCancelMutation(row.original.id);
-  const queryClient = useQueryClient();
-
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          size={"sm"}
-          variant={"outline"}
-          className="w-full text-destructive hover:text-destructive"
-          disabled={!isCanceled}
-        >
-          Cancel
-        </Button>
-      </AlertDialogTrigger>
-      <CommonAlertDialogContent
-        onContinue={() => {
-          mutateAsync()
-            .then(() => {
-              // queryClient.invalidateQueries({
-              //   queryKey: [
-              //     "invoices",
-              //     "detail",
-              //     { invoiceId: row.original.invoiceId },
-              //   ],
-              // });
-            })
-            .catch(() => {});
-        }}
-      />
-    </AlertDialog>
-  );
-}
-
-const paymentForInvoiceColumnHelper =
-  createColumnHelper<InvoiceResponseDto["payments"][number]>();
-
-export const paymentForInvoiceColumns = [
-  paymentForInvoiceColumnHelper.accessor("paymentDate", {
-    header: "Payment Date",
-    size: 200,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {formatDateTime(getValue())}
-      </p>
-    ),
-  }),
-  paymentForInvoiceColumnHelper.accessor("paymentMethod", {
-    header: "Payment Method",
-    size: 150,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        {getValue()}
-      </p>
-    ),
-  }),
-  paymentForInvoiceColumnHelper.accessor("amount", {
-    header: "Amount",
-    size: 150,
-    cell: ({ getValue, column }) => (
-      <p
-        style={{ width: column.getSize() - 32 }}
-        className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-      >
-        ${getValue()}
-      </p>
-    ),
-  }),
-  paymentForInvoiceColumnHelper.accessor("notes", {
-    header: "Notes",
-    size: 400,
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      if (value == null || value === "") {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return value;
-    },
-  }),
-  paymentForInvoiceColumnHelper.accessor("canceledAt", {
-    header: "Date Canceled",
-    size: 200,
-    cell: ({ getValue, column }) => {
-      const value = getValue();
-
-      if (value == null) {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return (
-        <p
-          style={{ width: column.getSize() - 32 }}
-          className={`whitespace-nowrap overflow-hidden text-ellipsis`}
-        >
-          {formatDateTime(value)}
-        </p>
-      );
-    },
-  }),
-  paymentForInvoiceColumnHelper.display({
-    id: "action",
-    size: 150,
-    cell: (cellContext) => (
-      <CancelButtonForPaymentForInvoice cellContext={cellContext} />
-    ),
-  }),
-];
 
 // const jobToInvoiceColumnHelper = createColumnHelper<LineItem>();
 

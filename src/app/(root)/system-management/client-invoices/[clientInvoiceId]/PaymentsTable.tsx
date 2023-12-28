@@ -1,14 +1,18 @@
-"use client";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
+import { useMemo } from "react";
+import PaymentDialog from "./PaymentDialog";
+import { InvoiceResponseDto } from "@/api";
+import { AffixInput } from "@/components/AffixInput";
+import Item from "@/components/Item";
+import { Label } from "@/components/ui/label";
+import { formatInEST } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -17,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserResponseDto } from "@/api";
+import usePatchPaymentCancelMutation from "@/mutations/usePatchPaymentCancelMutation";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -29,94 +33,64 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import useDeleteUserAvailableTaskMutation from "@/mutations/useDeleteUserAvailableTaskMutation";
-import { getUserQueryKey } from "@/queries/useUserQuery";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
-import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
-import usePatchUserAvailableTaskMutation from "@/mutations/usePatchUserAvailableTaskMutation";
+import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 
 const columnHelper =
-  createColumnHelper<UserResponseDto["availableTasks"][number]>();
+  createColumnHelper<InvoiceResponseDto["payments"][number]>();
 
 interface Props {
-  user: UserResponseDto;
+  clientInvoice: InvoiceResponseDto;
 }
 
-export default function AvailableTasksTable({ user }: Props) {
-  const { toast } = useToast();
-  const router = useRouter();
-  const { mutateAsync: deleteUserAvailableTaskMutateAsync } =
-    useDeleteUserAvailableTaskMutation();
-  const { mutateAsync: patchUserAvailableTaskMutateAsync } =
-    usePatchUserAvailableTaskMutation(user.id);
+export default function PaymentsTable({ clientInvoice }: Props) {
+  const { mutateAsync } = usePatchPaymentCancelMutation();
   const queryClient = useQueryClient();
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("name", {
-        header: "Name",
+      columnHelper.accessor("paymentDate", {
+        header: "Payment Date (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
       }),
-      columnHelper.accessor("licenseType", {
-        header: "License Type",
+      columnHelper.accessor("paymentMethod", {
+        header: "Payment Method",
+      }),
+      columnHelper.accessor("amount", {
+        header: "Amount",
+        cell: ({ getValue, column }) => `$${getValue()}`,
+      }),
+      columnHelper.accessor("notes", {
+        header: "Notes",
         cell: ({ getValue }) => {
           const value = getValue();
 
-          if (value == null) {
+          if (value == null || value === "") {
             return <p className="text-muted-foreground">-</p>;
           }
 
           return value;
         },
       }),
-      columnHelper.accessor("autoAssignmentType", {
-        header: "Auto Assignment Property Type",
-        cell: ({ getValue, row }) => {
-          return (
-            <Select
-              value={getValue()}
-              onValueChange={(newValue) => {
-                patchUserAvailableTaskMutateAsync({
-                  taskId: row.original.id,
-                  autoAssignmentType:
-                    newValue as AutoAssignmentPropertyTypeEnum,
-                }).then(() => {
-                  toast({
-                    title: "Success",
-                  });
-                  queryClient.invalidateQueries({
-                    queryKey: getUserQueryKey(user.id),
-                  });
-                });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a property type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {AutoAssignmentPropertyTypeEnum.options.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          );
+      columnHelper.accessor("canceledAt", {
+        header: "Date Canceled (EST)",
+        size: 200,
+        cell: ({ getValue, column }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
         },
       }),
       columnHelper.display({
         id: "action",
+        size: 150,
         cell: ({ row }) => {
-          if (row.original.licenseType != null) {
+          const isCanceled = row.original.canceledAt == null;
+
+          if (!isCanceled) {
             return;
           }
 
@@ -142,14 +116,15 @@ export default function AvailableTasksTable({ user }: Props) {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => {
-                          deleteUserAvailableTaskMutateAsync({
-                            userId: user.id,
-                            taskId: row.original.id,
-                          }).then(() => {
-                            queryClient.invalidateQueries({
-                              queryKey: getUserQueryKey(user.id),
-                            });
-                          });
+                          mutateAsync({ paymentId: row.id })
+                            .then(() => {
+                              queryClient.invalidateQueries({
+                                queryKey: getClientInvoiceQueryKey(
+                                  clientInvoice.id
+                                ),
+                              });
+                            })
+                            .catch(() => {});
                         }}
                       >
                         Continue
@@ -163,24 +138,26 @@ export default function AvailableTasksTable({ user }: Props) {
         },
       }),
     ],
-    [
-      deleteUserAvailableTaskMutateAsync,
-      patchUserAvailableTaskMutateAsync,
-      queryClient,
-      toast,
-      user.id,
-    ]
+    [clientInvoice.id, mutateAsync, queryClient]
   );
 
   const table = useReactTable({
-    data: user.availableTasks,
+    data: clientInvoice.payments,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
   });
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
+      <Item>
+        <Label>Total</Label>
+        <AffixInput
+          prefixElement={<span className="text-muted-foreground">$</span>}
+          value={clientInvoice.totalOfPayment}
+          disabled
+        />
+      </Item>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -214,10 +191,6 @@ export default function AvailableTasksTable({ user }: Props) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/tasks/${row.id}`);
-                  }}
-                  className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -233,6 +206,7 @@ export default function AvailableTasksTable({ user }: Props) {
           </TableBody>
         </Table>
       </div>
+      <PaymentDialog />
     </div>
   );
 }

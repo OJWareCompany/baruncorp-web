@@ -4,12 +4,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { AxiosError } from "axios";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { AffixInput } from "@/components/AffixInput";
 import usePatchOrderedServiceManualPriceMutation from "@/mutations/usePatchOrderedServiceManualPriceMutation";
 import { useToast } from "@/components/ui/use-toast";
 import { getJobQueryKey } from "@/queries/useJobQuery";
+import { toTwoDecimalRegExp } from "@/lib/constants";
 
 const formSchema = z.object({
   price: z.string().trim(),
@@ -19,7 +21,7 @@ type FieldValues = z.infer<typeof formSchema>;
 
 const getFieldValues = (price: number | null): FieldValues => {
   return {
-    price: price ? String(price) : "",
+    price: price == null ? "" : String(price),
   };
 };
 
@@ -54,7 +56,7 @@ export default function PriceField({
     return (
       <AffixInput
         prefixElement={<span className="text-muted-foreground">$</span>}
-        value={price ? String(price) : ""}
+        value={price == null ? "" : String(price)}
         className="h-9 w-[150px]"
         disabled
       />
@@ -72,12 +74,31 @@ export default function PriceField({
       return;
     }
 
-    await mutateAsync({ price: Number(price) }).then(() => {
-      toast({
-        title: "Success",
+    await mutateAsync({ price: Number(price) })
+      .then(() => {
+        toast({
+          title: "Success",
+        });
+        queryClient.invalidateQueries({ queryKey: getJobQueryKey(jobId) });
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 400:
+            if (error.response?.data.errorCode.includes("40302")) {
+              toast({
+                title: "Select Major / Minor first",
+                variant: "destructive",
+              });
+            }
+            if (error.response?.data.errorCode.includes("40002")) {
+              toast({
+                title: "Cannot be updated after an invoice has been issued",
+                variant: "destructive",
+              });
+            }
+            break;
+        }
       });
-      queryClient.invalidateQueries({ queryKey: getJobQueryKey(jobId) });
-    });
   }
 
   return (
@@ -97,6 +118,12 @@ export default function PriceField({
                     <span className="text-muted-foreground">$</span>
                   }
                   {...field}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    if (value === "" || toTwoDecimalRegExp.test(value)) {
+                      field.onChange(event);
+                    }
+                  }}
                   className="h-9"
                 />
               </FormControl>

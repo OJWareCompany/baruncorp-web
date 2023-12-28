@@ -27,10 +27,6 @@ export default function SocketProvider({ children }: Props) {
 
     setSocket(socket);
 
-    socket.on("connect", () => {
-      console.log("connected");
-    });
-
     return () => {
       socket.disconnect();
       setSocket(null);

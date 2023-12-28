@@ -1,6 +1,8 @@
 "use client";
 import { Grab, Hand } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useSocketContext } from "./SocketProvider";
 import { Button } from "@/components/ui/button";
 import useHandsStatusQuery, {
   getHandsStatusQueryKey,
@@ -17,6 +19,25 @@ export default function HandToggle() {
     usePostUserHandsDownMutation();
   const { mutateAsync: postUserHandsUpMutateAsync } =
     usePostUserHandsUpMutation();
+  const socket = useSocketContext();
+
+  useEffect(() => {
+    if (socket == null) {
+      return;
+    }
+
+    const listener = () => {
+      queryClient.invalidateQueries({
+        queryKey: getHandsStatusQueryKey(),
+      });
+    };
+
+    socket.on("task-assigned", listener);
+
+    return () => {
+      socket.off("task-assigned", listener);
+    };
+  }, [queryClient, socket]);
 
   return (
     <Button
@@ -30,7 +51,7 @@ export default function HandToggle() {
         if (handStatus.status) {
           postUserHandsDownMutateAsync().then(() => {
             toast({
-              title: "Success",
+              title: "Hands down",
             });
             queryClient.invalidateQueries({
               queryKey: getHandsStatusQueryKey(),
@@ -39,7 +60,7 @@ export default function HandToggle() {
         } else {
           postUserHandsUpMutateAsync().then(() => {
             toast({
-              title: "Success",
+              title: "Hands up",
             });
             queryClient.invalidateQueries({
               queryKey: getHandsStatusQueryKey(),

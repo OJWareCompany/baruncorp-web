@@ -56,6 +56,8 @@ export interface AvailableTaskResponseDto {
     | "Residential"
     | "Commercial"
     | "Residential / Commercial";
+  /** @default "Structural" */
+  licenseType: "Structural" | "Electrical" | null;
 }
 
 export interface UserLicenseResponseDto {
@@ -1721,6 +1723,34 @@ export interface LicensePaginatedResponseDto {
   items: LicenseResponseDto[];
 }
 
+export interface AssigningTaskAlertResponse {
+  id: string;
+  userId: string;
+  userName: string;
+  assignedTaskId: string;
+  taskName: string;
+  jobId: string;
+  projectPropertyType: "Residential" | "Commercial";
+  mountingType: "Roof Mount" | "Ground Mount";
+  isRevision: boolean;
+  note: string | null;
+  /** @format date-time */
+  createdAt: string;
+  isCheckedOut: boolean;
+}
+
+export interface AssigningTaskAlertPaginatedResponse {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: AssigningTaskAlertResponse[];
+}
+
 export interface AuthenticationControllerPostSignInTimeParams {
   /** @default 20 */
   jwt: number;
@@ -2311,11 +2341,19 @@ export interface FindLicensePaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface FindWorkersForLicenseHttpControllerGetParams {
-  /** @default "Structural" */
-  type: "Structural" | "Electrical";
-  /** @default "AK" */
-  abbreviation: string;
+export interface FindAssigningTaskAlertPaginatedHttpControllerFindParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
 }
 
 import type {
@@ -2932,17 +2970,13 @@ export class Api<
     /**
      * No description
      *
-     * @name FindWorkersForLicenseHttpControllerGet
-     * @request GET:/licenses/{abbreviation}/workers
+     * @name FindLicensableWorkersHttpControllerGet
+     * @request GET:/licenses/licensable/workers
      */
-    findWorkersForLicenseHttpControllerGet: (
-      { abbreviation, ...query }: FindWorkersForLicenseHttpControllerGetParams,
-      params: RequestParams = {}
-    ) =>
+    findLicensableWorkersHttpControllerGet: (params: RequestParams = {}) =>
       this.request<PositionUnregisteredUserResponseDto, any>({
-        path: `/licenses/${abbreviation}/workers`,
+        path: `/licenses/licensable/workers`,
         method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),
@@ -4968,6 +5002,41 @@ export class Api<
         path: `/positions/${positionId}/unregistered-users`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+  };
+  assigningTaskAlerts = {
+    /**
+     * No description
+     *
+     * @name FindAssigningTaskAlertPaginatedHttpControllerFind
+     * @request GET:/assigning-task-alerts
+     */
+    findAssigningTaskAlertPaginatedHttpControllerFind: (
+      query: FindAssigningTaskAlertPaginatedHttpControllerFindParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AssigningTaskAlertPaginatedResponse, any>({
+        path: `/assigning-task-alerts`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CheckOutAssigningTaskAlertHttpControllerCheckOut
+     * @request PATCH:/assigning-task-alerts/{assigningTaskAlertId}/check-out
+     */
+    checkOutAssigningTaskAlertHttpControllerCheckOut: (
+      assigningTaskAlertId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/assigning-task-alerts/${assigningTaskAlertId}/check-out`,
+        method: "PATCH",
         ...params,
       }),
   };

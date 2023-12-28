@@ -10,11 +10,7 @@ import {
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronsDown, CornerDownRight } from "lucide-react";
 import { useSession } from "next-auth/react";
-import AssignedTaskActionField from "./AssignedTaskActionField";
-import OrderedServiceActionField from "./OrderedServiceActionField";
-import SizeForRevisionField from "./SizeForRevisionField";
-import PriceField from "./PriceField";
-import DurationField from "./DurationField";
+import PriceField from "@/components/field/PriceField";
 import {
   Table,
   TableBody,
@@ -33,6 +29,10 @@ import {
   orderedServiceStatuses,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import SizeForRevisionField from "@/components/field/SizeForRevisionField";
+import DurationField from "@/components/field/DurationField";
+import AssignedTaskActionField from "@/components/field/AssignedTaskActionField";
+import OrderedServiceActionField from "@/components/field/OrderedServiceActionField";
 
 // function Price() {
 //   // const price = getValue();
@@ -342,6 +342,11 @@ export default function TasksTable({ job, project }: Props) {
                   sizeForRevision={getValue()}
                   jobId={job.id}
                   orderedServiceId={row.id}
+                  disabled={
+                    !row.original.subRows?.some(
+                      (value) => value.assigneeId === session?.id
+                    )
+                  }
                 />
               );
             },
@@ -349,16 +354,29 @@ export default function TasksTable({ job, project }: Props) {
         : columnHelper.accessor("duration", {
             header: "Duration",
             cell: ({ row, getValue }) => {
+              if (!row.original.isRevision) {
+                return;
+              }
+
               const duration = getValue();
 
               if (row.depth === 0) {
-                return <DurationField duration={duration} disabled />;
+                return (
+                  <DurationField
+                    duration={duration}
+                    disabled
+                    assignedTaskId={row.id}
+                    jobId={job.id}
+                  />
+                );
               }
 
               return (
                 <DurationField
                   duration={duration}
                   disabled={row.original.assigneeId !== session?.id}
+                  assignedTaskId={row.id}
+                  jobId={job.id}
                 />
               );
 
@@ -463,6 +481,8 @@ export default function TasksTable({ job, project }: Props) {
               status={row.original.status as JobStatusEnum}
               jobId={job.id}
               projectId={job.projectId}
+              page="WORKSPACE"
+              disabled={row.original.assigneeId !== session?.id}
             />
           );
         },

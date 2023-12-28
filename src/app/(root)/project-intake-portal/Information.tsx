@@ -1,5 +1,4 @@
 import { Info } from "lucide-react";
-import EditDialog from "./EditDialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function Information() {
@@ -33,10 +32,9 @@ export default function Information() {
           </p>
         </AlertDescription>
       </Alert>
-
-      <div className="absolute top-[17px] right-[17px]">
+      {/* <div className="absolute top-[17px] right-[17px]">
         <EditDialog />
-      </div>
+      </div> */}
     </div>
   );
 }

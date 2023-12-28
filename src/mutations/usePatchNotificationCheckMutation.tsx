@@ -2,20 +2,22 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 
-const usePatchPaymentCancelMutation = () => {
+const usePatchNotificationCheckMutation = () => {
   const api = useApi();
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
     {
-      paymentId: string;
+      assigningTaskAlertId: string;
     }
   >((reqData) => {
-    return api.payments
-      .cancelPaymentHttpControllerPatch(reqData.paymentId)
+    return api.assigningTaskAlerts
+      .checkOutAssigningTaskAlertHttpControllerCheckOut(
+        reqData.assigningTaskAlertId
+      )
       .then(({ data: resData }) => resData);
   });
 };
 
-export default usePatchPaymentCancelMutation;
+export default usePatchNotificationCheckMutation;

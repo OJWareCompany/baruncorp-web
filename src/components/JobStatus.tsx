@@ -27,9 +27,10 @@ import { getProjectQueryKey } from "@/queries/useProjectQuery";
 
 interface Props {
   job: JobResponseDto;
+  readOnly?: boolean;
 }
 
-export default function JobStatus({ job }: Props) {
+export default function JobStatus({ job, readOnly = false }: Props) {
   const [state, setState] = useState<
     | { alertDialogOpen: false }
     | { alertDialogOpen: true; type: "Hold" | "Cancel" }
@@ -46,16 +47,29 @@ export default function JobStatus({ job }: Props) {
   const isNotStarted = job.jobStatus === JobStatusEnum.Values["Not Started"];
   const isInProgress = job.jobStatus === JobStatusEnum.Values["In Progress"];
   const isOnHold = job.jobStatus === JobStatusEnum.Values["On Hold"];
+  const isCanceled = job.jobStatus === JobStatusEnum.Values["Canceled"];
+  const isCompleted = job.jobStatus === JobStatusEnum.Values["Completed"];
 
-  return (
-    <div className="flex gap-2">
-      <div className="flex h-10 px-3 py-2 rounded-md text-sm border border-input bg-background flex-1">
-        {status && (
+  if (readOnly || isCompleted) {
+    return (
+      <div className="flex gap-2">
+        <div className="flex h-10 px-3 py-2 rounded-md text-sm border border-input bg-background flex-1">
           <div className="flex items-center flex-1 gap-2">
             <status.Icon className={`w-4 h-4 ${status.color}`} />
             <span>{status.value}</span>
           </div>
-        )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-2">
+      <div className="flex h-10 px-3 py-2 rounded-md text-sm border border-input bg-background flex-1">
+        <div className="flex items-center flex-1 gap-2">
+          <status.Icon className={`w-4 h-4 ${status.color}`} />
+          <span>{status.value}</span>
+        </div>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -66,17 +80,13 @@ export default function JobStatus({ job }: Props) {
         <DropdownMenuContent align="end">
           {(isNotStarted || isInProgress) && (
             <>
-              {isOnHold ? (
-                <DropdownMenuItem>TODO: Reactivate (Hold)</DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem
-                  onClick={() => {
-                    setState({ alertDialogOpen: true, type: "Hold" });
-                  }}
-                >
-                  Hold
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem
+                onClick={() => {
+                  setState({ alertDialogOpen: true, type: "Hold" });
+                }}
+              >
+                Hold
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
@@ -88,6 +98,8 @@ export default function JobStatus({ job }: Props) {
               </DropdownMenuItem>
             </>
           )}
+          {isOnHold && <DropdownMenuItem>Release (TODO)</DropdownMenuItem>}
+          {isCanceled && <DropdownMenuItem>Reactivate (TODO)</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
       <AlertDialog

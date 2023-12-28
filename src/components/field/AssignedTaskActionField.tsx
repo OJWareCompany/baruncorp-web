@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import ReasonForm from "../../app/(root)/workspace/jobs/[jobId]/ReasonForm";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,14 +22,22 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { getJobQueryKey } from "@/queries/useJobQuery";
-import usePatchAssignedTaskUnassignMutation from "@/mutations/usePatchAssignedTaskUnassignMutation";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import usePatchAssignedTaskUnassignMutation from "@/mutations/usePatchAssignedTaskUnassignMutation";
 
 interface Props {
   assignedTaskId: string;
   status: JobStatusEnum;
   jobId: string;
   projectId: string;
+  page: "WORKSPACE" | "SYSTEM_MANAGEMENT";
+  disabled?: boolean;
 }
 
 export default function AssignedTaskActionField({
@@ -36,11 +45,13 @@ export default function AssignedTaskActionField({
   status,
   jobId,
   projectId,
+  page,
+  disabled = false,
 }: Props) {
-  const [state, setState] = useState<
-    | { alertDialogOpen: false }
-    | { alertDialogOpen: true; type: "Complete" | "Unassign" }
-  >({ alertDialogOpen: false });
+  const [alertDialogState, setAlertDialogState] = useState<
+    { open: false } | { open: true; type: "Complete" | "Unassign" }
+  >({ open: false });
+  const [dialogOpen, setDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { mutateAsync: patchAssignedTaskCompleteMutateAsync } =
     usePatchAssignedTaskCompleteMutation(assignedTaskId);
@@ -48,6 +59,10 @@ export default function AssignedTaskActionField({
     usePatchAssignedTaskUnassignMutation(assignedTaskId);
 
   const isInProgress = status === JobStatusEnum.Values["In Progress"];
+
+  if (disabled) {
+    return;
+  }
 
   if (isInProgress) {
     return (
@@ -61,27 +76,39 @@ export default function AssignedTaskActionField({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               onClick={() => {
-                setState({ alertDialogOpen: true, type: "Complete" });
+                setAlertDialogState({ open: true, type: "Complete" });
               }}
             >
               Complete
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                setState({ alertDialogOpen: true, type: "Unassign" });
-              }}
-              className="text-destructive focus:text-destructive"
-            >
-              Unassign
-            </DropdownMenuItem>
+            {page === "WORKSPACE" && (
+              <DropdownMenuItem
+                onClick={() => {
+                  setDialogOpen(true);
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                Reject
+              </DropdownMenuItem>
+            )}
+            {page === "SYSTEM_MANAGEMENT" && (
+              <DropdownMenuItem
+                onClick={() => {
+                  setAlertDialogState({ open: true, type: "Unassign" });
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                Unassign
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
         <AlertDialog
-          open={state.alertDialogOpen}
+          open={alertDialogState.open}
           onOpenChange={(newOpen) => {
             if (!newOpen) {
-              setState({ alertDialogOpen: false });
+              setAlertDialogState({ open: false });
               return;
             }
           }}
@@ -94,11 +121,11 @@ export default function AssignedTaskActionField({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
-                  if (!state.alertDialogOpen) {
+                  if (!alertDialogState.open) {
                     return;
                   }
 
-                  if (state.type === "Complete") {
+                  if (alertDialogState.type === "Complete") {
                     patchAssignedTaskCompleteMutateAsync()
                       .then(() => {
                         queryClient.invalidateQueries({
@@ -114,7 +141,7 @@ export default function AssignedTaskActionField({
                     return;
                   }
 
-                  if (state.type === "Unassign") {
+                  if (alertDialogState.type === "Unassign") {
                     patchAssignedTaskUnassignMutateAsync()
                       .then(() => {
                         queryClient.invalidateQueries({
@@ -136,6 +163,25 @@ export default function AssignedTaskActionField({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reason for rejection</DialogTitle>
+            </DialogHeader>
+            <ReasonForm
+              assignedTaskId={assignedTaskId}
+              onSuccess={() => {
+                setDialogOpen(false);
+                queryClient.invalidateQueries({
+                  queryKey: getJobQueryKey(jobId),
+                });
+                queryClient.invalidateQueries({
+                  queryKey: getProjectQueryKey(projectId),
+                });
+              }}
+            />
+          </DialogContent>
+        </Dialog>
       </>
     );
   }

@@ -63,7 +63,7 @@ const StatesCombobox = forwardRef<HTMLButtonElement, Props>(
                 {STATES.map((value) => (
                   <CommandItem
                     key={value.abbreviation}
-                    value={value.abbreviation}
+                    value={value.stateName}
                     onSelect={() => {
                       onAbbreviationChange(value.abbreviation);
                       setPopoverOpen(false);

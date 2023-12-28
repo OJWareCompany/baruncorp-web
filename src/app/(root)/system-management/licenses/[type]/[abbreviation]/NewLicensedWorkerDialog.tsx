@@ -14,13 +14,19 @@ import { LicenseTypeEnum } from "@/lib/constants";
 
 import NewLicenseForm from "@/components/form/NewLicenseForm";
 import { getLicenseQueryKey } from "@/queries/useLicenseQuery";
+import { LicenseResponseDto } from "@/api";
 
 interface Props {
+  license: LicenseResponseDto;
   type: LicenseTypeEnum;
   abbreviation: string;
 }
 
-export default function NewLicensedWorkerDialog({ abbreviation, type }: Props) {
+export default function NewLicensedWorkerDialog({
+  license,
+  abbreviation,
+  type,
+}: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -49,6 +55,7 @@ export default function NewLicensedWorkerDialog({ abbreviation, type }: Props) {
             });
             setOpen(false);
           }}
+          filteringIds={license.workers.map((value) => value.userId)}
         />
       </DialogContent>
     </Dialog>

@@ -5,7 +5,7 @@ import { z } from "zod";
 import LoadingButton from "../LoadingButton";
 import DatePicker from "../DatePicker";
 import StatesCombobox from "../combobox/StatesCombobox";
-import UsersByOrganizationCombobox from "../combobox/UsersByOrganizationCombobox";
+import WorkersCombobox from "../combobox/WorkerCombobox";
 import {
   Form,
   FormControl,
@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { BARUNCORP_ORGANIZATION_ID, LicenseTypeEnum } from "@/lib/constants";
+import { LicenseTypeEnum } from "@/lib/constants";
 import usePostUserLicenseMutation from "@/mutations/usePostUserLicenseMutation";
 import {
   Select,
@@ -39,6 +39,7 @@ interface Props {
   userId?: string;
   abbreviation?: string;
   type?: LicenseTypeEnum;
+  filteringIds?: string[];
 }
 
 export default function NewLicenseForm({
@@ -46,6 +47,7 @@ export default function NewLicenseForm({
   userId,
   abbreviation,
   type,
+  filteringIds,
 }: Props) {
   const { mutateAsync } = usePostUserLicenseMutation();
 
@@ -83,12 +85,13 @@ export default function NewLicenseForm({
             <FormItem>
               <FormLabel required>User</FormLabel>
               <FormControl>
-                {/* TODO: Worker Combobox */}
-                <UsersByOrganizationCombobox
-                  organizationId={BARUNCORP_ORGANIZATION_ID}
+                <WorkersCombobox
                   userId={field.value}
                   onUserIdChange={field.onChange}
+                  modal
                   ref={field.ref}
+                  filteringIds={filteringIds}
+                  disabled={userId !== undefined}
                 />
               </FormControl>
               <FormMessage />

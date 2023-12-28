@@ -3,6 +3,7 @@ import PositionForm from "./PositionForm";
 import TasksTable from "./TasksTable";
 import NewTaskDialog from "./NewTaskDialog";
 import WorkersTable from "./WorkersTable";
+import NewWorkerDialog from "./NewWorkerDialog";
 import PageHeader from "@/components/PageHeader";
 import usePositionQuery from "@/queries/usePositionQuery";
 import useNotFound from "@/hook/useNotFound";
@@ -49,7 +50,10 @@ export default function Page({ params: { positionId } }: Props) {
           <TasksTable position={position} />
         </section>
         <section className="space-y-2">
-          <h2 className="h4">Workers</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="h4">Workers</h2>
+            <NewWorkerDialog position={position} />
+          </div>
           <WorkersTable position={position} />
         </section>
       </div>

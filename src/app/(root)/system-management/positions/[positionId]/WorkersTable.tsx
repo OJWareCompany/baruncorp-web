@@ -8,6 +8,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -17,6 +18,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PositionResponseDto } from "@/api";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import useDeletePositionUserMutation from "@/mutations/useDeletePositionUserMutation";
+import { getPositionQueryKey } from "@/queries/usePositionQuery";
 
 const columnHelper =
   createColumnHelper<PositionResponseDto["workers"][number]>();
@@ -27,7 +41,7 @@ interface Props {
 
 export default function WorkersTable({ position }: Props) {
   const router = useRouter();
-  // const { mutateAsync } = useDeletePrerequisiteTaskMutation(task.id);
+  const { mutateAsync } = useDeletePositionUserMutation(position.id);
   const queryClient = useQueryClient();
 
   const columns = useMemo(
@@ -35,8 +49,55 @@ export default function WorkersTable({ position }: Props) {
       columnHelper.accessor("userName", {
         header: "Name",
       }),
+      columnHelper.accessor("email", {
+        header: "Email",
+      }),
+      columnHelper.display({
+        id: "action",
+        cell: ({ row }) => {
+          return (
+            <div className="text-right">
+              <div
+                className="inline-flex"
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          mutateAsync({
+                            userId: row.id,
+                          }).then(() => {
+                            queryClient.invalidateQueries({
+                              queryKey: getPositionQueryKey(position.id),
+                            });
+                          });
+                        }}
+                      >
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          );
+        },
+      }),
     ],
-    []
+    [mutateAsync, position.id, queryClient]
   );
 
   const table = useReactTable({

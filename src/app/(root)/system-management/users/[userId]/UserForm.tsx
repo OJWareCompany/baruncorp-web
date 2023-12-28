@@ -99,7 +99,6 @@ export default function UserForm({ user }: Props) {
 
   const { mutateAsync } = usePatchProfileByUserIdMutation(userId);
   const queryClient = useQueryClient();
-  const watchIsContractor = form.watch("isContractor");
 
   useEffect(() => {
     if (user) {
@@ -115,7 +114,10 @@ export default function UserForm({ user }: Props) {
       firstName: values.firstName,
       lastName: values.lastName,
       phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
-      isVendor: values.isContractor,
+      isVendor:
+        user.organizationId === BARUNCORP_ORGANIZATION_ID
+          ? false
+          : values.isContractor,
     })
       .then(() => {
         queryClient.invalidateQueries({

@@ -15,6 +15,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatInEST } from "@/lib/utils";
 import useClientInvoicesQuery from "@/queries/useClientInvoicesQuery";
+import { invoiceStatuses } from "@/lib/constants";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -44,9 +46,22 @@ const columns = [
   }),
   columnHelper.accessor("servicePeriodDate", {
     header: "Service Period Month",
+    cell: ({ getValue }) =>
+      format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
   }),
   columnHelper.accessor("status", {
     header: "Status",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      const status = invoiceStatuses[value];
+
+      return (
+        <div className={`flex items-center`}>
+          <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+          <span className="whitespace-nowrap">{status.value}</span>
+        </div>
+      );
+    },
   }),
   columnHelper.accessor("invoiceDate", {
     header: "Invoice Date (EST)",

@@ -75,7 +75,11 @@ export default function Page({ params: { type, abbreviation } }: Props) {
         <section className="space-y-2">
           <div className="flex items-center justify-between">
             <h2 className="h4">Licensed Workers</h2>
-            <NewLicensedWorkerDialog type={type} abbreviation={abbreviation} />
+            <NewLicensedWorkerDialog
+              type={type}
+              abbreviation={abbreviation}
+              license={license}
+            />
           </div>
           <LicensedWorkersTable license={license} />
         </section>

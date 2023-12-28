@@ -6,7 +6,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Table,
@@ -21,6 +20,21 @@ import { TaskResponseDto } from "@/api";
 const columnHelper =
   createColumnHelper<TaskResponseDto["taskWorker"][number]>();
 
+const columns = [
+  columnHelper.accessor("organizationName", {
+    header: "Organization",
+  }),
+  columnHelper.accessor("userName", {
+    header: "Name",
+  }),
+  columnHelper.accessor("email", {
+    header: "Email",
+  }),
+  columnHelper.accessor("position", {
+    header: "Position",
+  }),
+];
+
 interface Props {
   task: TaskResponseDto;
 }
@@ -29,15 +43,6 @@ export default function WorkersTable({ task }: Props) {
   const router = useRouter();
   // const { mutateAsync } = useDeletePrerequisiteTaskMutation(task.id);
   const queryClient = useQueryClient();
-
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("userName", {
-        header: "Name",
-      }),
-    ],
-    []
-  );
 
   const table = useReactTable({
     data: task.taskWorker,
@@ -78,7 +83,7 @@ export default function WorkersTable({ task }: Props) {
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
-                  router.push(`/system-management/tasks/${row.id}`);
+                  router.push(`/system-management/users/${row.id}`);
                 }}
                 className="cursor-pointer"
               >

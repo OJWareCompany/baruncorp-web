@@ -2,7 +2,7 @@ import { useListData } from "react-stately";
 import { GridList, GridListItem, useDragAndDrop } from "react-aria-components";
 import { AlignJustify, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { TaskResponseDto } from "@/api";
@@ -36,9 +36,10 @@ interface Props {
 export default function PositionsTable({ task }: Props) {
   const session = useSession();
   const list = useListData({
-    initialItems: task.taskPositions,
+    initialItems: task.taskPositions.sort((a, b) => a.order - b.order),
     getKey: ({ positionId }) => positionId,
   });
+  const isInitialRef = useRef(true);
 
   const queryClient = useQueryClient();
   const { mutateAsync: deletePositionTaskMutateAsync } =
@@ -61,15 +62,25 @@ export default function PositionsTable({ task }: Props) {
   });
 
   useEffect(() => {
-    if (session.status === "authenticated") {
-      patchTaskPositionOrderMutateAsync({
-        taskPositions: list.items,
-      }).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: getTaskQueryKey(task.id),
-        });
-      });
+    if (session.status !== "authenticated") {
+      return;
     }
+
+    if (isInitialRef.current) {
+      isInitialRef.current = false;
+      return;
+    }
+
+    patchTaskPositionOrderMutateAsync({
+      taskPositions: list.items.map((value, index) => ({
+        ...value,
+        order: index + 1,
+      })),
+    }).then(() => {
+      queryClient.invalidateQueries({
+        queryKey: getTaskQueryKey(task.id),
+      });
+    });
   }, [
     list.items,
     patchTaskPositionOrderMutateAsync,
