@@ -38,6 +38,48 @@ const columnHelper =
   createColumnHelper<VendorInvoicePaginatedResponseDto["items"][number]>();
 
 const columns = [
+  columnHelper.accessor("countLineItems", {
+    header: "countLineItems",
+  }),
+  columnHelper.accessor("daysPastDue", {
+    header: "daysPastDue",
+  }),
+  columnHelper.accessor("dueDate", {
+    header: "dueDate",
+  }),
+  columnHelper.accessor("internalTotalBalanceDue", {
+    header: "internalTotalBalanceDue",
+  }),
+  columnHelper.accessor("invoiceDate", {
+    header: "invoiceDate",
+  }),
+  columnHelper.accessor("invoiceNumber", {
+    header: "invoiceNumber",
+  }),
+  columnHelper.accessor("invoiceTotalDifference", {
+    header: "invoiceTotalDifference",
+  }),
+  columnHelper.accessor("note", {
+    header: "note",
+  }),
+  columnHelper.accessor("organizationName", {
+    header: "organizationName",
+  }),
+  columnHelper.accessor("serviceMonth", {
+    header: "serviceMonth",
+  }),
+  columnHelper.accessor("subTotal", {
+    header: "subTotal",
+  }),
+  columnHelper.accessor("terms", {
+    header: "terms",
+  }),
+  columnHelper.accessor("transactionType", {
+    header: "transactionType",
+  }),
+  columnHelper.accessor("updatedAt", {
+    header: "updatedAt",
+  }),
   columnHelper.accessor("total", {
     header: "Total",
   }),

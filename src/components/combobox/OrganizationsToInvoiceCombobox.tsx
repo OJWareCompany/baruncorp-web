@@ -23,7 +23,7 @@ interface Props {
   onOrganizationIdChange: (newOrganizationId: string) => void;
 }
 
-const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
+const OrganizationsToInvoiceCombobox = forwardRef<HTMLButtonElement, Props>(
   ({ organizationId, onOrganizationIdChange }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const { data: organizations, isLoading: isOrganizationsQueryLoading } =
@@ -71,7 +71,7 @@ const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
             <CommandInput placeholder="Search" />
             {isEmpty ? (
               <div className="py-6 text-center text-sm">
-                No organization to issue invoice.
+                No organization to issue client invoice.
               </div>
             ) : (
               <>
@@ -108,6 +108,6 @@ const InvoiceOrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
     );
   }
 );
-InvoiceOrganizationsCombobox.displayName = "InvoiceOrganizationsCombobox";
+OrganizationsToInvoiceCombobox.displayName = "OrganizationsToInvoiceCombobox";
 
-export default InvoiceOrganizationsCombobox;
+export default OrganizationsToInvoiceCombobox;

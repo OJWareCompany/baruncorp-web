@@ -16,7 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import InvoiceOrganizationsCombobox from "@/components/combobox/OrganizationsForInvoiceCombobox";
+import OrganizationsToInvoiceCombobox from "@/components/combobox/OrganizationsToInvoiceCombobox";
 import {
   Popover,
   PopoverContent,
@@ -168,7 +168,7 @@ export default function NewClientInvoiceSheet() {
                       <FormItem>
                         <FormLabel required>Organization</FormLabel>
                         <FormControl>
-                          <InvoiceOrganizationsCombobox
+                          <OrganizationsToInvoiceCombobox
                             organizationId={field.value}
                             onOrganizationIdChange={(organizationId) => {
                               field.onChange(organizationId);

@@ -1,6 +1,7 @@
 "use client";
 import {
   PaginationState,
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -13,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSocketContext } from "../SocketProvider";
 import {
@@ -32,10 +33,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { jobColumns } from "@/columns/jobColumns";
 import useMyActiveJobsQuery, {
   getMyActiveJobsQueryKey,
 } from "@/queries/useMyActiveJobsQuery";
+import { JobPaginatedResponseDto } from "@/api";
+import { Checkbox } from "@/components/ui/checkbox";
+import { jobStatuses } from "@/lib/constants";
+import TasksBadge from "@/components/badge/TasksBadge";
+import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
+import { formatInEST } from "@/lib/utils";
+
+const columnHelper =
+  createColumnHelper<JobPaginatedResponseDto["items"][number]>();
 
 export default function JobsTable() {
   const socket = useSocketContext();
@@ -60,10 +69,66 @@ export default function JobsTable() {
     },
     true
   );
+  const columns = useMemo(() => {
+    return [
+      columnHelper.accessor("isExpedited", {
+        header: "Expedite",
+        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+      }),
+      columnHelper.accessor("clientInfo.clientOrganizationName", {
+        header: "Organization",
+      }),
+      columnHelper.accessor("jobName", {
+        header: "Name",
+      }),
+      columnHelper.accessor("jobStatus", {
+        header: "Status",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = jobStatuses[value];
+
+          return (
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("assignedTasks", {
+        header: "Tasks",
+        cell: ({ getValue }) => <TasksBadge tasks={getValue()} />,
+      }),
+      columnHelper.accessor("projectPropertyType", {
+        header: "Property Type",
+      }),
+      columnHelper.accessor("mountingType", {
+        header: "Mounting Type",
+      }),
+      columnHelper.accessor("additionalInformationFromClient", {
+        header: "Additional Information",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <AdditionalInformationHoverCard value={value} />;
+        },
+      }),
+      columnHelper.accessor("clientInfo.clientUserName", {
+        header: "Client User",
+      }),
+      columnHelper.accessor("receivedAt", {
+        header: "Date Received (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+    ];
+  }, []);
 
   const table = useReactTable({
     data: data?.items ?? [],
-    columns: jobColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
@@ -125,7 +190,7 @@ export default function JobsTable() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={jobColumns.length} className="h-24">
+                <TableCell colSpan={columns.length} className="h-24">
                   <div className="flex justify-center">
                     <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
@@ -134,7 +199,7 @@ export default function JobsTable() {
             ) : table.getRowModel().rows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={jobColumns.length}
+                  colSpan={columns.length}
                   className="h-24 text-center"
                 >
                   No results.

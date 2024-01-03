@@ -1,6 +1,10 @@
 "use client";
+import { useState } from "react";
 import { Plus } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Sheet,
   SheetContent,
@@ -10,66 +14,68 @@ import {
 } from "@/components/ui/sheet";
 
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import RowItemsContainer from "@/components/RowItemsContainer";
 
-import { TermsEnum } from "@/lib/constants";
+import VendorsToInvoiceCombobox from "@/components/combobox/VendorsToInvoiceCombobox";
 
 const formSchema = z.object({
   organizationId: z
     .string()
     .trim()
     .min(1, { message: "Organization is required" }),
-  invoiceDate: z.date({
-    required_error: "A date of birth is required.",
-  }),
-  terms: TermsEnum,
-  servicePeriodMonth: z
-    .string()
-    .datetime({ message: "Service Period Month is required" }),
-  notesToClient: z.string().trim(),
+  // invoiceDate: z.date({
+  //   required_error: "A date of birth is required.",
+  // }),
+  // terms: TermsEnum,
+  // servicePeriodMonth: z
+  //   .string()
+  //   .datetime({ message: "Service Period Month is required" }),
+  // notesToClient: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function NewVendorInvoiceSheet() {
-  // const { toast } = useToast();
-  // const router = useRouter();
+export default function NewClientInvoiceSheet() {
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
-  // /**
-  //  * State
-  //  */
-  // const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
-
-  // /**
-  //  * Form
-  //  */
-  // const form = useForm<FieldValues>({
-  //   resolver: zodResolver(formSchema),
-  //   defaultValues: {
-  //     organizationId: "",
-  //     invoiceDate: new Date(),
-  //     terms: "30",
-  //     servicePeriodMonth: "",
-  //     notesToClient: "",
-  //   },
-  // });
+  const form = useForm<FieldValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      organizationId: "",
+      // invoiceDate: new Date(),
+      // terms: "30",
+      // servicePeriodMonth: "",
+      // notesToClient: "",
+    },
+  });
+  const watchOrganizationId = form.watch("organizationId");
   // const watchInvoiceDate = form.watch("invoiceDate");
-  // const watchOrganizationId = form.watch("organizationId");
   // const watchTerms = form.watch("terms");
   // const watchServicePeriodMonth = form.watch("servicePeriodMonth");
 
-  // /**
-  //  * Query
-  //  */
-  // const { data: jobsToInvoice } = useJobsToInvoiceQuery({
-  //   organizationId: watchOrganizationId,
-  //   servicePeriodMonth: watchServicePeriodMonth,
-  // });
+  // const { data: jobsToInvoice } = useJobsToInvoiceQuery(
+  //   {
+  //     clientOrganizationId: watchOrganizationId,
+  //     serviceMonth:
+  //       watchServicePeriodMonth !== ""
+  //         ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
+  //         : "",
+  //   },
+  //   true
+  // );
   // const { mutateAsync } = usePostInvoiceMutation();
   // const queryClient = useQueryClient();
 
-  // /**
-  //  * useEffect
-  //  */
   // useEffect(() => {
   //   if (isSubmitSuccessful) {
   //     form.reset();
@@ -77,33 +83,37 @@ export default function NewVendorInvoiceSheet() {
   //   }
   // }, [form, isSubmitSuccessful]);
 
-  // async function onSubmit(values: FieldValues) {
-  //   await mutateAsync({
-  //     clientOrganizationId: values.organizationId,
-  //     invoiceDate: values.invoiceDate.toISOString(),
-  //     notesToClient: transformStringIntoNullableString.parse(
-  //       values.notesToClient
-  //     ),
-  //     serviceMonth: format(
-  //       new Date(values.servicePeriodMonth.slice(0, 7)),
-  //       "yyyy-MM"
-  //     ),
-  //     terms: Number(values.terms) as 21 | 30,
-  //   })
-  //     .then(() => {
-  //       setIsSubmitSuccessful(true);
-  //       toast({
-  //         title: "Success",
-  //       });
-  //       queryClient.invalidateQueries({
-  //         queryKey: ["organizations-to-invoice", "list"],
-  //       });
-  //     })
-  //     .catch(() => {});
-  // }
+  async function onSubmit(values: FieldValues) {
+    // await mutateAsync({
+    //   clientOrganizationId: values.organizationId,
+    //   invoiceDate: values.invoiceDate.toISOString(),
+    //   notesToClient: transformStringIntoNullableString.parse(
+    //     values.notesToClient
+    //   ),
+    //   serviceMonth: format(
+    //     new Date(values.servicePeriodMonth.slice(0, 7)),
+    //     "yyyy-MM"
+    //   ),
+    //   terms: Number(values.terms) as 21 | 30,
+    // })
+    //   .then(() => {
+    //     setIsSubmitSuccessful(true);
+    //     toast({
+    //       title: "Success",
+    //     });
+    //     queryClient.invalidateQueries({
+    //       queryKey: getOrganizationsToInvoiceQueryKey(),
+    //     });
+    //     queryClient.invalidateQueries({
+    //       queryKey: getClientInvoicesQueryKey({}),
+    //     });
+    //     setOpen(false);
+    //   })
+    //   .catch(() => {});
+  }
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant={"outline"} size={"sm"}>
           <Plus className="mr-2 h-4 w-4" />
@@ -114,7 +124,7 @@ export default function NewVendorInvoiceSheet() {
         <SheetHeader className="mb-6">
           <SheetTitle>New Vendor Invoice</SheetTitle>
         </SheetHeader>
-        {/* <div className="space-y-6">
+        <div className="space-y-6">
           <section>
             <Form {...form}>
               <form
@@ -129,13 +139,13 @@ export default function NewVendorInvoiceSheet() {
                       <FormItem>
                         <FormLabel required>Organization</FormLabel>
                         <FormControl>
-                          <InvoiceOrganizationsCombobox
-                            organizationId={field.value}
-                            onSelect={(organizationId) => {
-                              field.onChange(organizationId);
-                              form.setValue("servicePeriodMonth", "", {
-                                shouldValidate: form.formState.isSubmitted,
-                              });
+                          <VendorsToInvoiceCombobox
+                            vendorId={field.value}
+                            onVendorIdChange={(vendorId) => {
+                              field.onChange(vendorId);
+                              // form.setValue("servicePeriodMonth", "", {
+                              //   shouldValidate: form.formState.isSubmitted,
+                              // });
                             }}
                           />
                         </FormControl>
@@ -143,7 +153,7 @@ export default function NewVendorInvoiceSheet() {
                       </FormItem>
                     )}
                   />
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="servicePeriodMonth"
                     render={({ field }) => (
@@ -159,9 +169,9 @@ export default function NewVendorInvoiceSheet() {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
                 </RowItemsContainer>
-                <RowItemsContainer>
+                {/* <RowItemsContainer>
                   <FormField
                     control={form.control}
                     name="invoiceDate"
@@ -242,11 +252,11 @@ export default function NewVendorInvoiceSheet() {
                         addDays(watchInvoiceDate, Number(watchTerms)),
                         "MM-dd-yyyy"
                       )}
-                      readOnly
+                      disabled
                     />
                   </Item>
-                </RowItemsContainer>
-                <FormField
+                </RowItemsContainer> */}
+                {/* <FormField
                   control={form.control}
                   name="notesToClient"
                   render={({ field }) => (
@@ -265,58 +275,53 @@ export default function NewVendorInvoiceSheet() {
                   className="w-full"
                 >
                   Submit
-                </LoadingButton>
+                </LoadingButton> */}
               </form>
             </Form>
           </section>
-          {jobsToInvoice && (
-            <section>
-              <h4 className="h4 mb-2">Jobs</h4>
-              <div className="flex flex-col gap-2">
-                <RowItemsContainer>
-                  <Item>
-                    <Label>Subtotal</Label>
-                    <AffixInput
-                      prefixElement={
-                        <span className="text-muted-foreground">$</span>
-                      }
-                      value={jobsToInvoice.subtotal}
-                      readOnly
-                    />
-                  </Item>
-                  <Item>
-                    <Label>Discount</Label>
-                    <AffixInput
-                      prefixElement={
-                        <span className="text-muted-foreground">$</span>
-                      }
-                      value={jobsToInvoice.discount}
-                      readOnly
-                    />
-                  </Item>
-                  <Item>
-                    <Label>Total</Label>
-                    <AffixInput
-                      prefixElement={
-                        <span className="text-muted-foreground">$</span>
-                      }
-                      value={jobsToInvoice.total}
-                      readOnly
-                    />
-                  </Item>
-                </RowItemsContainer>
-                <BaseTable
-                  columns={lineItemColumns}
-                  data={jobsToInvoice.items ?? []}
-                  getRowId={({ jobId }) => jobId}
-                  onRowClick={(id) => {
-                    router.push(`/system-management/jobs/${id}`);
-                  }}
-                />
-              </div>
-            </section>
-          )}
-        </div> */}
+          {/* {watchOrganizationId !== "" &&
+            watchServicePeriodMonth !== "" &&
+            jobsToInvoice && (
+              <section>
+                <h4 className="h4 mb-2">Jobs</h4>
+                <div className="flex flex-col gap-2">
+                  <RowItemsContainer>
+                    <Item>
+                      <Label>Subtotal</Label>
+                      <AffixInput
+                        prefixElement={
+                          <span className="text-muted-foreground">$</span>
+                        }
+                        value={jobsToInvoice.subtotal}
+                        disabled
+                      />
+                    </Item>
+                    <Item>
+                      <Label>Discount</Label>
+                      <AffixInput
+                        prefixElement={
+                          <span className="text-muted-foreground">$</span>
+                        }
+                        value={jobsToInvoice.discount}
+                        disabled
+                      />
+                    </Item>
+                    <Item>
+                      <Label>Total</Label>
+                      <AffixInput
+                        prefixElement={
+                          <span className="text-muted-foreground">$</span>
+                        }
+                        value={jobsToInvoice.total}
+                        disabled
+                      />
+                    </Item>
+                  </RowItemsContainer>
+                  <JobsTable jobsToInvoice={jobsToInvoice} />
+                </div>
+              </section>
+            )} */}
+        </div>
       </SheetContent>
     </Sheet>
   );

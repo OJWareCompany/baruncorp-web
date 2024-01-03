@@ -37,7 +37,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   BARUNCORP_ORGANIZATION_ID,
   YesOrNoEnum,
-  transformNullableYesOrNoEnumIntoNullableBoolean,
+  transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
   userStatuses,
 } from "@/lib/constants";
 import SearchHeader from "@/components/table/SearchHeader";
@@ -71,7 +71,7 @@ export default function UsersTable({ organization }: Props) {
   );
   const contractorSearchParam = contractorSearchParamParseResult.success
     ? contractorSearchParamParseResult.data
-    : null;
+    : "";
 
   const { data, isLoading } = useUsersQuery(
     {
@@ -80,9 +80,10 @@ export default function UsersTable({ organization }: Props) {
       organizationId: organization.id,
       userName: nameSearchParam,
       email: emailSearchParam,
-      isContractor: transformNullableYesOrNoEnumIntoNullableBoolean.parse(
-        contractorSearchParam
-      ),
+      isContractor:
+        transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
+          contractorSearchParam
+        ),
     },
     true
   );
@@ -155,9 +156,9 @@ export default function UsersTable({ organization }: Props) {
         header: () => (
           <EnumHeader
             buttonText="Contractor"
-            isFiltered={contractorSearchParam !== null}
+            isFiltered={contractorSearchParam !== ""}
             items={YesOrNoEnum.options}
-            selectedValue={contractorSearchParam ?? ""}
+            selectedValue={contractorSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("contractor", value);

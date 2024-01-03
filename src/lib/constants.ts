@@ -548,10 +548,13 @@ export const KNOWN_ERROR = "KNOWN_ERROR";
 // "Yes" | "No"
 export const YesOrNoEnum = z.enum(["Yes", "No"]);
 
-// "Yes" | "No" | null => true | false | null
-export const transformNullableYesOrNoEnumIntoNullableBoolean =
-  YesOrNoEnum.nullable().transform((v) => {
-    if (v == null) {
+// "Yes" | "No" | ""
+export const YesOrNoEnumWithEmptyString = YesOrNoEnum.or(z.literal(""));
+
+// "Yes" | "No" | "" => true | false | null
+export const transformYesOrNoEnumWithEmptyStringIntoNullableBoolean =
+  YesOrNoEnumWithEmptyString.transform((v) => {
+    if (v === "") {
       return null;
     }
 

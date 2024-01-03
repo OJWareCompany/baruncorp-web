@@ -38,7 +38,7 @@ import SearchHeader from "@/components/table/SearchHeader";
 import EnumHeader from "@/components/table/EnumHeader";
 import {
   YesOrNoEnum,
-  transformNullableYesOrNoEnumIntoNullableBoolean,
+  transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 
 const columnHelper =
@@ -66,7 +66,7 @@ export default function OrganizationsTable() {
   );
   const vendorSearchParam = vendorSearchParamParseResult.success
     ? vendorSearchParamParseResult.data
-    : null;
+    : "";
 
   const { data, isLoading } = useOrganizationsQuery(
     {
@@ -77,7 +77,7 @@ export default function OrganizationsTable() {
       phoneNumber: phoneNumberSearchParam,
       email: emailSearchParam,
       isVendor:
-        transformNullableYesOrNoEnumIntoNullableBoolean.parse(
+        transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           vendorSearchParam
         ),
     },
@@ -207,9 +207,9 @@ export default function OrganizationsTable() {
         header: () => (
           <EnumHeader
             buttonText="Vendor"
-            isFiltered={vendorSearchParam !== null}
+            isFiltered={vendorSearchParam !== ""}
             items={YesOrNoEnum.options}
-            selectedValue={vendorSearchParam ?? ""}
+            selectedValue={vendorSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("vendor", value);

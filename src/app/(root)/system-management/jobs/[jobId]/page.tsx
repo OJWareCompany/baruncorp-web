@@ -27,6 +27,7 @@ export default function Page({ params: { jobId } }: Props) {
     isLoading: isJobQueryLoading,
     error: jobQueryError,
   } = useJobQuery(jobId);
+  console.log("🚀 ~ file: page.tsx:30 ~ Page ~ job:", job);
   const projectId = job?.projectId ?? "";
   const {
     data: project,

@@ -18,13 +18,9 @@ import {
 import { JobResponseDto, ProjectResponseDto } from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import TasksBadge from "@/components/badge/TasksBadge";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { formatInEST } from "@/lib/utils";
 import { jobStatuses } from "@/lib/constants";
+import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 
 const columnHelper = createColumnHelper<JobResponseDto>();
 
@@ -71,14 +67,7 @@ const columns = [
         return <p className="text-muted-foreground">-</p>;
       }
 
-      return (
-        <HoverCard openDelay={0} closeDelay={100}>
-          <HoverCardTrigger className="underline">View Detail</HoverCardTrigger>
-          <HoverCardContent className="w-[auto] cursor-default" side="top">
-            {value}
-          </HoverCardContent>
-        </HoverCard>
-      );
+      return <AdditionalInformationHoverCard value={value} />;
     },
   }),
   columnHelper.accessor("clientInfo.clientUserName", {

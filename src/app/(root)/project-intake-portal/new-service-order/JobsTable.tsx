@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import {
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -14,7 +15,68 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { JobResponseDto } from "@/api";
-import { jobColumns } from "@/columns/jobColumns";
+import { Checkbox } from "@/components/ui/checkbox";
+import { jobStatuses } from "@/lib/constants";
+import TasksBadge from "@/components/badge/TasksBadge";
+import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
+import { formatInEST } from "@/lib/utils";
+
+const columnHelper = createColumnHelper<JobResponseDto>();
+
+const columns = [
+  columnHelper.accessor("isExpedited", {
+    header: "Expedite",
+    cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+  }),
+  columnHelper.accessor("clientInfo.clientOrganizationName", {
+    header: "Organization",
+  }),
+  columnHelper.accessor("jobName", {
+    header: "Name",
+  }),
+  columnHelper.accessor("jobStatus", {
+    header: "Status",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      const status = jobStatuses[value];
+
+      return (
+        <div className={`flex items-center`}>
+          <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+          <span className="whitespace-nowrap">{status.value}</span>
+        </div>
+      );
+    },
+  }),
+  columnHelper.accessor("assignedTasks", {
+    header: "Tasks",
+    cell: ({ getValue }) => <TasksBadge tasks={getValue()} />,
+  }),
+  columnHelper.accessor("projectPropertyType", {
+    header: "Property Type",
+  }),
+  columnHelper.accessor("mountingType", {
+    header: "Mounting Type",
+  }),
+  columnHelper.accessor("additionalInformationFromClient", {
+    header: "Additional Information",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return <AdditionalInformationHoverCard value={value} />;
+    },
+  }),
+  columnHelper.accessor("clientInfo.clientUserName", {
+    header: "Client User",
+  }),
+  columnHelper.accessor("receivedAt", {
+    header: "Date Received (EST)",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+];
 
 interface Props {
   data: JobResponseDto[];
@@ -23,7 +85,7 @@ interface Props {
 export default function JobsTable({ data }: Props) {
   const table = useReactTable({
     data,
-    columns: jobColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
   });
@@ -63,10 +125,7 @@ export default function JobsTable({ data }: Props) {
             ))
           ) : (
             <TableRow>
-              <TableCell
-                colSpan={jobColumns.length}
-                className="h-24 text-center"
-              >
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>

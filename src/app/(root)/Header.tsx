@@ -50,10 +50,10 @@ const systemManagementItems: {
     title: "Client Invoices",
     href: "/system-management/client-invoices",
   },
-  // {
-  //   title: "Vendor Invoices",
-  //   href: "/system-management/vendor-invoices",
-  // },
+  {
+    title: "Vendor Invoices",
+    href: "/system-management/vendor-invoices",
+  },
   // {
   //   title: "Payments",
   //   href: "/system-management/payments",

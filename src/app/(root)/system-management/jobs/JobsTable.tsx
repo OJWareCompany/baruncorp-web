@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { z } from "zod";
 import {
   Table,
   TableBody,
@@ -37,27 +36,20 @@ import { JobPaginatedResponseDto } from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   JobStatusEnum,
-  JobStatusEnumWithEmptyString,
   MountingTypeEnum,
-  MountingTypeEnumWithEmptyString,
   PropertyTypeEnum,
-  PropertyTypeEnumWithEmptyString,
   YesOrNoEnum,
   jobStatuses,
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
-  transformNullableYesOrNoEnumIntoNullableBoolean,
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
+  transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import TasksBadge from "@/components/badge/TasksBadge";
 import { formatInEST } from "@/lib/utils";
 import SearchHeader from "@/components/table/SearchHeader";
 import EnumHeader from "@/components/table/EnumHeader";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -76,24 +68,30 @@ export default function JobsTable() {
       : 10,
   };
   const nameSearchParam = searchParams.get("name") ?? "";
-  const statusSearchParam =
-    (searchParams.get("status") as z.infer<
-      typeof JobStatusEnumWithEmptyString
-    >) ?? "";
-  const propertyTypeSearchParam =
-    (searchParams.get("propertyType") as z.infer<
-      typeof PropertyTypeEnumWithEmptyString
-    >) ?? "";
-  const mountingTypeSearchParam =
-    (searchParams.get("mountingType") as z.infer<
-      typeof MountingTypeEnumWithEmptyString
-    >) ?? "";
+  const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
+    searchParams.get("jobStatus")
+  );
+  const jobStatusSearchParam = jobStatusSearchParamParseResult.success
+    ? jobStatusSearchParamParseResult.data
+    : "";
+  const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
+    searchParams.get("propertyType")
+  );
+  const propertyTypeSearchParam = propertyTypeSearchParamParseResult.success
+    ? propertyTypeSearchParamParseResult.data
+    : "";
+  const mountingTypeSearchParamParseResult = MountingTypeEnum.safeParse(
+    searchParams.get("mountingType")
+  );
+  const mountingTypeSearchParam = mountingTypeSearchParamParseResult.success
+    ? mountingTypeSearchParamParseResult.data
+    : "";
   const expediteSearchParamParseResult = YesOrNoEnum.safeParse(
     searchParams.get("expedite")
   );
   const expediteSearchParam = expediteSearchParamParseResult.success
     ? expediteSearchParamParseResult.data
-    : null;
+    : "";
 
   const { data, isLoading } = useJobsQuery(
     {
@@ -102,7 +100,7 @@ export default function JobsTable() {
       jobName: nameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
-          statusSearchParam
+          jobStatusSearchParam
         ),
       mountingType:
         transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum.parse(
@@ -113,7 +111,7 @@ export default function JobsTable() {
           propertyTypeSearchParam
         ),
       isExpedited:
-        transformNullableYesOrNoEnumIntoNullableBoolean.parse(
+        transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           expediteSearchParam
         ),
     },
@@ -126,9 +124,9 @@ export default function JobsTable() {
         header: () => (
           <EnumHeader
             buttonText="Expedite"
-            isFiltered={expediteSearchParam !== null}
+            isFiltered={expediteSearchParam !== ""}
             items={YesOrNoEnum.options}
-            selectedValue={expediteSearchParam ?? ""}
+            selectedValue={expediteSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("expedite", value);
@@ -183,11 +181,11 @@ export default function JobsTable() {
         header: () => (
           <EnumHeader
             buttonText="Status"
-            isFiltered={statusSearchParam !== ""}
+            isFiltered={jobStatusSearchParam !== ""}
             items={JobStatusEnum.options}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("status", value);
+              newSearchParams.set("jobStatus", value);
               newSearchParams.set("pageIndex", "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
@@ -195,14 +193,14 @@ export default function JobsTable() {
             }}
             onResetButtonClick={() => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("status");
+              newSearchParams.delete("jobStatus");
               newSearchParams.set("pageIndex", "0");
 
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
             }}
-            selectedValue={statusSearchParam}
+            selectedValue={jobStatusSearchParam}
           />
         ),
         cell: ({ getValue }) => {
@@ -283,16 +281,7 @@ export default function JobsTable() {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return (
-            <HoverCard openDelay={0} closeDelay={100}>
-              <HoverCardTrigger className="underline">
-                View Detail
-              </HoverCardTrigger>
-              <HoverCardContent className="w-[auto] cursor-default" side="top">
-                {value}
-              </HoverCardContent>
-            </HoverCard>
-          );
+          return <AdditionalInformationHoverCard value={value} />;
         },
       }),
       columnHelper.accessor("clientInfo.clientUserName", {
@@ -311,7 +300,7 @@ export default function JobsTable() {
     propertyTypeSearchParam,
     router,
     searchParams,
-    statusSearchParam,
+    jobStatusSearchParam,
   ]);
 
   const table = useReactTable({
