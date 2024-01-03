@@ -282,7 +282,7 @@ export default function ServiceForm({ onSuccess }: Props) {
               form.setError(
                 "name",
                 {
-                  message: `${values.name} is already existed`,
+                  message: `${values.name} already exists`,
                 },
                 { shouldFocus: true }
               );
@@ -291,7 +291,7 @@ export default function ServiceForm({ onSuccess }: Props) {
               form.setError(
                 "billingCode",
                 {
-                  message: `${values.billingCode} is already existed`,
+                  message: `${values.billingCode} already exists`,
                 },
                 { shouldFocus: true }
               );

@@ -21,7 +21,14 @@ const LoadingButton = forwardRef<HTMLButtonElement, Props>(
           onClick?.(event);
         }}
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            {children}
+          </>
+        ) : (
+          children
+        )}
       </Button>
     );
   }

@@ -10,41 +10,64 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
 import { useToast } from "@/components/ui/use-toast";
 import { getUsersQueryKey } from "@/queries/useUsersQuery";
 import NewUserForm from "@/components/form/NewUserForm";
+import InvitationDialog from "@/components/dialog/InvitationDialog";
 
 export default function NewUserSheet() {
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [dialogState, setDialogState] = useState<
+    { open: false } | { open: true; email: string; organizationId: string }
+  >({ open: false });
 
   const queryClient = useQueryClient();
 
+  const closeDialog = () => {
+    setDialogState({ open: false });
+  };
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant={"outline"} size={"sm"}>
-          <Plus className="mr-2 h-4 w-4" />
-          New User
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="sm:max-w-[1400px] w-full">
-        <SheetHeader className="mb-6">
-          <SheetTitle>New User</SheetTitle>
-        </SheetHeader>
-        <NewUserForm
-          onSuccess={() => {
-            setOpen(false);
-            toast({
-              title: "Success",
-            });
-            queryClient.invalidateQueries({
-              queryKey: getUsersQueryKey({}),
-            });
-          }}
-        />
-      </SheetContent>
-    </Sheet>
+    <>
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetTrigger asChild>
+          <Button variant={"outline"} size={"sm"}>
+            <Plus className="mr-2 h-4 w-4" />
+            New User
+          </Button>
+        </SheetTrigger>
+        <SheetContent className="sm:max-w-[1400px] w-full">
+          <SheetHeader className="mb-6">
+            <SheetTitle>New User</SheetTitle>
+          </SheetHeader>
+          <NewUserForm
+            onSuccess={({ email, organizationId }) => {
+              setSheetOpen(false);
+              setDialogState({
+                open: true,
+                organizationId,
+                email,
+              });
+              toast({
+                title: "Success",
+              });
+              queryClient.invalidateQueries({
+                queryKey: getUsersQueryKey({}),
+              });
+            }}
+          />
+        </SheetContent>
+      </Sheet>
+      <InvitationDialog
+        dialogState={dialogState}
+        closeDialog={closeDialog}
+        onInviteSuccess={() => {
+          queryClient.invalidateQueries({
+            queryKey: getUsersQueryKey({}),
+          });
+        }}
+      />
+    </>
   );
 }

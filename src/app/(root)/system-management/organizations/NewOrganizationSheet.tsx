@@ -207,7 +207,7 @@ export default function NewOrganizationSheet() {
               form.setError(
                 "name",
                 {
-                  message: `${values.name} is already existed`,
+                  message: `${values.name} already exists`,
                 },
                 {
                   shouldFocus: true,

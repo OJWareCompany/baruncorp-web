@@ -17,7 +17,7 @@ interface Props extends DialogProps {
   onUserIdChange: (newUserId: string) => void;
 }
 
-export default function NewUserByOrganizationSheet({
+export default function NewUserByOrganizationSheetForCombobox({
   organizationId,
   onUserIdChange,
   ...dialogProps
@@ -31,7 +31,7 @@ export default function NewUserByOrganizationSheet({
           <SheetTitle>New User</SheetTitle>
         </SheetHeader>
         <NewUserForm
-          onSuccess={(userId) => {
+          onSuccess={({ userId }) => {
             dialogProps.onOpenChange?.(false);
             onUserIdChange(userId);
             queryClient.invalidateQueries({

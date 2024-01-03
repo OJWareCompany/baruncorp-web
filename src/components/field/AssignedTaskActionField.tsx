@@ -66,123 +66,130 @@ export default function AssignedTaskActionField({
 
   if (isInProgress) {
     return (
-      <>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => {
-                setAlertDialogState({ open: true, type: "Complete" });
-              }}
-            >
-              Complete
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {page === "WORKSPACE" && (
-              <DropdownMenuItem
-                onClick={() => {
-                  setDialogOpen(true);
-                }}
-                className="text-destructive focus:text-destructive"
-              >
-                Reject
-              </DropdownMenuItem>
-            )}
-            {page === "SYSTEM_MANAGEMENT" && (
-              <DropdownMenuItem
-                onClick={() => {
-                  setAlertDialogState({ open: true, type: "Unassign" });
-                }}
-                className="text-destructive focus:text-destructive"
-              >
-                Unassign
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <AlertDialog
-          open={alertDialogState.open}
-          onOpenChange={(newOpen) => {
-            if (!newOpen) {
-              setAlertDialogState({ open: false });
-              return;
-            }
+      <div className="text-right">
+        <div
+          className="inline-flex"
+          onClick={(event) => {
+            event.stopPropagation();
           }}
         >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
                 onClick={() => {
-                  if (!alertDialogState.open) {
-                    return;
-                  }
-
-                  if (alertDialogState.type === "Complete") {
-                    patchAssignedTaskCompleteMutateAsync()
-                      .then(() => {
-                        queryClient.invalidateQueries({
-                          queryKey: getJobQueryKey(jobId),
-                        });
-                        queryClient.invalidateQueries({
-                          queryKey: getProjectQueryKey(projectId),
-                        });
-                      })
-                      .catch(() => {
-                        // TODO: error handling
-                      });
-                    return;
-                  }
-
-                  if (alertDialogState.type === "Unassign") {
-                    patchAssignedTaskUnassignMutateAsync()
-                      .then(() => {
-                        queryClient.invalidateQueries({
-                          queryKey: getJobQueryKey(jobId),
-                        });
-                        queryClient.invalidateQueries({
-                          queryKey: getProjectQueryKey(projectId),
-                        });
-                      })
-                      .catch(() => {
-                        // TODO: error handling
-                      });
-                    return;
-                  }
+                  setAlertDialogState({ open: true, type: "Complete" });
                 }}
               >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reason for rejection</DialogTitle>
-            </DialogHeader>
-            <ReasonForm
-              assignedTaskId={assignedTaskId}
-              onSuccess={() => {
-                setDialogOpen(false);
-                queryClient.invalidateQueries({
-                  queryKey: getJobQueryKey(jobId),
-                });
-                queryClient.invalidateQueries({
-                  queryKey: getProjectQueryKey(projectId),
-                });
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      </>
+                Complete
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {page === "WORKSPACE" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setDialogOpen(true);
+                  }}
+                  className="text-destructive focus:text-destructive"
+                >
+                  Reject
+                </DropdownMenuItem>
+              )}
+              {page === "SYSTEM_MANAGEMENT" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setAlertDialogState({ open: true, type: "Unassign" });
+                  }}
+                  className="text-destructive focus:text-destructive"
+                >
+                  Unassign
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <AlertDialog
+            open={alertDialogState.open}
+            onOpenChange={(newOpen) => {
+              if (!newOpen) {
+                setAlertDialogState({ open: false });
+                return;
+              }
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    if (!alertDialogState.open) {
+                      return;
+                    }
+
+                    if (alertDialogState.type === "Complete") {
+                      patchAssignedTaskCompleteMutateAsync()
+                        .then(() => {
+                          queryClient.invalidateQueries({
+                            queryKey: getJobQueryKey(jobId),
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: getProjectQueryKey(projectId),
+                          });
+                        })
+                        .catch(() => {
+                          // TODO: error handling
+                        });
+                      return;
+                    }
+
+                    if (alertDialogState.type === "Unassign") {
+                      patchAssignedTaskUnassignMutateAsync()
+                        .then(() => {
+                          queryClient.invalidateQueries({
+                            queryKey: getJobQueryKey(jobId),
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: getProjectQueryKey(projectId),
+                          });
+                        })
+                        .catch(() => {
+                          // TODO: error handling
+                        });
+                      return;
+                    }
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Reason for rejection</DialogTitle>
+              </DialogHeader>
+              <ReasonForm
+                assignedTaskId={assignedTaskId}
+                onSuccess={() => {
+                  setDialogOpen(false);
+                  queryClient.invalidateQueries({
+                    queryKey: getJobQueryKey(jobId),
+                  });
+                  queryClient.invalidateQueries({
+                    queryKey: getProjectQueryKey(projectId),
+                  });
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
     );
   }
 }

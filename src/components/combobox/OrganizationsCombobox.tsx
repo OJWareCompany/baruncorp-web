@@ -22,10 +22,14 @@ interface Props {
   organizationId: string;
   onOrganizationIdChange: (newOrganizationId: string) => void;
   disabled?: boolean;
+  modal?: boolean;
 }
 
 const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ organizationId, onOrganizationIdChange, disabled = false }, ref) => {
+  (
+    { organizationId, onOrganizationIdChange, disabled = false, modal = false },
+    ref
+  ) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const { data: organizations, isLoading: isOrganizationsQueryLoading } =
@@ -53,7 +57,7 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
     const isEmpty = organizations.items.length === 0;
 
     return (
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal={modal}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"

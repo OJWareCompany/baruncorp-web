@@ -168,7 +168,7 @@ export default function ExpensePricingForm({
         //     // form.setError(
         //     //   "",
         //     //   {
-        //     //     message: `${name} is already existed`,
+        //     //     message: `${name} already exists`,
         //     //   },
         //     //   {
         //     //     shouldFocus: true,

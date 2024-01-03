@@ -38,9 +38,11 @@ import {
   BARUNCORP_ORGANIZATION_ID,
   YesOrNoEnum,
   transformNullableYesOrNoEnumIntoNullableBoolean,
+  userStatuses,
 } from "@/lib/constants";
 import SearchHeader from "@/components/table/SearchHeader";
 import EnumHeader from "@/components/table/EnumHeader";
+import UserActionField from "@/components/field/UserActionField";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -180,6 +182,33 @@ export default function UsersTable({ organization }: Props) {
           }
 
           return <Checkbox checked={getValue()} />;
+        },
+      }),
+      columnHelper.accessor("status", {
+        header: "Status",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = userStatuses[value];
+
+          return (
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.display({
+        id: "action",
+        cell: ({ row }) => {
+          const { status, email, organizationId } = row.original;
+          return (
+            <UserActionField
+              email={email}
+              status={status}
+              organizationId={organizationId}
+            />
+          );
         },
       }),
     ],

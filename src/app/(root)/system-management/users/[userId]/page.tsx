@@ -5,11 +5,12 @@ import LicensesTabs from "./LicensesTabs";
 import NewAvailableTaskDialog from "./NewAvailableTaskDialog";
 import AvailableTasksTable from "./AvailableTasksTable";
 import PositionForm from "./PositionForm";
+import StatusSectionHeaderAction from "./StatusSectionHeaderAction";
 import PageHeader from "@/components/PageHeader";
 import useUserQuery from "@/queries/useUserQuery";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
-import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
+import { BARUNCORP_ORGANIZATION_ID, userStatuses } from "@/lib/constants";
 
 interface Props {
   params: {
@@ -29,6 +30,8 @@ export default function Page({ params: { userId } }: Props) {
     return <PageLoading />;
   }
 
+  const status = userStatuses[user.status];
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -43,6 +46,18 @@ export default function Page({ params: { userId } }: Props) {
       <div className="space-y-6">
         <section>
           <UserForm user={user} />
+        </section>
+        <section className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="h4">Status</h2>
+            <StatusSectionHeaderAction user={user} />
+          </div>
+          <div className="flex h-10 px-3 py-2 rounded-md text-sm border border-input bg-background flex-1">
+            <div className="flex items-center flex-1 gap-2">
+              <status.Icon className={`w-4 h-4 ${status.color}`} />
+              <span>{status.value}</span>
+            </div>
+          </div>
         </section>
         {(user.isVendor ||
           user.organizationId === BARUNCORP_ORGANIZATION_ID) && (

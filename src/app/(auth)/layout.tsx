@@ -7,7 +7,7 @@ export default async function AuthLayout({
 }) {
   return (
     <Unauthenticate>
-      <main className="w-96 mx-auto flex flex-col justify-center py-32">
+      <main className="w-96 mx-auto flex flex-col justify-center pt-32 py-12">
         <h1 className="h1 mb-12 text-center">Barun Corp</h1>
         {children}
       </main>

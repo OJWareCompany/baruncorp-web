@@ -419,7 +419,7 @@ export default function CustomPricingForm({
         //     // form.setError(
         //     //   "",
         //     //   {
-        //     //     message: `${name} is already existed`,
+        //     //     message: `${name} already exists`,
         //     //   },
         //     //   {
         //     //     shouldFocus: true,

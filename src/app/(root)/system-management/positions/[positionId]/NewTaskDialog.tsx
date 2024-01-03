@@ -80,7 +80,7 @@ export default function NewTaskDialog({ position }: Props) {
               form.setError(
                 "taskId",
                 {
-                  message: `This task is already existed`,
+                  message: `This task already exists`,
                 },
                 { shouldFocus: true }
               );

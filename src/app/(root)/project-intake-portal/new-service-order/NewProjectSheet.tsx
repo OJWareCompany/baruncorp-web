@@ -176,7 +176,7 @@ export default function NewProjectSheet({
               form.setError(
                 "address",
                 {
-                  message: `${values.address.fullAddress} is already existed`,
+                  message: `${values.address.fullAddress} already exists`,
                 },
                 { shouldFocus: true }
               );
@@ -185,7 +185,7 @@ export default function NewProjectSheet({
               form.setError(
                 "projectNumber",
                 {
-                  message: `${values.projectNumber} is already existed`,
+                  message: `${values.projectNumber} already exists`,
                 },
                 { shouldFocus: true }
               );

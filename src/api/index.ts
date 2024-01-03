@@ -37,7 +37,7 @@ export interface SignUpRequestDto {
   /** @default "thisistestPass123!" */
   password: string;
   /** @default "857-250-4567" */
-  phoneNumber: string;
+  phoneNumber: string | null;
 }
 
 export interface UserPositionResponseDto {
@@ -84,7 +84,7 @@ export interface UserResponseDto {
   deliverablesEmails: string[];
   isVendor: boolean;
   /** @default "Active" */
-  status: "Sign Up Not Completed" | "Invitation Sent" | "Inactive" | "Active";
+  status: "Invitation Not Sent" | "Invitation Sent" | "Inactive" | "Active";
 }
 
 export interface UpdateUserRequestDto {
@@ -656,7 +656,7 @@ export interface CreateOrderedTaskWhenJobIsCreatedRequestDto {
 export interface CreateJobRequestDto {
   /** @default "chris@barun.com" */
   deliverablesEmails: string[];
-  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
   clientUserId: string;
   /** @default "please, check this out." */
   additionalInformationFromClient: string | null;
@@ -2013,6 +2013,50 @@ export interface FindJobToInvoiceHttpControllerFindJobParams {
   serviceMonth: string;
 }
 
+export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default "3480 Northwest 33rd Court"
+   */
+  jobName?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  projectNumber?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  propertyFullAddress?: string | null;
+  /** @default "Commercial" */
+  projectPropertyType?: "Residential" | "Commercial" | null;
+  /** @default "Completed" */
+  jobStatus?:
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Completed"
+    | "Canceled"
+    | null;
+  /** @default "Ground Mount" */
+  mountingType?: "Roof Mount" | "Ground Mount" | null;
+  /** @default false */
+  isExpedited?: boolean | null;
+}
+
 export interface FindServicePaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
@@ -2893,6 +2937,23 @@ export class Api<
         method: "POST",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @name CheckInvitedUserHttpControllerGet
+     * @request GET:/users/{userId}/invitations
+     */
+    checkInvitedUserHttpControllerGet: (
+      userId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<UserResponseDto, any>({
+        path: `/users/${userId}/invitations`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
   };
   licenses = {
     /**
@@ -3526,6 +3587,26 @@ export class Api<
     ) =>
       this.request<JobToInvoiceResponseDto, any>({
         path: `/jobs-to-invoice`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
+  myOrderedJobs = {
+    /**
+     * No description
+     *
+     * @name FindMyOrderedJobPaginatedHttpControllerFindJob
+     * @summary Find My ordered jobs.
+     * @request GET:/my-ordered-jobs
+     */
+    findMyOrderedJobPaginatedHttpControllerFindJob: (
+      query: FindMyOrderedJobPaginatedHttpControllerFindJobParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<JobPaginatedResponseDto, any>({
+        path: `/my-ordered-jobs`,
         method: "GET",
         query: query,
         format: "json",

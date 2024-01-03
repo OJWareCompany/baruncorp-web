@@ -1,10 +1,13 @@
 import {
+  Ban,
   CheckCircle2,
   Circle,
   CircleDashed,
   CircleDot,
   CircleEllipsis,
   LucideIcon,
+  MailCheck,
+  MailX,
   PauseCircle,
   PlayCircle,
   XCircle,
@@ -110,6 +113,36 @@ export const invoiceStatuses: Record<
     value: "Paid",
     Icon: CheckCircle2,
     color: "text-green-500",
+  },
+};
+
+export const userStatuses: Record<
+  UserStatusEnum,
+  {
+    value: UserStatusEnum;
+    Icon: LucideIcon;
+    color: string;
+  }
+> = {
+  Active: {
+    value: "Active",
+    Icon: Circle,
+    color: "text-green-500",
+  },
+  Inactive: {
+    value: "Inactive",
+    Icon: Ban,
+    color: "text-red-500",
+  },
+  "Invitation Sent": {
+    value: "Invitation Sent",
+    Icon: MailCheck,
+    color: "text-blue-500",
+  },
+  "Invitation Not Sent": {
+    value: "Invitation Not Sent",
+    Icon: MailX,
+    color: "text-red-500",
   },
 };
 
@@ -317,6 +350,17 @@ export type OrderedServiceStatusEnum = z.infer<typeof OrderedServiceStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
+// "Sign Up Not Completed" | "Invitation Sent" | "Inactive" | "Active"
+export const UserStatusEnum = z.enum([
+  "Invitation Not Sent",
+  "Invitation Sent",
+  "Inactive",
+  "Active",
+]);
+export type UserStatusEnum = z.infer<typeof UserStatusEnum>;
+
+/* -------------------------------------------------------------------------- */
+
 // "Unissued" | "Issued" | "Paid"
 export const InvoiceStatusEnum = z.enum(["Unissued", "Issued", "Paid"]);
 export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
@@ -497,6 +541,7 @@ export const digitRegExp = new RegExp(/^\d+$/);
 /* -------------------------------------------------------------------------- */
 
 export const BARUNCORP_ORGANIZATION_ID = "asda";
+export const KNOWN_ERROR = "KNOWN_ERROR";
 
 /* -------------------------------------------------------------------------- */
 

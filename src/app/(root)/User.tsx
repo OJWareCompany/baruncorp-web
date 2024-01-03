@@ -2,6 +2,7 @@
 import { Building, LogOut, User2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
 import {
@@ -14,12 +15,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import useHandsStatusQuery, {
+  getHandsStatusQueryKey,
+} from "@/queries/useHandsStatusQuery";
+import usePostUserHandsDownMutation from "@/mutations/usePostUserHandsDownMutation";
 
 export default function User() {
   const { toast } = useToast();
   const { data: user, isSuccess: isProfileQuerySuccess } = useProfileQuery();
+  const { data: handStatus } = useHandsStatusQuery();
+  const { mutateAsync: postUserHandsDownMutateAsync } =
+    usePostUserHandsDownMutation();
+  const queryClient = useQueryClient();
 
   const handleSignOutButtonClick = () => {
+    if (handStatus != null && handStatus.status) {
+      postUserHandsDownMutateAsync().then(() => {
+        queryClient.invalidateQueries({
+          queryKey: getHandsStatusQueryKey(),
+        });
+      });
+    }
+
     signOut({ redirect: false });
     toast({ title: "Sign-out success" });
   };

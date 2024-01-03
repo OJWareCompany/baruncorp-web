@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === "development") {
   };
 }
 
-export default function SigninPage() {
+export default function Page() {
   const router = useRouter();
   const { toast } = useToast();
 

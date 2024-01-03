@@ -57,95 +57,102 @@ export default function OrderedServiceActionField({
 
   if (isPending || isCanceled) {
     return (
-      <>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {isPending && (
-              <DropdownMenuItem
-                onClick={() => {
-                  setState({ alertDialogOpen: true, type: "Cancel" });
-                }}
-                className="text-destructive focus:text-destructive"
-              >
-                Cancel
-              </DropdownMenuItem>
-            )}
-            {isCanceled && (
-              <DropdownMenuItem
-                onClick={() => {
-                  setState({ alertDialogOpen: true, type: "Reactivate" });
-                }}
-              >
-                Reactivate
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <AlertDialog
-          open={state.alertDialogOpen}
-          onOpenChange={(newOpen) => {
-            if (!newOpen) {
-              setState({ alertDialogOpen: false });
-              return;
-            }
+      <div className="text-right">
+        <div
+          className="inline-flex"
+          onClick={(event) => {
+            event.stopPropagation();
           }}
         >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  if (!state.alertDialogOpen) {
-                    return;
-                  }
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isPending && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setState({ alertDialogOpen: true, type: "Cancel" });
+                  }}
+                  className="text-destructive focus:text-destructive"
+                >
+                  Cancel
+                </DropdownMenuItem>
+              )}
+              {isCanceled && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setState({ alertDialogOpen: true, type: "Reactivate" });
+                  }}
+                >
+                  Reactivate
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <AlertDialog
+            open={state.alertDialogOpen}
+            onOpenChange={(newOpen) => {
+              if (!newOpen) {
+                setState({ alertDialogOpen: false });
+                return;
+              }
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    if (!state.alertDialogOpen) {
+                      return;
+                    }
 
-                  if (state.type === "Cancel") {
-                    patchOrderedServiceCancelMutateAsync()
-                      .then(() => {
-                        queryClient.invalidateQueries({
-                          queryKey: getJobQueryKey(jobId),
+                    if (state.type === "Cancel") {
+                      patchOrderedServiceCancelMutateAsync()
+                        .then(() => {
+                          queryClient.invalidateQueries({
+                            queryKey: getJobQueryKey(jobId),
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: getProjectQueryKey(projectId),
+                          });
+                        })
+                        .catch(() => {
+                          // TODO: error handling
                         });
-                        queryClient.invalidateQueries({
-                          queryKey: getProjectQueryKey(projectId),
-                        });
-                      })
-                      .catch(() => {
-                        // TODO: error handling
-                      });
-                    return;
-                  }
+                      return;
+                    }
 
-                  if (state.type === "Reactivate") {
-                    patchOrderedServiceReactivateMutateAsync()
-                      .then(() => {
-                        queryClient.invalidateQueries({
-                          queryKey: getJobQueryKey(jobId),
+                    if (state.type === "Reactivate") {
+                      patchOrderedServiceReactivateMutateAsync()
+                        .then(() => {
+                          queryClient.invalidateQueries({
+                            queryKey: getJobQueryKey(jobId),
+                          });
+                          queryClient.invalidateQueries({
+                            queryKey: getProjectQueryKey(projectId),
+                          });
+                        })
+                        .catch(() => {
+                          // TODO: error handling
                         });
-                        queryClient.invalidateQueries({
-                          queryKey: getProjectQueryKey(projectId),
-                        });
-                      })
-                      .catch(() => {
-                        // TODO: error handling
-                      });
-                    return;
-                  }
-                }}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
+                      return;
+                    }
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
     );
   }
 }

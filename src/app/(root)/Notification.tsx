@@ -15,8 +15,10 @@ import useNotificationsQuery, {
 } from "@/queries/useNotificationsQuery";
 import { formatInEST } from "@/lib/utils";
 import usePatchNotificationCheckMutation from "@/mutations/usePatchNotificationCheckMutation";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Notification() {
+  const { toast } = useToast();
   const socket = useSocketContext();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -46,7 +48,7 @@ export default function Notification() {
     return () => {
       socket.off("task-assigned", listener);
     };
-  }, [queryClient, socket]);
+  }, [queryClient, socket, toast]);
 
   if (notifications == null) {
     return (

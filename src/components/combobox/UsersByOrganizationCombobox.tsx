@@ -2,7 +2,7 @@
 import { forwardRef, useState } from "react";
 import { Check, ChevronsUpDown, Loader2, Plus } from "lucide-react";
 import { Button } from "../ui/button";
-import NewUserByOrganizationSheet from "./NewUserByOrganizationSheet";
+import NewUserByOrganizationSheetForCombobox from "./NewUserByOrganizationSheetForCombobox";
 import {
   Popover,
   PopoverContent,
@@ -167,7 +167,7 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
             </Command>
           </PopoverContent>
         </Popover>
-        <NewUserByOrganizationSheet
+        <NewUserByOrganizationSheetForCombobox
           open={sheetOpen}
           onOpenChange={setSheetOpen}
           organizationId={organizationId}

@@ -57,7 +57,15 @@ const formSchema = z.object({
 type FieldValues = z.infer<typeof formSchema>;
 
 interface Props {
-  onSuccess?: (userId: string) => void;
+  onSuccess?: ({
+    organizationId,
+    userId,
+    email,
+  }: {
+    organizationId: string;
+    userId: string;
+    email: string;
+  }) => void;
   organizationId?: string;
 }
 
@@ -107,7 +115,11 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
     })
       .then(({ id }) => {
         setIsSubmitSuccessful(true);
-        onSuccess?.(id);
+        onSuccess?.({
+          userId: id,
+          organizationId: values.organizationId,
+          email: values.emailAddress,
+        });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
@@ -127,7 +139,7 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
               form.setError(
                 "emailAddress",
                 {
-                  message: `${values.emailAddress} is already existed`,
+                  message: `${values.emailAddress} already exists`,
                 },
                 {
                   shouldFocus: true,
@@ -163,6 +175,7 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
                   }}
                   ref={field.ref}
                   disabled={organizationId !== undefined}
+                  modal
                 />
               </FormControl>
               <FormMessage />

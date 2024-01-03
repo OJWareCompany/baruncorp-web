@@ -878,7 +878,7 @@ export default function ExpensePricingForm({ onSuccess }: Props) {
 //     //       // form.setError(
 //     //       //   "",
 //     //       //   {
-//     //       //     message: `${name} is already existed`,
+//     //       //     message: `${name} already exists`,
 //     //       //   },
 //     //       //   {
 //     //       //     shouldFocus: true,

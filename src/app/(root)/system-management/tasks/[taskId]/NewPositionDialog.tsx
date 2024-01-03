@@ -85,7 +85,7 @@ export default function NewPositionDialog({ task }: Props) {
               form.setError(
                 "positionId",
                 {
-                  message: `This position is already existed`,
+                  message: `This position already exists`,
                 },
                 { shouldFocus: true }
               );
