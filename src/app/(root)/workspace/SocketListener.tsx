@@ -1,7 +1,7 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSocketContext } from "../SocketProvider";
 import { useEffect } from "react";
+import { useSocketContext } from "../SocketProvider";
 import { getMyJobsQueryKey } from "@/queries/useMyJobsQuery";
 
 export default function SocketListener() {

@@ -1,6 +1,6 @@
 import JobsTable from "./JobsTable";
-import PageHeader from "@/components/PageHeader";
 import SocketListener from "./SocketListener";
+import PageHeader from "@/components/PageHeader";
 
 export default function Page() {
   return (

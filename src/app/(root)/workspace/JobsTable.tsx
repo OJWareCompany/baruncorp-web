@@ -15,8 +15,6 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSocketContext } from "../SocketProvider";
 import {
   Table,
   TableBody,
@@ -33,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import useMyJobsQuery, { getMyJobsQueryKey } from "@/queries/useMyJobsQuery";
+import useMyJobsQuery from "@/queries/useMyJobsQuery";
 import {
   FindJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
