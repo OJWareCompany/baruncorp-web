@@ -18,7 +18,6 @@ export default function Page({ params: { serviceId } }: Props) {
     isLoading: isServiceQueryLoading,
     error: serviceQueryError,
   } = useServiceQuery(serviceId);
-  console.log("🚀 ~ file: page.tsx:21 ~ Page ~ service:", service);
   useNotFound(serviceQueryError);
 
   if (isServiceQueryLoading || service == null) {

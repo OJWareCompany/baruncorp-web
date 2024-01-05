@@ -8,7 +8,12 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronsDown, CornerDownRight } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronsDown,
+  CornerDownRight,
+} from "lucide-react";
 import AssigneeField from "./AssigneeField";
 import PriceField from "@/components/field/PriceField";
 import {
@@ -33,128 +38,12 @@ import SizeForRevisionField from "@/components/field/SizeForRevisionField";
 import DurationField from "@/components/field/DurationField";
 import AssignedTaskActionField from "@/components/field/AssignedTaskActionField";
 import OrderedServiceActionField from "@/components/field/OrderedServiceActionField";
-
-// function Price() {
-//   // const price = getValue();
-//   // const { priceOverride } = row.original;
-//   // const { toast } = useToast();
-
-//   const form = useForm<PriceFormFieldValues>({
-//     resolver: zodResolver(priceFormSchema),
-//     defaultValues: {
-//       price:
-//         priceOverride != null
-//           ? String(priceOverride)
-//           : price == null
-//           ? "0"
-//           : String(price),
-//     },
-//   });
-
-//   /**
-//    * Query
-//    */
-//   const { mutateAsync } = usePatchOrderedServiceMutation(row.original.id);
-//   const queryClient = useQueryClient();
-
-//   useEffect(() => {
-//     form.reset({
-//       price:
-//         priceOverride != null
-//           ? String(priceOverride)
-//           : price == null
-//           ? "0"
-//           : String(price),
-//     });
-//   }, [form, price, priceOverride]);
-
-//   async function onSubmit(values: PriceFormFieldValues) {
-//     const { price } = values;
-//     if (price.length === 0) {
-//       toast({
-//         title: "Price is required",
-//         variant: "destructive",
-//       });
-//       return;
-//     }
-
-//     if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(price)) {
-//       toast({
-//         title: "Price should be a number",
-//         variant: "destructive",
-//       });
-//       return;
-//     }
-
-//     await mutateAsync({
-//       description: row.original.description,
-//       priceOverride: Number(price),
-//       sizeForRevision: row.original.sizeForRevision,
-//     })
-//       .then(() => {
-//         queryClient.invalidateQueries({
-//           queryKey: ["jobs", "detail", { jobId }],
-//         });
-//         toast({
-//           title: "Success",
-//         });
-//       })
-//       .catch((error: AxiosError<ErrorResponseData>) => {
-//         switch (error.response?.status) {
-//           case 400:
-//             if (error.response?.data.errorCode.includes("40002")) {
-//               toast({
-//                 title: "Job can not be updated after invoice is issued",
-//                 variant: "destructive",
-//               });
-//             } else {
-//               toast({
-//                 title: "Price is invalid",
-//                 variant: "destructive",
-//               });
-//             }
-//             break;
-//         }
-//       });
-//   }
-
-//   return (
-//     <Form {...form}>
-//       <form
-//         style={{ width: column.getSize() - 32 }}
-//         className="flex gap-2"
-//         onSubmit={form.handleSubmit(onSubmit)}
-//       >
-//         <FormField
-//           control={form.control}
-//           name="price"
-//           render={({ field }) => (
-//             <FormItem className="flex-row">
-//               <FormControl>
-//                 <AffixInput
-//                   prefixElement={
-//                     <span className="text-muted-foreground">$</span>
-//                   }
-//                   {...field}
-//                   className="h-9"
-//                 />
-//               </FormControl>
-//             </FormItem>
-//           )}
-//         />
-//         <Button
-//           size={"icon"}
-//           variant={"outline"}
-//           className="w-9 h-9 flex-shrink-0"
-//           type="submit"
-//           disabled={!form.formState.isDirty}
-//         >
-//           <Pencil className="w-4 h-4" />
-//         </Button>
-//       </form>
-//     </Form>
-//   );
-// }
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Data {
   id: string;
@@ -167,6 +56,8 @@ interface Data {
   isRevision: boolean;
   assigneeId: string | null;
   serviceId: string | null;
+  isActive: boolean;
+  prerequisiteTasks: string[] | null;
   subRows?: Data[];
   // basePrice: number | null;
 }
@@ -179,6 +70,7 @@ interface Props {
 }
 
 export default function TasksTable({ job, project }: Props) {
+  console.log("🚀 ~ file: TasksTable.tsx:182 ~ TasksTable ~ job:", job);
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
   const data = useMemo(
@@ -222,6 +114,8 @@ export default function TasksTable({ job, project }: Props) {
           status,
           assigneeId: null,
           serviceId,
+          isActive: true,
+          prerequisiteTasks: null,
           // basePrice,
           subRows: filteredAssignedTasks.map<Data>((value) => ({
             assigneeId: value.assigneeId,
@@ -235,6 +129,25 @@ export default function TasksTable({ job, project }: Props) {
             status: value.status,
             serviceId: null,
             isRevision,
+            isActive: value.prerequisiteTasks.every(
+              ({ prerequisiteTaskId }) => {
+                const foundTask = job.assignedTasks.find(
+                  (value) => value.taskId === prerequisiteTaskId
+                );
+                if (foundTask == null) {
+                  return true;
+                }
+
+                if (foundTask.status === "Completed") {
+                  return true;
+                }
+
+                return false;
+              }
+            ),
+            prerequisiteTasks: value.prerequisiteTasks.map(
+              (value) => value.prerequisiteTaskName
+            ),
             // basePrice: null,
           })),
         };
@@ -245,7 +158,7 @@ export default function TasksTable({ job, project }: Props) {
   const columns = useMemo(
     () => [
       columnHelper.display({
-        id: "expand",
+        id: "expand or information",
         header: ({ table }) => (
           <Button
             variant={"ghost"}
@@ -258,21 +171,45 @@ export default function TasksTable({ job, project }: Props) {
           </Button>
         ),
         cell: ({ row }) => {
-          if (row.depth > 0) {
-            return;
+          if (row.depth === 0) {
+            return (
+              <Button
+                variant={"ghost"}
+                size={"icon"}
+                className="w-9 h-9 [&[data-expand=open]>svg]:rotate-180"
+                onClick={row.getToggleExpandedHandler()}
+                data-expand={row.getIsExpanded() ? "open" : "closed"}
+              >
+                <ChevronDown className="w-4 h-4 transition-transform duration-200" />
+              </Button>
+            );
           }
 
-          return (
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              className="w-9 h-9 [&[data-expand=open]>svg]:rotate-180"
-              onClick={row.getToggleExpandedHandler()}
-              data-expand={row.getIsExpanded() ? "open" : "closed"}
-            >
-              <ChevronDown className="w-4 h-4 transition-transform duration-200" />
-            </Button>
-          );
+          if (
+            !row.original.isActive &&
+            row.original.prerequisiteTasks != null &&
+            row.original.prerequisiteTasks.length !== 0
+          ) {
+            return (
+              <TooltipProvider>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button variant={"ghost"} size={"icon"} className="w-9 h-9">
+                      <AlertTriangle className="w-4 h-4 text-orange-500" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      <span className="font-medium">
+                        {row.original.prerequisiteTasks.join(", ")}
+                      </span>{" "}
+                      must be completed first
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          }
         },
       }),
       columnHelper.accessor("isRevision", {
@@ -281,7 +218,7 @@ export default function TasksTable({ job, project }: Props) {
           const isRevision = getValue();
 
           if (row.depth > 0) {
-            return;
+            return <div className="h-9"></div>;
           }
 
           return isRevision ? (

@@ -16,10 +16,6 @@ export default function useSearchParamsState(searchParamName: string) {
     } else {
       urlSearchParams.set(searchParamName, state);
     }
-    console.log(
-      "🚀 ~ file: useSearchParamsState.ts:14 ~ useEffect ~ urlSearchParams:",
-      urlSearchParams.toString()
-    );
 
     router.replace(`${pathname}?${urlSearchParams.toString()}`);
   }, [pathname, router, searchParamName, searchParams, state]);
