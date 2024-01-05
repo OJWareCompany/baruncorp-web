@@ -151,85 +151,69 @@ export default function JobsTable({ type }: Props) {
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("isExpedited", {
-        header: () => {
-          return (
-            <EnumHeader
-              buttonText="Expedite"
-              isFiltered={expediteSearchParam !== ""}
-              items={YesOrNoEnum.options}
-              selectedValue={expediteSearchParam}
-              onItemButtonClick={(value) => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.set(
-                  encodeURIComponent(`${type} expedite`),
-                  value
-                );
-                newSearchParams.set(
-                  encodeURIComponent(`${type} pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              onResetButtonClick={() => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete(encodeURIComponent(`${type} expedite`));
-                newSearchParams.set(
-                  encodeURIComponent(`${type} pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              isLoading={
-                syncedParams != null &&
-                params.isExpedited !== syncedParams.isExpedited
-              }
-            />
-          );
-        },
+        header: () => (
+          <EnumHeader
+            buttonText="Expedite"
+            isFiltered={expediteSearchParam !== ""}
+            items={YesOrNoEnum.options}
+            selectedValue={expediteSearchParam}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set(
+                encodeURIComponent(`${type} expedite`),
+                value
+              );
+              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete(encodeURIComponent(`${type} expedite`));
+              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isLoading={
+              syncedParams != null &&
+              params.isExpedited !== syncedParams.isExpedited
+            }
+          />
+        ),
         cell: ({ getValue }) => <Checkbox checked={getValue()} />,
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
         header: "Organization",
       }),
       columnHelper.accessor("jobName", {
-        header: () => {
-          return (
-            <SearchHeader
-              initialValue={nameSearchParam}
-              buttonText="Name"
-              onFilterButtonClick={(value) => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.set(encodeURIComponent(`${type} name`), value);
-                newSearchParams.set(
-                  encodeURIComponent(`${type} pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              isFiltered={nameSearchParam !== ""}
-              onResetButtonClick={() => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete(encodeURIComponent(`${type} name`));
-                newSearchParams.set(
-                  encodeURIComponent(`${type} pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              isLoading={
-                syncedParams != null && params.jobName !== syncedParams.jobName
-              }
-            />
-          );
-        },
+        header: () => (
+          <SearchHeader
+            initialValue={nameSearchParam}
+            buttonText="Name"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set(encodeURIComponent(`${type} name`), value);
+              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={nameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete(encodeURIComponent(`${type} name`));
+              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isLoading={
+              syncedParams != null && params.jobName !== syncedParams.jobName
+            }
+          />
+        ),
       }),
       columnHelper.accessor("jobStatus", {
         header: () => (

@@ -2,16 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import {
-  FindJobPaginatedHttpControllerFindJobParams,
+  FindMyJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
 } from "@/api";
 
 export const getMyJobsQueryKey = (
-  params: FindJobPaginatedHttpControllerFindJobParams
+  params: FindMyJobPaginatedHttpControllerFindJobParams
 ) => ["my-jobs", "list", params];
 
 const useMyJobsQuery = (
-  params: FindJobPaginatedHttpControllerFindJobParams,
+  params: FindMyJobPaginatedHttpControllerFindJobParams,
   keepPreviousData?: boolean
 ) => {
   const api = useApi();
