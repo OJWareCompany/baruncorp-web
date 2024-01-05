@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCommandState } from "cmdk";
 import { Button } from "../ui/button";
 import {
@@ -56,6 +56,7 @@ interface Props {
   isFiltered: boolean;
   selectedValue: string;
   items: string[];
+  isLoading: boolean | undefined;
 }
 
 export default function EnumHeader({
@@ -65,6 +66,7 @@ export default function EnumHeader({
   isFiltered,
   selectedValue,
   items,
+  isLoading = false,
 }: Props) {
   return (
     <Popover>
@@ -78,7 +80,11 @@ export default function EnumHeader({
           )}
         >
           {buttonText}
-          <ChevronsUpDown className="h-4 w-4 ml-2" />
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+          ) : (
+            <ChevronsUpDown className="h-4 w-4 ml-2" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-auto" align="start">

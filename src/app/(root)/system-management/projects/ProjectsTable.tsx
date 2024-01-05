@@ -14,7 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -23,7 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ProjectPaginatedResponseDto } from "@/api";
+import {
+  FindProjectsHttpControllerFindUsersParams,
+  ProjectPaginatedResponseDto,
+} from "@/api";
 import { Button } from "@/components/ui/button";
 import { formatInEST } from "@/lib/utils";
 import SearchHeader from "@/components/table/SearchHeader";
@@ -48,6 +51,8 @@ export default function ProjectsTable() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindProjectsHttpControllerFindUsersParams>();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get("pageIndex")
@@ -68,8 +73,8 @@ export default function ProjectsTable() {
     ? propertyTypeSearchParamParseResult.data
     : "";
 
-  const { data, isLoading } = useProjectsQuery(
-    {
+  const params: FindProjectsHttpControllerFindUsersParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       propertyFullAddress: addressSearchParam,
@@ -80,9 +85,25 @@ export default function ProjectsTable() {
         ),
       projectNumber: projectNumberSearchParam,
       projectPropertyOwner: propertyOwnerSearchParam,
-    },
-    true
+    }),
+    [
+      addressSearchParam,
+      organizationSearchParam,
+      pagination.pageIndex,
+      pagination.pageSize,
+      projectNumberSearchParam,
+      propertyOwnerSearchParam,
+      propertyTypeSearchParam,
+    ]
   );
+
+  const { data, isLoading, isFetching } = useProjectsQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
 
   const columns = useMemo(
     () => [
@@ -108,6 +129,10 @@ export default function ProjectsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.organizationName !== syncedParams.organizationName
+            }
           />
         ),
       }),
@@ -133,6 +158,10 @@ export default function ProjectsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.propertyFullAddress !== syncedParams.propertyFullAddress
+            }
           />
         ),
       }),
@@ -142,7 +171,6 @@ export default function ProjectsTable() {
             buttonText="Property Type"
             isFiltered={propertyTypeSearchParam !== ""}
             items={PropertyTypeEnum.options}
-            selectedValue={propertyTypeSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("propertyType", value);
@@ -159,6 +187,11 @@ export default function ProjectsTable() {
                 scroll: false,
               });
             }}
+            selectedValue={propertyTypeSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.propertyType !== syncedParams.propertyType
+            }
           />
         ),
       }),
@@ -184,6 +217,10 @@ export default function ProjectsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.projectPropertyOwner !== syncedParams.projectPropertyOwner
+            }
           />
         ),
         cell: ({ getValue }) => {
@@ -217,6 +254,10 @@ export default function ProjectsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.projectNumber !== syncedParams.projectNumber
+            }
           />
         ),
         cell: ({ getValue }) => {
@@ -239,12 +280,14 @@ export default function ProjectsTable() {
     [
       addressSearchParam,
       organizationSearchParam,
+      params,
       pathname,
       projectNumberSearchParam,
       propertyOwnerSearchParam,
       propertyTypeSearchParam,
       router,
       searchParams,
+      syncedParams,
     ]
   );
 

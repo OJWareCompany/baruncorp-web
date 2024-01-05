@@ -14,7 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -23,7 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AhjNotePaginatedResponseDto } from "@/api";
+import {
+  AhjNotePaginatedResponseDto,
+  GeographyControllerGetFindNotesParams,
+} from "@/api";
 import {
   Select,
   SelectContent,
@@ -43,6 +46,8 @@ export default function AhjNotesTable() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<GeographyControllerGetFindNotesParams>();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get("pageIndex")
@@ -55,15 +60,28 @@ export default function AhjNotesTable() {
   const fullNameSearchParam = searchParams.get("fullName") ?? "";
   const nameSearchParam = searchParams.get("name") ?? "";
 
-  const { data, isLoading } = useAhjNotesQuery(
-    {
+  const params: GeographyControllerGetFindNotesParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       fullAhjName: fullNameSearchParam,
       name: nameSearchParam,
-    },
-    true
+    }),
+    [
+      fullNameSearchParam,
+      nameSearchParam,
+      pagination.pageIndex,
+      pagination.pageSize,
+    ]
   );
+
+  const { data, isLoading, isFetching } = useAhjNotesQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
 
   const columns = useMemo(
     () => [
@@ -89,6 +107,9 @@ export default function AhjNotesTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null && params.name !== syncedParams.name
+            }
           />
         ),
       }),
@@ -114,6 +135,10 @@ export default function AhjNotesTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.fullAhjName !== syncedParams.fullAhjName
+            }
           />
         ),
       }),
@@ -140,7 +165,15 @@ export default function AhjNotesTable() {
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],
-    [fullNameSearchParam, nameSearchParam, pathname, router, searchParams]
+    [
+      fullNameSearchParam,
+      nameSearchParam,
+      params,
+      pathname,
+      router,
+      searchParams,
+      syncedParams,
+    ]
   );
 
   const table = useReactTable({

@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSocketContext } from "../SocketProvider";
 import {
@@ -33,42 +33,73 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import useMyActiveJobsQuery, {
-  getMyActiveJobsQueryKey,
-} from "@/queries/useMyActiveJobsQuery";
-import { JobPaginatedResponseDto } from "@/api";
+import useMyJobsQuery, { getMyJobsQueryKey } from "@/queries/useMyJobsQuery";
+import {
+  FindJobPaginatedHttpControllerFindJobParams,
+  JobPaginatedResponseDto,
+} from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
-import { jobStatuses } from "@/lib/constants";
+import {
+  JobStatusEnum,
+  jobStatuses,
+  transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
+} from "@/lib/constants";
 import TasksBadge from "@/components/badge/TasksBadge";
 import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 import { formatInEST } from "@/lib/utils";
+import EnumHeader from "@/components/table/EnumHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
 
-export default function JobsTable() {
-  const socket = useSocketContext();
+interface Props {
+  type: "All" | JobStatusEnum;
+}
+
+export default function JobsTable({ type }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
+  const [syncedParams, setSyncedParams] =
+    useState<FindJobPaginatedHttpControllerFindJobParams>();
 
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(encodeURIComponent(`${type} pageIndex`))
+      ? Number(searchParams.get(encodeURIComponent(`${type} pageIndex`)))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(encodeURIComponent(`${type} pageSize`))
+      ? Number(searchParams.get(encodeURIComponent(`${type} pageSize`)))
       : 10,
   };
+  const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
+    searchParams.get(encodeURIComponent(`${type} jobStatus`))
+  );
+  const jobStatusSearchParam = jobStatusSearchParamParseResult.success
+    ? jobStatusSearchParamParseResult.data
+    : type === "All"
+    ? ""
+    : type;
 
-  const { data, isLoading } = useMyActiveJobsQuery(
-    {
+  const params: FindJobPaginatedHttpControllerFindJobParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-    },
-    true
+      jobStatus:
+        transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
+          jobStatusSearchParam
+        ),
+    }),
+    [jobStatusSearchParam, pagination.pageIndex, pagination.pageSize]
   );
+
+  const { data, isLoading, isFetching } = useMyJobsQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
+
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("isExpedited", {
@@ -82,7 +113,38 @@ export default function JobsTable() {
         header: "Name",
       }),
       columnHelper.accessor("jobStatus", {
-        header: "Status",
+        header: () => (
+          <EnumHeader
+            buttonText="Status"
+            isFiltered={jobStatusSearchParam !== ""}
+            items={JobStatusEnum.options}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set(
+                encodeURIComponent(`${type} jobStatus`),
+                value
+              );
+              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete(encodeURIComponent(`${type} jobStatus`));
+              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            selectedValue={jobStatusSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.jobStatus !== syncedParams.jobStatus
+            }
+          />
+        ),
         cell: ({ getValue }) => {
           const value = getValue();
           const status = jobStatuses[value];
@@ -124,7 +186,15 @@ export default function JobsTable() {
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ];
-  }, []);
+  }, [
+    jobStatusSearchParam,
+    params,
+    pathname,
+    router,
+    searchParams,
+    syncedParams,
+    type,
+  ]);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -136,8 +206,14 @@ export default function JobsTable() {
       if (typeof updater === "function") {
         const { pageIndex, pageSize } = updater(pagination);
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
+        newSearchParams.set(
+          encodeURIComponent(`${type} pageIndex`),
+          String(pageIndex)
+        );
+        newSearchParams.set(
+          encodeURIComponent(`${type} pageSize`),
+          String(pageSize)
+        );
         router.replace(`${pathname}?${newSearchParams.toString()}`, {
           scroll: false,
         });
@@ -148,24 +224,6 @@ export default function JobsTable() {
       pagination,
     },
   });
-
-  useEffect(() => {
-    if (socket == null) {
-      return;
-    }
-
-    const listener = () => {
-      queryClient.invalidateQueries({
-        queryKey: getMyActiveJobsQueryKey({}),
-      });
-    };
-
-    socket.on("task-assigned", listener);
-
-    return () => {
-      socket.off("task-assigned", listener);
-    };
-  }, [queryClient, socket]);
 
   return (
     <div className="space-y-2">

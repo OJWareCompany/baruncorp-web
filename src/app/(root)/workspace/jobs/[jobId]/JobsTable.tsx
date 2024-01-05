@@ -125,7 +125,7 @@ export default function JobsTable({ project }: Props) {
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
-                  router.push(`/system-management/jobs/${row.id}`);
+                  router.push(`/workspace/jobs/${row.id}`);
                 }}
                 className="cursor-pointer"
               >

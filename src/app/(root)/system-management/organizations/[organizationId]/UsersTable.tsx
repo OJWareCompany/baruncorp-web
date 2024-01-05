@@ -14,7 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -23,7 +23,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { OrganizationResponseDto, UserPaginatedResponseDto } from "@/api";
+import {
+  FindUsersHttpControllerGetFindUsersParams,
+  OrganizationResponseDto,
+  UserPaginatedResponseDto,
+} from "@/api";
 import {
   Select,
   SelectContent,
@@ -55,6 +59,8 @@ export default function UsersTable({ organization }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindUsersHttpControllerGetFindUsersParams>();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get("pageIndex")
@@ -73,8 +79,8 @@ export default function UsersTable({ organization }: Props) {
     ? contractorSearchParamParseResult.data
     : "";
 
-  const { data, isLoading } = useUsersQuery(
-    {
+  const params: FindUsersHttpControllerGetFindUsersParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       organizationId: organization.id,
@@ -84,9 +90,24 @@ export default function UsersTable({ organization }: Props) {
         transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           contractorSearchParam
         ),
-    },
-    true
+    }),
+    [
+      contractorSearchParam,
+      emailSearchParam,
+      nameSearchParam,
+      organization.id,
+      pagination.pageIndex,
+      pagination.pageSize,
+    ]
   );
+
+  const { data, isLoading, isFetching } = useUsersQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
 
   const columns = useMemo(
     () => [
@@ -112,6 +133,9 @@ export default function UsersTable({ organization }: Props) {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null && params.userName !== syncedParams.userName
+            }
           />
         ),
       }),
@@ -137,6 +161,9 @@ export default function UsersTable({ organization }: Props) {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null && params.email !== syncedParams.email
+            }
           />
         ),
       }),
@@ -158,7 +185,6 @@ export default function UsersTable({ organization }: Props) {
             buttonText="Contractor"
             isFiltered={contractorSearchParam !== ""}
             items={YesOrNoEnum.options}
-            selectedValue={contractorSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("contractor", value);
@@ -175,6 +201,11 @@ export default function UsersTable({ organization }: Props) {
                 scroll: false,
               });
             }}
+            selectedValue={contractorSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.isContractor !== syncedParams.isContractor
+            }
           />
         ),
         cell: ({ getValue, row }) => {
@@ -217,9 +248,11 @@ export default function UsersTable({ organization }: Props) {
       contractorSearchParam,
       emailSearchParam,
       nameSearchParam,
+      params,
       pathname,
       router,
       searchParams,
+      syncedParams,
     ]
   );
 

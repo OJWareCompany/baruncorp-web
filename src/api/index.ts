@@ -521,6 +521,11 @@ export interface ProjectAssociatedRegulatoryBodyDto {
   ahjId: string;
 }
 
+export interface PrerequisiteTaskVO {
+  prerequisiteTaskId: string;
+  prerequisiteTaskName: string;
+}
+
 export interface AssignedTaskResponseFields {
   assignTaskId: string;
   /** @example "Not Started" */
@@ -534,6 +539,7 @@ export interface AssignedTaskResponseFields {
   doneAt: string | null;
   description: string | null;
   duration: number | null;
+  prerequisiteTasks: PrerequisiteTaskVO[];
 }
 
 export interface OrderedServiceResponseFields {
@@ -1988,7 +1994,15 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
   page?: number;
 }
 
-export interface FindMyActiveJobPaginatedHttpControllerFindJobParams {
+export interface FindMyJobPaginatedHttpControllerFindJobParams {
+  /** @default "In Progress" */
+  jobStatus?:
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Completed"
+    | "Canceled"
+    | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -3554,20 +3568,20 @@ export class Api<
         ...params,
       }),
   };
-  myActiveJobs = {
+  myJobs = {
     /**
      * No description
      *
-     * @name FindMyActiveJobPaginatedHttpControllerFindJob
-     * @summary Find My active jobs.
-     * @request GET:/my-active-jobs
+     * @name FindMyJobPaginatedHttpControllerFindJob
+     * @summary Find My jobs.
+     * @request GET:/my-jobs
      */
-    findMyActiveJobPaginatedHttpControllerFindJob: (
-      query: FindMyActiveJobPaginatedHttpControllerFindJobParams,
+    findMyJobPaginatedHttpControllerFindJob: (
+      query: FindMyJobPaginatedHttpControllerFindJobParams,
       params: RequestParams = {}
     ) =>
       this.request<JobPaginatedResponseDto, any>({
-        path: `/my-active-jobs`,
+        path: `/my-jobs`,
         method: "GET",
         query: query,
         format: "json",

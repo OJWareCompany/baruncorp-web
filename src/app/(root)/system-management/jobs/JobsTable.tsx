@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -32,7 +32,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useJobsQuery from "@/queries/useJobsQuery";
-import { JobPaginatedResponseDto } from "@/api";
+import {
+  FindJobPaginatedHttpControllerFindJobParams,
+  JobPaginatedResponseDto,
+} from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   JobStatusEnum,
@@ -58,6 +61,8 @@ export default function JobsTable() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindJobPaginatedHttpControllerFindJobParams>();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get("pageIndex")
@@ -93,8 +98,8 @@ export default function JobsTable() {
     ? expediteSearchParamParseResult.data
     : "";
 
-  const { data, isLoading } = useJobsQuery(
-    {
+  const params: FindJobPaginatedHttpControllerFindJobParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       jobName: nameSearchParam,
@@ -114,9 +119,25 @@ export default function JobsTable() {
         transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           expediteSearchParam
         ),
-    },
-    true
+    }),
+    [
+      expediteSearchParam,
+      jobStatusSearchParam,
+      mountingTypeSearchParam,
+      nameSearchParam,
+      pagination.pageIndex,
+      pagination.pageSize,
+      propertyTypeSearchParam,
+    ]
   );
+
+  const { data, isLoading, isFetching } = useJobsQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
 
   const columns = useMemo(() => {
     return [
@@ -126,7 +147,6 @@ export default function JobsTable() {
             buttonText="Expedite"
             isFiltered={expediteSearchParam !== ""}
             items={YesOrNoEnum.options}
-            selectedValue={expediteSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("expedite", value);
@@ -143,6 +163,11 @@ export default function JobsTable() {
                 scroll: false,
               });
             }}
+            selectedValue={expediteSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.isExpedited !== syncedParams.isExpedited
+            }
           />
         ),
         cell: ({ getValue }) => <Checkbox checked={getValue()} />,
@@ -173,6 +198,9 @@ export default function JobsTable() {
                   scroll: false,
                 });
               }}
+              isLoading={
+                syncedParams != null && params.jobName !== syncedParams.jobName
+              }
             />
           );
         },
@@ -201,6 +229,10 @@ export default function JobsTable() {
               });
             }}
             selectedValue={jobStatusSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.jobStatus !== syncedParams.jobStatus
+            }
           />
         ),
         cell: ({ getValue }) => {
@@ -243,6 +275,10 @@ export default function JobsTable() {
               });
             }}
             selectedValue={propertyTypeSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.projectPropertyType !== syncedParams.projectPropertyType
+            }
           />
         ),
       }),
@@ -270,6 +306,10 @@ export default function JobsTable() {
               });
             }}
             selectedValue={mountingTypeSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.mountingType !== syncedParams.mountingType
+            }
           />
         ),
       }),
@@ -294,13 +334,15 @@ export default function JobsTable() {
     ];
   }, [
     expediteSearchParam,
+    jobStatusSearchParam,
     mountingTypeSearchParam,
     nameSearchParam,
+    params,
     pathname,
     propertyTypeSearchParam,
     router,
     searchParams,
-    jobStatusSearchParam,
+    syncedParams,
   ]);
 
   const table = useReactTable({

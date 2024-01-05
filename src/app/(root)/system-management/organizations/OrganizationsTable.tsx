@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -23,7 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { OrganizationPaginatedResponseDto } from "@/api";
+import {
+  FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams,
+  OrganizationPaginatedResponseDto,
+} from "@/api";
 import {
   Select,
   SelectContent,
@@ -48,6 +51,8 @@ export default function OrganizationsTable() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams>();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get("pageIndex")
@@ -68,21 +73,38 @@ export default function OrganizationsTable() {
     ? vendorSearchParamParseResult.data
     : "";
 
-  const { data, isLoading } = useOrganizationsQuery(
-    {
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      fullAddress: addressSearchParam,
-      name: nameSearchParam,
-      phoneNumber: phoneNumberSearchParam,
-      email: emailSearchParam,
-      isVendor:
-        transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
-          vendorSearchParam
-        ),
-    },
-    true
-  );
+  const params: FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams =
+    useMemo(
+      () => ({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        fullAddress: addressSearchParam,
+        name: nameSearchParam,
+        phoneNumber: phoneNumberSearchParam,
+        email: emailSearchParam,
+        isVendor:
+          transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
+            vendorSearchParam
+          ),
+      }),
+      [
+        addressSearchParam,
+        emailSearchParam,
+        nameSearchParam,
+        pagination.pageIndex,
+        pagination.pageSize,
+        phoneNumberSearchParam,
+        vendorSearchParam,
+      ]
+    );
+
+  const { data, isLoading, isFetching } = useOrganizationsQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
 
   const columns = useMemo(() => {
     return [
@@ -108,6 +130,9 @@ export default function OrganizationsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null && params.name !== syncedParams.name
+            }
           />
         ),
       }),
@@ -133,6 +158,10 @@ export default function OrganizationsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.fullAddress !== syncedParams.fullAddress
+            }
           />
         ),
       }),
@@ -158,6 +187,9 @@ export default function OrganizationsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null && params.email !== syncedParams.email
+            }
           />
         ),
         cell: ({ getValue }) => {
@@ -192,6 +224,10 @@ export default function OrganizationsTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.phoneNumber !== syncedParams.phoneNumber
+            }
           />
         ),
         cell: ({ getValue }) => {
@@ -209,7 +245,6 @@ export default function OrganizationsTable() {
             buttonText="Vendor"
             isFiltered={vendorSearchParam !== ""}
             items={YesOrNoEnum.options}
-            selectedValue={vendorSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("vendor", value);
@@ -226,6 +261,10 @@ export default function OrganizationsTable() {
                 scroll: false,
               });
             }}
+            selectedValue={vendorSearchParam}
+            isLoading={
+              syncedParams != null && params.isVendor !== syncedParams.isVendor
+            }
           />
         ),
         cell: ({ getValue }) => <Checkbox checked={getValue()} />,
@@ -235,10 +274,12 @@ export default function OrganizationsTable() {
     addressSearchParam,
     emailSearchParam,
     nameSearchParam,
+    params,
     pathname,
     phoneNumberSearchParam,
     router,
     searchParams,
+    syncedParams,
     vendorSearchParam,
   ]);
 

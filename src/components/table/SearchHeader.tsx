@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Popover,
@@ -20,6 +20,7 @@ interface Props {
   onResetButtonClick: () => void;
   isFiltered: boolean;
   initialValue: string;
+  isLoading: boolean | undefined;
 }
 
 export default function SearchHeader({
@@ -28,6 +29,7 @@ export default function SearchHeader({
   onResetButtonClick,
   isFiltered,
   initialValue,
+  isLoading = false,
 }: Props) {
   const [value, setValue] = useState(initialValue);
 
@@ -43,7 +45,11 @@ export default function SearchHeader({
           )}
         >
           {buttonText}
-          <ChevronsUpDown className="h-4 w-4 ml-2" />
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+          ) : (
+            <ChevronsUpDown className="h-4 w-4 ml-2" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-auto" align="start">

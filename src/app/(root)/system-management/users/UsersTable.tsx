@@ -14,7 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -23,7 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserPaginatedResponseDto } from "@/api";
+import {
+  FindUsersHttpControllerGetFindUsersParams,
+  UserPaginatedResponseDto,
+} from "@/api";
 import {
   Select,
   SelectContent,
@@ -51,6 +54,8 @@ export default function UsersTable() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindUsersHttpControllerGetFindUsersParams>();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get("pageIndex")
@@ -71,8 +76,8 @@ export default function UsersTable() {
     ? contractorSearchParamParseResult.data
     : "";
 
-  const { data, isLoading } = useUsersQuery(
-    {
+  const params: FindUsersHttpControllerGetFindUsersParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       email: emailSearchParam,
@@ -82,16 +87,31 @@ export default function UsersTable() {
           contractorSearchParam
         ),
       organizationName: organizationNameSearchParam,
-    },
-    true
+    }),
+    [
+      contractorSearchParam,
+      emailSearchParam,
+      nameSearchParam,
+      organizationNameSearchParam,
+      pagination.pageIndex,
+      pagination.pageSize,
+    ]
   );
+
+  const { data, isLoading, isFetching } = useUsersQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
 
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("organization", {
         header: () => (
           <SearchHeader
-            initialValue={emailSearchParam}
+            initialValue={organizationNameSearchParam}
             buttonText="Organization"
             onFilterButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
@@ -110,6 +130,10 @@ export default function UsersTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null &&
+              params.organizationName !== syncedParams.organizationName
+            }
           />
         ),
       }),
@@ -135,6 +159,9 @@ export default function UsersTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null && params.userName !== syncedParams.userName
+            }
           />
         ),
       }),
@@ -160,6 +187,9 @@ export default function UsersTable() {
                 scroll: false,
               });
             }}
+            isLoading={
+              syncedParams != null && params.email !== syncedParams.email
+            }
           />
         ),
       }),
@@ -181,7 +211,6 @@ export default function UsersTable() {
             buttonText="Contractor"
             isFiltered={contractorSearchParam !== ""}
             items={YesOrNoEnum.options}
-            selectedValue={contractorSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set("contractor", value);
@@ -198,6 +227,11 @@ export default function UsersTable() {
                 scroll: false,
               });
             }}
+            selectedValue={contractorSearchParam}
+            isLoading={
+              syncedParams != null &&
+              params.isContractor !== syncedParams.isContractor
+            }
           />
         ),
         cell: ({ getValue, row }) => {
@@ -241,9 +275,11 @@ export default function UsersTable() {
     emailSearchParam,
     nameSearchParam,
     organizationNameSearchParam,
+    params,
     pathname,
     router,
     searchParams,
+    syncedParams,
   ]);
 
   const table = useReactTable({
