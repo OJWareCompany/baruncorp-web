@@ -85,6 +85,8 @@ export interface UserResponseDto {
   isVendor: boolean;
   /** @default "Active" */
   status: "Invitation Not Sent" | "Invitation Sent" | "Inactive" | "Active";
+  /** @format date-time */
+  dateOfJoining: string;
 }
 
 export interface UpdateUserRequestDto {
@@ -98,6 +100,10 @@ export interface UpdateUserRequestDto {
   deliverablesEmails: string[];
   /** @default "857-250-4567" */
   phoneNumber: string | null;
+}
+
+export interface RoleResponseDto {
+  name: string;
 }
 
 export interface GiveRoleRequestDto {
@@ -120,6 +126,11 @@ export interface CreateUserRequestDto {
   deliverablesEmails: string[];
   /** @default "857-250-4567" */
   phoneNumber: string | null;
+  /**
+   * @format date-time
+   * @default "2023-09-04T07:31:27.217Z"
+   */
+  dateOfJoining?: string | null;
 }
 
 export interface IdResponse {
@@ -182,6 +193,17 @@ export interface InviteRequestDto {
   email: string;
 }
 
+export interface ChangeUserRoleRequestDto {
+  /** @default "Viewer" */
+  newRole:
+    | "Special Admin"
+    | "Admin"
+    | "Member"
+    | "Client Company Manager"
+    | "Client Company Employee"
+    | "Viewer";
+}
+
 export interface AddressDto {
   /** @default "3480 Northwest 33rd Court" */
   street1: string;
@@ -205,7 +227,6 @@ export interface OrganizationResponseDto {
   id: string;
   name: string;
   description: string | null;
-  email: string | null;
   phoneNumber: string | null;
   organizationType: string;
   address: AddressDto;
@@ -214,6 +235,8 @@ export interface OrganizationResponseDto {
   isSpecialRevisionPricing: boolean;
   numberOfFreeRevisionCount: number | null;
   isVendor: boolean;
+  isDelinquent: boolean;
+  invoiceRecipientEmail: string | null;
 }
 
 export interface OrganizationPaginatedResponseFields {
@@ -221,12 +244,13 @@ export interface OrganizationPaginatedResponseFields {
   fullAddress: string;
   name: string;
   description: string | null;
-  email: string | null;
   phoneNumber: string | null;
   organizationType: string;
+  invoiceRecipientEmail: string | null;
   projectPropertyTypeDefaultValue: string | null;
   mountingTypeDefaultValue: string | null;
   isSpecialRevisionPricing: boolean;
+  isDelinquent: boolean;
   numberOfFreeRevisionCount: number | null;
   isVendor: boolean;
 }
@@ -244,8 +268,6 @@ export interface OrganizationPaginatedResponseDto {
 }
 
 export interface CreateOrganizationRequestDto {
-  /** @default "hyomin@ojware.com" */
-  email: string | null;
   /** @default true */
   isVendor: boolean;
   address: AddressDto;
@@ -253,6 +275,8 @@ export interface CreateOrganizationRequestDto {
   phoneNumber: string | null;
   /** @default "OJ Tech" */
   name: string;
+  /** @default "test123@baruncorp.com" */
+  invoiceRecipientEmail: string | null;
   /** @default "Commercial" */
   projectPropertyTypeDefaultValue: "Residential" | "Commercial" | null;
   /** @default "Roof Mount" */
@@ -264,10 +288,12 @@ export interface CreateOrganizationRequestDto {
 }
 
 export interface UpdateOrganizationRequestDto {
-  /** @default "hyomin@ojware.com" */
-  email: string | null;
+  /** @default "test123@baruncorp.com" */
+  invoiceRecipientEmail: string | null;
   /** @default true */
   isVendor: boolean;
+  /** @default true */
+  isDelinquent: boolean;
   address: AddressDto;
   /** @default "01012341234" */
   phoneNumber: string | null;
@@ -2804,9 +2830,10 @@ export class Api<
      * @request GET:/users/roles
      */
     usersControllerGetRoles: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<RoleResponseDto[], any>({
         path: `/users/roles`,
         method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -2990,6 +3017,60 @@ export class Api<
       this.request<UserResponseDto, any>({
         path: `/users/${userId}/invitations`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ReactivateUserHttpControllerPost
+     * @request PATCH:/users/{userId}/activate
+     */
+    reactivateUserHttpControllerPost: (
+      userId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/users/${userId}/activate`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeactivateUserHttpControllerPost
+     * @request PATCH:/users/{userId}/deactivate
+     */
+    deactivateUserHttpControllerPost: (
+      userId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/users/${userId}/deactivate`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ChangeUserRoleHttpControllerPost
+     * @request POST:/users/{userId}/roles
+     */
+    changeUserRoleHttpControllerPost: (
+      userId: string,
+      data: ChangeUserRoleRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/users/${userId}/roles`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

@@ -120,7 +120,7 @@ function getFieldValues(organization: OrganizationResponseDto): FieldValues {
         organization.projectPropertyTypeDefaultValue
       ),
     emailAddressToReceiveInvoice: transformNullishStringIntoString.parse(
-      organization.email
+      organization.invoiceRecipientEmail
     ),
     phoneNumber: transformNullishStringIntoString.parse(
       organization.phoneNumber
@@ -166,7 +166,7 @@ export default function OrganizationForm({ organization }: Props) {
           values.address.street2
         ),
       },
-      email: transformStringIntoNullableString.parse(
+      invoiceRecipientEmail: transformStringIntoNullableString.parse(
         values.emailAddressToReceiveInvoice
       ),
       mountingTypeDefaultValue:
@@ -183,6 +183,7 @@ export default function OrganizationForm({ organization }: Props) {
         ? Number(values.numberOfFreeRevisionCount)
         : null,
       isVendor: values.isVendor,
+      isDelinquent: false, // TODO
     })
       .then(() => {
         queryClient.invalidateQueries({

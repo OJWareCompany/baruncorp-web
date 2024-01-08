@@ -156,7 +156,7 @@ export default function NewOrganizationSheet() {
           values.address.street2
         ),
       },
-      email: transformStringIntoNullableString.parse(
+      invoiceRecipientEmail: transformStringIntoNullableString.parse(
         values.emailAddressToReceiveInvoice
       ),
       name: values.name.trim(),

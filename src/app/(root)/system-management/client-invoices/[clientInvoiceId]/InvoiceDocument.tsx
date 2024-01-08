@@ -72,7 +72,9 @@ export default function InvoiceDocument({
           <Text>{organization.name}</Text>
           <Text>{organization.address.fullAddress}</Text>
           {organization.phoneNumber && <Text>{organization.phoneNumber}</Text>}
-          {organization.email && <Text>{organization.email}</Text>}
+          {organization.invoiceRecipientEmail && (
+            <Text>{organization.invoiceRecipientEmail}</Text>
+          )}
         </View>
         <View style={{ marginBottom: 32 }}>
           <Text style={[styles.bold, { textAlign: "center", marginBottom: 8 }]}>

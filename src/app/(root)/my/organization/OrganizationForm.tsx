@@ -21,7 +21,7 @@ export default function OrganizationForm({ organization }: Props) {
         </Item>
         <Item>
           <Label>Email Address to Receive Invoice</Label>
-          <Input value={organization.email ?? "-"} disabled />
+          <Input value={organization.invoiceRecipientEmail ?? "-"} disabled />
         </Item>
         <Item>
           <Label>Phone Number</Label>
