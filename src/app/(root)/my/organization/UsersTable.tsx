@@ -38,6 +38,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useUsersQuery from "@/queries/useUsersQuery";
 import SearchHeader from "@/components/table/SearchHeader";
+import { userStatuses } from "@/lib/constants";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -157,6 +158,20 @@ export default function UsersTable({ organization }: Props) {
           }
 
           return value;
+        },
+      }),
+      columnHelper.accessor("status", {
+        header: "Status",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = userStatuses[value];
+
+          return (
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
+            </div>
+          );
         },
       }),
     ],
