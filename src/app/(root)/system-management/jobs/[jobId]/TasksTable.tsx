@@ -41,7 +41,6 @@ import OrderedServiceActionField from "@/components/field/OrderedServiceActionFi
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -191,23 +190,21 @@ export default function TasksTable({ job, project }: Props) {
             row.original.prerequisiteTasks.length !== 0
           ) {
             return (
-              <TooltipProvider>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="w-9 h-9">
-                      <AlertTriangle className="w-4 h-4 text-orange-500" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      <span className="font-medium">
-                        {row.original.prerequisiteTasks.join(", ")}
-                      </span>{" "}
-                      must be completed first
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button variant={"ghost"} size={"icon"} className="w-9 h-9">
+                    <AlertTriangle className="w-4 h-4 text-orange-500" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    <span className="font-medium">
+                      {row.original.prerequisiteTasks.join(", ")}
+                    </span>{" "}
+                    must be completed first
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             );
           }
         },

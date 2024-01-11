@@ -9,7 +9,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-
 import { getUsersQueryKey } from "@/queries/useUsersQuery";
 
 interface Props extends DialogProps {

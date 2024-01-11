@@ -11,7 +11,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
 import { useToast } from "@/components/ui/use-toast";
 import { getUsersQueryKey } from "@/queries/useUsersQuery";
 import NewUserForm from "@/components/form/NewUserForm";

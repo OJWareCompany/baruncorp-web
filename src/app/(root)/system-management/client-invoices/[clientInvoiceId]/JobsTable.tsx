@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/table";
 import { InvoiceResponseDto, LineItem } from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
-
 import { Badge } from "@/components/ui/badge";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import Item from "@/components/Item";

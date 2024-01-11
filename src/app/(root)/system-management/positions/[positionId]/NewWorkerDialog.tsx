@@ -23,7 +23,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import { PositionResponseDto } from "@/api";
 import WorkersCombobox from "@/components/combobox/WorkerCombobox";

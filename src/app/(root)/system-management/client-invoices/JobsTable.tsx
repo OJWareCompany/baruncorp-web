@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/table";
 import { JobToInvoiceResponseDto } from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
-
 import { Badge } from "@/components/ui/badge";
 import { formatInEST } from "@/lib/utils";
 

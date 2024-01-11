@@ -12,6 +12,7 @@ import { isAxiosError } from "axios";
 import { KNOWN_ERROR, defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
 import { isError } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface Props {
   children: ReactNode;
@@ -94,7 +95,7 @@ export default function Providers({ children }: Props) {
   return (
     <SessionProvider refetchOnWindowFocus={false}>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
         <ReactQueryDevtools initialIsOpen={true} />
       </QueryClientProvider>
     </SessionProvider>

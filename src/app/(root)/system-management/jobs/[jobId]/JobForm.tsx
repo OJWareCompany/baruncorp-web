@@ -1,11 +1,12 @@
 import React from "react";
 import { useCallback, useEffect, useMemo } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { DefaultValues, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { AxiosError } from "axios";
+import { Value } from "@udecode/plate-common";
 import {
   Form,
   FormControl,
@@ -21,7 +22,6 @@ import LoadingButton from "@/components/LoadingButton";
 import Minimap from "@/components/Minimap";
 import ItemsContainer from "@/components/ItemsContainer";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AffixInput } from "@/components/AffixInput";
@@ -29,14 +29,16 @@ import usePatchJobMutation from "@/mutations/usePatchJobMutation";
 import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizationCombobox";
 import {
   ELECTRICAL_WET_STAMP_SERVICE_ID,
+  INITIAL_EDITOR_VALUE,
   MountingTypeEnum,
   STRUCTURAL_WET_STAMP_SERVICE_ID,
-  transformStringIntoNullableString,
 } from "@/lib/constants";
 import useUserQuery from "@/queries/useUserQuery";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
+import BasicEditor from "@/components/editor/BasicEditor";
+import { getEditorValue, isEditorValueEmpty } from "@/lib/utils";
 
 interface Props {
   project: ProjectResponseDto;
@@ -75,7 +77,7 @@ export default function JobForm({ project, job }: Props) {
               })
             ),
           }),
-          additionalInformation: z.string().trim(),
+          additionalInformation: z.custom<Value>(),
           mountingType: MountingTypeEnum,
           isExpedited: z.boolean(),
           systemSize: z.string().trim(),
@@ -169,7 +171,10 @@ export default function JobForm({ project, job }: Props) {
             email,
           })),
       },
-      additionalInformation: job.additionalInformationFromClient ?? "",
+      additionalInformation:
+        job.additionalInformationFromClient == null
+          ? INITIAL_EDITOR_VALUE
+          : getEditorValue(job.additionalInformationFromClient),
       mountingType: job.mountingType as z.infer<typeof MountingTypeEnum>,
       isExpedited: job.isExpedited,
       systemSize: job.systemSize == null ? "" : String(job.systemSize),
@@ -190,7 +195,7 @@ export default function JobForm({ project, job }: Props) {
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: getFieldValues(job),
+    defaultValues: getFieldValues(job) as DefaultValues<FieldValues>, // editor value의 deep partial 문제로 typescript가 error를 발생시키나, 실제로는 문제 없음
   });
 
   const watchUserId = form.watch("clientUser.id");
@@ -229,29 +234,25 @@ export default function JobForm({ project, job }: Props) {
   });
 
   async function onSubmit(values: FieldValues) {
-    const {
-      additionalInformation,
-      clientUser,
-      isExpedited,
-      mailingAddress,
-      mountingType,
-      numberOfWetStamp,
-      systemSize,
-    } = values;
     await patchJobMutateAsync({
-      additionalInformationFromClient: transformStringIntoNullableString.parse(
-        additionalInformation
-      ),
-      clientUserId: clientUser.id,
-      deliverablesEmails: clientUser.emailAddressesToReceiveDeliverables.map(
-        ({ email }) => email
-      ),
+      additionalInformationFromClient: isEditorValueEmpty(
+        values.additionalInformation
+      )
+        ? null
+        : JSON.stringify(values.additionalInformation),
+      clientUserId: values.clientUser.id,
+      deliverablesEmails:
+        values.clientUser.emailAddressesToReceiveDeliverables.map(
+          ({ email }) => email
+        ),
       systemSize:
-        project.propertyType === "Commercial" ? Number(systemSize) : null,
-      mountingType,
-      numberOfWetStamp: hasWetStamp ? Number(numberOfWetStamp) : null,
-      mailingAddressForWetStamp: hasWetStamp ? mailingAddress : null,
-      isExpedited,
+        project.propertyType === "Commercial"
+          ? Number(values.systemSize)
+          : null,
+      mountingType: values.mountingType,
+      numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
+      mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
+      isExpedited: values.isExpedited,
     })
       .then(() => {
         queryClient.invalidateQueries({
@@ -523,7 +524,7 @@ export default function JobForm({ project, job }: Props) {
               <FormItem>
                 <FormLabel>Additional Information</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <BasicEditor {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

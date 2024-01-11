@@ -8,7 +8,7 @@ interface Props extends ButtonProps {
 }
 
 const LoadingButton = forwardRef<HTMLButtonElement, Props>(
-  ({ isLoading = false, children, onClick, ...buttonProps }: Props) => {
+  ({ isLoading = false, children, onClick, ...buttonProps }: Props, ref) => {
     return (
       <Button
         {...buttonProps}
@@ -20,6 +20,7 @@ const LoadingButton = forwardRef<HTMLButtonElement, Props>(
 
           onClick?.(event);
         }}
+        ref={ref}
       >
         {isLoading ? (
           <>

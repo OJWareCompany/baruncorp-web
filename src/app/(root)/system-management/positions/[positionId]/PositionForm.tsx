@@ -18,7 +18,6 @@ import {
 import LoadingButton from "@/components/LoadingButton";
 import { Input } from "@/components/ui/input";
 import RowItemsContainer from "@/components/RowItemsContainer";
-
 import ItemsContainer from "@/components/ItemsContainer";
 import { PositionResponseDto } from "@/api";
 import usePatchPositionMutation from "@/mutations/usePatchPositionMutation";

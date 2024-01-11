@@ -16,7 +16,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatInEST } from "@/lib/utils";
-
 import { LicenseResponseDto } from "@/api";
 
 const columnHelper =

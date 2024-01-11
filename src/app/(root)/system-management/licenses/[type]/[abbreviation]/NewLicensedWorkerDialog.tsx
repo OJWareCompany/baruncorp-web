@@ -9,9 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import { LicenseTypeEnum } from "@/lib/constants";
-
 import NewLicenseForm from "@/components/form/NewLicenseForm";
 import { getLicenseQueryKey } from "@/queries/useLicenseQuery";
 import { LicenseResponseDto } from "@/api";

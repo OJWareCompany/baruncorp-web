@@ -5,6 +5,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { X } from "lucide-react";
+import { Value } from "@udecode/plate-common";
 import NewProjectSheet from "./NewProjectSheet";
 import JobsTable from "./JobsTable";
 import ResultDialog from "./ResultDialog";
@@ -34,6 +35,7 @@ import {
   ELECTRICAL_WET_STAMP_SERVICE_ID,
   ESS_ELECTRICAL_PE_STAMP_SERVICE_ID,
   ESS_STRUCTURAL_PE_STAMP_SERVICE_ID,
+  INITIAL_EDITOR_VALUE,
   MountingTypeEnum,
   OTHER_SERVICE_ID,
   SPECIAL_INSPECTION_FORM_SERVICE_ID,
@@ -54,10 +56,11 @@ import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizati
 import { AffixInput } from "@/components/AffixInput";
 import { Checkbox } from "@/components/ui/checkbox";
 import AddressSearchButton from "@/components/AddressSearchButton";
-import { Textarea } from "@/components/ui/textarea";
 import Dropzone from "@/components/Dropzone";
 import LoadingButton from "@/components/LoadingButton";
 import PageLoading from "@/components/PageLoading";
+import BasicEditor from "@/components/editor/BasicEditor";
+import { isEditorValueEmpty } from "@/lib/utils";
 
 export default function NewServiceOrderForm() {
   const [organizationId, setOrganizationId] = useState("");
@@ -133,7 +136,7 @@ export default function NewServiceOrderForm() {
             fullAddress: z.string().trim(),
             coordinates: z.array(z.number()),
           }),
-          additionalInformation: z.string().trim(),
+          additionalInformation: z.custom<Value>(),
           isExpedited: z.boolean(),
         })
         .superRefine((values, ctx) => {
@@ -270,7 +273,7 @@ export default function NewServiceOrderForm() {
         street2: "",
       },
       typeOfWetStamp: [],
-      additionalInformation: "",
+      additionalInformation: INITIAL_EDITOR_VALUE,
       isExpedited: false,
     },
   });
@@ -403,7 +406,7 @@ export default function NewServiceOrderForm() {
           street1: mailingAddressForWetStamp?.street1 ?? "",
           street2: mailingAddressForWetStamp?.street2 ?? "",
         },
-        additionalInformation: "",
+        additionalInformation: INITIAL_EDITOR_VALUE,
         isExpedited: false,
       });
     }
@@ -466,9 +469,11 @@ export default function NewServiceOrderForm() {
     }
 
     await mutateAsync({
-      additionalInformationFromClient: transformStringIntoNullableString.parse(
+      additionalInformationFromClient: isEditorValueEmpty(
         values.additionalInformation
-      ),
+      )
+        ? null
+        : JSON.stringify(values.additionalInformation),
       clientUserId: values.clientUser.id,
       deliverablesEmails:
         values.clientUser.emailAddressesToReceiveDeliverables.map(
@@ -1244,7 +1249,7 @@ export default function NewServiceOrderForm() {
                       <FormItem>
                         <FormLabel>Additional Information</FormLabel>
                         <FormControl>
-                          <Textarea {...field} />
+                          <BasicEditor {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

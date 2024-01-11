@@ -567,6 +567,10 @@ export const transformYesOrNoEnumWithEmptyStringIntoNullableBoolean =
 
 /* -------------------------------------------------------------------------- */
 
+export const INITIAL_EDITOR_VALUE = [{ type: "p", children: [{ text: "" }] }];
+
+/* -------------------------------------------------------------------------- */
+
 export const STATES = [
   {
     stateName: "ALABAMA",
