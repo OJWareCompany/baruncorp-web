@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -152,22 +152,6 @@ export default function NewProjectSheet({
             limit: Number.MAX_SAFE_INTEGER,
           }),
         });
-
-        /**
-         * @TODO 삭제 예정
-         * 파일 서버 - 프로젝트 폴더 생성 API 연동
-         * 이 API는 추후 바른 서버 백엔드에서 재연동 되어야 한다
-         */
-        axios
-          .post(
-            `${
-              process.env.NEXT_PUBLIC_FILE_API_URL
-            }/filesystem/${encodeURIComponent(organization?.name ?? "")}/${
-              values.propertyType
-            }/${encodeURIComponent(values.address.fullAddress)}`
-          )
-          .then(console.log)
-          .catch(console.error);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
