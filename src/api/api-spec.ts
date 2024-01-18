@@ -52,10 +52,10 @@ export interface AvailableTaskResponseDto {
   name: string;
   /** @default "Residential / Commercial" */
   autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
+  | "None"
+  | "Residential"
+  | "Commercial"
+  | "Residential / Commercial";
   /** @default "Structural" */
   licenseType: "Structural" | "Electrical" | null;
 }
@@ -184,19 +184,19 @@ export interface AddAvailableTaskRequestDto {
   taskId: string;
   /** @default "Residential" */
   autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
+  | "None"
+  | "Residential"
+  | "Commercial"
+  | "Residential / Commercial";
 }
 
 export interface ModifyAssignmentTypeOfAvailableTaskRequestDto {
   /** @default "Residential" */
   autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
+  | "None"
+  | "Residential"
+  | "Commercial"
+  | "Residential / Commercial";
 }
 
 export interface HandsStatusResponseDto {
@@ -213,12 +213,12 @@ export interface InviteRequestDto {
 export interface ChangeUserRoleRequestDto {
   /** @default "Viewer" */
   newRole:
-    | "Special Admin"
-    | "Admin"
-    | "Member"
-    | "Client Company Manager"
-    | "Client Company Employee"
-    | "Viewer";
+  | "Special Admin"
+  | "Admin"
+  | "Member"
+  | "Client Company Manager"
+  | "Client Company Employee"
+  | "Viewer";
 }
 
 export interface AddressDto {
@@ -385,12 +385,12 @@ export interface UpdateJobRequestDto {
 export interface UpdateJobStatusRequestDto {
   /** @default "Completed" */
   status:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)";
+  | "Not Started"
+  | "In Progress"
+  | "On Hold"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)";
 }
 
 export interface PrerequisiteTaskVO {
@@ -420,38 +420,38 @@ export interface OrderedServiceResponseFields {
   sizeForRevision: "Major" | "Minor" | null;
   serviceName: string;
   pricingType:
-    | "Base Residential New Price"
-    | "Base Residential GM Price"
-    | "Base Residential Revision Price"
-    | "Base Residential Revision GM Price"
-    | "Base Commercial New Price"
-    | "Base Commercial GM Price"
-    | "Base Commercial Revision Price"
-    | "Base Commercial Revision GM Price"
-    | "Base Fixed Price"
-    | "Custom Residential New Price"
-    | "Custom Residential GM Price"
-    | "Custom Residential New Flat Price"
-    | "Custom Residential GM Flat Price"
-    | "Custom Residential Revision Price"
-    | "Custom Residential Revision GM Price"
-    | "Custom Commercial New Price"
-    | "Custom Commercial GM Price"
-    | "Custom Fixed Price"
-    | "Custom Special Revision Price"
-    | "Custom Special Revision Fee"
-    | "No Pricing Type";
+  | "Base Residential New Price"
+  | "Base Residential GM Price"
+  | "Base Residential Revision Price"
+  | "Base Residential Revision GM Price"
+  | "Base Commercial New Price"
+  | "Base Commercial GM Price"
+  | "Base Commercial Revision Price"
+  | "Base Commercial Revision GM Price"
+  | "Base Fixed Price"
+  | "Custom Residential New Price"
+  | "Custom Residential GM Price"
+  | "Custom Residential New Flat Price"
+  | "Custom Residential GM Flat Price"
+  | "Custom Residential Revision Price"
+  | "Custom Residential Revision GM Price"
+  | "Custom Commercial New Price"
+  | "Custom Commercial GM Price"
+  | "Custom Fixed Price"
+  | "Custom Special Revision Price"
+  | "Custom Special Revision Fee"
+  | "No Pricing Type";
   isRevision: boolean;
   description: string | null;
   price: number | null;
   priceOverride: number | null;
   /** @example "Not Started" */
   status:
-    | "Not Started"
-    | "In Progress"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)";
+  | "Not Started"
+  | "In Progress"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)";
   orderedAt: string;
   doneAt: string | null;
 }
@@ -500,13 +500,13 @@ export interface JobResponseDto {
   jobRequestNumber: number;
   /** @example "In Progress" */
   jobStatus:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)"
-    | "Sent To Client";
+  | "Not Started"
+  | "In Progress"
+  | "On Hold"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)"
+  | "Sent To Client";
   /** @example "Self" */
   loadCalcOrigin: "Self" | "Client Provided";
   assignedTasks: AssignedTaskResponseFields[];
@@ -548,7 +548,7 @@ export interface JobToInvoiceResponseDto {
 }
 
 export interface SendDeliverablesRequestDto {
-  deliverablesLink: string;
+  // deliverablesLink: string;
 }
 
 export interface CommercialTier {
@@ -872,12 +872,12 @@ export interface Engineering {
   ofWetStamps: string | null;
   /** @default "ANSI B (11x17 INCH)" */
   wetStampSize:
-    | "ANSI A (8.5x11 INCH)"
-    | "ANSI B (11x17 INCH)"
-    | "ANSI D (22x34 INCH)"
-    | "ARCH D (24x36 INCH)"
-    | "See Notes"
-    | null;
+  | "ANSI A (8.5x11 INCH)"
+  | "ANSI B (11x17 INCH)"
+  | "ANSI D (22x34 INCH)"
+  | "ARCH D (24x36 INCH)"
+  | "See Notes"
+  | null;
   /** @default "engineeringNotes..." */
   engineeringNotes: string | null;
 }
@@ -1405,19 +1405,19 @@ export interface AddPositionTaskRequestDto {
   taskId: string;
   /** @default "Residential / Commercial" */
   autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
+  | "None"
+  | "Residential"
+  | "Commercial"
+  | "Residential / Commercial";
 }
 
 export interface UpdatePositionTaskAutoAssignmentTypeRequestDto {
   /** @default "Residential / Commercial" */
   autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
+  | "None"
+  | "Residential"
+  | "Commercial"
+  | "Residential / Commercial";
 }
 
 export interface AddPositionWorkerRequestDto {
@@ -1714,12 +1714,12 @@ export interface OrderedServiceResponseDto {
   jobId: string;
   /** @default "Completed" */
   status:
-    | "Not Started"
-    | "In Progress"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)"
-    | "On Hold";
+  | "Not Started"
+  | "In Progress"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)"
+  | "On Hold";
   orderedAt: string | null;
   doneAt: string | null;
   isRevision: boolean;
@@ -1731,11 +1731,11 @@ export interface OrderedServiceResponseDto {
 export interface UpdateOrderedScopeStatusRequestDto {
   /** @default "In Progress" */
   status:
-    | "Not Started"
-    | "In Progress"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)";
+  | "Not Started"
+  | "In Progress"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)";
 }
 
 export interface UpdateManualPriceRequestDto {
@@ -1828,10 +1828,10 @@ export interface TaskPosition {
   positionName: string;
   order: number;
   autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
+  | "None"
+  | "Residential"
+  | "Commercial"
+  | "Residential / Commercial";
 }
 
 export interface PrerequisiteTask {
@@ -2395,14 +2395,14 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Completed" */
   jobStatus?:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)"
-    | "Sent To Client"
-    | null;
+  | "Not Started"
+  | "In Progress"
+  | "On Hold"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)"
+  | "Sent To Client"
+  | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
@@ -2441,14 +2441,14 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Completed" */
   jobStatus?:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)"
-    | "Sent To Client"
-    | null;
+  | "Not Started"
+  | "In Progress"
+  | "On Hold"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)"
+  | "Sent To Client"
+  | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
@@ -2509,14 +2509,14 @@ export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Completed" */
   jobStatus?:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)"
-    | "Sent To Client"
-    | null;
+  | "Not Started"
+  | "In Progress"
+  | "On Hold"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)"
+  | "Sent To Client"
+  | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
@@ -2652,12 +2652,12 @@ export interface FindAssignedTaskPaginatedHttpControllerGetParams {
   organizationName?: string | null;
   /** @default "Completed" */
   status?:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Canceled"
-    | "Completed"
-    | null;
+  | "Not Started"
+  | "In Progress"
+  | "On Hold"
+  | "Canceled"
+  | "Completed"
+  | null;
   /** @default "Commercial" */
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Ground Mount" */
@@ -2920,12 +2920,12 @@ export interface FindOrderedServicePaginatedHttpControllerGetParams {
   page?: number;
   /** @default "Completed" */
   orderedServiceStatus?:
-    | "Not Started"
-    | "In Progress"
-    | "Canceled"
-    | "Completed"
-    | "Canceled (Invoice)"
-    | null;
+  | "Not Started"
+  | "In Progress"
+  | "Canceled"
+  | "Completed"
+  | "Canceled (Invoice)"
+  | null;
   /** @default "Commercial" */
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Ground Mount" */
@@ -3237,7 +3237,7 @@ export class HttpClient<SecurityDataType = unknown> {
       headers: {
         ...((method &&
           this.instance.defaults.headers[
-            method.toLowerCase() as keyof HeadersDefaults
+          method.toLowerCase() as keyof HeadersDefaults
           ]) ||
           {}),
         ...(params1.headers || {}),
@@ -4228,21 +4228,21 @@ export class Api<
       this.request<
         void,
         | {
-            /** @example 404 */
-            statusCode: number;
-            /** @example "Service is not found." */
-            message: string;
-            /** @example "40102" */
-            error?: string;
-          }
+          /** @example 404 */
+          statusCode: number;
+          /** @example "Service is not found." */
+          message: string;
+          /** @example "40102" */
+          error?: string;
+        }
         | {
-            /** @example 409 */
-            statusCode: number;
-            /** @example "This service name is already existed." */
-            message: string;
-            /** @example "40100" */
-            error?: string;
-          }
+          /** @example 409 */
+          statusCode: number;
+          /** @example "This service name is already existed." */
+          message: string;
+          /** @example "40100" */
+          error?: string;
+        }
       >({
         path: `/services/${serviceId}`,
         method: "PUT",
@@ -5017,21 +5017,21 @@ export class Api<
       this.request<
         IdResponse,
         | {
-            /** @example 404 */
-            statusCode: number;
-            /** @example "Not Organization Found" */
-            message: string;
-            /** @example "20002" */
-            error?: string;
-          }
+          /** @example 404 */
+          statusCode: number;
+          /** @example "Not Organization Found" */
+          message: string;
+          /** @example "20002" */
+          error?: string;
+        }
         | {
-            /** @example 409 */
-            statusCode: number;
-            /** @example "CustomPricing is Already Existed" */
-            message: string;
-            /** @example "30101" */
-            error?: string;
-          }
+          /** @example 409 */
+          statusCode: number;
+          /** @example "CustomPricing is Already Existed" */
+          message: string;
+          /** @example "30101" */
+          error?: string;
+        }
       >({
         path: `/custom-pricings`,
         method: "POST",

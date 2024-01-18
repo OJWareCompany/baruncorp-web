@@ -1,7 +1,6 @@
 import { MoreHorizontal } from "lucide-react";
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
 import { useToast } from "./ui/use-toast";
 import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
@@ -171,43 +170,9 @@ export default function JobStatus({ job, project, readOnly = false }: Props) {
                 }
 
                 if (state.type === "Send to Client") {
-                  axios
-                    .get(
-                      `${
-                        process.env.NEXT_PUBLIC_FILE_API_URL
-                      }/filesystem/${encodeURIComponent(
-                        job.clientInfo.clientOrganizationName
-                      )}/${encodeURIComponent(
-                        project.propertyType
-                      )}/${encodeURIComponent(
-                        project.propertyAddress.fullAddress
-                      )}/${encodeURIComponent(
-                        `Job ${job.jobRequestNumber}`
-                      )}/deliverables/sharelink`
-                    )
-                    .then((value) => {
-                      mutateAsync({
-                        deliverablesLink: value.data.data.shareLink,
-                      })
-                        .then(() => {
-                          toast({
-                            title: "Success",
-                          });
-                        })
-                        .catch((error: AxiosError<ErrorResponseData>) => {
-                          if (
-                            error.response &&
-                            error.response.data.errorCode.filter(
-                              (value) => value != null
-                            ).length !== 0
-                          ) {
-                            toast({
-                              title: error.response.data.message,
-                              variant: "destructive",
-                            });
-                            return;
-                          }
-                        });
+                  mutateAsync({})
+                    .then(() => {
+                      toast({ title: "Success" });
                     })
                     .catch(console.error);
                   // patchJobCancelMutateAsync()

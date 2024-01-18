@@ -37,23 +37,20 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
 
   useEffect(() => {
     if (dialogProps.open && job) {
-      const {
-        clientInfo: { clientOrganizationName },
-        projectPropertyType,
-        propertyFullAddress,
-        jobRequestNumber,
-      } = job;
-
+      if (!job.jobFolderId) {
+        toast({
+          title: "Upload failed",
+          description: errorToastDescription,
+          variant: "destructive",
+        });
+        setProgressState({ value: 100, error: true });
+        return;
+      }
       if (files.length !== 0) {
-        const url = `${
-          process.env.NEXT_PUBLIC_FILE_API_URL
-        }/filesystem/${encodeURIComponent(
-          clientOrganizationName
-        )}/${projectPropertyType}/${encodeURIComponent(
-          propertyFullAddress
-        )}/${encodeURIComponent(`Job ${jobRequestNumber}`)}/files-hack`;
+        const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobFiles`;
 
         const formData = new FormData();
+        formData.append("jobFolderId", job.jobFolderId);
         for (const file of files) {
           formData.append("files", file);
         }
@@ -76,21 +73,6 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
             });
             setProgressState({ value: 100, error: true });
           });
-      } else {
-        /**
-         * @TODO 삭제 예정
-         * 파일 서버 - 잡 폴더 생성 API 연동
-         * 이 API는 추후 바른 서버 백엔드에서 재연동 되어야 한다
-         */
-        const url = `${
-          process.env.NEXT_PUBLIC_FILE_API_URL
-        }/filesystem/${encodeURIComponent(
-          clientOrganizationName
-        )}/${projectPropertyType}/${encodeURIComponent(
-          propertyFullAddress
-        )}/${encodeURIComponent(`Job ${jobRequestNumber}`)}`;
-
-        axios.post(url).then(console.log).catch(console.error);
       }
     } else {
       setProgressState({ value: 0, error: false });

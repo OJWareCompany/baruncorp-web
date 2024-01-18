@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import { ProjectResponseDto } from "@/api/api-spec";
@@ -111,22 +111,6 @@ export default function ProjectForm({ project }: Props) {
         queryClient.invalidateQueries({
           queryKey: getProjectQueryKey(projectId),
         });
-
-        /**
-         * @TODO 삭제 예정
-         * 파일 서버 - 프로젝트 폴더 수정 API (propertyType, projectName) 연동
-         * 이 API는 추후 바른 서버 백엔드에서 재연동 되어야 한다
-         */
-        axios
-          .patch(`${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/project`, {
-            organization: project.clientOrganization,
-            type: project.propertyType,
-            project: project.propertyAddress.fullAddress,
-            updatedType: values.propertyType,
-            updatedProject: values.address.fullAddress,
-          })
-          .then(console.log)
-          .catch(console.error);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
