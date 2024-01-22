@@ -66,6 +66,14 @@ const systemManagementItems: {
     title: "Licenses",
     href: "/system-management/licenses",
   },
+  {
+    title: "PTO",
+    href: "/system-management/pto",
+  },
+  // {
+  //   title: "Utilities",
+  //   href: "/system-management/utilities",
+  // },
   // {
   //   title: "Tracking Numbers",
   //   href: "/system-management/tracking-numbers",

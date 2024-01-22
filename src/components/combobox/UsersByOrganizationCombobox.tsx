@@ -24,10 +24,11 @@ interface Props {
   organizationId: string;
   userId: string;
   onUserIdChange: (newUserId: string) => void;
+  modal?: boolean;
 }
 
 const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ organizationId, userId, onUserIdChange }, ref) => {
+  ({ organizationId, userId, onUserIdChange, modal = false }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -57,7 +58,7 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
 
     return (
       <>
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal={modal}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"

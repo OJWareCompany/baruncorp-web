@@ -1,5 +1,5 @@
 "use client";
-import { Building, LogOut, User2 } from "lucide-react";
+import { Building, LogOut, Palmtree, User2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ import useHandsStatusQuery, {
   getHandsStatusQueryKey,
 } from "@/queries/useHandsStatusQuery";
 import usePostUserHandsDownMutation from "@/mutations/usePostUserHandsDownMutation";
+import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
 
 export default function User() {
   const { toast } = useToast();
@@ -80,6 +81,14 @@ export default function User() {
             <span>Organization</span>
           </Link>
         </DropdownMenuItem>
+        {user.organizationId === BARUNCORP_ORGANIZATION_ID && (
+          <DropdownMenuItem asChild>
+            <Link href="/my/pto">
+              <Palmtree className="mr-2 h-4 w-4" />
+              <span>PTO</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOutButtonClick}>
           <LogOut className="mr-2 h-4 w-4" />

@@ -22,10 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import usePatchJobCancelMutation from "@/mutations/usePatchJobCancelMutation";
-import usePatchJobHoldMutation from "@/mutations/usePatchJobHoldMutation";
-import { getJobQueryKey } from "@/queries/useJobQuery";
-import { getProjectQueryKey } from "@/queries/useProjectQuery";
+// import usePatchJobCancelMutation from "@/mutations/usePatchJobCancelMutation";
+// import usePatchJobHoldMutation from "@/mutations/usePatchJobHoldMutation";
 import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 
 interface Props {
@@ -40,12 +38,12 @@ export default function JobStatus({ job, project, readOnly = false }: Props) {
     | { alertDialogOpen: true; type: "Hold" | "Cancel" | "Send to Client" }
   >({ alertDialogOpen: false });
   const queryClient = useQueryClient();
-  const { mutateAsync: patchJobCancelMutateAsync } = usePatchJobCancelMutation(
-    job.id
-  );
-  const { mutateAsync: patchJobHoldMutateAsync } = usePatchJobHoldMutation(
-    job.id
-  );
+  // const { mutateAsync: patchJobCancelMutateAsync } = usePatchJobCancelMutation(
+  //   job.id
+  // );
+  // const { mutateAsync: patchJobHoldMutateAsync } = usePatchJobHoldMutation(
+  //   job.id
+  // );
   const status = jobStatuses[job.jobStatus];
   const { mutateAsync } = usePatchJobSendMutation(job.id);
   const { toast } = useToast();
@@ -139,35 +137,37 @@ export default function JobStatus({ job, project, readOnly = false }: Props) {
                 }
 
                 if (state.type === "Hold") {
-                  patchJobHoldMutateAsync()
-                    .then(() => {
-                      queryClient.invalidateQueries({
-                        queryKey: getJobQueryKey(job.id),
-                      });
-                      queryClient.invalidateQueries({
-                        queryKey: getProjectQueryKey(job.projectId),
-                      });
-                    })
-                    .catch(() => {
-                      // TODO: error handling
-                    });
-                  return;
+                  // TODO
+                  // patchJobHoldMutateAsync()
+                  //   .then(() => {
+                  //     queryClient.invalidateQueries({
+                  //       queryKey: getJobQueryKey(job.id),
+                  //     });
+                  //     queryClient.invalidateQueries({
+                  //       queryKey: getProjectQueryKey(job.projectId),
+                  //     });
+                  //   })
+                  //   .catch(() => {
+                  //     // TODO: error handling
+                  //   });
+                  // return;
                 }
 
                 if (state.type === "Cancel") {
-                  patchJobCancelMutateAsync()
-                    .then(() => {
-                      queryClient.invalidateQueries({
-                        queryKey: getJobQueryKey(job.id),
-                      });
-                      queryClient.invalidateQueries({
-                        queryKey: getProjectQueryKey(job.projectId),
-                      });
-                    })
-                    .catch(() => {
-                      // TODO: error handling
-                    });
-                  return;
+                  // TODO
+                  // patchJobCancelMutateAsync()
+                  //   .then(() => {
+                  //     queryClient.invalidateQueries({
+                  //       queryKey: getJobQueryKey(job.id),
+                  //     });
+                  //     queryClient.invalidateQueries({
+                  //       queryKey: getProjectQueryKey(job.projectId),
+                  //     });
+                  //   })
+                  //   .catch(() => {
+                  //     // TODO: error handling
+                  //   });
+                  // return;
                 }
 
                 if (state.type === "Send to Client") {

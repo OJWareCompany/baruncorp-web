@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -230,6 +231,17 @@ export default function UsersTable({ organization }: Props) {
           );
         },
       }),
+      columnHelper.accessor("dateOfJoining", {
+        header: "Date of Joining",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return format(new Date(value), "MM-dd-yyyy");
+        },
+      }),
       columnHelper.display({
         id: "action",
         cell: ({ row }) => {
@@ -276,6 +288,9 @@ export default function UsersTable({ organization }: Props) {
     manualPagination: true,
     state: {
       pagination,
+      columnVisibility: {
+        dateOfJoining: organization.id === BARUNCORP_ORGANIZATION_ID,
+      },
     },
   });
 

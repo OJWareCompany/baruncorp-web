@@ -43,7 +43,7 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
       return (
         <Button
           variant="outline"
-          className="px-3 font-normal gap-2"
+          className="flex-1 px-3 font-normal gap-2"
           ref={ref}
           disabled
         >
@@ -61,7 +61,7 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="px-3 font-normal gap-2"
+            className="flex-1 px-3 font-normal gap-2"
             ref={ref}
             disabled={disabled}
           >

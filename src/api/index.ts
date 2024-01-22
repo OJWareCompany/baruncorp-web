@@ -86,7 +86,7 @@ export interface UserResponseDto {
   /** @default "Active" */
   status: "Invitation Not Sent" | "Invitation Sent" | "Inactive" | "Active";
   /** @format date-time */
-  dateOfJoining: string;
+  dateOfJoining: string | null;
 }
 
 export interface UpdateUserRequestDto {
@@ -100,6 +100,11 @@ export interface UpdateUserRequestDto {
   deliverablesEmails: string[];
   /** @default "857-250-4567" */
   phoneNumber: string | null;
+  /**
+   * @format date-time
+   * @default "2023-09-04"
+   */
+  dateOfJoining: string | null;
 }
 
 export interface RoleResponseDto {
@@ -128,9 +133,21 @@ export interface CreateUserRequestDto {
   phoneNumber: string | null;
   /**
    * @format date-time
-   * @default "2023-09-04T07:31:27.217Z"
+   * @default "2023-09-04"
    */
   dateOfJoining?: string | null;
+  /**
+   * @min 1
+   * @max 100
+   * @default 1
+   */
+  tenure?: number;
+  /**
+   * @min 1
+   * @max 50
+   * @default 10
+   */
+  totalPtoDays?: number;
 }
 
 export interface IdResponse {
@@ -288,7 +305,6 @@ export interface CreateOrganizationRequestDto {
 }
 
 export interface UpdateOrganizationRequestDto {
-  /** @default "test123@baruncorp.com" */
   invoiceRecipientEmail: string | null;
   /** @default true */
   isVendor: boolean;
@@ -305,6 +321,491 @@ export interface UpdateOrganizationRequestDto {
   isSpecialRevisionPricing: boolean;
   /** @default 2 */
   numberOfFreeRevisionCount: number | null;
+}
+
+export interface CreateOrderedTaskWhenJobIsCreatedRequestDto {
+  serviceId: string;
+  description: string | null;
+}
+
+export interface CreateJobRequestDto {
+  /** @default ["chris@barun.com"] */
+  deliverablesEmails: string[];
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  clientUserId: string;
+  /** @default "please, check this out." */
+  additionalInformationFromClient: string | null;
+  /** @default 300.1 */
+  systemSize: number | null;
+  /** @default "d6935a65-2ec5-4df0-a8b5-a4e39f124d05" */
+  projectId: string;
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @default "Self" */
+  loadCalcOrigin?: "Self" | "Client Provided";
+  /** @default [{"serviceId":"e5d81943-3fef-416d-a85b-addb8be296c0","description":""},{"serviceId":"9e773832-ad39-401d-b1c2-16d74f9268ea","description":""},{"serviceId":"99ff64ee-fe47-4235-a026-db197628d077","description":""},{"serviceId":"5c29f1ae-d50b-4400-a6fb-b1a2c87126e9","description":""},{"serviceId":"2a2a256b-57a5-46f5-8cfb-1855cc29238a","description":"This is not on the menu."}] */
+  taskIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[];
+  mailingAddressForWetStamp: AddressDto | null;
+  /** @default 3 */
+  numberOfWetStamp: number | null;
+  /** @default false */
+  isExpedited: boolean;
+  /**
+   * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
+   * @format date-time
+   */
+  dueDate?: string | null;
+}
+
+export interface UpdateJobRequestDto {
+  /** @default ["chris@barun.com"] */
+  deliverablesEmails: string[];
+  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  clientUserId: string;
+  /** @default "please, check this out." */
+  additionalInformationFromClient: string | null;
+  /** @default 300.1 */
+  systemSize: number | null;
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @default "Self" */
+  loadCalcOrigin?: "Self" | "Client Provided";
+  mailingAddressForWetStamp: AddressDto | null;
+  /** @default 3 */
+  numberOfWetStamp: number | null;
+  /** @default false */
+  isExpedited: boolean;
+  /**
+   * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
+   * @format date-time
+   */
+  dueDate: string | null;
+}
+
+export interface UpdateJobStatusRequestDto {
+  /** @default "Completed" */
+  status:
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)";
+}
+
+export interface PrerequisiteTaskVO {
+  prerequisiteTaskId: string;
+  prerequisiteTaskName: string;
+}
+
+export interface AssignedTaskResponseFields {
+  assignTaskId: string;
+  /** @example "Not Started" */
+  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
+  taskName: string;
+  taskId: string;
+  orderedServiceId: string;
+  startedAt: string | null;
+  assigneeName: string | null;
+  assigneeId: string | null;
+  doneAt: string | null;
+  description: string | null;
+  duration: number | null;
+  prerequisiteTasks: PrerequisiteTaskVO[];
+}
+
+export interface OrderedServiceResponseFields {
+  orderedServiceId: string;
+  serviceId: string;
+  sizeForRevision: "Major" | "Minor" | null;
+  serviceName: string;
+  isRevision: boolean;
+  description: string | null;
+  price: number | null;
+  priceOverride: number | null;
+  /** @example "Not Started" */
+  status:
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)";
+  orderedAt: string;
+  doneAt: string | null;
+}
+
+export interface ClientInformationFields {
+  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
+  clientOrganizationId: string;
+  /** @example "Barun Corp" */
+  clientOrganizationName: string;
+  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
+  clientUserId: string;
+  /** @example "Chris Kim" */
+  clientUserName: string;
+  /** @example "gyals0386@gmail.com" */
+  contactEmail: string;
+  /** @example "gyals0386@gmail.com" */
+  deliverablesEmails: string[];
+}
+
+export interface JobResponseDto {
+  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
+  id: string;
+  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
+  projectId: string;
+  isContainsRevisionTask: boolean;
+  projectPropertyType: "Residential" | "Commercial";
+  billingCodes: string[];
+  taskSizeForRevision: "Major" | "Minor" | null;
+  /** @example 300.1 */
+  systemSize: number | null;
+  mailingAddressForWetStamp: AddressDto | null;
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @example 3 */
+  numberOfWetStamp: number | null;
+  /** @example "Please check this out." */
+  additionalInformationFromClient: string | null;
+  /** @example "Chris Kim" */
+  updatedBy: string;
+  /** @example "176 Morningmist Road, Naugatuck, Connecticut 06770" */
+  propertyFullAddress: string;
+  /** @example 5 */
+  jobRequestNumber: number;
+  /** @example "In Progress" */
+  jobStatus:
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client";
+  /** @example "Self" */
+  loadCalcOrigin: "Self" | "Client Provided";
+  assignedTasks: AssignedTaskResponseFields[];
+  orderedServices: OrderedServiceResponseFields[];
+  clientInfo: ClientInformationFields;
+  /** @example "2023-08-11 09:10:31" */
+  receivedAt: string;
+  /** @example true */
+  isExpedited: boolean;
+  jobName: string;
+  isCurrentJob?: boolean;
+}
+
+export interface JobPaginatedResponseFields {
+  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
+  id: string;
+  /** @example "Residential" */
+  projectPropertyType: "Residential" | "Commercial";
+  /** @example "176 Morningmist Road, Naugatuck, Connecticut 06770" */
+  propertyFullAddress: string;
+  /** @example 5 */
+  jobRequestNumber: number;
+  /** @example "In Progress" */
+  jobStatus:
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client";
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @example "Self" */
+  loadCalcOrigin: "Self" | "Client Provided";
+  orderedServices: OrderedServiceResponseFields[];
+  assignedTasks: AssignedTaskResponseFields[];
+  clientInfo: ClientInformationFields;
+  /** @example "2023-08-11 09:10:31" */
+  receivedAt: string;
+  /** @example true */
+  isExpedited: boolean;
+  /** @example "Please check this out." */
+  additionalInformationFromClient: string | null;
+  jobName: string;
+}
+
+export interface JobPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: JobPaginatedResponseFields[];
+}
+
+export interface InvoiceClientOrganization {
+  id: string;
+  name: string;
+}
+
+export interface LineItem {
+  jobId: string;
+  /** @example 5 */
+  jobRequestNumber: number;
+  description: string;
+  /** @format date-time */
+  dateSentToClient: string;
+  mountingType: "Roof Mount" | "Ground Mount";
+  clientOrganization: InvoiceClientOrganization;
+  isContainsRevisionTask: boolean;
+  propertyType: "Residential" | "Commercial";
+  state: string;
+  billingCodes: string[];
+  taskSizeForRevision: "Major" | "Minor" | null;
+  pricingType: "Standard" | "Tiered";
+  price: number;
+  taskSubtotal: number;
+}
+
+export interface JobToInvoiceResponseDto {
+  items: LineItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+}
+
+export interface SendDeliverablesRequestDto {
+  deliverablesLink: string;
+}
+
+export interface CommercialTier {
+  /** @default 0.01 */
+  startingPoint: number;
+  /** @default 100 */
+  finishingPoint: number;
+  /** @default 10 */
+  price: number;
+  /** @default 10 */
+  gmPrice: number;
+}
+
+export interface StandardPricingRequestDtoFields {
+  /** @default 10 */
+  residentialPrice: number | null;
+  /** @default 10 */
+  residentialGmPrice: number | null;
+  /** @default 10 */
+  residentialRevisionPrice: number | null;
+  /** @default 10 */
+  residentialRevisionGmPrice: number | null;
+  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10}] */
+  commercialNewServiceTiers: CommercialTier[];
+  /** @default 0.167 */
+  commercialRevisionCostPerUnit: number | null;
+  /** @default 1 */
+  commercialRevisionMinutesPerUnit: number | null;
+}
+
+export interface CreateServiceRequestDto {
+  /** @default "PV Design" */
+  name: string;
+  /** @default "" */
+  billingCode: string;
+  /** @default "Standard" */
+  pricingType: "Standard" | "Fixed";
+  standardPricing: StandardPricingRequestDtoFields | null;
+  /** @default null */
+  fixedPrice: number | null;
+  /** @default null */
+  residentialNewEstimatedTaskDuration: number | null;
+  /** @default null */
+  residentialRevisionEstimatedTaskDuration: number | null;
+  /** @default null */
+  commercialNewEstimatedTaskDuration: number | null;
+  /** @default null */
+  commercialRevisionEstimatedTaskDuration: number | null;
+}
+
+export interface UpdateServiceRequestDto {
+  /** @default "PV Design" */
+  name: string;
+  /** @default "" */
+  billingCode: string;
+  /** @default "Standard" */
+  pricingType: "Standard" | "Fixed";
+  standardPricing: StandardPricingRequestDtoFields | null;
+  /** @default null */
+  fixedPrice: number | null;
+  /** @default null */
+  residentialNewEstimatedTaskDuration: number | null;
+  /** @default null */
+  residentialRevisionEstimatedTaskDuration: number | null;
+  /** @default null */
+  commercialNewEstimatedTaskDuration: number | null;
+  /** @default null */
+  commercialRevisionEstimatedTaskDuration: number | null;
+}
+
+export interface ServiceTaskResponseDto {
+  id: string;
+  name: string;
+}
+
+export interface ServiceResponseDto {
+  id: string;
+  name: string;
+  billingCode: string;
+  /** @default "Standard" */
+  pricingType: "Standard" | "Fixed";
+  standardPricing: StandardPricingRequestDtoFields | null;
+  /** @default null */
+  fixedPrice: number | null;
+  relatedTasks: ServiceTaskResponseDto[];
+  /** @default null */
+  residentialNewEstimatedTaskDuration: number | null;
+  /** @default null */
+  residentialRevisionEstimatedTaskDuration: number | null;
+  /** @default null */
+  commercialNewEstimatedTaskDuration: number | null;
+  /** @default null */
+  commercialRevisionEstimatedTaskDuration: number | null;
+}
+
+export interface ServicePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: ServiceResponseDto[];
+}
+
+export interface AddressFromMapBox {
+  /** @default [-97.87,34] */
+  coordinates: number[];
+}
+
+export interface CreateProjectRequestDto {
+  /** @default "Residential" */
+  projectPropertyType: "Residential" | "Commercial";
+  /** @default "Chris Kim" */
+  projectPropertyOwner: string | null;
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  clientOrganizationId: string;
+  /** @default "000152" */
+  projectNumber: string | null;
+  projectPropertyAddress: AddressDto;
+}
+
+export interface UpdateProjectRequestDto {
+  /** @default "Residential" */
+  projectPropertyType: "Residential" | "Commercial";
+  /** @default "Chris Kim" */
+  projectPropertyOwner: string | null;
+  /** @default "50021" */
+  projectNumber: string | null;
+  projectPropertyAddress: AddressDto;
+}
+
+export interface ProjectPaginatedResponseFields {
+  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  projectId: string;
+  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  organizationId: string;
+  /** @example "Freedom Forever" */
+  organizationName: string;
+  /** @example "Residential" */
+  propertyType: "Residential" | "Commercial";
+  /** @example "https://host.com/projects/path" */
+  projectFolderLink: string | null;
+  /** @example null */
+  projectNumber: string | null;
+  /** @example "3480 Northwest 33rd Court, Lauderdale Lakes, Florida 33309" */
+  propertyFullAddress: string;
+  /** @example "Smith Kim" */
+  propertyOwnerName: string | null;
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @example "2023-09-05T07:14:57.270Z" */
+  createdAt: string;
+  /** @example 1 */
+  totalOfJobs: number;
+  /**
+   * 필요한지 확인 필요
+   * @example false
+   */
+  masterLogUpload: boolean;
+  /**
+   * 필요한지 확인 필요
+   * @example false
+   */
+  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
+}
+
+export interface ProjectPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: ProjectPaginatedResponseFields[];
+}
+
+export interface ProjectAssociatedRegulatoryBodyDto {
+  /** @default "12" */
+  stateId: string;
+  /** @default "12011" */
+  countyId: string | null;
+  /** @default "1201191098" */
+  countySubdivisionsId: string | null;
+  /** @default "1239525" */
+  placeId: string | null;
+  /** @default "1239525" */
+  ahjId: string;
+}
+
+export interface ProjectResponseDto {
+  /** @example "07e12e89-6077-4fd1-a029-c50060b57f43" */
+  projectId: string;
+  /** @example 201 */
+  systemSize: number | null;
+  /** @example "Kevin Brook" */
+  projectPropertyOwnerName: string | null;
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @example "Barun Corp" */
+  clientOrganization: string;
+  /** @example "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
+  clientOrganizationId: string;
+  /** @example "https://host.com/projects/path" */
+  projectFolderLink: string | null;
+  propertyAddress: AddressDto;
+  mailingAddressForWetStamp: AddressDto | null;
+  /** @example 3 */
+  numberOfWetStamp: number | null;
+  /** @example "Residential" */
+  propertyType: "Residential" | "Commercial";
+  /** @example null */
+  projectNumber: string | null;
+  /** @example "2023-09-05T07:14:57.270Z" */
+  createdAt: string;
+  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto;
+  /** @example 1 */
+  totalOfJobs: number;
+  /** @example false */
+  masterLogUpload: boolean;
+  /** @example false */
+  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
+  /** @example false */
+  hasHistoryElectricalPEStamp: boolean;
+  /** @example false */
+  hasHistoryStructuralPEStamp: boolean;
+  /** @example [] */
+  jobs: JobResponseDto[];
 }
 
 export interface AhjNoteListResponseDto {
@@ -460,302 +961,44 @@ export interface AhjNoteHistoryPaginatedResponseDto {
   items: AhjNoteHistoryListResponseDto[];
 }
 
-export interface AddressFromMapBox {
-  /** @default [-97.87,34] */
-  coordinates: number[];
+export interface AssignTaskRequestDto {
+  /** @default "295fff4a-b13f-4c42-ba30-c0f39536ee6e" */
+  assigneeId: string;
 }
 
-export interface CreateProjectRequestDto {
-  /** @default "Residential" */
-  projectPropertyType: "Residential" | "Commercial";
-  /** @default "Chris Kim" */
-  projectPropertyOwner: string | null;
-  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
-  clientOrganizationId: string;
-  /** @default "000152" */
-  projectNumber: string | null;
-  projectPropertyAddress: AddressDto;
-}
-
-export interface UpdateProjectRequestDto {
-  /** @default "Residential" */
-  projectPropertyType: "Residential" | "Commercial";
-  /** @default "Chris Kim" */
-  projectPropertyOwner: string | null;
-  /** @default "50021" */
-  projectNumber: string | null;
-  projectPropertyAddress: AddressDto;
-}
-
-export interface ProjectPaginatedResponseFields {
-  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
-  projectId: string;
-  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
-  organizationId: string;
-  /** @example "Freedom Forever" */
-  organizationName: string;
-  /** @example "Residential" */
-  propertyType: "Residential" | "Commercial";
-  /** @example "https://host.com/projects/path" */
-  projectFolderLink: string | null;
-  /** @example null */
-  projectNumber: string | null;
-  /** @example "3480 Northwest 33rd Court, Lauderdale Lakes, Florida 33309" */
-  propertyFullAddress: string;
-  /** @example "Smith Kim" */
-  propertyOwnerName: string | null;
-  /** @example "Ground Mount" */
-  mountingType: "Roof Mount" | "Ground Mount";
-  /** @example "2023-09-05T07:14:57.270Z" */
-  createdAt: string;
-  /** @example 1 */
-  totalOfJobs: number;
-  /**
-   * 필요한지 확인 필요
-   * @example false
-   */
-  masterLogUpload: boolean;
-  /**
-   * 필요한지 확인 필요
-   * @example false
-   */
-  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
-}
-
-export interface ProjectPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: ProjectPaginatedResponseFields[];
-}
-
-export interface ProjectAssociatedRegulatoryBodyDto {
-  /** @default "12" */
-  stateId: string;
-  /** @default "12011" */
-  countyId: string | null;
-  /** @default "1201191098" */
-  countySubdivisionsId: string | null;
-  /** @default "1239525" */
-  placeId: string | null;
-  /** @default "1239525" */
-  ahjId: string;
-}
-
-export interface PrerequisiteTaskVO {
-  prerequisiteTaskId: string;
-  prerequisiteTaskName: string;
-}
-
-export interface AssignedTaskResponseFields {
-  assignTaskId: string;
-  /** @example "Not Started" */
-  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
-  taskName: string;
+export interface AssignedTaskResponseDto {
+  id: string;
   taskId: string;
+  taskName: string;
   orderedServiceId: string;
-  startedAt: string | null;
-  assigneeName: string | null;
-  assigneeId: string | null;
-  doneAt: string | null;
-  description: string | null;
-  duration: number | null;
-  prerequisiteTasks: PrerequisiteTaskVO[];
-}
-
-export interface OrderedServiceResponseFields {
-  orderedServiceId: string;
-  serviceId: string;
-  sizeForRevision: "Major" | "Minor" | null;
   serviceName: string;
-  isRevision: boolean;
+  jobId: string;
+  /** @default "Not Started" */
+  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
   description: string | null;
-  price: number | null;
-  priceOverride: number | null;
-  /** @example "Pending" */
-  status: "Pending" | "Completed" | "Canceled";
-  orderedAt: string;
-  doneAt: string | null;
-}
-
-export interface ClientInformationFields {
-  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
-  clientOrganizationId: string;
-  /** @example "Barun Corp" */
-  clientOrganizationName: string;
-  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
-  clientUserId: string;
-  /** @example "Chris Kim" */
-  clientUserName: string;
-  /** @example "gyals0386@gmail.com" */
-  contactEmail: string;
-  /** @example "gyals0386@gmail.com" */
-  deliverablesEmails: string[];
-}
-
-export interface JobResponseDto {
-  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
-  id: string;
-  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
+  assigneeId: string | null;
+  assigneeName: string | null;
+  assigneeOrganizationId: string | null;
+  assigneeOrganizationName: string | null;
   projectId: string;
-  isContainsRevisionTask: boolean;
-  projectPropertyType: "Residential" | "Commercial";
-  billingCodes: string[];
-  taskSizeForRevision: "Major" | "Minor" | null;
-  /** @example 300.1 */
-  systemSize: number | null;
-  mailingAddressForWetStamp: AddressDto | null;
-  /** @example "Ground Mount" */
+  organizationId: string;
+  organizationName: string;
+  projectPropertyType: string;
   mountingType: string;
-  /** @example 3 */
-  numberOfWetStamp: number | null;
-  /** @example "Please check this out." */
-  additionalInformationFromClient: string | null;
-  /** @example "Chris Kim" */
-  updatedBy: string;
-  /** @example "176 Morningmist Road, Naugatuck, Connecticut 06770" */
-  propertyFullAddress: string;
-  /** @example 5 */
-  jobRequestNumber: number;
-  /** @example "In Progress" */
-  jobStatus:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Completed"
-    | "Canceled";
-  assignedTasks: AssignedTaskResponseFields[];
-  orderedServices: OrderedServiceResponseFields[];
-  clientInfo: ClientInformationFields;
-  /** @example "2023-08-11 09:10:31" */
-  receivedAt: string;
-  /** @example true */
-  isExpedited: boolean;
-  jobName: string;
-  isCurrentJob?: boolean;
-}
-
-export interface ProjectResponseDto {
-  /** @example "07e12e89-6077-4fd1-a029-c50060b57f43" */
-  projectId: string;
-  /** @example 201 */
-  systemSize: number | null;
-  /** @example "Kevin Brook" */
-  projectPropertyOwnerName: string | null;
-  /** @example "Ground Mount" */
-  mountingType: "Roof Mount" | "Ground Mount";
-  /** @example "Barun Corp" */
-  clientOrganization: string;
-  /** @example "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
-  clientOrganizationId: string;
-  /** @example "https://host.com/projects/path" */
-  projectFolderLink: string | null;
-  propertyAddress: AddressDto;
-  mailingAddressForWetStamp: AddressDto | null;
-  /** @example 3 */
-  numberOfWetStamp: number | null;
-  /** @example "Residential" */
-  propertyType: "Residential" | "Commercial";
-  /** @example null */
-  projectNumber: string | null;
-  /** @example "2023-09-05T07:14:57.270Z" */
-  createdAt: string;
-  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto;
-  /** @example 1 */
-  totalOfJobs: number;
-  /** @example false */
-  masterLogUpload: boolean;
-  /** @example false */
-  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
-  /** @example false */
-  hasHistoryElectricalPEStamp: boolean;
-  /** @example false */
-  hasHistoryStructuralPEStamp: boolean;
-  /** @example [] */
-  jobs: JobResponseDto[];
-}
-
-export interface CreateOrderedTaskWhenJobIsCreatedRequestDto {
   serviceId: string;
-  description: string | null;
+  vendorInvoiceId: string | null;
+  isVendor: boolean;
+  /** @format date-time */
+  startedAt: string | null;
+  /** @format date-time */
+  doneAt: string | null;
+  /** @format date-time */
+  createdAt: string | null;
+  duration: number | null;
+  cost: number | null;
 }
 
-export interface CreateJobRequestDto {
-  /** @default "chris@barun.com" */
-  deliverablesEmails: string[];
-  /** @default "96d39061-a4d7-4de9-a147-f627467e11d5" */
-  clientUserId: string;
-  /** @default "please, check this out." */
-  additionalInformationFromClient: string | null;
-  /** @default 300.1 */
-  systemSize: number | null;
-  /** @default "561f7c64-fe49-40a4-8399-d5d24725f9cd" */
-  projectId: string;
-  /** @example "Ground Mount" */
-  mountingType: "Roof Mount" | "Ground Mount";
-  /** @default [{"serviceId":"e5d81943-3fef-416d-a85b-addb8be296c0","description":""},{"serviceId":"9e773832-ad39-401d-b1c2-16d74f9268ea","description":""},{"serviceId":"99ff64ee-fe47-4235-a026-db197628d077","description":""},{"serviceId":"5c29f1ae-d50b-4400-a6fb-b1a2c87126e9","description":""},{"serviceId":"2a2a256b-57a5-46f5-8cfb-1855cc29238a","description":"This is not on the menu."}] */
-  taskIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[];
-  mailingAddressForWetStamp: AddressDto | null;
-  /** @default 3 */
-  numberOfWetStamp: number | null;
-  /** @default false */
-  isExpedited: boolean;
-}
-
-export interface UpdateJobRequestDto {
-  /** @default "chris@barun.com" */
-  deliverablesEmails: string[];
-  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
-  clientUserId: string;
-  /** @default "please, check this out." */
-  additionalInformationFromClient: string | null;
-  /** @default 300.1 */
-  systemSize: number | null;
-  mailingAddressForWetStamp: AddressDto | null;
-  /** @default 3 */
-  numberOfWetStamp: number | null;
-  /** @default true */
-  isExpedited: boolean;
-  /** @default "Roof Mount" */
-  mountingType: string;
-}
-
-export interface JobPaginatedResponseFields {
-  /** @example "5c29f1ae-d50b-4400-a6fb-b1a2c87126e9" */
-  id: string;
-  /** @example "Residential" */
-  projectPropertyType: "Residential" | "Commercial";
-  /** @example "176 Morningmist Road, Naugatuck, Connecticut 06770" */
-  propertyFullAddress: string;
-  /** @example 5 */
-  jobRequestNumber: number;
-  /** @example "In Progress" */
-  jobStatus:
-    | "Not Started"
-    | "In Progress"
-    | "On Hold"
-    | "Completed"
-    | "Canceled";
-  /** @example "Ground Mount" */
-  mountingType: string;
-  orderedServices: OrderedServiceResponseFields[];
-  assignedTasks: AssignedTaskResponseFields[];
-  clientInfo: ClientInformationFields;
-  /** @example "2023-08-11 09:10:31" */
-  receivedAt: string;
-  /** @example true */
-  isExpedited: boolean;
-  /** @example "Please check this out." */
-  additionalInformationFromClient: string | null;
-  jobName: string;
-}
-
-export interface JobPaginatedResponseDto {
+export interface AssignedTaskPaginatedResponseDto {
   /** @default 1 */
   page: number;
   /** @default 20 */
@@ -764,135 +1007,305 @@ export interface JobPaginatedResponseDto {
   totalCount: number;
   /** @example 500 */
   totalPage: number;
-  items: JobPaginatedResponseFields[];
+  items: AssignedTaskResponseDto[];
 }
 
-export interface InvoiceClientOrganization {
+export interface UpdateTaskDurationRequestDto {
+  /** @default null */
+  duration: number | null;
+}
+
+export interface UpdateTaskCostRequestDto {
+  /** @default null */
+  cost: number | null;
+}
+
+export interface AvailableWorkerResponseDto {
   id: string;
   name: string;
+  position: string | null;
 }
 
-export interface LineItem {
-  jobId: string;
-  /** @example 5 */
-  jobRequestNumber: number;
-  description: string;
+export interface RejectedTaskReasonResponseDto {
+  userId: string;
+  userName: string;
+  taskName: string;
+  rejectedTaskId: string;
+  reason: string;
   /** @format date-time */
-  dateSentToClient: string;
-  mountingType: "Roof Mount" | "Ground Mount";
-  clientOrganization: InvoiceClientOrganization;
-  isContainsRevisionTask: boolean;
-  propertyType: "Residential" | "Commercial";
-  state: string;
-  billingCodes: string[];
-  taskSizeForRevision: "Major" | "Minor" | null;
-  pricingType: "Standard" | "Tiered";
-  price: number;
-  taskSubtotal: number;
+  rejectedAt: string;
 }
 
-export interface JobToInvoiceResponseDto {
-  items: LineItem[];
-  subtotal: number;
-  discount: number;
-  total: number;
+export interface RejectedTaskReasonPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: RejectedTaskReasonResponseDto[];
 }
 
-export interface SendDeliverablesRequestDto {
-  deliverablesLink: string;
+export interface RejectAssignedTaskRequestDto {
+  reason: string;
 }
 
-export interface CreateJobNoteRequestDto {
-  /** @default "what do you think about Jazz?" */
-  content: string;
-  /** @default "hs8da-cdef-gh22321ask-xzcm12e3" */
-  jobId: string;
+export interface CreateExpensePricingRequestDto {
+  /** @default "43e0ab61-f929-40a9-bb03-be7d6eb9de57" */
+  taskId: string;
+  /** @default "asda" */
+  organizationId: string;
+  /** @default "Fixed" */
+  resiNewExpenseType: string;
+  /** @default 25 */
+  resiNewValue: number;
+  /** @default "Fixed" */
+  resiRevExpenseType: string;
+  /** @default 25 */
+  resiRevValue: number;
+  /** @default "Fixed" */
+  comNewExpenseType: string;
+  /** @default 25 */
+  comNewValue: number;
+  /** @default "Fixed" */
+  comRevExpenseType: string;
+  /** @default 25 */
+  comRevValue: number;
 }
 
-export interface JobNoteResponseDto {
-  jobNoteId: string;
-  /** @example "what do you think about Jazz?" */
-  content: string;
-  jobId: string;
-  commenterName: string;
-  commenterUserId: string;
+export interface UpdateExpensePricingRequestDto {
+  /** @default "Fixed" */
+  resiNewExpenseType: string;
+  /** @default 25 */
+  resiNewValue: number;
+  /** @default "Fixed" */
+  resiRevExpenseType: string;
+  /** @default 25 */
+  resiRevValue: number;
+  /** @default "Fixed" */
+  comNewExpenseType: string;
+  /** @default 25 */
+  comNewValue: number;
+  /** @default "Fixed" */
+  comRevExpenseType: string;
+  /** @default 25 */
+  comRevValue: number;
+}
+
+export interface ExpensePricingResponseDto {
+  taskId: string;
+  organizationId: string;
+  taskName: string;
+  resiNewExpenseType: string;
+  resiNewValue: number;
+  resiRevExpenseType: string;
+  resiRevValue: number;
+  comNewExpenseType: string;
+  comNewValue: number;
+  comRevExpenseType: string;
+  comRevValue: number;
+}
+
+export interface ExpensePricingPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: ExpensePricingResponseDto[];
+}
+
+export interface CreatableExpensePricingResponse {
+  taskName: string;
+  taskId: string;
+}
+
+export interface CreateInvoiceRequestDto {
+  /**
+   * @format date-time
+   * @default "2023-10-01T05:14:33.599Z"
+   */
+  invoiceDate: string;
+  terms: 21 | 30;
+  notesToClient: string | null;
+  clientOrganizationId: string;
+  /**
+   * @format date-time
+   * @default "2023-02"
+   */
+  serviceMonth: string;
+}
+
+export interface UpdateInvoiceRequestDto {
+  /** @format date-time */
+  invoiceDate: string;
+  terms: 21 | 30;
+  notesToClient: string | null;
+}
+
+export interface InvoicePayments {
+  id: string;
+  paymentName: string;
+  invoiceId: string;
+  amount: number;
+  paymentMethod: "Credit" | "Direct";
+  notes: string | null;
+  paymentDate: string;
+  canceledAt: string | null;
+}
+
+export interface InvoiceResponseDto {
+  id: string;
+  status: "Unissued" | "Issued" | "Paid";
+  invoiceDate: string;
+  terms: 21 | 30;
+  dueDate: string;
+  notesToClient: string | null;
   createdAt: string;
+  updatedAt: string;
+  servicePeriodDate: string;
+  subtotal: number;
+  discount: number | null;
+  total: number;
+  clientOrganization: InvoiceClientOrganization;
+  lineItems: LineItem[];
+  payments: InvoicePayments[];
+  totalOfPayment: number;
 }
 
-export interface JobNoteListResponseDto {
-  notes: JobNoteResponseDto[];
+export interface InvoicePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: InvoiceResponseDto[];
 }
 
-export interface CommercialTier {
+export interface ClientToInvoice {
+  id: string;
+  name: string;
+  date: string[];
+}
+
+export interface ClientToInvoiceResponseDto {
+  clientToInvoices: ClientToInvoice[];
+}
+
+export interface Attachments {
+  filename?: string;
+  content?: string;
+  path?: string;
+  contentType?: string;
+  encoding?: string;
+  raw?: string;
+}
+
+export interface IssueInvoiceRequestDto {
+  attachments: Attachments[];
+}
+
+export interface Tier {
   /** @default 0.01 */
   startingPoint: number;
   /** @default 100 */
-  finishingPoint: number;
+  finishingPoint: number | null;
   /** @default 10 */
   price: number;
   /** @default 10 */
   gmPrice: number;
 }
 
-export interface StandardPricingRequestDtoFields {
-  /** @default 10 */
-  residentialPrice: number | null;
-  /** @default 10 */
-  residentialGmPrice: number | null;
+export interface CreateCustomPricingRequestDto {
+  /** @default "" */
+  serviceId: string;
+  /** @default "" */
+  organizationId: string;
+  /** @default "Custom Standard" */
+  customPricingType: "Custom Standard" | "Custom Fixed";
+  /** @default "Tier" */
+  residentialNewServicePricingType: "Tier" | "Flat" | null;
+  /** @default null */
+  residentialNewServiceFlatPrice: number | null;
+  /** @default null */
+  residentialNewServiceFlatGmPrice: number | null;
+  /** @default [{"startingPoint":1,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":101,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":201,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
+  residentialNewServiceTiers: Tier[];
   /** @default 10 */
   residentialRevisionPrice: number | null;
   /** @default 10 */
   residentialRevisionGmPrice: number | null;
-  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10}] */
-  commercialNewServiceTiers: CommercialTier[];
-  /** @default 0.167 */
-  commercialRevisionCostPerUnit: number | null;
-  /** @default 1 */
-  commercialRevisionMinutesPerUnit: number | null;
-}
-
-export interface CreateServiceRequestDto {
-  /** @default "PV Design" */
-  name: string;
-  /** @default "" */
-  billingCode: string;
-  /** @default "Standard" */
-  pricingType: "Standard" | "Fixed";
-  standardPricing: StandardPricingRequestDtoFields | null;
+  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":100.01,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":200.01,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
+  commercialNewServiceTiers: Tier[];
   /** @default null */
   fixedPrice: number | null;
 }
 
-export interface UpdateServiceRequestDto {
-  /** @default "PV Design" */
-  name: string;
-  /** @default "" */
-  billingCode: string;
-  /** @default "Standard" */
-  pricingType: "Standard" | "Fixed";
-  standardPricing: StandardPricingRequestDtoFields | null;
+export interface UpdateCustomPricingRequestDto {
+  /** @default "Custom Standard" */
+  customPricingType: "Custom Standard" | "Custom Fixed";
+  /** @default "Tier" */
+  residentialNewServicePricingType: "Tier" | "Flat" | null;
+  /** @default null */
+  residentialNewServiceFlatPrice: number | null;
+  /** @default null */
+  residentialNewServiceFlatGmPrice: number | null;
+  /** @default [{"startingPoint":1,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":101,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":201,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
+  residentialNewServiceTiers: Tier[];
+  /** @default 10 */
+  residentialRevisionPrice: number | null;
+  /** @default 10 */
+  residentialRevisionGmPrice: number | null;
+  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":100.01,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":200.01,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
+  commercialNewServiceTiers: Tier[];
   /** @default null */
   fixedPrice: number | null;
 }
 
-export interface ServiceTaskResponseDto {
+export interface CustomPricingResponseDto {
+  serviceId: string;
+  organizationId: string;
+  /** @default "Custom Standard" */
+  customPricingType: "Custom Standard" | "Custom Fixed";
+  /** @default "Tier" */
+  residentialNewServicePricingType: "Tier" | "Flat" | null;
+  /** @default null */
+  residentialNewServiceFlatPrice: number | null;
+  /** @default null */
+  residentialNewServiceFlatGmPrice: number | null;
+  /** @default [{"startingPoint":1,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":101,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":201,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
+  residentialNewServiceTiers: Tier[];
+  /** @default 10 */
+  residentialRevisionPrice: number | null;
+  /** @default 10 */
+  residentialRevisionGmPrice: number | null;
+  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":100.01,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":200.01,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
+  commercialNewServiceTiers: Tier[];
+  /** @default null */
+  fixedPrice: number | null;
+}
+
+export interface CustomPricingPaginatedResponseDtoFields {
   id: string;
-  name: string;
+  organizationId: string;
+  organizationName: string;
+  serviceId: string;
+  serviceName: string;
+  hasResidentialNewServicePricing: boolean;
+  hasResidentialRevisionPricing: boolean;
+  hasCommercialNewServiceTier: boolean;
+  hasFixedPricing: boolean;
 }
 
-export interface ServiceResponseDto {
-  id: string;
-  name: string;
-  billingCode: string;
-  /** @default "Standard" */
-  pricingType: "Standard" | "Fixed";
-  standardPricing: StandardPricingRequestDtoFields | null;
-  /** @default null */
-  fixedPrice: number | null;
-  relatedTasks: ServiceTaskResponseDto[];
-}
-
-export interface ServicePaginatedResponseDto {
+export interface CustomPricingPaginatedResponseDto {
   /** @default 1 */
   page: number;
   /** @default 20 */
@@ -901,7 +1314,366 @@ export interface ServicePaginatedResponseDto {
   totalCount: number;
   /** @example 500 */
   totalPage: number;
-  items: ServiceResponseDto[];
+  items: CustomPricingPaginatedResponseDtoFields[];
+}
+
+export interface CreatableCustomPricingResponse {
+  serviceName: string;
+  serviceId: string;
+}
+
+export interface CreatePositionRequestDto {
+  /** @default "Sr. Designer Test" */
+  name: string;
+  /** @default 5 */
+  maxAssignedTasksLimit: number | null;
+  /**
+   * TODO: UPDATE license type (워커와 태스크가 등록된경우 변경 불가하도록)
+   * @default null
+   */
+  licenseType: "Structural" | "Electrical" | null;
+  /** @default null */
+  description?: string | null;
+}
+
+export interface UpdatePositionRequestDto {
+  /** @default "Sr. Designer Update Test" */
+  name: string;
+  /** @default 777 */
+  maxAssignedTasksLimit: number | null;
+  /** @default null */
+  description?: string | null;
+}
+
+export interface PositionTask {
+  taskId: string;
+  taskName: string;
+  autoAssignmentType: string;
+}
+
+export interface Worker {
+  userId: string;
+  userName: string;
+  email: string;
+}
+
+export interface PositionResponseDto {
+  /** @default "" */
+  id: string;
+  /** @default "Sr. Designer" */
+  name: string;
+  /** @default null */
+  description: string | null;
+  /** @default null */
+  maxAssignedTasksLimit: number | null;
+  tasks: PositionTask[];
+  licenseType: "Structural" | "Electrical" | null;
+  workers: Worker[];
+}
+
+export interface PositionPaginatedResponseFields {
+  /** @default "" */
+  id: string;
+  /** @default "Sr. Designer" */
+  name: string;
+  /** @default null */
+  description: string | null;
+  /** @default null */
+  maxAssignedTasksLimit: number | null;
+  tasks: PositionTask[];
+  licenseType: "Structural" | "Electrical" | null;
+}
+
+export interface PositionPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PositionPaginatedResponseFields[];
+}
+
+export interface AddPositionTaskRequestDto {
+  /** @default "911fe9ac-94b8-4a0e-b478-56e88f4aa7d7" */
+  taskId: string;
+  /** @default "Residential / Commercial" */
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface UpdatePositionTaskAutoAssignmentTypeRequestDto {
+  /** @default "Residential / Commercial" */
+  autoAssignmentType:
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
+}
+
+export interface AddPositionWorkerRequestDto {
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  userId: string;
+}
+
+export interface PositionUnregisteredUserResponseFields {
+  userId: string;
+  userName: string;
+  email: string;
+}
+
+export interface PositionUnregisteredUserResponseDto {
+  items: PositionUnregisteredUserResponseFields[];
+}
+
+export interface CreatePtoRequestDto {
+  /** @default "ebf47426-2f8d-4b7c-9ef1-81209db8e3ad" */
+  userId: string;
+  /**
+   * @min 1
+   * @max 100
+   * @default 1
+   */
+  tenure: number;
+  /**
+   * @min 1
+   * @max 50
+   * @default 10
+   */
+  total: number;
+}
+
+export interface UpdatePtoTotalRequestDto {
+  /**
+   * @min 1
+   * @max 50
+   * @default 12
+   */
+  total: number;
+}
+
+export interface UpdatePtoPayRequestDto {
+  /** @default false */
+  isPaid: boolean;
+}
+
+export interface CreatePtoDetailRequestDto {
+  /** @default "ebf47426-2f8d-4b7c-9ef1-81209db8e3ad" */
+  userId: string;
+  /** @default "ebf47426-2f8d-4b7c-9ef1-81209db8e3ad" */
+  ptoTypeId: string;
+  /**
+   * @min 0
+   * @max 1
+   * @default 1.5
+   */
+  amountPerDay: number;
+  /**
+   * @format date-time
+   * @default "2024-01-09"
+   */
+  startedAt: string;
+  /**
+   * @min 1
+   * @max 180
+   * @default 2
+   */
+  days: number;
+}
+
+export interface UpdatePtoDetailRequestDto {
+  /**
+   * @format date-time
+   * @default "2024-01-09"
+   */
+  startedAt: string;
+  /**
+   * @min 1
+   * @max 180
+   * @default 2
+   */
+  days: number;
+  /** @default "529cec06-1fb7-4284-b56f-9f31219cd099" */
+  ptoTypeId: string;
+  /**
+   * @min 0
+   * @max 1
+   * @default 1
+   */
+  amountPerDay: number;
+}
+
+export interface PtoResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "Deo" */
+  userFirstName: string;
+  /** @default "John" */
+  userLastName: string;
+  /** @default "2024-01-01" */
+  userDateOfJoining: string;
+  /** @default 3 */
+  tenure: number;
+  /** @default 12 */
+  total: number;
+  /** @default 5 */
+  availablePto: number;
+  /** @default false */
+  isPaid: boolean;
+  /** @default "2024-01-01" */
+  startedAt: string;
+  /** @default "2024-12-30" */
+  endedAt: string;
+}
+
+export interface PtoPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PtoResponseDto[];
+}
+
+export interface PtoDetailResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "Deo" */
+  userFirstName: string;
+  /** @default "John" */
+  userLastName: string;
+  /** @default "2024-01-07" */
+  startedAt: string;
+  /** @default "2024-01-09" */
+  endedAt: string;
+  /** @default 3 */
+  days: number;
+  /** @default 1.5 */
+  amount: number;
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  ptoTypeId: string;
+  /** @default "Vacation" */
+  ptoTypeName: string;
+}
+
+export interface PtoDetailPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PtoDetailResponseDto[];
+}
+
+export interface PtoTypeInfo {
+  /** @default "ad2d7904-136d-4e2e-966a-679fe4f499d2" */
+  ptoTypeId: string;
+  /** @default "Vacation" */
+  ptoTypeName: string;
+  /** @default 10 */
+  totalAmount: number;
+}
+
+export interface PtoAnnualResponseDto {
+  /** @default "ad2d7904-136d-4e2e-966a-679fe4f499d2" */
+  userId: string;
+  /** @default "Deo" */
+  userFirstName: string;
+  /** @default "John" */
+  userLastName: string;
+  /** @default [] */
+  ptoTypeInfos: PtoTypeInfo[];
+  /** @default 10 */
+  totalAmount: number;
+}
+
+export interface PtoAnnualPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PtoAnnualResponseDto[];
+}
+
+export interface PtoTypeAvailableValue {
+  /** @default "1" */
+  value: number;
+}
+
+export interface PtoTypeResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "Vacation" */
+  name: string;
+  /** @default [] */
+  availableValues: PtoTypeAvailableValue[];
+}
+
+export interface PtoTypePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PtoTypeResponseDto[];
+}
+
+export interface UpdatePtoTenurePolicyRequestDto {
+  /**
+   * @min 1
+   * @max 50
+   * @default 12
+   */
+  total?: number;
+}
+
+export interface PtoTenurePolicyResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "3" */
+  tenure: number;
+  /** @default "12" */
+  total: number;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  createdAt: string;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  updatedAt: string;
+}
+
+export interface PtoTenurePolicyPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PtoTenurePolicyResponseDto[];
 }
 
 export interface CreateOrderedServiceRequestDto {
@@ -937,13 +1709,29 @@ export interface OrderedServiceResponseDto {
   priceOverride: number | null;
   jobId: string;
   /** @default "Completed" */
-  status: "Pending" | "Completed" | "Canceled";
+  status:
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "On Hold";
   orderedAt: string | null;
   doneAt: string | null;
   isRevision: boolean;
   assignedTasks: OrderedServiceAssignedTaskResponse[];
   projectPropertyType: string;
   mountingType: string;
+}
+
+export interface UpdateOrderedScopeStatusRequestDto {
+  /** @default "In Progress" */
+  status:
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)";
 }
 
 export interface UpdateManualPriceRequestDto {
@@ -966,6 +1754,27 @@ export interface OrderedServicePaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: OrderedServiceResponseDto[];
+}
+
+export interface CreateJobNoteRequestDto {
+  /** @default "what do you think about Jazz?" */
+  content: string;
+  /** @default "hs8da-cdef-gh22321ask-xzcm12e3" */
+  jobId: string;
+}
+
+export interface JobNoteResponseDto {
+  jobNoteId: string;
+  /** @example "what do you think about Jazz?" */
+  content: string;
+  jobId: string;
+  commenterName: string;
+  commenterUserId: string;
+  createdAt: string;
+}
+
+export interface JobNoteListResponseDto {
+  notes: JobNoteResponseDto[];
 }
 
 export interface CreateTaskRequestDto {
@@ -1078,185 +1887,6 @@ export interface UnregisteredUserForTaskPaginatedResponseDto {
   items: UnregisteredUserForTaskResponseDto[];
 }
 
-export interface AssignTaskRequestDto {
-  /** @default "295fff4a-b13f-4c42-ba30-c0f39536ee6e" */
-  assigneeId: string;
-}
-
-export interface AssignedTaskResponseDto {
-  id: string;
-  taskId: string;
-  taskName: string;
-  orderedServiceId: string;
-  serviceName: string;
-  jobId: string;
-  /** @default "Not Started" */
-  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
-  description: string | null;
-  assigneeId: string | null;
-  assigneeName: string | null;
-  assigneeOrganizationId: string | null;
-  assigneeOrganizationName: string | null;
-  projectId: string;
-  organizationId: string;
-  organizationName: string;
-  projectPropertyType: string;
-  mountingType: string;
-  serviceId: string;
-  vendorInvoiceId: string | null;
-  isVendor: boolean;
-  /** @format date-time */
-  startedAt: string | null;
-  /** @format date-time */
-  doneAt: string | null;
-  /** @format date-time */
-  createdAt: string | null;
-  duration: number | null;
-  cost: number | null;
-}
-
-export interface AssignedTaskPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: AssignedTaskResponseDto[];
-}
-
-export interface UpdateTaskDurationRequestDto {
-  /** @default null */
-  duration: number | null;
-}
-
-export interface UpdateTaskCostRequestDto {
-  /** @default null */
-  cost: number | null;
-}
-
-export interface AvailableWorkerResponseDto {
-  id: string;
-  name: string;
-  position: string | null;
-}
-
-export interface RejectedTaskReasonResponseDto {
-  userId: string;
-  userName: string;
-  taskName: string;
-  rejectedTaskId: string;
-  reason: string;
-  /** @format date-time */
-  rejectedAt: string;
-}
-
-export interface RejectedTaskReasonPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: RejectedTaskReasonResponseDto[];
-}
-
-export interface RejectAssignedTaskRequestDto {
-  reason: string;
-}
-
-export interface CreateInvoiceRequestDto {
-  /**
-   * @format date-time
-   * @default "2023-10-01T05:14:33.599Z"
-   */
-  invoiceDate: string;
-  terms: 21 | 30;
-  notesToClient: string | null;
-  clientOrganizationId: string;
-  /**
-   * @format date-time
-   * @default "2023-02"
-   */
-  serviceMonth: string;
-}
-
-export interface UpdateInvoiceRequestDto {
-  /** @format date-time */
-  invoiceDate: string;
-  terms: 21 | 30;
-  notesToClient: string | null;
-}
-
-export interface InvoicePayments {
-  id: string;
-  paymentName: string;
-  invoiceId: string;
-  amount: number;
-  paymentMethod: "Credit" | "Direct";
-  notes: string | null;
-  paymentDate: string;
-  canceledAt: string | null;
-}
-
-export interface InvoiceResponseDto {
-  id: string;
-  status: "Unissued" | "Issued" | "Paid";
-  invoiceDate: string;
-  terms: 21 | 30;
-  dueDate: string;
-  notesToClient: string | null;
-  createdAt: string;
-  updatedAt: string;
-  servicePeriodDate: string;
-  subtotal: number;
-  discount: number | null;
-  total: number;
-  clientOrganization: InvoiceClientOrganization;
-  lineItems: LineItem[];
-  payments: InvoicePayments[];
-  totalOfPayment: number;
-}
-
-export interface InvoicePaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: InvoiceResponseDto[];
-}
-
-export interface ClientToInvoice {
-  id: string;
-  name: string;
-  date: string[];
-}
-
-export interface ClientToInvoiceResponseDto {
-  clientToInvoices: ClientToInvoice[];
-}
-
-export interface Attachments {
-  filename?: string;
-  content?: string;
-  path?: string;
-  contentType?: string;
-  encoding?: string;
-  raw?: string;
-}
-
-export interface IssueInvoiceRequestDto {
-  attachments: Attachments[];
-}
-
 export interface CreatePaymentRequestDto {
   invoiceId: string;
   /** @default 100 */
@@ -1287,188 +1917,6 @@ export interface PaymentPaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: PaymentResponseDto[];
-}
-
-export interface Tier {
-  /** @default 0.01 */
-  startingPoint: number;
-  /** @default 100 */
-  finishingPoint: number | null;
-  /** @default 10 */
-  price: number;
-  /** @default 10 */
-  gmPrice: number;
-}
-
-export interface CreateCustomPricingRequestDto {
-  /** @default "" */
-  serviceId: string;
-  /** @default "" */
-  organizationId: string;
-  /** @default "Custom Standard" */
-  customPricingType: "Custom Standard" | "Custom Fixed";
-  /** @default "Tier" */
-  residentialNewServicePricingType: "Tier" | "Flat" | null;
-  /** @default null */
-  residentialNewServiceFlatPrice: number | null;
-  /** @default null */
-  residentialNewServiceFlatGmPrice: number | null;
-  /** @default [{"startingPoint":1,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":101,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":201,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
-  residentialNewServiceTiers: Tier[];
-  /** @default 10 */
-  residentialRevisionPrice: number | null;
-  /** @default 10 */
-  residentialRevisionGmPrice: number | null;
-  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":100.01,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":200.01,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
-  commercialNewServiceTiers: Tier[];
-  /** @default null */
-  fixedPrice: number | null;
-}
-
-export interface UpdateCustomPricingRequestDto {
-  /** @default "Custom Standard" */
-  customPricingType: "Custom Standard" | "Custom Fixed";
-  /** @default "Tier" */
-  residentialNewServicePricingType: "Tier" | "Flat" | null;
-  /** @default null */
-  residentialNewServiceFlatPrice: number | null;
-  /** @default null */
-  residentialNewServiceFlatGmPrice: number | null;
-  /** @default [{"startingPoint":1,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":101,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":201,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
-  residentialNewServiceTiers: Tier[];
-  /** @default 10 */
-  residentialRevisionPrice: number | null;
-  /** @default 10 */
-  residentialRevisionGmPrice: number | null;
-  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":100.01,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":200.01,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
-  commercialNewServiceTiers: Tier[];
-  /** @default null */
-  fixedPrice: number | null;
-}
-
-export interface CustomPricingResponseDto {
-  serviceId: string;
-  organizationId: string;
-  /** @default "Custom Standard" */
-  customPricingType: "Custom Standard" | "Custom Fixed";
-  /** @default "Tier" */
-  residentialNewServicePricingType: "Tier" | "Flat" | null;
-  /** @default null */
-  residentialNewServiceFlatPrice: number | null;
-  /** @default null */
-  residentialNewServiceFlatGmPrice: number | null;
-  /** @default [{"startingPoint":1,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":101,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":201,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
-  residentialNewServiceTiers: Tier[];
-  /** @default 10 */
-  residentialRevisionPrice: number | null;
-  /** @default 10 */
-  residentialRevisionGmPrice: number | null;
-  /** @default [{"startingPoint":0.01,"finishingPoint":100,"price":10,"gmPrice":12.01},{"startingPoint":100.01,"finishingPoint":200,"price":10,"gmPrice":12.01},{"startingPoint":200.01,"finishingPoint":null,"price":10,"gmPrice":12.01}] */
-  commercialNewServiceTiers: Tier[];
-  /** @default null */
-  fixedPrice: number | null;
-}
-
-export interface CustomPricingPaginatedResponseDtoFields {
-  id: string;
-  organizationId: string;
-  organizationName: string;
-  serviceId: string;
-  serviceName: string;
-  hasResidentialNewServicePricing: boolean;
-  hasResidentialRevisionPricing: boolean;
-  hasCommercialNewServiceTier: boolean;
-  hasFixedPricing: boolean;
-}
-
-export interface CustomPricingPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: CustomPricingPaginatedResponseDtoFields[];
-}
-
-export interface CreatableCustomPricingResponse {
-  serviceName: string;
-  serviceId: string;
-}
-
-export interface CreateExpensePricingRequestDto {
-  /** @default "43e0ab61-f929-40a9-bb03-be7d6eb9de57" */
-  taskId: string;
-  /** @default "asda" */
-  organizationId: string;
-  /** @default "Fixed" */
-  resiNewExpenseType: string;
-  /** @default 25 */
-  resiNewValue: number;
-  /** @default "Fixed" */
-  resiRevExpenseType: string;
-  /** @default 25 */
-  resiRevValue: number;
-  /** @default "Fixed" */
-  comNewExpenseType: string;
-  /** @default 25 */
-  comNewValue: number;
-  /** @default "Fixed" */
-  comRevExpenseType: string;
-  /** @default 25 */
-  comRevValue: number;
-}
-
-export interface UpdateExpensePricingRequestDto {
-  /** @default "Fixed" */
-  resiNewExpenseType: string;
-  /** @default 25 */
-  resiNewValue: number;
-  /** @default "Fixed" */
-  resiRevExpenseType: string;
-  /** @default 25 */
-  resiRevValue: number;
-  /** @default "Fixed" */
-  comNewExpenseType: string;
-  /** @default 25 */
-  comNewValue: number;
-  /** @default "Fixed" */
-  comRevExpenseType: string;
-  /** @default 25 */
-  comRevValue: number;
-}
-
-export interface ExpensePricingResponseDto {
-  taskId: string;
-  organizationId: string;
-  taskName: string;
-  resiNewExpenseType: string;
-  resiNewValue: number;
-  resiRevExpenseType: string;
-  resiRevValue: number;
-  comNewExpenseType: string;
-  comNewValue: number;
-  comRevExpenseType: string;
-  comRevValue: number;
-}
-
-export interface ExpensePricingPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: ExpensePricingResponseDto[];
-}
-
-export interface CreatableExpensePricingResponse {
-  taskName: string;
-  taskId: string;
 }
 
 export interface CreateVendorInvoiceRequestDto {
@@ -1622,115 +2070,6 @@ export interface VendorPaymentPaginatedResponseDto {
   items: VendorPaymentResponseDto[];
 }
 
-export interface CreatePositionRequestDto {
-  /** @default "Sr. Designer Test" */
-  name: string;
-  /** @default 5 */
-  maxAssignedTasksLimit: number | null;
-  /**
-   * TODO: UPDATE license type (워커와 태스크가 등록된경우 변경 불가하도록)
-   * @default null
-   */
-  licenseType: "Structural" | "Electrical" | null;
-  /** @default null */
-  description?: string | null;
-}
-
-export interface UpdatePositionRequestDto {
-  /** @default "Sr. Designer Update Test" */
-  name: string;
-  /** @default 777 */
-  maxAssignedTasksLimit: number | null;
-  /** @default null */
-  description?: string | null;
-}
-
-export interface PositionTask {
-  taskId: string;
-  taskName: string;
-  autoAssignmentType: string;
-}
-
-export interface Worker {
-  userId: string;
-  userName: string;
-  email: string;
-}
-
-export interface PositionResponseDto {
-  /** @default "" */
-  id: string;
-  /** @default "Sr. Designer" */
-  name: string;
-  /** @default null */
-  description: string | null;
-  /** @default null */
-  maxAssignedTasksLimit: number | null;
-  tasks: PositionTask[];
-  licenseType: "Structural" | "Electrical" | null;
-  workers: Worker[];
-}
-
-export interface PositionPaginatedResponseFields {
-  /** @default "" */
-  id: string;
-  /** @default "Sr. Designer" */
-  name: string;
-  /** @default null */
-  description: string | null;
-  /** @default null */
-  maxAssignedTasksLimit: number | null;
-  tasks: PositionTask[];
-  licenseType: "Structural" | "Electrical" | null;
-}
-
-export interface PositionPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: PositionPaginatedResponseFields[];
-}
-
-export interface AddPositionTaskRequestDto {
-  /** @default "911fe9ac-94b8-4a0e-b478-56e88f4aa7d7" */
-  taskId: string;
-  /** @default "Residential / Commercial" */
-  autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
-}
-
-export interface UpdatePositionTaskAutoAssignmentTypeRequestDto {
-  /** @default "Residential / Commercial" */
-  autoAssignmentType:
-    | "None"
-    | "Residential"
-    | "Commercial"
-    | "Residential / Commercial";
-}
-
-export interface AddPositionWorkerRequestDto {
-  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
-  userId: string;
-}
-
-export interface PositionUnregisteredUserResponseFields {
-  userId: string;
-  userName: string;
-  email: string;
-}
-
-export interface PositionUnregisteredUserResponseDto {
-  items: PositionUnregisteredUserResponseFields[];
-}
-
 export interface LicensedWorker {
   userId: string;
   userName: string;
@@ -1789,6 +2128,47 @@ export interface AssigningTaskAlertPaginatedResponse {
   /** @example 500 */
   totalPage: number;
   items: AssigningTaskAlertResponse[];
+}
+
+export interface CreateInformationRequestDto {
+  /** @default [{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:newjobs@baruncorp.com","target":"_blank","children":[{"text":"newjobs@baruncorp.com"}]},{"text":" if you need to:"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Add additional services to an active service order"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Send us updated information for an active service order or for a service order that is on hold"}],"listStart":2},{"type":"p","listStyleType":"disc","indent":1,"listStart":3,"children":[{"text":"Any other questions or issues concerning service orders"}]},{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:chrisk@baruncorp.com","target":"_blank","children":[{"text":"chrisk@baruncorp.com"}]},{"text":" for any matter relating to the portal."}]}] */
+  contents: object[];
+}
+
+export interface UpdateInformationRequestDto {
+  /** @default [{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:newjobs@baruncorp.com","target":"_blank","children":[{"text":"newjobs@baruncorp.com"}]},{"text":" if you need to:"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Add additional services to an active service order"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Send us updated information for an active service order or for a service order that is on hold"}],"listStart":2},{"type":"p","listStyleType":"disc","indent":1,"listStart":3,"children":[{"text":"Any other questions or issues concerning service orders"}]},{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:chrisk@baruncorp.com","target":"_blank","children":[{"text":"chrisk@baruncorp.com"}]},{"text":" for any matter relating to the portal."}]}] */
+  contents: object[];
+}
+
+export interface InformationResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default [{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:newjobs@baruncorp.com","target":"_blank","children":[{"text":"newjobs@baruncorp.com"}]},{"text":" if you need to:"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Add additional services to an active service order"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Send us updated information for an active service order or for a service order that is on hold"}],"listStart":2},{"type":"p","listStyleType":"disc","indent":1,"listStart":3,"children":[{"text":"Any other questions or issues concerning service orders"}]},{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:chrisk@baruncorp.com","target":"_blank","children":[{"text":"chrisk@baruncorp.com"}]},{"text":" for any matter relating to the portal."}]}] */
+  contents: object[];
+  /** @default true */
+  isActive: boolean;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  createdAt: string;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  updatedAt: string;
+}
+
+export interface InformationPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: InformationResponseDto[];
 }
 
 export interface AuthenticationControllerPostSignInTimeParams {
@@ -1903,83 +2283,6 @@ export interface FindMyMemberPaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface GeographyControllerGetFindNotesParams {
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-  /** @default "1239525" */
-  geoId?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  fullAhjName?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  name?: string | null;
-}
-
-export interface GeographyControllerGetFindNoteUpdateHistoryParams {
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-  /** @default "1239525" */
-  geoId: string | null;
-}
-
-export interface FindProjectsHttpControllerFindUsersParams {
-  /** @default "" */
-  organizationId?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default ""
-   */
-  organizationName?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default null
-   */
-  projectNumber?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default null
-   */
-  projectPropertyOwner?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default "3480 Northwest 33rd Court"
-   */
-  propertyFullAddress?: string | null;
-  /** @default "Residential" */
-  propertyType?: "Residential" | "Commercial" | null;
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-}
-
 export interface FindJobPaginatedHttpControllerFindJobParams {
   /**
    * Using LIKE (중간 값 검색)
@@ -2003,8 +2306,10 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
     | "Not Started"
     | "In Progress"
     | "On Hold"
-    | "Completed"
     | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client"
     | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
@@ -2047,8 +2352,10 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
     | "Not Started"
     | "In Progress"
     | "On Hold"
-    | "Completed"
     | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client"
     | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
@@ -2113,8 +2420,10 @@ export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
     | "Not Started"
     | "In Progress"
     | "On Hold"
-    | "Completed"
     | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client"
     | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
@@ -2137,32 +2446,9 @@ export interface FindServicePaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface FindOrderedServicePaginatedHttpControllerGetParams {
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-  /** @default "Completed" */
-  orderedServiceStatus?: "Pending" | "Completed" | "Canceled" | null;
-  /** @default "Commercial" */
-  projectPropertyType?: "Residential" | "Commercial" | null;
-  /** @default "Ground Mount" */
-  mountingType?: "Roof Mount" | "Ground Mount" | null;
-  /** @default false */
-  isRevision?: boolean | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default ""
-   */
-  serviceName?: string | null;
+export interface FindProjectsHttpControllerFindUsersParams {
+  /** @default "" */
+  organizationId?: string | null;
   /**
    * Using LIKE (중간 값 검색)
    * @default ""
@@ -2170,12 +2456,21 @@ export interface FindOrderedServicePaginatedHttpControllerGetParams {
   organizationName?: string | null;
   /**
    * Using LIKE (중간 값 검색)
-   * @default ""
+   * @default null
    */
-  jobName?: string | null;
-}
-
-export interface FindTaskPaginatedHttpControllerGetParams {
+  projectNumber?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default null
+   */
+  projectPropertyOwner?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default "3480 Northwest 33rd Court"
+   */
+  propertyFullAddress?: string | null;
+  /** @default "Residential" */
+  propertyType?: "Residential" | "Commercial" | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2190,7 +2485,7 @@ export interface FindTaskPaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface FindUnregisteredUsersForTaskHttpControllerGetParams {
+export interface GeographyControllerGetFindNotesParams {
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2203,7 +2498,29 @@ export interface FindUnregisteredUsersForTaskHttpControllerGetParams {
    * @example 1
    */
   page?: number;
-  taskId: string;
+  /** @default "1239525" */
+  geoId?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  fullAhjName?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  name?: string | null;
+}
+
+export interface GeographyControllerGetFindNoteUpdateHistoryParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  /** @default "1239525" */
+  geoId: string | null;
 }
 
 export interface FindAssignedTaskPaginatedHttpControllerGetParams {
@@ -2268,7 +2585,9 @@ export interface FindRejectedTaskReasonHttpControllerGetParams {
   userName?: string | null;
 }
 
-export interface FindInvoicePaginatedHttpControllerGetParams {
+export interface FindExpensePricingPaginatedHttpControllerGetParams {
+  taskId?: string | null;
+  organizationId?: string | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2283,7 +2602,12 @@ export interface FindInvoicePaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface FindPaymentPaginatedHttpControllerGetParams {
+export interface FindCreatableExpensePricingHttpControllerGetParams {
+  /** @default "" */
+  organizationId: string;
+}
+
+export interface FindInvoicePaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2326,9 +2650,7 @@ export interface FindCreatableCustomPricingHttpControllerGetParams {
   organizationId: string;
 }
 
-export interface FindExpensePricingPaginatedHttpControllerGetParams {
-  taskId?: string | null;
-  organizationId?: string | null;
+export interface FindPositionPaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2343,9 +2665,189 @@ export interface FindExpensePricingPaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface FindCreatableExpensePricingHttpControllerGetParams {
-  /** @default "" */
-  organizationId: string;
+export interface FindPtoPaginatedHttpControllerGetParams {
+  /** @default "674e3b83-0255-46fe-bc4b-047fca3c43cf" */
+  userId?: string;
+  /** @default "John Doe" */
+  userName?: string;
+  /** @default false */
+  isPaid?: boolean;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindPtoDetailPaginatedHttpControllerGetParams {
+  /** @default "674e3b83-0255-46fe-bc4b-047fca3c43cf" */
+  userId?: string;
+  /** @default "John Doe" */
+  userName?: string;
+  /**
+   * @format date-time
+   * @default "2023-06"
+   */
+  targetMonth?: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindPtoAnnualPaginatedHttpControllerGetParams {
+  /**
+   * @format date-time
+   * @default "2024"
+   */
+  targetYear: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindPtoTypePaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindPtoTenurePolicyPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindOrderedServicePaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  /** @default "Completed" */
+  orderedServiceStatus?:
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | null;
+  /** @default "Commercial" */
+  projectPropertyType?: "Residential" | "Commercial" | null;
+  /** @default "Ground Mount" */
+  mountingType?: "Roof Mount" | "Ground Mount" | null;
+  /** @default false */
+  isRevision?: boolean | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  serviceName?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  organizationName?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  jobName?: string | null;
+}
+
+export interface FindTaskPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindUnregisteredUsersForTaskHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  taskId: string;
+}
+
+export interface FindPaymentPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
 }
 
 export interface FindVendorInvoicePaginatedHttpControllerGetParams {
@@ -2422,21 +2924,6 @@ export interface FindVendorPaymentPaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface FindPositionPaginatedHttpControllerGetParams {
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-}
-
 export interface FindLicensePaginatedHttpControllerGetParams {
   /** @default "Structural" */
   type: "Structural" | "Electrical";
@@ -2455,6 +2942,21 @@ export interface FindLicensePaginatedHttpControllerGetParams {
 }
 
 export interface FindAssigningTaskAlertPaginatedHttpControllerFindParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindInformationPaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -3299,241 +3801,6 @@ export class Api<
         ...params,
       }),
   };
-  geography = {
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFindNotes
-     * @request GET:/geography/notes
-     * @secure
-     */
-    geographyControllerGetFindNotes: (
-      query: GeographyControllerGetFindNotesParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNotePaginatedResponseDto, any>({
-        path: `/geography/notes`,
-        method: "GET",
-        query: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFindNoteByGeoId
-     * @request GET:/geography/{geoId}/notes
-     * @secure
-     */
-    geographyControllerGetFindNoteByGeoId: (
-      geoId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNoteResponseDto, any>({
-        path: `/geography/${geoId}/notes`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerPutUpdateNote
-     * @request PUT:/geography/{geoId}/notes
-     * @secure
-     */
-    geographyControllerPutUpdateNote: (
-      geoId: string,
-      data: UpdateAhjNoteRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/geography/${geoId}/notes`,
-        method: "PUT",
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerDeleteNoteByGeoId
-     * @request DELETE:/geography/{geoId}/notes
-     * @secure
-     */
-    geographyControllerDeleteNoteByGeoId: (
-      geoId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/geography/${geoId}/notes`,
-        method: "DELETE",
-        secure: true,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFinNoteUpdateHistoryDetail
-     * @request GET:/geography/notes/history/{historyId}
-     * @secure
-     */
-    geographyControllerGetFinNoteUpdateHistoryDetail: (
-      historyId: number,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNoteHistoryResponseDto, any>({
-        path: `/geography/notes/history/${historyId}`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFindNoteUpdateHistory
-     * @request GET:/geography/notes/history
-     * @secure
-     */
-    geographyControllerGetFindNoteUpdateHistory: (
-      query: GeographyControllerGetFindNoteUpdateHistoryParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNoteHistoryPaginatedResponseDto, any>({
-        path: `/geography/notes/history`,
-        method: "GET",
-        query: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-  };
-  searchCensus = {
-    /**
-     * @description Census에서 행정구역이 매칭되지 않는 주소들이 있음 Census 결과와 상관 없이 프로젝트는 생성되어야함
-     *
-     * @name SearchCensusHttpControllerPostSearchCensus
-     * @request POST:/search-census
-     */
-    searchCensusHttpControllerPostSearchCensus: (
-      data: AddressFromMapBox,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/search-census`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-  };
-  projects = {
-    /**
-     * No description
-     *
-     * @name CreateProjectHttpControllerPostCreateProejct
-     * @request POST:/projects
-     */
-    createProjectHttpControllerPostCreateProejct: (
-      data: CreateProjectRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<IdResponse, any>({
-        path: `/projects`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindProjectsHttpControllerFindUsers
-     * @summary Find projects
-     * @request GET:/projects
-     */
-    findProjectsHttpControllerFindUsers: (
-      query: FindProjectsHttpControllerFindUsersParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<ProjectPaginatedResponseDto, any>({
-        path: `/projects`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateProjectHttpControllerUpdate
-     * @request PATCH:/projects/{projectId}
-     */
-    updateProjectHttpControllerUpdate: (
-      projectId: string,
-      data: UpdateProjectRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/projects/${projectId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DeleteProjectHttpControllerDelete
-     * @request DELETE:/projects/{projectId}
-     */
-    deleteProjectHttpControllerDelete: (
-      projectId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/projects/${projectId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindProjectDetailHttpControllerFindProjectDetail
-     * @summary Find projects
-     * @request GET:/projects/{projectId}
-     */
-    findProjectDetailHttpControllerFindProjectDetail: (
-      projectId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<ProjectResponseDto, any>({
-        path: `/projects/${projectId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-  };
   jobs = {
     /**
      * No description
@@ -3626,32 +3893,19 @@ export class Api<
     /**
      * No description
      *
-     * @name CancelJobHttpControllerUpdateJob
-     * @request PATCH:/jobs/cancel/{jobId}
+     * @name UpdateJobStatusHttpControllerUpdateJob
+     * @request PATCH:/jobs/{jobId}/status
      */
-    cancelJobHttpControllerUpdateJob: (
+    updateJobStatusHttpControllerUpdateJob: (
       jobId: string,
+      data: UpdateJobStatusRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/jobs/cancel/${jobId}`,
+        path: `/jobs/${jobId}/status`,
         method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name HoldJobHttpControllerUpdateJob
-     * @request PATCH:/jobs/hold/{jobId}
-     */
-    holdJobHttpControllerUpdateJob: (
-      jobId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/jobs/hold/${jobId}`,
-        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -3729,43 +3983,6 @@ export class Api<
         path: `/my-ordered-jobs`,
         method: "GET",
         query: query,
-        format: "json",
-        ...params,
-      }),
-  };
-  orderedJobNotes = {
-    /**
-     * No description
-     *
-     * @name CreateJobNoteHttpControllerCreate
-     * @request POST:/ordered-job-notes
-     */
-    createJobNoteHttpControllerCreate: (
-      data: CreateJobNoteRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<IdResponse, any>({
-        path: `/ordered-job-notes`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindJobNotesHttpControllerFind
-     * @request GET:/ordered-job-notes/{jobId}
-     */
-    findJobNotesHttpControllerFind: (
-      jobId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<JobNoteListResponseDto, any>({
-        path: `/ordered-job-notes/${jobId}`,
-        method: "GET",
         format: "json",
         ...params,
       }),
@@ -3898,172 +4115,38 @@ export class Api<
         ...params,
       }),
   };
-  orderedServices = {
+  searchCensus = {
     /**
-     * No description
+     * @description Census에서 행정구역이 매칭되지 않는 주소들이 있음 Census 결과와 상관 없이 프로젝트는 생성되어야함
      *
-     * @name CreateOrderedServiceHttpControllerPost
-     * @request POST:/ordered-services
+     * @name SearchCensusHttpControllerPostSearchCensus
+     * @request POST:/search-census
      */
-    createOrderedServiceHttpControllerPost: (
-      data: CreateOrderedServiceRequestDto,
+    searchCensusHttpControllerPostSearchCensus: (
+      data: AddressFromMapBox,
       params: RequestParams = {}
     ) =>
-      this.request<IdResponse, any>({
-        path: `/ordered-services`,
+      this.request<void, any>({
+        path: `/search-census`,
         method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindOrderedServicePaginatedHttpControllerGet
-     * @request GET:/ordered-services
-     */
-    findOrderedServicePaginatedHttpControllerGet: (
-      {
-        orderedServiceStatus,
-        projectPropertyType,
-        mountingType,
-        isRevision,
-        serviceName,
-        organizationName,
-        jobName,
-        ...query
-      }: FindOrderedServicePaginatedHttpControllerGetParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<OrderedServicePaginatedResponseDto, any>({
-        path: `/ordered-services`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateOrderedServiceHttpControllerPatch
-     * @request PATCH:/ordered-services/{orderedServiceId}
-     */
-    updateOrderedServiceHttpControllerPatch: (
-      orderedServiceId: string,
-      data: UpdateOrderedServiceRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/ordered-services/${orderedServiceId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindOrderedServiceHttpControllerGet
-     * @request GET:/ordered-services/{orderedServiceId}
-     */
-    findOrderedServiceHttpControllerGet: (
-      orderedServiceId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<OrderedServiceResponseDto, any>({
-        path: `/ordered-services/${orderedServiceId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CancelOrderedServiceHttpControllerPatch
-     * @request PATCH:/ordered-services/cancel/{orderedServiceId}
-     */
-    cancelOrderedServiceHttpControllerPatch: (
-      orderedServiceId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/ordered-services/cancel/${orderedServiceId}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ReactivateOrderedServiceHttpControllerPatch
-     * @request PATCH:/ordered-services/reactivate/{orderedServiceId}
-     */
-    reactivateOrderedServiceHttpControllerPatch: (
-      orderedServiceId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/ordered-services/reactivate/${orderedServiceId}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateManualPriceHttpControllerPatch
-     * @request PATCH:/ordered-services/{orderedServiceId}/manual-price
-     */
-    updateManualPriceHttpControllerPatch: (
-      orderedServiceId: string,
-      data: UpdateManualPriceRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/ordered-services/${orderedServiceId}/manual-price`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateRevisionSizeHttpControllerPatch
-     * @request PATCH:/ordered-services/{orderedServiceId}/revision-size
-     */
-    updateRevisionSizeHttpControllerPatch: (
-      orderedServiceId: string,
-      data: UpdateRevisionSizeRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/ordered-services/${orderedServiceId}/revision-size`,
-        method: "PATCH",
         body: data,
         type: ContentType.Json,
         ...params,
       }),
   };
-  tasks = {
+  projects = {
     /**
      * No description
      *
-     * @name CreateTaskHttpControllerPost
-     * @request POST:/tasks
+     * @name CreateProjectHttpControllerPostCreateProejct
+     * @request POST:/projects
      */
-    createTaskHttpControllerPost: (
-      data: CreateTaskRequestDto,
+    createProjectHttpControllerPostCreateProejct: (
+      data: CreateProjectRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<IdResponse, any>({
-        path: `/tasks`,
+        path: `/projects`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -4074,15 +4157,16 @@ export class Api<
     /**
      * No description
      *
-     * @name FindTaskPaginatedHttpControllerGet
-     * @request GET:/tasks
+     * @name FindProjectsHttpControllerFindUsers
+     * @summary Find projects
+     * @request GET:/projects
      */
-    findTaskPaginatedHttpControllerGet: (
-      query: FindTaskPaginatedHttpControllerGetParams,
+    findProjectsHttpControllerFindUsers: (
+      query: FindProjectsHttpControllerFindUsersParams,
       params: RequestParams = {}
     ) =>
-      this.request<TaskPaginatedResponseDto, any>({
-        path: `/tasks`,
+      this.request<ProjectPaginatedResponseDto, any>({
+        path: `/projects`,
         method: "GET",
         query: query,
         format: "json",
@@ -4092,16 +4176,16 @@ export class Api<
     /**
      * No description
      *
-     * @name UpdateTaskHttpControllerPatch
-     * @request PATCH:/tasks/{taskId}
+     * @name UpdateProjectHttpControllerUpdate
+     * @request PATCH:/projects/{projectId}
      */
-    updateTaskHttpControllerPatch: (
-      taskId: string,
-      data: UpdateTaskRequestDto,
+    updateProjectHttpControllerUpdate: (
+      projectId: string,
+      data: UpdateProjectRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/tasks/${taskId}`,
+        path: `/projects/${projectId}`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
@@ -4111,49 +4195,15 @@ export class Api<
     /**
      * No description
      *
-     * @name FindTaskHttpControllerGet
-     * @request GET:/tasks/{taskId}
+     * @name DeleteProjectHttpControllerDelete
+     * @request DELETE:/projects/{projectId}
      */
-    findTaskHttpControllerGet: (taskId: string, params: RequestParams = {}) =>
-      this.request<TaskResponseDto, any>({
-        path: `/tasks/${taskId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AddPrerequisiteTaskHttpControllerPost
-     * @request POST:/tasks/{taskId}/pre-tasks
-     */
-    addPrerequisiteTaskHttpControllerPost: (
-      taskId: string,
-      data: AddPrerequisiteTaskRequestDto,
+    deleteProjectHttpControllerDelete: (
+      projectId: string,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/tasks/${taskId}/pre-tasks`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DeletePrerequisiteTaskHttpControllerDelete
-     * @request DELETE:/tasks/{taskId}/pre-task/{prerequisiteTaskId}
-     */
-    deletePrerequisiteTaskHttpControllerDelete: (
-      taskId: string,
-      prerequisiteTaskId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/tasks/${taskId}/pre-task/${prerequisiteTaskId}`,
+        path: `/projects/${projectId}`,
         method: "DELETE",
         ...params,
       }),
@@ -4161,18 +4211,81 @@ export class Api<
     /**
      * No description
      *
-     * @name UpdatePositionOrderHttpControllerPatch
-     * @request PATCH:/tasks/{taskId}/position-order
+     * @name FindProjectDetailHttpControllerFindProjectDetail
+     * @summary Find projects
+     * @request GET:/projects/{projectId}
      */
-    updatePositionOrderHttpControllerPatch: (
-      taskId: string,
-      data: UpdatePositionOrderRequestDto,
+    findProjectDetailHttpControllerFindProjectDetail: (
+      projectId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<ProjectResponseDto, any>({
+        path: `/projects/${projectId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  geography = {
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFindNotes
+     * @request GET:/geography/notes
+     * @secure
+     */
+    geographyControllerGetFindNotes: (
+      query: GeographyControllerGetFindNotesParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNotePaginatedResponseDto, any>({
+        path: `/geography/notes`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFindNoteByGeoId
+     * @request GET:/geography/{geoId}/notes
+     * @secure
+     */
+    geographyControllerGetFindNoteByGeoId: (
+      geoId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNoteResponseDto, any>({
+        path: `/geography/${geoId}/notes`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerPutUpdateNote
+     * @request PUT:/geography/{geoId}/notes
+     * @secure
+     */
+    geographyControllerPutUpdateNote: (
+      geoId: string,
+      data: UpdateAhjNoteRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/tasks/${taskId}/position-order`,
-        method: "PATCH",
+        path: `/geography/${geoId}/notes`,
+        method: "PUT",
         body: data,
+        secure: true,
         type: ContentType.Json,
         ...params,
       }),
@@ -4180,17 +4293,59 @@ export class Api<
     /**
      * No description
      *
-     * @name FindUnregisteredUsersForTaskHttpControllerGet
-     * @request GET:/tasks/{taskId}/unregistered-users
+     * @tags geography
+     * @name GeographyControllerDeleteNoteByGeoId
+     * @request DELETE:/geography/{geoId}/notes
+     * @secure
      */
-    findUnregisteredUsersForTaskHttpControllerGet: (
-      { taskId, ...query }: FindUnregisteredUsersForTaskHttpControllerGetParams,
+    geographyControllerDeleteNoteByGeoId: (
+      geoId: string,
       params: RequestParams = {}
     ) =>
-      this.request<UnregisteredUserForTaskPaginatedResponseDto, any>({
-        path: `/tasks/${taskId}/unregistered-users`,
+      this.request<void, any>({
+        path: `/geography/${geoId}/notes`,
+        method: "DELETE",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFinNoteUpdateHistoryDetail
+     * @request GET:/geography/notes/history/{historyId}
+     * @secure
+     */
+    geographyControllerGetFinNoteUpdateHistoryDetail: (
+      historyId: number,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNoteHistoryResponseDto, any>({
+        path: `/geography/notes/history/${historyId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFindNoteUpdateHistory
+     * @request GET:/geography/notes/history
+     * @secure
+     */
+    geographyControllerGetFindNoteUpdateHistory: (
+      query: GeographyControllerGetFindNoteUpdateHistoryParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNoteHistoryPaginatedResponseDto, any>({
+        path: `/geography/notes/history`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -4375,6 +4530,118 @@ export class Api<
         ...params,
       }),
   };
+  expensePricings = {
+    /**
+     * No description
+     *
+     * @name CreateExpensePricingHttpControllerPost
+     * @request POST:/expense-pricings
+     */
+    createExpensePricingHttpControllerPost: (
+      data: CreateExpensePricingRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/expense-pricings`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindExpensePricingPaginatedHttpControllerGet
+     * @request GET:/expense-pricings
+     */
+    findExpensePricingPaginatedHttpControllerGet: (
+      query: FindExpensePricingPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<ExpensePricingPaginatedResponseDto, any>({
+        path: `/expense-pricings`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateExpensePricingHttpControllerPatch
+     * @request PATCH:/expense-pricings/{organizationId}/{taskId}
+     */
+    updateExpensePricingHttpControllerPatch: (
+      taskId: string,
+      organizationId: string,
+      data: UpdateExpensePricingRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/expense-pricings/${organizationId}/${taskId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeleteExpensePricingHttpControllerDelete
+     * @request DELETE:/expense-pricings/{organizationId}/{taskId}
+     */
+    deleteExpensePricingHttpControllerDelete: (
+      taskId: string,
+      organizationId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/expense-pricings/${organizationId}/${taskId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindExpensePricingHttpControllerGet
+     * @request GET:/expense-pricings/{organizationId}/{taskId}
+     */
+    findExpensePricingHttpControllerGet: (
+      taskId: string,
+      organizationId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<ExpensePricingResponseDto, any>({
+        path: `/expense-pricings/${organizationId}/${taskId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  creatableExpensePricings = {
+    /**
+     * No description
+     *
+     * @name FindCreatableExpensePricingHttpControllerGet
+     * @request GET:/creatable-expense-pricings
+     */
+    findCreatableExpensePricingHttpControllerGet: (
+      query: FindCreatableExpensePricingHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<CreatableExpensePricingResponse[], any>({
+        path: `/creatable-expense-pricings`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
   invoices = {
     /**
      * No description
@@ -4494,77 +4761,6 @@ export class Api<
     findClientToInvoiceHttpControllerGet: (params: RequestParams = {}) =>
       this.request<ClientToInvoiceResponseDto, any>({
         path: `/invoices-clients`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-  };
-  payments = {
-    /**
-     * No description
-     *
-     * @name CreatePaymentHttpControllerPost
-     * @request POST:/payments
-     */
-    createPaymentHttpControllerPost: (
-      data: CreatePaymentRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<IdResponse, any>({
-        path: `/payments`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindPaymentPaginatedHttpControllerGet
-     * @request GET:/payments
-     */
-    findPaymentPaginatedHttpControllerGet: (
-      query: FindPaymentPaginatedHttpControllerGetParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<PaymentPaginatedResponseDto, any>({
-        path: `/payments`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CancelPaymentHttpControllerPatch
-     * @request PATCH:/payments/{paymentId}
-     */
-    cancelPaymentHttpControllerPatch: (
-      paymentId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/payments/${paymentId}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindPaymentHttpControllerGet
-     * @request GET:/payments/{paymentId}
-     */
-    findPaymentHttpControllerGet: (
-      paymentId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<PaymentResponseDto, any>({
-        path: `/payments/${paymentId}`,
         method: "GET",
         format: "json",
         ...params,
@@ -4700,19 +4896,19 @@ export class Api<
         ...params,
       }),
   };
-  expensePricings = {
+  positions = {
     /**
      * No description
      *
-     * @name CreateExpensePricingHttpControllerPost
-     * @request POST:/expense-pricings
+     * @name CreatePositionHttpControllerPost
+     * @request POST:/positions
      */
-    createExpensePricingHttpControllerPost: (
-      data: CreateExpensePricingRequestDto,
+    createPositionHttpControllerPost: (
+      data: CreatePositionRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<IdResponse, any>({
-        path: `/expense-pricings`,
+        path: `/positions`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -4723,15 +4919,15 @@ export class Api<
     /**
      * No description
      *
-     * @name FindExpensePricingPaginatedHttpControllerGet
-     * @request GET:/expense-pricings
+     * @name FindPositionPaginatedHttpControllerGet
+     * @request GET:/positions
      */
-    findExpensePricingPaginatedHttpControllerGet: (
-      query: FindExpensePricingPaginatedHttpControllerGetParams,
+    findPositionPaginatedHttpControllerGet: (
+      query: FindPositionPaginatedHttpControllerGetParams,
       params: RequestParams = {}
     ) =>
-      this.request<ExpensePricingPaginatedResponseDto, any>({
-        path: `/expense-pricings`,
+      this.request<PositionPaginatedResponseDto, any>({
+        path: `/positions`,
         method: "GET",
         query: query,
         format: "json",
@@ -4741,17 +4937,16 @@ export class Api<
     /**
      * No description
      *
-     * @name UpdateExpensePricingHttpControllerPatch
-     * @request PATCH:/expense-pricings/{organizationId}/{taskId}
+     * @name UpdatePositionHttpControllerPatch
+     * @request PATCH:/positions/{positionId}
      */
-    updateExpensePricingHttpControllerPatch: (
-      taskId: string,
-      organizationId: string,
-      data: UpdateExpensePricingRequestDto,
+    updatePositionHttpControllerPatch: (
+      positionId: string,
+      data: UpdatePositionRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/expense-pricings/${organizationId}/${taskId}`,
+        path: `/positions/${positionId}`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
@@ -4761,16 +4956,15 @@ export class Api<
     /**
      * No description
      *
-     * @name DeleteExpensePricingHttpControllerDelete
-     * @request DELETE:/expense-pricings/{organizationId}/{taskId}
+     * @name DeletePositionHttpControllerDelete
+     * @request DELETE:/positions/{positionId}
      */
-    deleteExpensePricingHttpControllerDelete: (
-      taskId: string,
-      organizationId: string,
+    deletePositionHttpControllerDelete: (
+      positionId: string,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/expense-pricings/${organizationId}/${taskId}`,
+        path: `/positions/${positionId}`,
         method: "DELETE",
         ...params,
       }),
@@ -4778,36 +4972,739 @@ export class Api<
     /**
      * No description
      *
-     * @name FindExpensePricingHttpControllerGet
-     * @request GET:/expense-pricings/{organizationId}/{taskId}
+     * @name FindPositionHttpControllerGet
+     * @request GET:/positions/{positionId}
      */
-    findExpensePricingHttpControllerGet: (
-      taskId: string,
-      organizationId: string,
+    findPositionHttpControllerGet: (
+      positionId: string,
       params: RequestParams = {}
     ) =>
-      this.request<ExpensePricingResponseDto, any>({
-        path: `/expense-pricings/${organizationId}/${taskId}`,
+      this.request<PositionResponseDto, any>({
+        path: `/positions/${positionId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddPositionTaskHttpControllerPost
+     * @request POST:/positions/{positionId}/tasks
+     */
+    addPositionTaskHttpControllerPost: (
+      positionId: string,
+      data: AddPositionTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/tasks`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePositionTaskHttpControllerDelete
+     * @request DELETE:/positions/{positionId}/tasks/{taskId}
+     */
+    deletePositionTaskHttpControllerDelete: (
+      positionId: string,
+      taskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/tasks/${taskId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePositionTaskAutoAssignmentTypeHttpControllerPatch
+     * @request PATCH:/positions/{positionId}/tasks/{taskId}
+     */
+    updatePositionTaskAutoAssignmentTypeHttpControllerPatch: (
+      positionId: string,
+      taskId: string,
+      data: UpdatePositionTaskAutoAssignmentTypeRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/tasks/${taskId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddPositionWorkerHttpControllerPost
+     * @request POST:/positions/{positionId}/users
+     */
+    addPositionWorkerHttpControllerPost: (
+      positionId: string,
+      data: AddPositionWorkerRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/users`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePositionWorkerHttpControllerDelete
+     * @request DELETE:/positions/{positionId}/users/{userId}
+     */
+    deletePositionWorkerHttpControllerDelete: (
+      positionId: string,
+      userId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/positions/${positionId}/users/${userId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPositionUnRegisteredUsersHttpControllerGet
+     * @request GET:/positions/{positionId}/unregistered-users
+     */
+    findPositionUnRegisteredUsersHttpControllerGet: (
+      positionId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<PositionUnregisteredUserResponseDto, any>({
+        path: `/positions/${positionId}/unregistered-users`,
         method: "GET",
         format: "json",
         ...params,
       }),
   };
-  creatableExpensePricings = {
+  ptos = {
     /**
      * No description
      *
-     * @name FindCreatableExpensePricingHttpControllerGet
-     * @request GET:/creatable-expense-pricings
+     * @name CreatePtoHttpControllerPost
+     * @request POST:/ptos
      */
-    findCreatableExpensePricingHttpControllerGet: (
-      query: FindCreatableExpensePricingHttpControllerGetParams,
+    createPtoHttpControllerPost: (
+      data: CreatePtoRequestDto,
       params: RequestParams = {}
     ) =>
-      this.request<CreatableExpensePricingResponse[], any>({
-        path: `/creatable-expense-pricings`,
+      this.request<IdResponse, any>({
+        path: `/ptos`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPtoPaginatedHttpControllerGet
+     * @request GET:/ptos
+     */
+    findPtoPaginatedHttpControllerGet: (
+      query: FindPtoPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PtoPaginatedResponseDto, any>({
+        path: `/ptos`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePtoTotalHttpControllerPatch
+     * @request PATCH:/ptos/{ptoId}/total
+     */
+    updatePtoTotalHttpControllerPatch: (
+      ptoId: string,
+      data: UpdatePtoTotalRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ptos/${ptoId}/total`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePtoPayHttpControllerPatch
+     * @request PATCH:/ptos/{ptoId}/pay
+     */
+    updatePtoPayHttpControllerPatch: (
+      ptoId: string,
+      data: UpdatePtoPayRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ptos/${ptoId}/pay`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreatePtoDetailHttpControllerPost
+     * @request POST:/ptos/detail
+     */
+    createPtoDetailHttpControllerPost: (
+      data: CreatePtoDetailRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/ptos/detail`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPtoDetailPaginatedHttpControllerGet
+     * @request GET:/ptos/detail
+     */
+    findPtoDetailPaginatedHttpControllerGet: (
+      query: FindPtoDetailPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PtoDetailPaginatedResponseDto, any>({
+        path: `/ptos/detail`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePtoDetailHttpControllerPatch
+     * @request PATCH:/ptos/{ptoDetailId}/detail
+     */
+    updatePtoDetailHttpControllerPatch: (
+      ptoDetailId: string,
+      data: UpdatePtoDetailRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ptos/${ptoDetailId}/detail`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePtoDetailHttpControllerDelete
+     * @request DELETE:/ptos/{ptoDetailId}/detail
+     */
+    deletePtoDetailHttpControllerDelete: (
+      ptoDetailId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ptos/${ptoDetailId}/detail`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPtoAnnualPaginatedHttpControllerGet
+     * @request GET:/ptos/annual
+     */
+    findPtoAnnualPaginatedHttpControllerGet: (
+      query: FindPtoAnnualPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PtoAnnualPaginatedResponseDto, any>({
+        path: `/ptos/annual`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPtoTypePaginatedHttpControllerGet
+     * @request GET:/ptos/type
+     */
+    findPtoTypePaginatedHttpControllerGet: (
+      query: FindPtoTypePaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PtoTypePaginatedResponseDto, any>({
+        path: `/ptos/type`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
+  ptoTenurePolicies = {
+    /**
+     * No description
+     *
+     * @name UpdatePtoTenurePolicyHttpControllerPatch
+     * @request PATCH:/pto-tenure-policies/{ptoTenurePolicyId}
+     */
+    updatePtoTenurePolicyHttpControllerPatch: (
+      ptoTenurePolicyId: string,
+      data: UpdatePtoTenurePolicyRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/pto-tenure-policies/${ptoTenurePolicyId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPtoTenurePolicyPaginatedHttpControllerGet
+     * @request GET:/pto-tenure-policies
+     */
+    findPtoTenurePolicyPaginatedHttpControllerGet: (
+      query: FindPtoTenurePolicyPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PtoTenurePolicyPaginatedResponseDto, any>({
+        path: `/pto-tenure-policies`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
+  orderedServices = {
+    /**
+     * No description
+     *
+     * @name CreateOrderedServiceHttpControllerPost
+     * @request POST:/ordered-services
+     */
+    createOrderedServiceHttpControllerPost: (
+      data: CreateOrderedServiceRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/ordered-services`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindOrderedServicePaginatedHttpControllerGet
+     * @request GET:/ordered-services
+     */
+    findOrderedServicePaginatedHttpControllerGet: (
+      {
+        orderedServiceStatus,
+        projectPropertyType,
+        mountingType,
+        isRevision,
+        serviceName,
+        organizationName,
+        jobName,
+        ...query
+      }: FindOrderedServicePaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<OrderedServicePaginatedResponseDto, any>({
+        path: `/ordered-services`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateOrderedServiceHttpControllerPatch
+     * @request PATCH:/ordered-services/{orderedServiceId}
+     */
+    updateOrderedServiceHttpControllerPatch: (
+      orderedServiceId: string,
+      data: UpdateOrderedServiceRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ordered-services/${orderedServiceId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindOrderedServiceHttpControllerGet
+     * @request GET:/ordered-services/{orderedServiceId}
+     */
+    findOrderedServiceHttpControllerGet: (
+      orderedServiceId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<OrderedServiceResponseDto, any>({
+        path: `/ordered-services/${orderedServiceId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateOrderedScopeStatusHttpControllerPatch
+     * @request PATCH:/ordered-services/{orderedScopeId}/status
+     */
+    updateOrderedScopeStatusHttpControllerPatch: (
+      orderedScopeId: string,
+      data: UpdateOrderedScopeStatusRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ordered-services/${orderedScopeId}/status`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateManualPriceHttpControllerPatch
+     * @request PATCH:/ordered-services/{orderedServiceId}/manual-price
+     */
+    updateManualPriceHttpControllerPatch: (
+      orderedServiceId: string,
+      data: UpdateManualPriceRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ordered-services/${orderedServiceId}/manual-price`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateRevisionSizeHttpControllerPatch
+     * @request PATCH:/ordered-services/{orderedServiceId}/revision-size
+     */
+    updateRevisionSizeHttpControllerPatch: (
+      orderedServiceId: string,
+      data: UpdateRevisionSizeRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/ordered-services/${orderedServiceId}/revision-size`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  orderedJobNotes = {
+    /**
+     * No description
+     *
+     * @name CreateJobNoteHttpControllerCreate
+     * @request POST:/ordered-job-notes
+     */
+    createJobNoteHttpControllerCreate: (
+      data: CreateJobNoteRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/ordered-job-notes`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindJobNotesHttpControllerFind
+     * @request GET:/ordered-job-notes/{jobId}
+     */
+    findJobNotesHttpControllerFind: (
+      jobId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<JobNoteListResponseDto, any>({
+        path: `/ordered-job-notes/${jobId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  tasks = {
+    /**
+     * No description
+     *
+     * @name CreateTaskHttpControllerPost
+     * @request POST:/tasks
+     */
+    createTaskHttpControllerPost: (
+      data: CreateTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/tasks`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindTaskPaginatedHttpControllerGet
+     * @request GET:/tasks
+     */
+    findTaskPaginatedHttpControllerGet: (
+      query: FindTaskPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<TaskPaginatedResponseDto, any>({
+        path: `/tasks`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateTaskHttpControllerPatch
+     * @request PATCH:/tasks/{taskId}
+     */
+    updateTaskHttpControllerPatch: (
+      taskId: string,
+      data: UpdateTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tasks/${taskId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindTaskHttpControllerGet
+     * @request GET:/tasks/{taskId}
+     */
+    findTaskHttpControllerGet: (taskId: string, params: RequestParams = {}) =>
+      this.request<TaskResponseDto, any>({
+        path: `/tasks/${taskId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddPrerequisiteTaskHttpControllerPost
+     * @request POST:/tasks/{taskId}/pre-tasks
+     */
+    addPrerequisiteTaskHttpControllerPost: (
+      taskId: string,
+      data: AddPrerequisiteTaskRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tasks/${taskId}/pre-tasks`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeletePrerequisiteTaskHttpControllerDelete
+     * @request DELETE:/tasks/{taskId}/pre-task/{prerequisiteTaskId}
+     */
+    deletePrerequisiteTaskHttpControllerDelete: (
+      taskId: string,
+      prerequisiteTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tasks/${taskId}/pre-task/${prerequisiteTaskId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePositionOrderHttpControllerPatch
+     * @request PATCH:/tasks/{taskId}/position-order
+     */
+    updatePositionOrderHttpControllerPatch: (
+      taskId: string,
+      data: UpdatePositionOrderRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tasks/${taskId}/position-order`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindUnregisteredUsersForTaskHttpControllerGet
+     * @request GET:/tasks/{taskId}/unregistered-users
+     */
+    findUnregisteredUsersForTaskHttpControllerGet: (
+      { taskId, ...query }: FindUnregisteredUsersForTaskHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<UnregisteredUserForTaskPaginatedResponseDto, any>({
+        path: `/tasks/${taskId}/unregistered-users`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
+  payments = {
+    /**
+     * No description
+     *
+     * @name CreatePaymentHttpControllerPost
+     * @request POST:/payments
+     */
+    createPaymentHttpControllerPost: (
+      data: CreatePaymentRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/payments`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPaymentPaginatedHttpControllerGet
+     * @request GET:/payments
+     */
+    findPaymentPaginatedHttpControllerGet: (
+      query: FindPaymentPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PaymentPaginatedResponseDto, any>({
+        path: `/payments`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CancelPaymentHttpControllerPatch
+     * @request PATCH:/payments/{paymentId}
+     */
+    cancelPaymentHttpControllerPatch: (
+      paymentId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/payments/${paymentId}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPaymentHttpControllerGet
+     * @request GET:/payments/{paymentId}
+     */
+    findPaymentHttpControllerGet: (
+      paymentId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<PaymentResponseDto, any>({
+        path: `/payments/${paymentId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
@@ -5030,205 +5927,6 @@ export class Api<
         ...params,
       }),
   };
-  positions = {
-    /**
-     * No description
-     *
-     * @name CreatePositionHttpControllerPost
-     * @request POST:/positions
-     */
-    createPositionHttpControllerPost: (
-      data: CreatePositionRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<IdResponse, any>({
-        path: `/positions`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindPositionPaginatedHttpControllerGet
-     * @request GET:/positions
-     */
-    findPositionPaginatedHttpControllerGet: (
-      query: FindPositionPaginatedHttpControllerGetParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<PositionPaginatedResponseDto, any>({
-        path: `/positions`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdatePositionHttpControllerPatch
-     * @request PATCH:/positions/{positionId}
-     */
-    updatePositionHttpControllerPatch: (
-      positionId: string,
-      data: UpdatePositionRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/positions/${positionId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DeletePositionHttpControllerDelete
-     * @request DELETE:/positions/{positionId}
-     */
-    deletePositionHttpControllerDelete: (
-      positionId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/positions/${positionId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindPositionHttpControllerGet
-     * @request GET:/positions/{positionId}
-     */
-    findPositionHttpControllerGet: (
-      positionId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<PositionResponseDto, any>({
-        path: `/positions/${positionId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AddPositionTaskHttpControllerPost
-     * @request POST:/positions/{positionId}/tasks
-     */
-    addPositionTaskHttpControllerPost: (
-      positionId: string,
-      data: AddPositionTaskRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/positions/${positionId}/tasks`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DeletePositionTaskHttpControllerDelete
-     * @request DELETE:/positions/{positionId}/tasks/{taskId}
-     */
-    deletePositionTaskHttpControllerDelete: (
-      positionId: string,
-      taskId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/positions/${positionId}/tasks/${taskId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdatePositionTaskAutoAssignmentTypeHttpControllerPatch
-     * @request PATCH:/positions/{positionId}/tasks/{taskId}
-     */
-    updatePositionTaskAutoAssignmentTypeHttpControllerPatch: (
-      positionId: string,
-      taskId: string,
-      data: UpdatePositionTaskAutoAssignmentTypeRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/positions/${positionId}/tasks/${taskId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AddPositionWorkerHttpControllerPost
-     * @request POST:/positions/{positionId}/users
-     */
-    addPositionWorkerHttpControllerPost: (
-      positionId: string,
-      data: AddPositionWorkerRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/positions/${positionId}/users`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DeletePositionWorkerHttpControllerDelete
-     * @request DELETE:/positions/{positionId}/users/{userId}
-     */
-    deletePositionWorkerHttpControllerDelete: (
-      positionId: string,
-      userId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/positions/${positionId}/users/${userId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindPositionUnRegisteredUsersHttpControllerGet
-     * @request GET:/positions/{positionId}/unregistered-users
-     */
-    findPositionUnRegisteredUsersHttpControllerGet: (
-      positionId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<PositionUnregisteredUserResponseDto, any>({
-        path: `/positions/${positionId}/unregistered-users`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-  };
   assigningTaskAlerts = {
     /**
      * No description
@@ -5261,6 +5959,63 @@ export class Api<
       this.request<void, any>({
         path: `/assigning-task-alerts/${assigningTaskAlertId}/check-out`,
         method: "PATCH",
+        ...params,
+      }),
+  };
+  informations = {
+    /**
+     * No description
+     *
+     * @name CreateInformationHttpControllerPatch
+     * @request POST:/informations
+     */
+    createInformationHttpControllerPatch: (
+      data: CreateInformationRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/informations`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindInformationPaginatedHttpControllerGet
+     * @request GET:/informations
+     */
+    findInformationPaginatedHttpControllerGet: (
+      query: FindInformationPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<InformationPaginatedResponseDto, any>({
+        path: `/informations`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateInformationHttpControllerPatch
+     * @request PATCH:/informations/{informationId}
+     */
+    updateInformationHttpControllerPatch: (
+      informationId: string,
+      data: UpdateInformationRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/informations/${informationId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

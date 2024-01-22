@@ -253,6 +253,7 @@ export default function JobForm({ project, job }: Props) {
       numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
       mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
       isExpedited: values.isExpedited,
+      dueDate: null, // TODO
     })
       .then(() => {
         queryClient.invalidateQueries({

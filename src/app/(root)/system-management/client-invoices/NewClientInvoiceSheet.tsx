@@ -23,7 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TermsEnum, transformStringIntoNullableString } from "@/lib/constants";
-import useJobsToInvoiceQuery from "@/queries/useJobsToInvoiceQuery";
+import useJobsForClientInvoiceQuery from "@/queries/useJobsForClientInvoiceQuery";
 import { AffixInput } from "@/components/AffixInput";
 import usePostInvoiceMutation from "@/mutations/usePostInvoiceMutation";
 import { getOrganizationsToInvoiceQueryKey } from "@/queries/useOrganizationsToInvoiceQuery";
@@ -67,7 +67,7 @@ const formSchema = z.object({
   servicePeriodMonth: z
     .string()
     .datetime({ message: "Service Period Month is required" }),
-  notesToClient: z.string().trim(),
+  notes: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -84,7 +84,7 @@ export default function NewClientInvoiceSheet() {
       invoiceDate: new Date(),
       terms: "30",
       servicePeriodMonth: "",
-      notesToClient: "",
+      notes: "",
     },
   });
   const watchInvoiceDate = form.watch("invoiceDate");
@@ -92,7 +92,7 @@ export default function NewClientInvoiceSheet() {
   const watchTerms = form.watch("terms");
   const watchServicePeriodMonth = form.watch("servicePeriodMonth");
 
-  const { data: jobsToInvoice } = useJobsToInvoiceQuery(
+  const { data: jobs } = useJobsForClientInvoiceQuery(
     {
       clientOrganizationId: watchOrganizationId,
       serviceMonth:
@@ -115,10 +115,8 @@ export default function NewClientInvoiceSheet() {
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
       clientOrganizationId: values.organizationId,
-      invoiceDate: values.invoiceDate.toISOString(),
-      notesToClient: transformStringIntoNullableString.parse(
-        values.notesToClient
-      ),
+      invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
+      notesToClient: transformStringIntoNullableString.parse(values.notes),
       serviceMonth: format(
         new Date(values.servicePeriodMonth.slice(0, 7)),
         "yyyy-MM"
@@ -287,10 +285,10 @@ export default function NewClientInvoiceSheet() {
                 </RowItemsContainer>
                 <FormField
                   control={form.control}
-                  name="notesToClient"
+                  name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes to Client</FormLabel>
+                      <FormLabel>Notes</FormLabel>
                       <FormControl>
                         <Textarea {...field} />
                       </FormControl>
@@ -310,7 +308,7 @@ export default function NewClientInvoiceSheet() {
           </section>
           {watchOrganizationId !== "" &&
             watchServicePeriodMonth !== "" &&
-            jobsToInvoice && (
+            jobs && (
               <section>
                 <h4 className="h4 mb-2">Jobs</h4>
                 <div className="flex flex-col gap-2">
@@ -321,7 +319,7 @@ export default function NewClientInvoiceSheet() {
                         prefixElement={
                           <span className="text-muted-foreground">$</span>
                         }
-                        value={jobsToInvoice.subtotal}
+                        value={jobs.subtotal}
                         disabled
                       />
                     </Item>
@@ -331,7 +329,7 @@ export default function NewClientInvoiceSheet() {
                         prefixElement={
                           <span className="text-muted-foreground">$</span>
                         }
-                        value={jobsToInvoice.discount}
+                        value={jobs.discount}
                         disabled
                       />
                     </Item>
@@ -341,12 +339,12 @@ export default function NewClientInvoiceSheet() {
                         prefixElement={
                           <span className="text-muted-foreground">$</span>
                         }
-                        value={jobsToInvoice.total}
+                        value={jobs.total}
                         disabled
                       />
                     </Item>
                   </RowItemsContainer>
-                  <JobsTable jobsToInvoice={jobsToInvoice} />
+                  <JobsTable jobs={jobs} />
                 </div>
               </section>
             )}

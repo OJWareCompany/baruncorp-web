@@ -6,18 +6,18 @@ import {
   JobToInvoiceResponseDto,
 } from "@/api";
 
-export const getJobsToInvoiceQueryKey = (
+export const getJobsForClientInvoiceQueryKey = (
   params: FindJobToInvoiceHttpControllerFindJobParams
-) => ["jobs-to-invoice", "list", params];
+) => ["jobs-for-client-invoice", "list", params];
 
-const useJobsToInvoiceQuery = (
+const useJobsForClientInvoiceQuery = (
   params: FindJobToInvoiceHttpControllerFindJobParams,
   keepPreviousData?: boolean
 ) => {
   const api = useApi();
 
   return useQuery<JobToInvoiceResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: getJobsToInvoiceQueryKey(params),
+    queryKey: getJobsForClientInvoiceQueryKey(params),
     queryFn: () =>
       api.jobsToInvoice
         .findJobToInvoiceHttpControllerFindJob(params)
@@ -27,4 +27,4 @@ const useJobsToInvoiceQuery = (
   });
 };
 
-export default useJobsToInvoiceQuery;
+export default useJobsForClientInvoiceQuery;

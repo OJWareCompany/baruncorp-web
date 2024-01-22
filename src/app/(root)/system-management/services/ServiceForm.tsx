@@ -265,6 +265,11 @@ export default function ServiceForm({ onSuccess }: Props) {
           values.standardPricing.residentialRevisionPrice
         ),
       },
+      // TODO
+      commercialNewEstimatedTaskDuration: null,
+      commercialRevisionEstimatedTaskDuration: null,
+      residentialNewEstimatedTaskDuration: null,
+      residentialRevisionEstimatedTaskDuration: null,
     })
       .then(() => {
         setIsSubmitSuccessful(true);

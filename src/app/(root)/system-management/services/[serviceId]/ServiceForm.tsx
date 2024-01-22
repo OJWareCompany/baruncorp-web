@@ -325,6 +325,11 @@ export default function ServiceForm({ service }: Props) {
           values.standardPricing.residentialRevisionPrice
         ),
       },
+      // TODO
+      commercialNewEstimatedTaskDuration: null,
+      commercialRevisionEstimatedTaskDuration: null,
+      residentialNewEstimatedTaskDuration: null,
+      residentialRevisionEstimatedTaskDuration: null,
     })
       .then(() => {
         queryClient.invalidateQueries({

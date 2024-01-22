@@ -26,7 +26,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -97,7 +97,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
 
   async function onSubmit(values: FieldValues) {
     await patchInvoiceMutateAsync({
-      invoiceDate: values.invoiceDate.toISOString(),
+      invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
       notesToClient: transformStringIntoNullableString.parse(
         values.notesToClient
       ),

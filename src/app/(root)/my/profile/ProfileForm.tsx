@@ -20,8 +20,13 @@ import usePatchProfileMutation from "@/mutations/usePatchProfileMutation";
 import LoadingButton from "@/components/LoadingButton";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { UserResponseDto } from "@/api";
-import { transformStringIntoNullableString } from "@/lib/constants";
+import {
+  BARUNCORP_ORGANIZATION_ID,
+  transformStringIntoNullableString,
+} from "@/lib/constants";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
+import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
+import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
 const formSchema = z.object({
   organization: z.string().trim().min(1, {
@@ -50,6 +55,7 @@ const formSchema = z.object({
         .email({ message: "Format of Email Address is incorrect" }),
     })
   ),
+  dateOfJoining: z.date().optional(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -66,6 +72,10 @@ function getFieldValues(profile: UserResponseDto): FieldValues {
       })
     ),
     phoneNumber: profile.phoneNumber ?? "",
+    dateOfJoining:
+      profile.dateOfJoining == null
+        ? undefined
+        : new Date(profile.dateOfJoining),
   };
 }
 
@@ -101,6 +111,10 @@ export default function ProfileForm({ profile }: Props) {
         .map(({ email }) => transformStringIntoNullableString.parse(email))
         .filter((value): value is string => value != null),
       isVendor: profile.isVendor,
+      dateOfJoining:
+        profile.organizationId === BARUNCORP_ORGANIZATION_ID
+          ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+          : null,
     })
       .then(() => {
         queryClient.invalidateQueries({ queryKey: getProfileQueryKey() });
@@ -257,6 +271,21 @@ export default function ProfileForm({ profile }: Props) {
             );
           }}
         />
+        {profile.organizationId === BARUNCORP_ORGANIZATION_ID && (
+          <FormField
+            control={form.control}
+            name="dateOfJoining"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Date of Joining</FormLabel>
+                <FormControl>
+                  <DateOfJoiningDatePicker {...field} disabled />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <LoadingButton
           type="submit"
           disabled={!form.formState.isDirty}

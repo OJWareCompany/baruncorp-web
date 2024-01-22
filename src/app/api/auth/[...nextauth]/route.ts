@@ -1,9 +1,5 @@
 import { AxiosError } from "axios";
 import { NextAuthOptions } from "next-auth";
-/**
- * @see https://next-auth.js.org/configuration/initialization#route-handlers-app
- */
-
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import api from "@/api";

@@ -10,6 +10,7 @@ import {
   MailX,
   PauseCircle,
   PlayCircle,
+  X,
   XCircle,
 } from "lucide-react";
 import { z } from "zod";
@@ -84,10 +85,20 @@ export const jobStatuses: Record<
     Icon: XCircle,
     color: "text-red-500",
   },
+  "Canceled (Invoice)": {
+    value: "Canceled (Invoice)",
+    Icon: XCircle,
+    color: "text-red-500",
+  },
   "On Hold": {
     value: "On Hold",
     Icon: PauseCircle,
     color: "text-yellow-500",
+  },
+  "Sent To Client": {
+    value: "Sent To Client",
+    Icon: X,
+    color: "text-red-500",
   },
 };
 
@@ -143,6 +154,39 @@ export const userStatuses: Record<
     value: "Invitation Not Sent",
     Icon: MailX,
     color: "text-red-500",
+  },
+};
+
+export const ptoTypes: Record<
+  PtoTypeEnum,
+  {
+    value: PtoTypeEnum;
+    color: string;
+  }
+> = {
+  Maternity: {
+    value: "Maternity",
+    color: "text-red-400",
+  },
+  Sick: {
+    value: "Sick",
+    color: "text-red-700",
+  },
+  Vacation: {
+    value: "Vacation",
+    color: "text-green-700",
+  },
+  Half: {
+    value: "Half",
+    color: "text-green-400",
+  },
+  Casual: {
+    value: "Casual",
+    color: "text-blue-700",
+  },
+  Unpaid: {
+    value: "Unpaid",
+    color: "text-yellow-700",
   },
 };
 
@@ -321,19 +365,27 @@ export const transformNullishANSIIntoANSIWithEmptyString =
 
 /* -------------------------------------------------------------------------- */
 
-// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled"
+// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "Sent To Client"
 export const JobStatusEnum = z.enum(
-  ["Not Started", "In Progress", "Completed", "On Hold", "Canceled"],
+  [
+    "Not Started",
+    "In Progress",
+    "Completed",
+    "On Hold",
+    "Canceled",
+    "Canceled (Invoice)",
+    "Sent To Client",
+  ],
   {
     errorMap: () => ({ message: "Job Status is required" }),
   }
 );
-// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | ""
+// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "Canceled (Invoice)" | "Sent To Client" | ""
 export const JobStatusEnumWithEmptyString = JobStatusEnum.or(z.literal(""));
-// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "" => "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | null
+// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "Canceled (Invoice)" | "Sent To Client" | "" => "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "Canceled (Invoice)" | "Sent To Client" | null
 export const transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum =
   JobStatusEnumWithEmptyString.transform((v) => (v === "" ? null : v));
-// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | null | undefined => "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | ""
+// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "Canceled (Invoice)" | "Sent To Client" | null | undefined => "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "Canceled (Invoice)" | "Sent To Client" | ""
 export const transformNullishJobStatusEnumIntoJobStatusEnumWithEmptyString =
   JobStatusEnum.nullish().transform((v) => v ?? "");
 export type JobStatusEnum = z.infer<typeof JobStatusEnum>;
@@ -364,6 +416,19 @@ export type UserStatusEnum = z.infer<typeof UserStatusEnum>;
 // "Unissued" | "Issued" | "Paid"
 export const InvoiceStatusEnum = z.enum(["Unissued", "Issued", "Paid"]);
 export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
+
+/* -------------------------------------------------------------------------- */
+
+// "Vacation" | "Half" | "Sick" | "Maternity" | "Casual" | "Unpaid"
+export const PtoTypeEnum = z.enum([
+  "Vacation",
+  "Half",
+  "Sick",
+  "Maternity",
+  "Casual",
+  "Unpaid",
+]);
+export type PtoTypeEnum = z.infer<typeof PtoTypeEnum>;
 
 /* -------------------------------------------------------------------------- */
 

@@ -4,16 +4,19 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
 import { X } from "lucide-react";
+import { differenceInYears } from "date-fns";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import RowItemsContainer from "../RowItemsContainer";
 import OrganizationsCombobox from "../combobox/OrganizationsCombobox";
 import { Checkbox } from "../ui/checkbox";
 import LoadingButton from "../LoadingButton";
+import DateOfJoiningDatePicker from "../DateOfJoiningDatePicker";
 import usePostUserMutation from "@/mutations/usePostUserMutation";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,38 +24,51 @@ import {
 } from "@/components/ui/form";
 import {
   BARUNCORP_ORGANIZATION_ID,
+  digitRegExp,
   transformStringIntoNullableString,
 } from "@/lib/constants";
+import usePtoPerTenureQuery from "@/queries/usePtoPerTenureQuery";
+import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
-const formSchema = z.object({
-  organizationId: z.string().trim().min(1, {
-    message: "Organization is required",
-  }),
-  firstName: z.string().trim().min(1, {
-    message: "First Name is required",
-  }),
-  lastName: z.string().trim().min(1, {
-    message: "Last Name is required",
-  }),
-  phoneNumber: z.string().trim(),
-  emailAddress: z
-    .string()
-    .trim()
-    .min(1, { message: "Email Address is required" })
-    .email({
-      message: "Format of Email Address is incorrect",
+const formSchema = z
+  .object({
+    organizationId: z.string().trim().min(1, {
+      message: "Organization is required",
     }),
-  emailAddressesToReceiveDeliverables: z.array(
-    z.object({
-      email: z
-        .string()
-        .trim()
-        .min(1, { message: "Email Address is required" })
-        .email({ message: "Format of Email Address is incorrect" }),
-    })
-  ),
-  isContractor: z.boolean(),
-});
+    firstName: z.string().trim().min(1, {
+      message: "First Name is required",
+    }),
+    lastName: z.string().trim().min(1, {
+      message: "Last Name is required",
+    }),
+    phoneNumber: z.string().trim(),
+    emailAddress: z
+      .string()
+      .trim()
+      .min(1, { message: "Email Address is required" })
+      .email({
+        message: "Format of Email Address is incorrect",
+      }),
+    emailAddressesToReceiveDeliverables: z.array(
+      z.object({
+        email: z
+          .string()
+          .trim()
+          .min(1, { message: "Email Address is required" })
+          .email({ message: "Format of Email Address is incorrect" }),
+      })
+    ),
+    isContractor: z.boolean(),
+    dateOfJoining: z.date().optional(),
+    tenure: z.string().trim(),
+    pto: z.string().trim(),
+  })
+  .refine(
+    (values) =>
+      values.organizationId !== BARUNCORP_ORGANIZATION_ID ||
+      values.dateOfJoining != null,
+    { message: "Date of Joining is required", path: ["dateOfJoining"] }
+  );
 
 type FieldValues = z.infer<typeof formSchema>;
 
@@ -71,6 +87,7 @@ interface Props {
 
 export default function NewUserForm({ onSuccess, organizationId }: Props) {
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,6 +98,8 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
       lastName: "",
       phoneNumber: "",
       isContractor: false,
+      tenure: "",
+      pto: "",
     },
   });
   const { fields, append, remove } = useFieldArray({
@@ -88,6 +107,13 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
     name: "emailAddressesToReceiveDeliverables",
   });
   const { mutateAsync } = usePostUserMutation();
+
+  const watchTenure = form.watch("tenure");
+  const watchDateOfJoining = form.watch("dateOfJoining");
+  const { data: ptoPerTenure, isLoading: isPtoPerTenureQueryLoading } =
+    usePtoPerTenureQuery({
+      limit: Number.MAX_SAFE_INTEGER,
+    });
 
   useEffect(() => {
     if (isSubmitSuccessful) {
@@ -98,7 +124,14 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
 
   const watchOrganizationId = form.watch("organizationId");
 
+  const isOrganizationBarunCorp =
+    watchOrganizationId === BARUNCORP_ORGANIZATION_ID;
+
   async function onSubmit(values: FieldValues) {
+    const selectedPtoPerTenure = ptoPerTenure?.items.find(
+      (value) => value.tenure === Number(values.tenure)
+    );
+
     await mutateAsync({
       deliverablesEmails: values.emailAddressesToReceiveDeliverables.map(
         (value) => value.email
@@ -108,10 +141,16 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
       lastName: values.lastName,
       phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
       organizationId: values.organizationId,
-      isVendor:
-        values.organizationId === BARUNCORP_ORGANIZATION_ID
-          ? false
-          : values.isContractor,
+      isVendor: isOrganizationBarunCorp ? false : values.isContractor,
+      dateOfJoining: isOrganizationBarunCorp
+        ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+        : null,
+      tenure: isOrganizationBarunCorp ? Number(values.tenure) : 1,
+      totalPtoDays: isOrganizationBarunCorp
+        ? values.pto === ""
+          ? selectedPtoPerTenure?.total ?? 10
+          : Number(values.pto)
+        : 10,
     })
       .then(({ id }) => {
         setIsSubmitSuccessful(true);
@@ -300,7 +339,7 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
             );
           }}
         />
-        {watchOrganizationId !== BARUNCORP_ORGANIZATION_ID && (
+        {!isOrganizationBarunCorp && (
           <FormField
             control={form.control}
             name="isContractor"
@@ -318,6 +357,95 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
               </FormItem>
             )}
           />
+        )}
+        {isOrganizationBarunCorp && (
+          <RowItemsContainer>
+            <FormField
+              control={form.control}
+              name="dateOfJoining"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Date of Joining</FormLabel>
+                  <FormControl>
+                    <DateOfJoiningDatePicker
+                      {...field}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        if (value != null) {
+                          const yearsDifference = differenceInYears(
+                            new Date(),
+                            value
+                          );
+                          const tenureAsNumber = yearsDifference + 1;
+                          form.setValue("tenure", String(tenureAsNumber));
+                          const totalPto = ptoPerTenure?.items.find(
+                            (value) => value.tenure === tenureAsNumber
+                          )?.total;
+                          form.setValue(
+                            "pto",
+                            totalPto ? String(totalPto) : "10"
+                          );
+                        } else {
+                          form.resetField("tenure");
+                          form.resetField("pto");
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Tenure and PTO are updated based on Date of Joining
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="tenure"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tenure (Year)</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="pto"
+              render={({ field }) => {
+                const defaultTotalPto = ptoPerTenure?.items.find(
+                  (value) =>
+                    value.tenure ===
+                    (watchTenure === "" ? 0 : Number(watchTenure))
+                )?.total;
+
+                return (
+                  <FormItem>
+                    <FormLabel>PTO (Days)</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(event) => {
+                          const { value } = event.target;
+                          if (value === "" || digitRegExp.test(value)) {
+                            field.onChange(event);
+                          }
+                        }}
+                        placeholder={
+                          defaultTotalPto ? String(defaultTotalPto) : "10"
+                        }
+                        disabled={watchDateOfJoining === undefined}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          </RowItemsContainer>
         )}
         <LoadingButton
           type="submit"

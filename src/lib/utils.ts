@@ -1,8 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import React from "react";
-import { format } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
+import { format, startOfDay } from "date-fns";
+import { formatInTimeZone, zonedTimeToUtc } from "date-fns-tz";
 import { Value } from "@udecode/plate-common";
 import { Node } from "slate";
 
@@ -67,4 +67,8 @@ export function getEditorValue(string: string): Value {
       .split("\n")
       .map((value) => ({ type: "p", children: [{ text: value.trim() }] }));
   }
+}
+
+export function getISOStringForStartOfDayInUTC(date: Date) {
+  return zonedTimeToUtc(startOfDay(date), "Etc/UTC").toISOString();
 }

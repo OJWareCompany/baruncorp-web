@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
 const formSchema = z.object({
   userId: z.string().trim().min(1, { message: "User is required" }),
@@ -65,7 +66,9 @@ export default function NewLicenseForm({
       userId: values.userId,
       abbreviation: values.abbreviation,
       type: values.type,
-      expiryDate: values.expiryDate ? values.expiryDate.toISOString() : null,
+      expiryDate: values.expiryDate
+        ? getISOStringForStartOfDayInUTC(values.expiryDate)
+        : null,
     })
       .then(() => {
         onSuccess?.();

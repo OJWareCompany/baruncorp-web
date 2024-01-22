@@ -89,12 +89,12 @@ const columns = [
 ];
 
 interface Props {
-  jobsToInvoice: JobToInvoiceResponseDto;
+  jobs: JobToInvoiceResponseDto;
 }
 
-export default function JobsTable({ jobsToInvoice }: Props) {
+export default function JobsTable({ jobs }: Props) {
   const table = useReactTable({
-    data: jobsToInvoice.items,
+    data: jobs.items,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ jobId }) => jobId,

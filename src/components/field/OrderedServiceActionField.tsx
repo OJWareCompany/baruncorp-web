@@ -18,10 +18,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import usePatchOrderedServiceCancelMutation from "@/mutations/usePatchOrderedServiceCancelMutation";
-import { getJobQueryKey } from "@/queries/useJobQuery";
-import { getProjectQueryKey } from "@/queries/useProjectQuery";
-import usePatchOrderedServiceReactivateMutation from "@/mutations/usePatchOrderedServiceReactivateMutation";
+// import usePatchOrderedServiceCancelMutation from "@/mutations/usePatchOrderedServiceCancelMutation";
+// import usePatchOrderedServiceReactivateMutation from "@/mutations/usePatchOrderedServiceReactivateMutation";
 
 interface Props {
   orderedServiceId: string;
@@ -43,10 +41,10 @@ export default function OrderedServiceActionField({
     | { alertDialogOpen: true; type: "Cancel" | "Reactivate" }
   >({ alertDialogOpen: false });
   const queryClient = useQueryClient();
-  const { mutateAsync: patchOrderedServiceCancelMutateAsync } =
-    usePatchOrderedServiceCancelMutation(orderedServiceId);
-  const { mutateAsync: patchOrderedServiceReactivateMutateAsync } =
-    usePatchOrderedServiceReactivateMutation(orderedServiceId);
+  // const { mutateAsync: patchOrderedServiceCancelMutateAsync } =
+  //   usePatchOrderedServiceCancelMutation(orderedServiceId);
+  // const { mutateAsync: patchOrderedServiceReactivateMutateAsync } =
+  //   usePatchOrderedServiceReactivateMutation(orderedServiceId);
 
   if (disabled) {
     return;
@@ -114,35 +112,37 @@ export default function OrderedServiceActionField({
                     }
 
                     if (state.type === "Cancel") {
-                      patchOrderedServiceCancelMutateAsync()
-                        .then(() => {
-                          queryClient.invalidateQueries({
-                            queryKey: getJobQueryKey(jobId),
-                          });
-                          queryClient.invalidateQueries({
-                            queryKey: getProjectQueryKey(projectId),
-                          });
-                        })
-                        .catch(() => {
-                          // TODO: error handling
-                        });
-                      return;
+                      // TODO
+                      // patchOrderedServiceCancelMutateAsync()
+                      //   .then(() => {
+                      //     queryClient.invalidateQueries({
+                      //       queryKey: getJobQueryKey(jobId),
+                      //     });
+                      //     queryClient.invalidateQueries({
+                      //       queryKey: getProjectQueryKey(projectId),
+                      //     });
+                      //   })
+                      //   .catch(() => {
+                      //     // TODO: error handling
+                      //   });
+                      // return;
                     }
 
                     if (state.type === "Reactivate") {
-                      patchOrderedServiceReactivateMutateAsync()
-                        .then(() => {
-                          queryClient.invalidateQueries({
-                            queryKey: getJobQueryKey(jobId),
-                          });
-                          queryClient.invalidateQueries({
-                            queryKey: getProjectQueryKey(projectId),
-                          });
-                        })
-                        .catch(() => {
-                          // TODO: error handling
-                        });
-                      return;
+                      // TODO
+                      // patchOrderedServiceReactivateMutateAsync()
+                      //   .then(() => {
+                      //     queryClient.invalidateQueries({
+                      //       queryKey: getJobQueryKey(jobId),
+                      //     });
+                      //     queryClient.invalidateQueries({
+                      //       queryKey: getProjectQueryKey(projectId),
+                      //     });
+                      //   })
+                      //   .catch(() => {
+                      //     // TODO: error handling
+                      //   });
+                      // return;
                     }
                   }}
                 >

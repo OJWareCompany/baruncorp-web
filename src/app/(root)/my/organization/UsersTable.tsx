@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -38,7 +39,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useUsersQuery from "@/queries/useUsersQuery";
 import SearchHeader from "@/components/table/SearchHeader";
-import { userStatuses } from "@/lib/constants";
+import { BARUNCORP_ORGANIZATION_ID, userStatuses } from "@/lib/constants";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -174,6 +175,17 @@ export default function UsersTable({ organization }: Props) {
           );
         },
       }),
+      columnHelper.accessor("dateOfJoining", {
+        header: "Date of Joining",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return format(new Date(value), "MM-dd-yyyy");
+        },
+      }),
     ],
     [
       emailSearchParam,
@@ -206,6 +218,9 @@ export default function UsersTable({ organization }: Props) {
     manualPagination: true,
     state: {
       pagination,
+      columnVisibility: {
+        dateOfJoining: organization.id === BARUNCORP_ORGANIZATION_ID,
+      },
     },
   });
 

@@ -13,6 +13,7 @@ import { UserResponseDto } from "@/api";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -30,53 +31,73 @@ import usePatchProfileByUserIdMutation from "@/mutations/usePatchProfileByUserId
 import { Checkbox } from "@/components/ui/checkbox";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
+import OrganizationsCombobox from "@/components/combobox/OrganizationsCombobox";
+import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
+import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
-const formSchema = z.object({
-  organization: z
-    .string()
-    .trim()
-    .min(1, { message: "Organization is required" }),
-  firstName: z.string().trim().min(1, {
-    message: "First Name is required",
-  }),
-  lastName: z.string().trim().min(1, {
-    message: "Last Name is required",
-  }),
-  phoneNumber: z.string().trim(),
-  emailAddress: z
-    .string()
-    .trim()
-    .min(1, { message: "Email Address is required" })
-    .email({
-      message: "Format of Email Address is incorrect",
+const formSchema = z
+  .object({
+    organizationId: z
+      .string()
+      .trim()
+      .min(1, { message: "Organization is required" }),
+    firstName: z.string().trim().min(1, {
+      message: "First Name is required",
     }),
-  emailAddressesToReceiveDeliverables: z.array(
-    z.object({
-      email: z
-        .string()
-        .trim()
-        .min(1, { message: "Email Address is required" })
-        .email({ message: "Format of Email Address is incorrect" }),
-    })
-  ),
-  isContractor: z.boolean(),
-});
+    lastName: z.string().trim().min(1, {
+      message: "Last Name is required",
+    }),
+    phoneNumber: z.string().trim(),
+    emailAddress: z
+      .string()
+      .trim()
+      .min(1, { message: "Email Address is required" })
+      .email({
+        message: "Format of Email Address is incorrect",
+      }),
+    emailAddressesToReceiveDeliverables: z.array(
+      z.object({
+        email: z
+          .string()
+          .trim()
+          .min(1, { message: "Email Address is required" })
+          .email({ message: "Format of Email Address is incorrect" }),
+      })
+    ),
+    isContractor: z.boolean(),
+    dateOfJoining: z.date().optional(),
+  })
+  .superRefine((values, ctx) => {
+    if (
+      values.organizationId === BARUNCORP_ORGANIZATION_ID &&
+      values.dateOfJoining == null
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Date of Joining is required",
+        path: ["dateOfJoining"],
+      });
+      return;
+    }
+  });
 
 type FieldValues = z.infer<typeof formSchema>;
 
 const getFieldValues = (user: UserResponseDto): FieldValues => {
   return {
-    emailAddress: user.email ?? "",
-    emailAddressesToReceiveDeliverables: (user.deliverablesEmails ?? []).map(
+    emailAddress: user.email,
+    emailAddressesToReceiveDeliverables: user.deliverablesEmails.map(
       (email) => ({
         email,
       })
     ),
-    firstName: user.firstName ?? "",
-    lastName: user.lastName ?? "",
-    organization: user.organization ?? "",
+    firstName: user.firstName,
+    lastName: user.lastName,
+    organizationId: user.organizationId,
     phoneNumber: user.phoneNumber ?? "",
     isContractor: user.isVendor,
+    dateOfJoining:
+      user.dateOfJoining == null ? undefined : new Date(user.dateOfJoining),
   };
 };
 
@@ -118,6 +139,10 @@ export default function UserForm({ user }: Props) {
         user.organizationId === BARUNCORP_ORGANIZATION_ID
           ? false
           : values.isContractor,
+      dateOfJoining:
+        user.organizationId === BARUNCORP_ORGANIZATION_ID
+          ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+          : null,
     })
       .then(() => {
         queryClient.invalidateQueries({
@@ -156,13 +181,18 @@ export default function UserForm({ user }: Props) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="organization"
+          name="organizationId"
           render={({ field }) => (
             <FormItem>
               <FormLabel required>Organization</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
-                  <Input {...field} disabled />
+                  <OrganizationsCombobox
+                    organizationId={field.value}
+                    onOrganizationIdChange={field.onChange}
+                    ref={field.ref}
+                    disabled
+                  />
                 </FormControl>
                 <Button
                   size={"icon"}
@@ -314,6 +344,24 @@ export default function UserForm({ user }: Props) {
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {user.organizationId === BARUNCORP_ORGANIZATION_ID && (
+          <FormField
+            control={form.control}
+            name="dateOfJoining"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Date of Joining</FormLabel>
+                <FormControl>
+                  <DateOfJoiningDatePicker {...field} />
+                </FormControl>
+                <FormDescription>
+                  Tenure and PTO are updated based on Date of Joining
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
