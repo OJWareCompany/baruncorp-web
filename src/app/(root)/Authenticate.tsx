@@ -2,7 +2,7 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -14,9 +14,14 @@ export default function Authenticate({ children }: Props) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { toast } = useToast();
+  const isSignOutTriggeredRef = useRef(false);
 
   useEffect(() => {
-    if (session == null || session.authError == null) {
+    if (
+      session == null ||
+      session.authError == null ||
+      isSignOutTriggeredRef.current
+    ) {
       return;
     }
 
@@ -35,7 +40,8 @@ export default function Authenticate({ children }: Props) {
     }
 
     signOut({ redirect: false });
-  }, [session, toast]);
+    isSignOutTriggeredRef.current = true;
+  }, [session, status, toast]);
 
   useEffect(() => {
     if (status === "unauthenticated") {

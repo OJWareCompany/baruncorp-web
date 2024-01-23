@@ -1,6 +1,19 @@
+"use client";
 import { Pencil } from "lucide-react";
-import ItemsContainer from "@/components/ItemsContainer";
-import { Button } from "@/components/ui/button";
+import { DefaultValues, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Value } from "@udecode/plate-common";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import LoadingButton from "@/components/LoadingButton";
 import {
   Dialog,
   DialogContent,
@@ -8,9 +21,57 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+import BasicEditor from "@/components/editor/BasicEditor";
+import { isEditorValueEmpty } from "@/lib/utils";
+import usePostInformationMutation from "@/mutations/usePostInformationMutation";
+import { getInformationsQueryKey } from "@/queries/useInformationsQuery";
 
-export default function EditDialog() {
+const formSchema = z.object({
+  information: z
+    .custom<Value>()
+    .refine((value) => !isEditorValueEmpty(value), "Information is required"),
+});
+
+type FieldValues = z.infer<typeof formSchema>;
+
+const getFieldValues = (information: Value): FieldValues => {
+  return {
+    information,
+  };
+};
+
+interface Props {
+  information: Value;
+}
+
+export default function EditDialog({ information }: Props) {
+  // const editorRef = useRef<PlateEditor | null>(null);
+
+  const form = useForm<FieldValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: getFieldValues(information) as DefaultValues<FieldValues>, // editor value의 deep partial 문제로 typescript가 error를 발생시키나, 실제로는 문제 없음
+  });
+
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = usePostInformationMutation();
+
+  async function onSubmit(values: FieldValues) {
+    await mutateAsync({ contents: JSON.stringify(values.information) })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: getInformationsQueryKey({ limit: 1 }),
+        });
+      })
+      .catch(() => {
+        // TODO
+      });
+  }
+
+  useEffect(() => {
+    form.reset(getFieldValues(information));
+  }, [form, information]);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -20,10 +81,36 @@ export default function EditDialog() {
         <DialogHeader>
           <DialogTitle>Information</DialogTitle>
         </DialogHeader>
-        <ItemsContainer>
-          <Textarea />
-          <Button>Edit</Button>
-        </ItemsContainer>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="min-w-0 space-y-4"
+          >
+            <FormField
+              control={form.control}
+              name="information"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <BasicEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <LoadingButton
+              type="submit"
+              className="w-full"
+              disabled={!form.formState.isDirty}
+              isLoading={form.formState.isSubmitting}
+            >
+              Edit
+            </LoadingButton>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

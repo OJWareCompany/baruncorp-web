@@ -934,6 +934,7 @@ export interface UpdateAhjNoteRequestDto {
 
 export interface AhjNoteHistoryResponseDto {
   id: number;
+  historyType: "Created" | "Modified";
   general: General;
   design: Design;
   engineering: Engineering;
@@ -941,8 +942,8 @@ export interface AhjNoteHistoryResponseDto {
 }
 
 export interface AhjNoteHistoryListResponseDto {
-  id: number;
   geoId: string;
+  historyType: "Created" | "Modified";
   name: string;
   fullAhjName: string;
   updatedBy: string;
@@ -1211,6 +1212,24 @@ export interface Attachments {
 
 export interface IssueInvoiceRequestDto {
   attachments: Attachments[];
+}
+
+export interface ClientWithOutstandingBalancesResponseDto {
+  organizationId: string;
+  organizationName: string;
+  totalBalanceDue: number;
+}
+
+export interface ClientWithOutstandingBalancesPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: ClientWithOutstandingBalancesResponseDto[];
 }
 
 export interface Tier {
@@ -2131,20 +2150,20 @@ export interface AssigningTaskAlertPaginatedResponse {
 }
 
 export interface CreateInformationRequestDto {
-  /** @default [{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:newjobs@baruncorp.com","target":"_blank","children":[{"text":"newjobs@baruncorp.com"}]},{"text":" if you need to:"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Add additional services to an active service order"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Send us updated information for an active service order or for a service order that is on hold"}],"listStart":2},{"type":"p","listStyleType":"disc","indent":1,"listStart":3,"children":[{"text":"Any other questions or issues concerning service orders"}]},{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:chrisk@baruncorp.com","target":"_blank","children":[{"text":"chrisk@baruncorp.com"}]},{"text":" for any matter relating to the portal."}]}] */
-  contents: object[];
+  /** @default "string contents..." */
+  contents: string;
 }
 
 export interface UpdateInformationRequestDto {
-  /** @default [{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:newjobs@baruncorp.com","target":"_blank","children":[{"text":"newjobs@baruncorp.com"}]},{"text":" if you need to:"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Add additional services to an active service order"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Send us updated information for an active service order or for a service order that is on hold"}],"listStart":2},{"type":"p","listStyleType":"disc","indent":1,"listStart":3,"children":[{"text":"Any other questions or issues concerning service orders"}]},{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:chrisk@baruncorp.com","target":"_blank","children":[{"text":"chrisk@baruncorp.com"}]},{"text":" for any matter relating to the portal."}]}] */
-  contents: object[];
+  /** @default "string contents..." */
+  contents: string;
 }
 
 export interface InformationResponseDto {
   /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
   id: string;
-  /** @default [{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:newjobs@baruncorp.com","target":"_blank","children":[{"text":"newjobs@baruncorp.com"}]},{"text":" if you need to:"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Add additional services to an active service order"}]},{"type":"p","listStyleType":"disc","indent":1,"children":[{"text":"Send us updated information for an active service order or for a service order that is on hold"}],"listStart":2},{"type":"p","listStyleType":"disc","indent":1,"listStart":3,"children":[{"text":"Any other questions or issues concerning service orders"}]},{"type":"p","children":[{"text":"Please send an email to "},{"type":"a","url":"mailto:chrisk@baruncorp.com","target":"_blank","children":[{"text":"chrisk@baruncorp.com"}]},{"text":" for any matter relating to the portal."}]}] */
-  contents: object[];
+  /** @default "string contents..." */
+  contents: string;
   /** @default true */
   isActive: boolean;
   /**
@@ -2169,6 +2188,52 @@ export interface InformationPaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: InformationResponseDto[];
+}
+
+export interface CreateClientNoteRequestDto {
+  /** @default "ebf47426-2f8d-4b7c-9ef1-81209db8e3ad" */
+  organizationId: string;
+  /** @default "Blah - Blah" */
+  designNotes: string;
+  /** @default "Blah - Blah" */
+  electricalEngineeringNotes: string;
+  /** @default "Blah - Blah" */
+  structuralEngineeringNotes: string;
+}
+
+export interface UpdateClientNoteRequestDto {
+  /** @default "Blah - Blah" */
+  designNotes: string;
+  /** @default "Blah - Blah" */
+  electricalEngineeringNotes: string;
+  /** @default "Blah - Blah" */
+  structuralEngineeringNotes: string;
+}
+
+export interface ClientNoteResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "dglee" */
+  userName: string;
+  /** @default "Create" */
+  type: string;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  updatedAt: string;
+}
+
+export interface ClientNotePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: ClientNoteResponseDto[];
 }
 
 export interface AuthenticationControllerPostSignInTimeParams {
@@ -2347,7 +2412,7 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
   propertyFullAddress?: string | null;
   /** @default "Commercial" */
   projectPropertyType?: "Residential" | "Commercial" | null;
-  /** @default "In Progress" */
+  /** @default "Completed" */
   jobStatus?:
     | "Not Started"
     | "In Progress"
@@ -2506,6 +2571,13 @@ export interface GeographyControllerGetFindNotesParams {
   name?: string | null;
 }
 
+export interface GeographyControllerGetFinNoteUpdateHistoryDetailParams {
+  /** @format date-time */
+  updatedAt: string;
+  /** @default "1239525" */
+  geoId: string;
+}
+
 export interface GeographyControllerGetFindNoteUpdateHistoryParams {
   /**
    * Specifies a limit of returned records
@@ -2608,6 +2680,45 @@ export interface FindCreatableExpensePricingHttpControllerGetParams {
 }
 
 export interface FindInvoicePaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  organizationName?: string | null;
+  /** @default "Issued" */
+  status?: "Unissued" | "Issued" | "Paid" | null;
+  /** @format date-time */
+  invoiceDate?: string | null;
+}
+
+export interface FindClientWithOutstandingBalancesHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindOverdueInvoicePaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2957,6 +3068,23 @@ export interface FindAssigningTaskAlertPaginatedHttpControllerFindParams {
 }
 
 export interface FindInformationPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindClientNotePaginatedHttpControllerGetParams {
+  /** @default "674e3b83-0255-46fe-bc4b-047fca3c43cf" */
+  organizationId?: string;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -4314,16 +4442,20 @@ export class Api<
      *
      * @tags geography
      * @name GeographyControllerGetFinNoteUpdateHistoryDetail
-     * @request GET:/geography/notes/history/{historyId}
+     * @request GET:/geography/{geoId}/notes/history
      * @secure
      */
     geographyControllerGetFinNoteUpdateHistoryDetail: (
-      historyId: number,
+      {
+        geoId,
+        ...query
+      }: GeographyControllerGetFinNoteUpdateHistoryDetailParams,
       params: RequestParams = {}
     ) =>
       this.request<AhjNoteHistoryResponseDto, any>({
-        path: `/geography/notes/history/${historyId}`,
+        path: `/geography/${geoId}/notes/history`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -4762,6 +4894,44 @@ export class Api<
       this.request<ClientToInvoiceResponseDto, any>({
         path: `/invoices-clients`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  clientWithOutstandingBalances = {
+    /**
+     * No description
+     *
+     * @name FindClientWithOutstandingBalancesHttpControllerGet
+     * @request GET:/client-with-outstanding-balances
+     */
+    findClientWithOutstandingBalancesHttpControllerGet: (
+      query: FindClientWithOutstandingBalancesHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<ClientWithOutstandingBalancesPaginatedResponseDto, any>({
+        path: `/client-with-outstanding-balances`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
+  overdueInvoices = {
+    /**
+     * No description
+     *
+     * @name FindOverdueInvoicePaginatedHttpControllerGet
+     * @request GET:/overdue-invoices
+     */
+    findOverdueInvoicePaginatedHttpControllerGet: (
+      query: FindOverdueInvoicePaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<InvoicePaginatedResponseDto, any>({
+        path: `/overdue-invoices`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -6016,6 +6186,80 @@ export class Api<
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+  };
+  clientNote = {
+    /**
+     * No description
+     *
+     * @name CreateClientNoteHttpControllerPatch
+     * @request POST:/client-note
+     */
+    createClientNoteHttpControllerPatch: (
+      data: CreateClientNoteRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/client-note`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindClientNotePaginatedHttpControllerGet
+     * @request GET:/client-note
+     */
+    findClientNotePaginatedHttpControllerGet: (
+      query: FindClientNotePaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<ClientNotePaginatedResponseDto, any>({
+        path: `/client-note`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateClientNoteHttpControllerPatch
+     * @request PATCH:/client-note/{clientNoteId}
+     */
+    updateClientNoteHttpControllerPatch: (
+      clientNoteId: string,
+      data: UpdateClientNoteRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/client-note/${clientNoteId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindClientNoteHttpControllerGet
+     * @request GET:/client-note/{clientNoteSnapshotId}
+     */
+    findClientNoteHttpControllerGet: (
+      clientNoteSnapshotId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<ClientNoteResponseDto, any>({
+        path: `/client-note/${clientNoteSnapshotId}`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };

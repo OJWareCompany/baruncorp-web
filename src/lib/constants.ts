@@ -4,7 +4,6 @@ import {
   Circle,
   CircleDashed,
   CircleDot,
-  CircleEllipsis,
   LucideIcon,
   MailCheck,
   MailX,
@@ -40,10 +39,15 @@ export const orderedServiceStatuses: Record<
     color: string;
   }
 > = {
-  Pending: {
-    value: "Pending",
-    Icon: CircleEllipsis,
+  "Not Started": {
+    value: "Not Started",
+    Icon: CircleDot,
     color: "text-neutral-500",
+  },
+  "In Progress": {
+    value: "In Progress",
+    Icon: PlayCircle,
+    color: "text-blue-500",
   },
   Completed: {
     value: "Completed",
@@ -52,6 +56,11 @@ export const orderedServiceStatuses: Record<
   },
   Canceled: {
     value: "Canceled",
+    Icon: XCircle,
+    color: "text-red-500",
+  },
+  "Canceled (Invoice)": {
+    value: "Canceled (Invoice)",
     Icon: XCircle,
     color: "text-red-500",
   },
@@ -392,11 +401,13 @@ export type JobStatusEnum = z.infer<typeof JobStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
-// "Pending" | "Completed" | "Canceled"
+// "Not Started" | "In Progress" | "Canceled" | "Completed" | "Canceled (Invoice)"
 export const OrderedServiceStatusEnum = z.enum([
-  "Pending",
-  "Completed",
+  "Not Started",
+  "In Progress",
   "Canceled",
+  "Completed",
+  "Canceled (Invoice)",
 ]);
 export type OrderedServiceStatusEnum = z.infer<typeof OrderedServiceStatusEnum>;
 

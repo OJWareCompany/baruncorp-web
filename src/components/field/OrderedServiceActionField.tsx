@@ -50,10 +50,11 @@ export default function OrderedServiceActionField({
     return;
   }
 
-  const isPending = status === OrderedServiceStatusEnum.Values.Pending;
+  // TODO
+  // const isPending = status === OrderedServiceStatusEnum.Values.Pending;
   const isCanceled = status === OrderedServiceStatusEnum.Values.Canceled;
 
-  if (isPending || isCanceled) {
+  if (isCanceled) {
     return (
       <div className="text-right">
         <div
@@ -69,16 +70,17 @@ export default function OrderedServiceActionField({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {isPending && (
-                <DropdownMenuItem
-                  onClick={() => {
-                    setState({ alertDialogOpen: true, type: "Cancel" });
-                  }}
-                  className="text-destructive focus:text-destructive"
-                >
-                  Cancel
-                </DropdownMenuItem>
-              )}
+              {/* TODO */}
+              <DropdownMenuItem
+                onClick={() => {
+                  setState({ alertDialogOpen: true, type: "Cancel" });
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                Cancel
+              </DropdownMenuItem>
+              {/* {isPending && (
+              )} */}
               {isCanceled && (
                 <DropdownMenuItem
                   onClick={() => {
