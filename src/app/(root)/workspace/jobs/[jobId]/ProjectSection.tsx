@@ -14,7 +14,7 @@ interface Props {
 export default function ProjectSection({ project }: Props) {
   return (
     <section>
-      <Link href={`/system-management/projects/${project.projectId}`}>
+      <Link href={`/workspace/projects/${project.projectId}`}>
         <h4 className="h4 mb-2 underline inline-block">Project</h4>
       </Link>
       <ItemsContainer>

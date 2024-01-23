@@ -13,9 +13,9 @@ export default function PageHeaderAction({ job, project }: Props) {
   return (
     <div className="flex gap-2">
       <Button asChild size={"sm"} variant={"outline"}>
-        <Link href={`/system-management/jobs/${job.id}/ahj`}>
+        <Link href={`/system-management/jobs/${job.id}/ahj-notes`}>
           <ScrollText className="mr-2 h-4 w-4" />
-          View AHJ Note
+          View AHJ Notes
         </Link>
       </Button>
       <OpenJobFolderButton job={job} project={project} />

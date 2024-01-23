@@ -4,6 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import AhjNoteForm from "@/components/form/AhjNoteForm";
 import useNotFound from "@/hook/useNotFound";
+import AhjNoteHistories from "@/components/ahj/AhjNoteHistories";
 
 interface Props {
   params: {
@@ -34,7 +35,15 @@ export default function Page({ params: { geoId } }: Props) {
           },
         ]}
       />
-      <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />
+      <div className="space-y-6">
+        <section>
+          <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />
+        </section>
+        <section className="space-y-2">
+          <h2 className="h4">History</h2>
+          <AhjNoteHistories geoId={geoId} />
+        </section>
+      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { DefaultValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Value } from "@udecode/plate-common";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Form,
@@ -22,9 +22,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import BasicEditor from "@/components/editor/BasicEditor";
-import { isEditorValueEmpty } from "@/lib/utils";
+import { isEditorValueEmpty } from "@/lib/plate-utils";
 import usePostInformationMutation from "@/mutations/usePostInformationMutation";
 import { getInformationsQueryKey } from "@/queries/useInformationsQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   information: z
@@ -45,8 +46,8 @@ interface Props {
 }
 
 export default function EditDialog({ information }: Props) {
-  // const editorRef = useRef<PlateEditor | null>(null);
-
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(information) as DefaultValues<FieldValues>, // editor value의 deep partial 문제로 typescript가 error를 발생시키나, 실제로는 문제 없음
@@ -62,6 +63,8 @@ export default function EditDialog({ information }: Props) {
         queryClient.invalidateQueries({
           queryKey: getInformationsQueryKey({ limit: 1 }),
         });
+        setOpen(false);
+        toast({ title: "Success" });
       })
       .catch(() => {
         // TODO
@@ -73,7 +76,7 @@ export default function EditDialog({ information }: Props) {
   }, [form, information]);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Pencil className="w-4 h-4 cursor-pointer" />
       </DialogTrigger>

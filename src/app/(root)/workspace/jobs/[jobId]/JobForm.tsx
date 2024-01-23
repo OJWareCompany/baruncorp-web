@@ -37,7 +37,7 @@ import useUserQuery from "@/queries/useUserQuery";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
-import { getEditorValue, isEditorValueEmpty } from "@/lib/utils";
+import { getEditorValue, isEditorValueEmpty } from "@/lib/plate-utils";
 import BasicEditor from "@/components/editor/BasicEditor";
 
 interface Props {

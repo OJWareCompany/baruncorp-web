@@ -1,19 +1,28 @@
-// import { useQuery } from "@tanstack/react-query";
-// import { AxiosError } from "axios";
-// import useApi from "@/hook/useApi";
-// import { AhjNoteHistoryResponseDto } from "@/api";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import useApi from "@/hook/useApi";
+import {
+  AhjNoteHistoryResponseDto,
+  GeographyControllerGetFinNoteUpdateHistoryDetailParams,
+} from "@/api";
 
-// const useAhjNoteHistoryQuery = (historyId: string | undefined) => {
-//   const api = useApi();
+export const getAhjNoteHistoryQueryKey = (
+  params: GeographyControllerGetFinNoteUpdateHistoryDetailParams
+) => ["ahj-note-histories", "detail", params];
 
-//   return useQuery<AhjNoteHistoryResponseDto, AxiosError<ErrorResponseData>>({
-//     queryKey: ["ahj-note-histories", "detail", { historyId }],
-//     queryFn: () =>
-//       api.geography
-//         .geographyControllerGetFinNoteUpdateHistoryDetail(Number(historyId))
-//         .then(({ data }) => data),
-//     enabled: historyId !== undefined && historyId !== "",
-//   });
-// };
+const useAhjNoteHistoryQuery = (
+  params: GeographyControllerGetFinNoteUpdateHistoryDetailParams
+) => {
+  const api = useApi();
 
-// export default useAhjNoteHistoryQuery;
+  return useQuery<AhjNoteHistoryResponseDto, AxiosError<ErrorResponseData>>({
+    queryKey: getAhjNoteHistoryQueryKey(params),
+    queryFn: () =>
+      api.geography
+        .geographyControllerGetFinNoteUpdateHistoryDetail(params)
+        .then(({ data }) => data),
+    enabled: params.updatedAt !== "",
+  });
+};
+
+export default useAhjNoteHistoryQuery;

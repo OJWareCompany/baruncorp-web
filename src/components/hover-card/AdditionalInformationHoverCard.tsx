@@ -6,7 +6,7 @@ import {
   HoverCardTrigger,
 } from "../ui/hover-card";
 import { basicEditorPlugins } from "@/lib/plate/plugins";
-import { getEditorValue } from "@/lib/utils";
+import { getEditorValue } from "@/lib/plate-utils";
 
 interface Props {
   value: string;

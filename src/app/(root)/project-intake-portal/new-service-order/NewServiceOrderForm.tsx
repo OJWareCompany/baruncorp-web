@@ -60,7 +60,7 @@ import Dropzone from "@/components/Dropzone";
 import LoadingButton from "@/components/LoadingButton";
 import PageLoading from "@/components/PageLoading";
 import BasicEditor from "@/components/editor/BasicEditor";
-import { isEditorValueEmpty } from "@/lib/utils";
+import { isEditorValueEmpty } from "@/lib/plate-utils";
 
 export default function NewServiceOrderForm() {
   const [organizationId, setOrganizationId] = useState("");

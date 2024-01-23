@@ -1,7 +1,9 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { DefaultValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import InputEditor from "../editor/InputEditor";
+import BasicEditor from "../editor/BasicEditor";
 import {
   Form,
   FormControl,
@@ -26,7 +28,6 @@ import {
   SelectOptionEnum,
   WindExposureEnum,
 } from "@/lib/constants";
-import { Textarea } from "@/components/ui/textarea";
 import ItemsContainer from "@/components/ItemsContainer";
 import usePutAhjMutation from "@/mutations/usePutAhjMutation";
 import {
@@ -37,6 +38,7 @@ import {
 } from "@/lib/ahj";
 import { AhjNoteResponseDto } from "@/api";
 import { getAhjNoteQueryKey } from "@/queries/useAhjNoteQuery";
+import { getAhjNoteHistoriesQueryKey } from "@/queries/useAhjNoteHistoriesQuery";
 
 interface Props {
   ahjNote: AhjNoteResponseDto;
@@ -46,7 +48,9 @@ interface Props {
 export default function AhjNoteForm({ ahjNote, geoId }: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: getFieldValuesFromAhjNote(ahjNote),
+    defaultValues: getFieldValuesFromAhjNote(
+      ahjNote
+    ) as DefaultValues<FieldValues>, // editor value의 deep partial 문제로 typescript가 error를 발생시키나, 실제로는 문제 없음
   });
 
   const queryClient = useQueryClient();
@@ -64,9 +68,9 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
         queryClient.invalidateQueries({
           queryKey: getAhjNoteQueryKey(geoId),
         });
-        // queryClient.invalidateQueries({
-        //   queryKey: ["ahj-note-histories", "list", { geoId }],
-        // });
+        queryClient.invalidateQueries({
+          queryKey: getAhjNoteHistoriesQueryKey({ geoId }),
+        });
       })
       .catch(() => {});
   }
@@ -97,7 +101,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>Website</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <InputEditor {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -139,7 +143,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>Building Codes</FormLabel>
                     <FormControl>
-                      <Textarea {...field} />
+                      <BasicEditor {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -151,7 +155,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>General Notes</FormLabel>
                     <FormControl>
-                      <Textarea {...field} />
+                      <BasicEditor {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -267,7 +271,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 <FormItem>
                   <FormLabel>Fire Setback</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <BasicEditor {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -279,7 +283,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 <FormItem>
                   <FormLabel>Utility Notes</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <BasicEditor {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -291,7 +295,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 <FormItem>
                   <FormLabel>Design Notes</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <BasicEditor {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -560,7 +564,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 <FormItem>
                   <FormLabel>Engineering Notes</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <BasicEditor {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -577,7 +581,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 <FormItem>
                   <FormLabel>Engineering Notes</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <BasicEditor {...field} />
                   </FormControl>
                 </FormItem>
               )}

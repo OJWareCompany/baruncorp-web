@@ -1,4 +1,9 @@
 import * as z from "zod";
+import { Value } from "@udecode/plate-common";
+import {
+  getEditorValue,
+  transformEditorValueToStringOrNull,
+} from "./plate-utils";
 import {
   ANSIEnumWithEmptyString,
   DigitalSignatureTypeEnumWithEmptyString,
@@ -25,18 +30,18 @@ export const formSchema = z.object({
   // general
   general: z.object({
     name: z.string().trim(),
-    website: z.string().trim(),
+    website: z.custom<Value>(),
     specificFormRequired: SelectOptionEnumWithEmptyString,
-    generalNotes: z.string().trim(),
-    buildingCodes: z.string().trim(),
+    generalNotes: z.custom<Value>(),
+    buildingCodes: z.custom<Value>(),
     updatedBy: z.string().trim(),
     updatedAt: z.string().trim(),
   }),
   // design
   design: z.object({
-    fireSetBack: z.string().trim(),
-    utilityNotes: z.string().trim(),
-    designNotes: z.string().trim(),
+    fireSetBack: z.custom<Value>(),
+    utilityNotes: z.custom<Value>(),
+    designNotes: z.custom<Value>(),
     pvMeterRequired: SelectOptionEnumWithEmptyString,
     acDisconnectRequired: SelectOptionEnumWithEmptyString,
     centerFed120Percent: SelectOptionEnumWithEmptyString,
@@ -55,11 +60,11 @@ export const formSchema = z.object({
     wetStampsRequired: SelectOptionEnumWithEmptyString,
     ofWetStamps: z.string().trim(),
     wetStampSize: ANSIEnumWithEmptyString,
-    engineeringNotes: z.string().trim(),
+    engineeringNotes: z.custom<Value>(),
   }),
   // electrical engineering
   electricalEngineering: z.object({
-    engineeringNotes: z.string().trim(),
+    engineeringNotes: z.custom<Value>(),
   }),
 });
 
@@ -72,17 +77,13 @@ export function getFieldValuesFromAhjNote(
     // general
     general: {
       name: transformNullishStringIntoString.parse(ahjNote?.general.name),
-      website: transformNullishStringIntoString.parse(ahjNote?.general.website),
+      website: getEditorValue(ahjNote?.general.website),
       specificFormRequired:
         transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
           ahjNote?.general.specificFormRequired
         ),
-      buildingCodes: transformNullishStringIntoString.parse(
-        ahjNote?.general.buildingCodes
-      ),
-      generalNotes: transformNullishStringIntoString.parse(
-        ahjNote?.general.generalNotes
-      ),
+      buildingCodes: getEditorValue(ahjNote?.general.buildingCodes),
+      generalNotes: getEditorValue(ahjNote?.general.generalNotes),
       updatedAt: transformNullishStringIntoString.parse(
         ahjNote?.general.updatedAt
       ),
@@ -92,15 +93,9 @@ export function getFieldValuesFromAhjNote(
     },
     // design
     design: {
-      fireSetBack: transformNullishStringIntoString.parse(
-        ahjNote?.design.fireSetBack
-      ),
-      utilityNotes: transformNullishStringIntoString.parse(
-        ahjNote?.design.utilityNotes
-      ),
-      designNotes: transformNullishStringIntoString.parse(
-        ahjNote?.design.designNotes
-      ),
+      fireSetBack: getEditorValue(ahjNote?.design.fireSetBack),
+      utilityNotes: getEditorValue(ahjNote?.design.utilityNotes),
+      designNotes: getEditorValue(ahjNote?.design.designNotes),
       pvMeterRequired:
         transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
           ahjNote?.design.pvMeterRequired
@@ -158,13 +153,11 @@ export function getFieldValuesFromAhjNote(
       wetStampSize: transformNullishANSIIntoANSIWithEmptyString.parse(
         ahjNote?.engineering.wetStampSize
       ),
-      engineeringNotes: transformNullishStringIntoString.parse(
-        ahjNote?.engineering.engineeringNotes
-      ),
+      engineeringNotes: getEditorValue(ahjNote?.engineering.engineeringNotes),
     },
     // electrical engineering
     electricalEngineering: {
-      engineeringNotes: transformNullishStringIntoString.parse(
+      engineeringNotes: getEditorValue(
         ahjNote?.electricalEngineering.electricalNotes
       ),
     },
@@ -176,13 +169,13 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
 ): UpdateAhjNoteRequestDto {
   return {
     general: {
-      buildingCodes: transformStringIntoNullableString.parse(
+      buildingCodes: transformEditorValueToStringOrNull(
         values.general.buildingCodes
       ),
-      generalNotes: transformStringIntoNullableString.parse(
+      generalNotes: transformEditorValueToStringOrNull(
         values.general.generalNotes
       ),
-      website: transformStringIntoNullableString.parse(values.general.website),
+      website: transformEditorValueToStringOrNull(values.general.website),
       specificFormRequired:
         transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
           values.general.specificFormRequired
@@ -192,13 +185,13 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
       deratedAmpacity: transformStringIntoNullableString.parse(
         values.design.deratedAmpacity
       ),
-      designNotes: transformStringIntoNullableString.parse(
+      designNotes: transformEditorValueToStringOrNull(
         values.design.designNotes
       ),
-      fireSetBack: transformStringIntoNullableString.parse(
+      fireSetBack: transformEditorValueToStringOrNull(
         values.design.fireSetBack
       ),
-      utilityNotes: transformStringIntoNullableString.parse(
+      utilityNotes: transformEditorValueToStringOrNull(
         values.design.utilityNotes
       ),
       pvMeterRequired:
@@ -242,7 +235,7 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
       wetStampSize: transformANSIWithEmptyStringIntoNullableANSI.parse(
         values.structuralEngineering.wetStampSize
       ),
-      engineeringNotes: transformStringIntoNullableString.parse(
+      engineeringNotes: transformEditorValueToStringOrNull(
         values.structuralEngineering.engineeringNotes
       ),
       ofWetStamps: transformStringIntoNullableString.parse(
@@ -259,7 +252,7 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
       ),
     },
     electricalEngineering: {
-      electricalNotes: transformStringIntoNullableString.parse(
+      electricalNotes: transformEditorValueToStringOrNull(
         values.electricalEngineering.engineeringNotes
       ),
     },

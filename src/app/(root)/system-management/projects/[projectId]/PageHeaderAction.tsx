@@ -12,9 +12,11 @@ export default function PageHeaderAction({ project }: Props) {
   return (
     <div className="flex gap-2">
       <Button asChild size={"sm"} variant={"outline"}>
-        <Link href={`/system-management/projects/${project.projectId}/ahj`}>
+        <Link
+          href={`/system-management/projects/${project.projectId}/ahj-notes`}
+        >
           <ScrollText className="mr-2 h-4 w-4" />
-          View AHJ Note
+          View AHJ Notes
         </Link>
       </Button>
       <OpenProjectFolderButton project={project} />

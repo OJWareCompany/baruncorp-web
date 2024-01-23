@@ -11,7 +11,7 @@ import { basicEditorPlugins } from "@/lib/plate/plugins";
 import useInformationsQuery from "@/queries/useInformationsQuery";
 import useNotFound from "@/hook/useNotFound";
 import PageLoading from "@/components/PageLoading";
-import { getEditorValue } from "@/lib/utils";
+import { getEditorValue } from "@/lib/plate-utils";
 
 export default function Page() {
   const {

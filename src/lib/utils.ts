@@ -3,8 +3,6 @@ import { twMerge } from "tailwind-merge";
 import React from "react";
 import { format, startOfDay } from "date-fns";
 import { formatInTimeZone, zonedTimeToUtc } from "date-fns-tz";
-import { Value } from "@udecode/plate-common";
-import { Node } from "slate";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -46,27 +44,6 @@ export function formatDateTime(dateTimeString: string) {
 
 export function formatInEST(date: string) {
   return formatInTimeZone(date, "America/New_York", "MM-dd-yyyy, p");
-}
-
-export function isEditorValueEmpty(value: Value): boolean {
-  const textContent = value
-    .filter((node) => Node.isNode(node))
-    .map((node) => Node.string(node))
-    .join("")
-    .trim();
-
-  return textContent === "";
-}
-
-export function getEditorValue(string: string): Value {
-  try {
-    const parsed = JSON.parse(string);
-    return parsed;
-  } catch {
-    return string
-      .split("\n")
-      .map((value) => ({ type: "p", children: [{ text: value.trim() }] }));
-  }
 }
 
 export function getISOStringForStartOfDayInUTC(date: Date) {

@@ -25,7 +25,10 @@ import { LinkFloatingToolbar } from "@/components/plate-ui/link-floating-toolbar
 import { ListElement } from "@/components/plate-ui/list-element";
 import { MentionElement } from "@/components/plate-ui/mention-element";
 import { MentionInputElement } from "@/components/plate-ui/mention-input-element";
-import { ParagraphElement } from "@/components/plate-ui/paragraph-element";
+import {
+  ParagraphElement,
+  ParagraphElementForInputEditor,
+} from "@/components/plate-ui/paragraph-element";
 
 export const basicEditorPlugins = createPlugins(
   [
@@ -62,6 +65,25 @@ export const basicEditorPlugins = createPlugins(
       [ELEMENT_UL]: withProps(ListElement, { variant: "ul" }),
       [ELEMENT_OL]: withProps(ListElement, { variant: "ol" }),
       [ELEMENT_PARAGRAPH]: ParagraphElement,
+    },
+  }
+);
+
+export const inputEditorPlugins = createPlugins(
+  [
+    // Nodes
+    createParagraphPlugin(),
+    createLinkPlugin({
+      renderAfterEditable: LinkFloatingToolbar as RenderAfterEditable,
+    }),
+
+    // Functionality
+    // createComboboxPlugin(),
+  ],
+  {
+    components: {
+      [ELEMENT_LINK]: LinkElement,
+      [ELEMENT_PARAGRAPH]: ParagraphElementForInputEditor,
     },
   }
 );
