@@ -11,6 +11,7 @@ import {
   endOfMonth,
   format,
   getDay,
+  isBefore,
   isWithinInterval,
   startOfMonth,
   subDays,
@@ -23,6 +24,7 @@ interface Props {
   onMonthChange: MonthChangeEventHandler;
   isFetching?: boolean;
   DayContent: CustomComponents["DayContent"];
+  dateOfJoining?: string | null;
 }
 
 export default function PtoCalendar({
@@ -30,6 +32,7 @@ export default function PtoCalendar({
   month,
   onMonthChange,
   DayContent,
+  dateOfJoining,
 }: Props) {
   const currentDate = new Date();
   return (
@@ -89,7 +92,10 @@ export default function PtoCalendar({
         }}
         disabled={(date) => {
           const day = getDay(date);
+
           return (
+            (dateOfJoining != null &&
+              isBefore(date, subDays(new Date(dateOfJoining), 1))) ||
             !isWithinInterval(date, {
               start: startOfMonth(subDays(currentDate, 180)),
               end: endOfMonth(addDays(currentDate, 180)),

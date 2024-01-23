@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { PtoTypeEnum, ptoTypes } from "@/lib/constants";
 import PtoCalendar from "@/components/PtoCalendar";
 import { cn } from "@/lib/utils";
+import useProfileQuery from "@/queries/useProfileQuery";
 
 interface CustomDayContentProps extends DayContentProps {
   deletePto: (ptoId: string) => void;
@@ -171,6 +172,7 @@ export default function PtoDetails({ userId }: Props) {
     },
     true
   );
+  const { data: profile } = useProfileQuery();
 
   const isFetching =
     isPreviousMonthPtoDetailsQueryFetching ||
@@ -180,6 +182,7 @@ export default function PtoDetails({ userId }: Props) {
     <>
       <div className="space-y-4">
         <PtoCalendar
+          dateOfJoining={profile?.dateOfJoining}
           month={month}
           onMonthChange={setMonth}
           isFetching={isFetching}

@@ -197,7 +197,16 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
                 form.setError(
                   "rangeOfDays",
                   {
-                    message: `Pto cannot be issued by combining days before and after the anniversary of joining the company`,
+                    message: `Pto cannot be registered by combining days before and after the date of joining the company`,
+                  },
+                  { shouldFocus: true }
+                );
+              }
+              if (error.response?.data.errorCode.includes("20822")) {
+                form.setError(
+                  "rangeOfDays",
+                  {
+                    message: `Pto cannot be registered before the date of joining the company`,
                   },
                   { shouldFocus: true }
                 );
@@ -257,7 +266,16 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
                 form.setError(
                   "rangeOfDays",
                   {
-                    message: `Pto cannot be issued by combining days before and after the anniversary of joining the company`,
+                    message: `Pto cannot be registered by combining days before and after the date of joining the company`,
+                  },
+                  { shouldFocus: true }
+                );
+              }
+              if (error.response?.data.errorCode.includes("20822")) {
+                form.setError(
+                  "rangeOfDays",
+                  {
+                    message: `Pto cannot be registered before the date of joining the company`,
                   },
                   { shouldFocus: true }
                 );

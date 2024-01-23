@@ -171,6 +171,15 @@ export default function UserForm({ user }: Props) {
                 { shouldFocus: true }
               );
             }
+            if (error.response?.data.errorCode.includes("20821")) {
+              form.setError(
+                "dateOfJoining",
+                {
+                  message: `There is PTO history before the date of joining`,
+                },
+                { shouldFocus: true }
+              );
+            }
             break;
         }
       });
