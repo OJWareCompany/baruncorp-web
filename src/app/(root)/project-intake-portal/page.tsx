@@ -11,6 +11,7 @@ import { basicEditorPlugins } from "@/lib/plate/plugins";
 import useInformationsQuery from "@/queries/useInformationsQuery";
 import useNotFound from "@/hook/useNotFound";
 import PageLoading from "@/components/PageLoading";
+import { getEditorValue } from "@/lib/utils";
 
 export default function Page() {
   const {
@@ -25,7 +26,9 @@ export default function Page() {
   if (isInformationsQueryLoading || informations == null) {
     return <PageLoading />;
   }
-  const information = JSON.parse(informations.items[0].contents);
+  const information = getEditorValue(
+    informations.items.length > 0 ? informations.items[0].contents : ""
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -43,7 +46,7 @@ export default function Page() {
               plugins={basicEditorPlugins}
               readOnly
               value={information}
-              key={information}
+              key={JSON.stringify(information)}
             >
               <PlateContent />
             </Plate>
