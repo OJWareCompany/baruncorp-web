@@ -23,7 +23,7 @@ const editorVariants = cva(
         true: "ring-2 ring-ring ring-offset-2",
       },
       disabled: {
-        true: "cursor-not-allowed opacity-50",
+        true: "pointer-events-none opacity-50",
       },
       focusRing: {
         true: "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

@@ -7,22 +7,10 @@ interface Props extends Pick<PlateProps, "value" | "onChange" | "readOnly"> {
   disabled?: boolean;
 }
 
-export default function InputEditor(props: Props) {
-  if (props.disabled) {
-    return (
-      <Plate
-        plugins={inputEditorPlugins}
-        key={JSON.stringify(props.value)}
-        {...props}
-      >
-        <Editor className="min-h-[40px] h-[40px] pt-[9px]" disabled />
-      </Plate>
-    );
-  }
-
+export default function InputEditor({ disabled, ...props }: Props) {
   return (
-    <Plate plugins={inputEditorPlugins} {...props}>
-      <Editor className="min-h-[40px] h-[40px] pt-[9px]" />
+    <Plate plugins={inputEditorPlugins} {...props} readOnly={disabled}>
+      <Editor className="min-h-[40px] h-[40px] pt-[9px]" disabled={disabled} />
     </Plate>
   );
 }

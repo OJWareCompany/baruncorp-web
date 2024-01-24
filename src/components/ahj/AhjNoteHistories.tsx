@@ -15,9 +15,10 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DialogProps } from "@radix-ui/react-dialog";
-import { DefaultValues, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Item from "../Item";
+import { Label } from "../ui/label";
+import PageLoading from "../PageLoading";
 import {
   Table,
   TableBody,
@@ -26,7 +27,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AhjNoteHistoryPaginatedResponseDto } from "@/api";
+import {
+  AhjNoteHistoryPaginatedResponseDto,
+  AhjNoteHistoryResponseDto,
+} from "@/api";
 import {
   Select,
   SelectContent,
@@ -36,21 +40,20 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useAhjNoteHistoriesQuery from "@/queries/useAhjNoteHistoriesQuery";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import useAhjNoteHistoryQuery from "@/queries/useAhjNoteHistoryQuery";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import useAhjNoteHistoryQuery from "@/queries/useAhjNoteHistoryQuery";
 import { Input } from "@/components/ui/input";
 import RowItemsContainer from "@/components/RowItemsContainer";
-import { FieldValues, formSchema, getFieldValuesFromAhjNote } from "@/lib/ahj";
-import { formatDateTime } from "@/lib/utils";
+import { formatInEST } from "@/lib/utils";
 import InputEditor from "@/components/editor/InputEditor";
 import BasicEditor from "@/components/editor/BasicEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getEditorValue } from "@/lib/plate-utils";
 
 const columnHelper =
   createColumnHelper<AhjNoteHistoryPaginatedResponseDto["items"][number]>();
@@ -63,7 +66,8 @@ const columns = [
     header: "Type",
   }),
   columnHelper.accessor("updatedAt", {
-    header: "Date Updated",
+    header: "Date Updated (EST)",
+    cell: ({ getValue }) => formatInEST(getValue()),
   }),
 ];
 
@@ -259,9 +263,261 @@ function AhjNoteHistoriesTable({
   );
 }
 
+interface AhjNoteHistoryFormProps {
+  data: AhjNoteHistoryResponseDto;
+}
+
+function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
+  return (
+    <>
+      <section>
+        <h2 className="h4 mb-2">General</h2>
+        <div className="flex flex-col gap-4">
+          <RowItemsContainer>
+            <Item>
+              <Label>Name</Label>
+              <Input value={data.general.name} disabled />
+            </Item>
+            <Item>
+              <Label>Website</Label>
+              <InputEditor
+                value={getEditorValue(data.general.website)}
+                disabled
+              />
+            </Item>
+            <Item>
+              <Label>Specific Form Required?</Label>
+              <Input value={data.general.specificFormRequired ?? ""} disabled />
+            </Item>
+          </RowItemsContainer>
+          <RowItemsContainer>
+            <Item>
+              <Label>Building Codes</Label>
+              <BasicEditor
+                value={getEditorValue(data.general.buildingCodes)}
+                disabled
+              />
+            </Item>
+            <Item>
+              <Label>General Codes</Label>
+              <BasicEditor
+                value={getEditorValue(data.general.generalNotes)}
+                disabled
+              />
+            </Item>
+          </RowItemsContainer>
+        </div>
+      </section>
+      <section>
+        <h2 className="h4 mb-2">Design</h2>
+        <div className="flex flex-col gap-4">
+          <RowItemsContainer>
+            <Item>
+              <Label>PV Meter Required?</Label>
+              <Input value={data.design.pvMeterRequired ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>AC Disconnect Required?</Label>
+              <Input value={data.design.acDisconnectRequired ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>Center Fed 120%</Label>
+              <Input value={data.design.centerFed120Percent ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>Derated Ampacity</Label>
+              <Input value={data.design.deratedAmpacity ?? ""} disabled />
+            </Item>
+          </RowItemsContainer>
+          <Item>
+            <Label>Fire Setback</Label>
+            <BasicEditor
+              value={getEditorValue(data.design.fireSetBack)}
+              disabled
+            />
+          </Item>
+          <Item>
+            <Label>Utility Notes</Label>
+            <BasicEditor
+              value={getEditorValue(data.design.utilityNotes)}
+              disabled
+            />
+          </Item>
+          <Item>
+            <Label>Design Notes</Label>
+            <BasicEditor
+              value={getEditorValue(data.design.designNotes)}
+              disabled
+            />
+          </Item>
+        </div>
+      </section>
+      <section>
+        <h2 className="h4 mb-2">Structural Engineering</h2>
+        <div className="flex flex-col gap-4">
+          <RowItemsContainer>
+            <Item>
+              <Label>IEBC Accepted?</Label>
+              <Input value={data.engineering.iebcAccepted ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>Structural Observation Required?</Label>
+              <Input
+                value={data.engineering.structuralObservationRequired ?? ""}
+                disabled
+              />
+            </Item>
+            <Item>
+              <Label>Digital Signature Type</Label>
+              <Input
+                value={data.engineering.digitalSignatureType ?? ""}
+                disabled
+              />
+            </Item>
+          </RowItemsContainer>
+          <RowItemsContainer>
+            <Item>
+              <Label>Wind Uplift Calculation Required?</Label>
+              <Input
+                value={data.engineering.windUpliftCalculationRequired ?? ""}
+                disabled
+              />
+            </Item>
+            <Item>
+              <Label>Wind Speed (mph)</Label>
+              <Input value={data.engineering.windSpeed ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>Wind Exposure</Label>
+              <Input value={data.engineering.windExposure ?? ""} disabled />
+            </Item>
+          </RowItemsContainer>
+          <RowItemsContainer>
+            <Item>
+              <Label>Snow Load Ground (psf)</Label>
+              <Input value={data.engineering.snowLoadGround ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>Snow Load Flat Roof (psf)</Label>
+              <Input value={data.engineering.snowLoadFlatRoof ?? ""} disabled />
+            </Item>
+          </RowItemsContainer>
+          <RowItemsContainer>
+            <Item>
+              <Label>Wet Stamp Required?</Label>
+              <Input
+                value={data.engineering.wetStampsRequired ?? ""}
+                disabled
+              />
+            </Item>
+            <Item>
+              <Label># of Wet Stamps</Label>
+              <Input value={data.engineering.ofWetStamps ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>Wet Stamp Size</Label>
+              <Input value={data.engineering.wetStampSize ?? ""} disabled />
+            </Item>
+          </RowItemsContainer>
+          <Item>
+            <Label>Engineering Notes</Label>
+            <BasicEditor
+              value={getEditorValue(data.engineering.engineeringNotes)}
+              disabled
+            />
+          </Item>
+        </div>
+      </section>
+      <section>
+        <h2 className="h4 mb-2">Electrical Engineering</h2>
+        <Item>
+          <Label>Engineering Notes</Label>
+          <BasicEditor
+            value={getEditorValue(data.electricalEngineering.electricalNotes)}
+            disabled
+          />
+        </Item>
+      </section>
+    </>
+  );
+}
+
+interface ContentProps {
+  geoId: string;
+  updatedAt: string;
+}
+
+function Content({ geoId, updatedAt }: ContentProps) {
+  const { data, isLoading } = useAhjNoteHistoryQuery({
+    geoId,
+    updatedAt,
+  });
+
+  if (isLoading || data == null) {
+    return <PageLoading isPageHeaderPlaceholder={false} />;
+  }
+
+  const metaData = (
+    <section>
+      <RowItemsContainer>
+        <Item>
+          <Label>Updated By</Label>
+          <Input value={data.general.updatedBy ?? "System"} disabled />
+        </Item>
+        <Item>
+          <Label>Type</Label>
+          <Input value={data.historyType} disabled />
+        </Item>
+        <Item>
+          <Label>Date Updated (EST)</Label>
+          <Input
+            value={
+              data.general.updatedAt == null
+                ? "-"
+                : formatInEST(data.general.updatedAt)
+            }
+            disabled
+          />
+        </Item>
+      </RowItemsContainer>
+    </section>
+  );
+
+  if (data.historyType === "Modified" && data.beforeModification != null) {
+    return (
+      <div className="space-y-4">
+        {metaData}
+        <Tabs defaultValue="before">
+          <TabsList>
+            <TabsTrigger value="before">Before Modification</TabsTrigger>
+            <TabsTrigger value="after">After Modification</TabsTrigger>
+          </TabsList>
+          <TabsContent value="before">
+            <div className="space-y-6">
+              <AhjNoteHistoryForm data={data.beforeModification} />
+            </div>
+          </TabsContent>
+          <TabsContent value="after">
+            <div className="space-y-6">
+              <AhjNoteHistoryForm data={data} />
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {metaData}
+      <AhjNoteHistoryForm data={data} />
+    </div>
+  );
+}
+
 interface AhjNoteHistorySheetProps extends DialogProps {
   geoId: string;
-  updatedAt?: string;
+  updatedAt: string;
 }
 
 function AhjNoteHistorySheet({
@@ -269,396 +525,13 @@ function AhjNoteHistorySheet({
   updatedAt,
   ...dialogProps
 }: AhjNoteHistorySheetProps) {
-  const { data: ahjNoteHistory } = useAhjNoteHistoryQuery({
-    geoId,
-    updatedAt: updatedAt ?? "",
-  });
-  const form = useForm<FieldValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: getFieldValuesFromAhjNote() as DefaultValues<FieldValues>, // editor value의 deep partial 문제로 typescript가 error를 발생시키나, 실제로는 문제 없음
-  });
-
-  useEffect(() => {
-    if (ahjNoteHistory) {
-      form.reset(getFieldValuesFromAhjNote(ahjNoteHistory));
-    }
-  }, [ahjNoteHistory, form]);
-
   return (
     <Sheet {...dialogProps}>
       <SheetContent className="w-full max-w-[1400px] sm:max-w-[1400px]">
-        <Form {...form}>
-          <form className="space-y-6 w-full">
-            <section>
-              <h2 className="h4 mb-2">General</h2>
-              <div className="flex flex-col gap-4">
-                <RowItemsContainer>
-                  <FormField
-                    control={form.control}
-                    name="general.name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="general.website"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Website</FormLabel>
-                        <FormControl>
-                          <InputEditor {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="general.specificFormRequired"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Specific Form Required?</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </RowItemsContainer>
-                <RowItemsContainer>
-                  <FormField
-                    control={form.control}
-                    name="general.buildingCodes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Building Codes</FormLabel>
-                        <FormControl>
-                          <BasicEditor {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="general.generalNotes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>General Notes</FormLabel>
-                        <FormControl>
-                          <BasicEditor {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </RowItemsContainer>
-              </div>
-            </section>
-            <section>
-              <h2 className="h4 mb-2">Design</h2>
-              <div className="flex flex-col gap-4">
-                <RowItemsContainer>
-                  <FormField
-                    control={form.control}
-                    name="design.pvMeterRequired"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>PV Meter Required?</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="design.acDisconnectRequired"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>AC Disconnect Required?</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="design.centerFed120Percent"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Center Fed 120%</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="design.deratedAmpacity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Derated Ampacity</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </RowItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="design.fireSetBack"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fire Setback</FormLabel>
-                      <FormControl>
-                        <BasicEditor {...field} disabled />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="design.utilityNotes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Utility Notes</FormLabel>
-                      <FormControl>
-                        <BasicEditor {...field} disabled />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="design.designNotes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Design Notes</FormLabel>
-                      <FormControl>
-                        <BasicEditor {...field} disabled />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </section>
-            <section>
-              <h2 className="h4 mb-2">Structural Engineering</h2>
-              <div className="flex flex-col gap-4">
-                <RowItemsContainer>
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.iebcAccepted"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>IEBC Accepted?</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.structuralObservationRequired"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Structural Observation Required?</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.digitalSignatureType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Digital Signature Type</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </RowItemsContainer>
-                <RowItemsContainer>
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.windUpliftCalculationRequired"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Wind Uplift Calculation Required?</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.windSpeed"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Wind Speed (mph)</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.windExposure"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Wind Exposure</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </RowItemsContainer>
-                <RowItemsContainer>
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.snowLoadGround"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Snow Load Ground (psf)</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.snowLoadFlatRoof"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Snow Load Flat Roof (psf)</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </RowItemsContainer>
-                <RowItemsContainer>
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.wetStampsRequired"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Wet Stamp Required?</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.ofWetStamps"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel># of Wet Stamps</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="structuralEngineering.wetStampSize"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Wet Stamp Size</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </RowItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="structuralEngineering.engineeringNotes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Engineering Notes</FormLabel>
-                      <FormControl>
-                        <BasicEditor {...field} disabled />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </section>
-            <section>
-              <h2 className="h4 mb-2">Electrical Engineering</h2>
-              <FormField
-                control={form.control}
-                name="electricalEngineering.engineeringNotes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Engineering Notes</FormLabel>
-                    <FormControl>
-                      <BasicEditor {...field} disabled />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </section>
-            <section>
-              <h2 className="h4 mb-2">History</h2>
-              <RowItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="general.updatedBy"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Modified By</FormLabel>
-                      <FormControl>
-                        <Input value={field.value ?? "System"} disabled />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="general.updatedAt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date Modified</FormLabel>
-                      <FormControl>
-                        <Input
-                          value={
-                            field.value === ""
-                              ? "-"
-                              : formatDateTime(field.value)
-                          }
-                          disabled
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </RowItemsContainer>
-            </section>
-          </form>
-        </Form>
+        <SheetHeader className="mb-6">
+          <SheetTitle>History</SheetTitle>
+        </SheetHeader>
+        <Content geoId={geoId} updatedAt={updatedAt} />
       </SheetContent>
     </Sheet>
   );
@@ -669,12 +542,10 @@ interface Props {
 }
 
 export default function AhjNoteHistories({ geoId }: Props) {
-  const [sheetState, setSheetState] = useState<
-    | {
-        open: false;
-      }
-    | { open: true; updatedAt: string }
-  >({ open: false });
+  const [sheetState, setSheetState] = useState<{
+    open: boolean;
+    updatedAt: string;
+  }>({ open: false, updatedAt: "" });
 
   return (
     <>
@@ -689,7 +560,7 @@ export default function AhjNoteHistories({ geoId }: Props) {
         geoId={geoId}
         onOpenChange={(open) => {
           if (!open) {
-            setSheetState({ open });
+            setSheetState((prev) => ({ ...prev, open }));
           }
         }}
       />

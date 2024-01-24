@@ -69,7 +69,6 @@ interface Props {
 }
 
 export default function TasksTable({ job, project }: Props) {
-  console.log("🚀 ~ file: TasksTable.tsx:182 ~ TasksTable ~ job:", job);
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
   const data = useMemo(

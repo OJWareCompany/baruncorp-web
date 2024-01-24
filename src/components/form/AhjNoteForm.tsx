@@ -596,43 +596,6 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
             </LoadingButton>
           </ItemsContainer>
         </section>
-        {/* <section>
-          <h2 className="h4 mb-2">History</h2>
-          <div className="flex flex-col gap-2">
-            <RowItemsContainer>
-              <FormField
-                control={form.control}
-                name="general.updatedBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Modified By</FormLabel>
-                    <FormControl>
-                      <Input value={field.value ?? "System"} disabled />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="general.updatedAt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date Modified</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={
-                          field.value === "" ? "-" : formatDateTime(field.value)
-                        }
-                        disabled
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </RowItemsContainer>
-            <AhjNoteHistory geoId={geoId} />
-          </div>
-        </section> */}
       </form>
     </Form>
   );

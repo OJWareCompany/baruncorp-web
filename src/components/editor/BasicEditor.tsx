@@ -9,14 +9,10 @@ interface Props extends Pick<PlateProps, "value" | "onChange" | "readOnly"> {
   disabled?: boolean;
 }
 
-export default function BasicEditor(props: Props) {
-  if (props.disabled) {
+export default function BasicEditor({ disabled, ...props }: Props) {
+  if (disabled) {
     return (
-      <Plate
-        plugins={basicEditorPlugins}
-        key={JSON.stringify(props.value)}
-        {...props}
-      >
+      <Plate plugins={basicEditorPlugins} {...props} readOnly>
         <Editor
           focusRing={false}
           variant={"outline"}
