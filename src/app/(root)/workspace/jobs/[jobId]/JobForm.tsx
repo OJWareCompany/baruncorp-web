@@ -217,7 +217,6 @@ export default function JobForm({ project, job }: Props) {
           email,
         })),
         {
-          shouldDirty: true,
           shouldValidate: true,
         }
       );
@@ -287,6 +286,12 @@ export default function JobForm({ project, job }: Props) {
             if (error.response?.data.errorCode.includes("40006")) {
               toast({
                 title: "Completed jobs cannot be modified",
+                variant: "destructive",
+              });
+            }
+            if (error.response?.data.errorCode.includes("40002")) {
+              toast({
+                title: error.response.data.message,
                 variant: "destructive",
               });
             }

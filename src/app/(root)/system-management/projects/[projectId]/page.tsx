@@ -31,7 +31,7 @@ export default function Page({ params: { projectId } }: Props) {
         items={[
           { href: "/system-management/projects", name: "Projects" },
           {
-            href: `/system-management/projects/${project?.projectId}`,
+            href: `/system-management/projects/${project.projectId}`,
             name: project.propertyAddress.fullAddress,
           },
         ]}

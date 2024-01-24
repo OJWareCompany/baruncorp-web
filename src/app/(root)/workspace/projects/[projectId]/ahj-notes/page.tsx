@@ -70,8 +70,8 @@ export default function Page({ params: { projectId } }: Props) {
             name: project.propertyAddress.fullAddress,
           },
           {
-            href: `/workspace/projects/${project.projectId}/ahj`,
-            name: "AHJ Note",
+            href: `/workspace/projects/${project.projectId}/ahj-notes`,
+            name: "AHJ Notes",
           },
         ]}
       />

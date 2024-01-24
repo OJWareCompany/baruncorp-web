@@ -25,6 +25,7 @@ const useClientNotesQuery = (
       api.clientNote
         .findClientNotePaginatedHttpControllerGet(params)
         .then(({ data }) => data),
+    enabled: params.organizationId != null && params.organizationId !== "",
     keepPreviousData,
   });
 };

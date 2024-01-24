@@ -1,43 +1,44 @@
 "use client";
-import React from "react";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
-import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useClientNotesQuery from "@/queries/useClientNotesQuery";
 import useClientNoteQuery from "@/queries/useClientNoteQuery";
-import ClientNoteHistories from "@/components/client-notes/ClientNoteHistories";
 import ClientNotesForm from "@/components/client-notes/ClientNotesForm";
+import ClientNoteHistories from "@/components/client-notes/ClientNoteHistories";
+import useProjectQuery from "@/queries/useProjectQuery";
 
 interface Props {
   params: {
-    organizationId: string;
+    projectId: string;
   };
 }
 
-export default function Page({ params: { organizationId } }: Props) {
+export default function Page({ params: { projectId } }: Props) {
   const {
-    data: organization,
-    isLoading: isOrganizationQueryLoading,
-    error: organizationQueryError,
-  } = useOrganizationQuery(organizationId);
+    data: project,
+    isLoading: isProjectQueryLoading,
+    error: projectQueryError,
+  } = useProjectQuery(projectId);
   const {
     data: clientNotes,
     isLoading: isClientNotesQueryLoading,
     error: clientNotesQueryError,
-  } = useClientNotesQuery({ organizationId });
+  } = useClientNotesQuery({
+    organizationId: project?.clientOrganizationId,
+  });
   const {
     data: clientNote,
     isLoading: isClientNoteQueryLoading,
     error: clientNoteQueryError,
   } = useClientNoteQuery(clientNotes?.items[0].id ?? "", true);
-  useNotFound(organizationQueryError);
+  useNotFound(projectQueryError);
   useNotFound(clientNotesQueryError);
   useNotFound(clientNoteQueryError);
 
   if (
-    isOrganizationQueryLoading ||
-    organization == null ||
+    isProjectQueryLoading ||
+    project == null ||
     isClientNotesQueryLoading ||
     clientNotes == null ||
     isClientNoteQueryLoading ||
@@ -46,17 +47,19 @@ export default function Page({ params: { organizationId } }: Props) {
     return <PageLoading />;
   }
 
+  const organizationId = project.clientOrganizationId;
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         items={[
-          { href: "/system-management/organizations", name: "Organizations" },
+          { href: "/workspace", name: "Workspace" },
           {
-            href: `/system-management/organizations/${organizationId}`,
-            name: organization.name,
+            href: `/workspace/projects/${project.projectId}`,
+            name: project.propertyAddress.fullAddress,
           },
           {
-            href: `/system-management/organizations/${organizationId}/client-notes`,
+            href: `/workspace/projects/${project.projectId}/client-notes`,
             name: "Client Notes",
           },
         ]}

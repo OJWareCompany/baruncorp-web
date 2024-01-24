@@ -80,7 +80,7 @@ export default function Page({ params: { jobId } }: Props) {
         items={[
           { href: "/workspace", name: "Workspace" },
           { href: `/workspace/jobs/${job.id}`, name: job.jobName },
-          { href: `/workspace/jobs/${job.id}/ahj`, name: "AHJ Note" },
+          { href: `/workspace/jobs/${job.id}/ahj-notes`, name: "AHJ Notes" },
         ]}
       />
       <AhjTabs project={project} />

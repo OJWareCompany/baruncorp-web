@@ -1,43 +1,44 @@
 "use client";
-import React from "react";
+import useJobQuery from "@/queries/useJobQuery";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
-import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useClientNotesQuery from "@/queries/useClientNotesQuery";
 import useClientNoteQuery from "@/queries/useClientNoteQuery";
-import ClientNoteHistories from "@/components/client-notes/ClientNoteHistories";
 import ClientNotesForm from "@/components/client-notes/ClientNotesForm";
+import ClientNoteHistories from "@/components/client-notes/ClientNoteHistories";
 
 interface Props {
   params: {
-    organizationId: string;
+    jobId: string;
   };
 }
 
-export default function Page({ params: { organizationId } }: Props) {
+export default function Page({ params: { jobId } }: Props) {
   const {
-    data: organization,
-    isLoading: isOrganizationQueryLoading,
-    error: organizationQueryError,
-  } = useOrganizationQuery(organizationId);
+    data: job,
+    isLoading: isJobQueryLoading,
+    error: jobQueryError,
+  } = useJobQuery(jobId);
   const {
     data: clientNotes,
     isLoading: isClientNotesQueryLoading,
     error: clientNotesQueryError,
-  } = useClientNotesQuery({ organizationId });
+  } = useClientNotesQuery({
+    organizationId: job?.clientInfo.clientOrganizationId,
+  });
   const {
     data: clientNote,
     isLoading: isClientNoteQueryLoading,
     error: clientNoteQueryError,
   } = useClientNoteQuery(clientNotes?.items[0].id ?? "", true);
-  useNotFound(organizationQueryError);
+  useNotFound(jobQueryError);
   useNotFound(clientNotesQueryError);
   useNotFound(clientNoteQueryError);
 
   if (
-    isOrganizationQueryLoading ||
-    organization == null ||
+    isJobQueryLoading ||
+    job == null ||
     isClientNotesQueryLoading ||
     clientNotes == null ||
     isClientNoteQueryLoading ||
@@ -46,17 +47,16 @@ export default function Page({ params: { organizationId } }: Props) {
     return <PageLoading />;
   }
 
+  const organizationId = job.clientInfo.clientOrganizationId;
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         items={[
-          { href: "/system-management/organizations", name: "Organizations" },
+          { href: "/workspace", name: "Workspace" },
+          { href: `/workspace/jobs/${job.id}`, name: job.jobName },
           {
-            href: `/system-management/organizations/${organizationId}`,
-            name: organization.name,
-          },
-          {
-            href: `/system-management/organizations/${organizationId}/client-notes`,
+            href: `/workspace/jobs/${job.id}/client-notes`,
             name: "Client Notes",
           },
         ]}
