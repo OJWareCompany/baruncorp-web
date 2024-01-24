@@ -42,7 +42,7 @@ export default function Page({ params: { projectId } }: Props) {
           <ProjectForm project={project} />
         </section>
         <section>
-          <h4 className="h4 mb-2">Jobs Related to Project</h4>
+          <h2 className="h4 mb-2">Jobs Related to Project</h2>
           <JobsTable project={project} />
         </section>
       </div>

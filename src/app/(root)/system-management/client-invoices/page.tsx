@@ -3,6 +3,7 @@ import NewClientInvoiceSheet from "./NewClientInvoiceSheet";
 import OverdueClientInvoicesTable from "./OverdueClientInvoicesTable";
 import ClientsWithOutstandingBalancesTable from "./ClientsWithOutstandingBalancesTable";
 import PageHeader from "@/components/PageHeader";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 export default function Page() {
   return (
@@ -16,30 +17,24 @@ export default function Page() {
         ]}
         action={<NewClientInvoiceSheet />}
       />
-      <section>
-        <h4 className="h4 mb-2">All</h4>
+      <CollapsibleSection title="All">
         <ClientInvoicesTable type="All" />
-      </section>
-      <section>
-        <h4 className="h4 mb-2">Unissued</h4>
+      </CollapsibleSection>
+      <CollapsibleSection title="Unissued">
         <ClientInvoicesTable type="Unissued" />
-      </section>
-      <section>
-        <h4 className="h4 mb-2">Open (Issued)</h4>
+      </CollapsibleSection>
+      <CollapsibleSection title="Open (Issued)">
         <ClientInvoicesTable type="Issued" />
-      </section>
-      <section>
-        <h4 className="h4 mb-2">Overdue</h4>
+      </CollapsibleSection>
+      <CollapsibleSection title="Overdue">
         <OverdueClientInvoicesTable />
-      </section>
-      <section>
-        <h4 className="h4 mb-2">Paid</h4>
+      </CollapsibleSection>
+      <CollapsibleSection title="Paid">
         <ClientInvoicesTable type="Paid" />
-      </section>
-      <section>
-        <h4 className="h4 mb-2">Clients With Outstanding Balances</h4>
+      </CollapsibleSection>
+      <CollapsibleSection title="Clients With Outstanding Balances">
         <ClientsWithOutstandingBalancesTable />
-      </section>
+      </CollapsibleSection>
     </div>
   );
 }

@@ -310,7 +310,7 @@ export default function NewClientInvoiceSheet() {
             watchServicePeriodMonth !== "" &&
             jobs && (
               <section>
-                <h4 className="h4 mb-2">Jobs</h4>
+                <h2 className="h4 mb-2">Jobs</h2>
                 <div className="flex flex-col gap-2">
                   <RowItemsContainer>
                     <Item>

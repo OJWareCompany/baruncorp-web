@@ -161,7 +161,7 @@ export default function TasksTable({ job, project }: Props) {
           <Button
             variant={"ghost"}
             size={"icon"}
-            className="w-9 h-9 [&[data-expand=open]>svg]:rotate-180"
+            className="w-9 h-9 [&[data-expand=closed]>svg]:-rotate-90"
             onClick={table.getToggleAllRowsExpandedHandler()}
             data-expand={table.getIsAllRowsExpanded() ? "open" : "closed"}
           >
@@ -174,7 +174,7 @@ export default function TasksTable({ job, project }: Props) {
               <Button
                 variant={"ghost"}
                 size={"icon"}
-                className="w-9 h-9 [&[data-expand=open]>svg]:rotate-180"
+                className="w-9 h-9 [&[data-expand=closed]>svg]:-rotate-90"
                 onClick={row.getToggleExpandedHandler()}
                 data-expand={row.getIsExpanded() ? "open" : "closed"}
               >

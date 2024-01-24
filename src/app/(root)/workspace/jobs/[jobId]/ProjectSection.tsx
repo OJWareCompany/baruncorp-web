@@ -15,7 +15,7 @@ export default function ProjectSection({ project }: Props) {
   return (
     <section>
       <Link href={`/workspace/projects/${project.projectId}`}>
-        <h4 className="h4 mb-2 underline inline-block">Project</h4>
+        <h2 className="h4 mb-2 underline inline-block">Project</h2>
       </Link>
       <ItemsContainer>
         <Item>

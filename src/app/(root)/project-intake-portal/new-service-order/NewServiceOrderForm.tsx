@@ -555,7 +555,7 @@ export default function NewServiceOrderForm() {
         </section>
         {isOrganizationSelected && (
           <section>
-            <h4 className="h4 mb-2">Project</h4>
+            <h2 className="h4 mb-2">Project</h2>
             <ItemsContainer>
               <Item>
                 <Label>Existing Project</Label>
@@ -617,7 +617,7 @@ export default function NewServiceOrderForm() {
         )}
         {isOrganizationSelected && isProjectQuerySuccess && (
           <section>
-            <h4 className="h4 mb-2">Jobs Related to Project</h4>
+            <h2 className="h4 mb-2">Jobs Related to Project</h2>
             <ItemsContainer>
               {/* TODO: column 추가 */}
               <JobsTable data={project.jobs} />
@@ -631,7 +631,7 @@ export default function NewServiceOrderForm() {
         )}
         {isOrganizationSelected && isProjectQuerySuccess && (
           <section>
-            <h4 className="h4 mb-2">Job</h4>
+            <h2 className="h4 mb-2">Job</h2>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <ItemsContainer>

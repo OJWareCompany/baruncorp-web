@@ -25,7 +25,7 @@ export default function Page() {
       <PageHeader items={[{ href: "/my/pto", name: "My PTO" }]} />
       <div className="space-y-6">
         <section>
-          <h4 className="h4 mb-2">History</h4>
+          <h2 className="h4 mb-2">History</h2>
           <HistoryTable ptos={ptos} />
         </section>
         <section>

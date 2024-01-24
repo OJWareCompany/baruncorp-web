@@ -67,22 +67,22 @@ export default function Page({ params: { jobId } }: Props) {
       <div className="space-y-6">
         <ProjectSection project={project} />
         <section>
-          <h4 className="h4 mb-2">Jobs Related to Project</h4>
+          <h2 className="h4 mb-2">Jobs Related to Project</h2>
           <JobsTable project={project} />
         </section>
         <section>
-          <h4 className="h4 mb-2">Job</h4>
+          <h2 className="h4 mb-2">Job</h2>
           <JobForm job={job} project={project} />
         </section>
         <section>
-          <h4 className="h4 mb-2">Job Note</h4>
+          <h2 className="h4 mb-2">Job Note</h2>
           <ItemsContainer>
             <JobNotesTable jobNotes={jobNotes} />
             <JobNoteForm job={job} />
           </ItemsContainer>
         </section>
         <section>
-          <h4 className="h4 mb-2">Status</h4>
+          <h2 className="h4 mb-2">Status</h2>
           <JobStatus
             job={job}
             readOnly={
@@ -94,7 +94,7 @@ export default function Page({ params: { jobId } }: Props) {
           />
         </section>
         <section>
-          <h4 className="h4 mb-2">Tasks</h4>
+          <h2 className="h4 mb-2">Tasks</h2>
           <TasksTable job={job} project={project} />
         </section>
       </div>
