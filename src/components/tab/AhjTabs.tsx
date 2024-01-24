@@ -1,4 +1,5 @@
 import AhjNoteHistories from "../ahj/AhjNoteHistories";
+import OpenAhjFolderButton from "../OpenAhjFolderButton";
 import { ProjectResponseDto } from "@/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transformProjectAssociatedRegulatoryBodyIntoArray } from "@/lib/ahj";
@@ -24,7 +25,8 @@ function AhjTabsContent({ geoId, value }: AhjTabsContentProps) {
   }
 
   return (
-    <TabsContent value={value} className="mt-4">
+    <TabsContent value={value} className="mt-2">
+      <OpenAhjFolderButton className="w-full mb-2" ahjNote={ahjNote} />
       <div className="space-y-6">
         <section>
           <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />
