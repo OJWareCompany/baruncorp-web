@@ -69,9 +69,8 @@ const columns = [
       return value;
     },
   }),
-  columnHelper.accessor("price", {
+  columnHelper.accessor((row) => `$${row.price}`, {
     header: "Price",
-    cell: ({ getValue, column }) => `$${getValue()}`,
   }),
   columnHelper.accessor("pricingType", {
     header: "Pricing Type",

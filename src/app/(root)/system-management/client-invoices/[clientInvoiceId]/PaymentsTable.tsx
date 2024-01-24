@@ -5,7 +5,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 import { useMemo } from "react";
 import PaymentDialog from "./PaymentDialog";
 import { InvoiceResponseDto } from "@/api";
@@ -34,6 +34,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["payments"][number]>();
@@ -48,16 +53,11 @@ export default function PaymentsTable({ clientInvoice }: Props) {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("paymentDate", {
-        header: "Payment Date (EST)",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
       columnHelper.accessor("paymentMethod", {
         header: "Payment Method",
       }),
-      columnHelper.accessor("amount", {
+      columnHelper.accessor((row) => `$${row.amount}`, {
         header: "Amount",
-        cell: ({ getValue, column }) => `$${getValue()}`,
       }),
       columnHelper.accessor("notes", {
         header: "Notes",
@@ -71,9 +71,12 @@ export default function PaymentsTable({ clientInvoice }: Props) {
           return value;
         },
       }),
+      columnHelper.accessor("paymentDate", {
+        header: "Payment Date (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
       columnHelper.accessor("canceledAt", {
         header: "Date Canceled (EST)",
-        size: 200,
         cell: ({ getValue, column }) => {
           const value = getValue();
 
@@ -86,12 +89,22 @@ export default function PaymentsTable({ clientInvoice }: Props) {
       }),
       columnHelper.display({
         id: "action",
-        size: 150,
         cell: ({ row }) => {
-          const isCanceled = row.original.canceledAt == null;
+          const isCanceled = row.original.canceledAt != null;
 
-          if (!isCanceled) {
-            return;
+          if (isCanceled) {
+            return (
+              <div className="text-right">
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button variant={"ghost"} size={"icon"} className="w-9 h-9">
+                      <AlertTriangle className="w-4 h-4 text-orange-500" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Canceled</TooltipContent>
+                </Tooltip>
+              </div>
+            );
           }
 
           return (

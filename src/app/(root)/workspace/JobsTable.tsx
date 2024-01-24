@@ -69,18 +69,18 @@ export default function JobsTable({ type }: Props) {
     useState<FindMyJobPaginatedHttpControllerFindJobParams>();
 
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${type} pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${type} pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(`${type}pageIndex`))
+      ? Number(searchParams.get(encodeURIComponent(`${type}pageIndex`)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${type} pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${type} pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(`${type}pageSize`))
+      ? Number(searchParams.get(encodeURIComponent(`${type}pageSize`)))
       : 10,
   };
 
   const nameSearchParam =
-    searchParams.get(encodeURIComponent(`${type} name`)) ?? "";
+    searchParams.get(encodeURIComponent(`${type}name`)) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type} jobStatus`))
+    searchParams.get(encodeURIComponent(`${type}jobStatus`))
   );
   const jobStatusSearchParam = jobStatusSearchParamParseResult.success
     ? jobStatusSearchParamParseResult.data
@@ -88,19 +88,19 @@ export default function JobsTable({ type }: Props) {
     ? ""
     : type;
   const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type} propertyType`))
+    searchParams.get(encodeURIComponent(`${type}propertyType`))
   );
   const propertyTypeSearchParam = propertyTypeSearchParamParseResult.success
     ? propertyTypeSearchParamParseResult.data
     : "";
   const mountingTypeSearchParamParseResult = MountingTypeEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type} mountingType`))
+    searchParams.get(encodeURIComponent(`${type}mountingType`))
   );
   const mountingTypeSearchParam = mountingTypeSearchParamParseResult.success
     ? mountingTypeSearchParamParseResult.data
     : "";
   const expediteSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type} expedite`))
+    searchParams.get(encodeURIComponent(`${type}expedite`))
   );
   const expediteSearchParam = expediteSearchParamParseResult.success
     ? expediteSearchParamParseResult.data
@@ -147,8 +147,8 @@ export default function JobsTable({ type }: Props) {
     }
   }, [isFetching, params]);
 
-  const columns = useMemo(() => {
-    return [
+  const columns = useMemo(
+    () => [
       columnHelper.accessor("isExpedited", {
         header: () => (
           <EnumHeader
@@ -158,19 +158,16 @@ export default function JobsTable({ type }: Props) {
             selectedValue={expediteSearchParam}
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${type} expedite`),
-                value
-              );
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.set(encodeURIComponent(`${type}expedite`), value);
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
             }}
             onResetButtonClick={() => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type} expedite`));
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.delete(encodeURIComponent(`${type}expedite`));
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
@@ -193,8 +190,8 @@ export default function JobsTable({ type }: Props) {
             buttonText="Name"
             onFilterButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(encodeURIComponent(`${type} name`), value);
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.set(encodeURIComponent(`${type}name`), value);
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
@@ -202,8 +199,8 @@ export default function JobsTable({ type }: Props) {
             isFiltered={nameSearchParam !== ""}
             onResetButtonClick={() => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type} name`));
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.delete(encodeURIComponent(`${type}name`));
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
@@ -223,18 +220,18 @@ export default function JobsTable({ type }: Props) {
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set(
-                encodeURIComponent(`${type} jobStatus`),
+                encodeURIComponent(`${type}jobStatus`),
                 value
               );
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
             }}
             onResetButtonClick={() => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type} jobStatus`));
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.delete(encodeURIComponent(`${type}jobStatus`));
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
 
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
@@ -272,20 +269,18 @@ export default function JobsTable({ type }: Props) {
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set(
-                encodeURIComponent(`${type} propertyType`),
+                encodeURIComponent(`${type}propertyType`),
                 value
               );
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
             }}
             onResetButtonClick={() => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(
-                encodeURIComponent(`${type} propertyType`)
-              );
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.delete(encodeURIComponent(`${type}propertyType`));
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
 
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
@@ -308,20 +303,18 @@ export default function JobsTable({ type }: Props) {
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set(
-                encodeURIComponent(`${type} mountingType`),
+                encodeURIComponent(`${type}mountingType`),
                 value
               );
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
               });
             }}
             onResetButtonClick={() => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(
-                encodeURIComponent(`${type} mountingType`)
-              );
-              newSearchParams.set(encodeURIComponent(`${type} pageIndex`), "0");
+              newSearchParams.delete(encodeURIComponent(`${type}mountingType`));
+              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
 
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
                 scroll: false,
@@ -353,20 +346,21 @@ export default function JobsTable({ type }: Props) {
         header: "Date Received (EST)",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
-    ];
-  }, [
-    expediteSearchParam,
-    jobStatusSearchParam,
-    mountingTypeSearchParam,
-    nameSearchParam,
-    params,
-    pathname,
-    propertyTypeSearchParam,
-    router,
-    searchParams,
-    syncedParams,
-    type,
-  ]);
+    ],
+    [
+      expediteSearchParam,
+      jobStatusSearchParam,
+      mountingTypeSearchParam,
+      nameSearchParam,
+      params,
+      pathname,
+      propertyTypeSearchParam,
+      router,
+      searchParams,
+      syncedParams,
+      type,
+    ]
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -379,11 +373,11 @@ export default function JobsTable({ type }: Props) {
         const { pageIndex, pageSize } = updater(pagination);
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(
-          encodeURIComponent(`${type} pageIndex`),
+          encodeURIComponent(`${type}pageIndex`),
           String(pageIndex)
         );
         newSearchParams.set(
-          encodeURIComponent(`${type} pageSize`),
+          encodeURIComponent(`${type}pageSize`),
           String(pageSize)
         );
         router.replace(`${pathname}?${newSearchParams.toString()}`, {

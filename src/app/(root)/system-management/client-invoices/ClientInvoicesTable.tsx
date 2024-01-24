@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -16,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -24,7 +24,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { InvoicePaginatedResponseDto } from "@/api";
+import {
+  FindInvoicePaginatedHttpControllerGetParams,
+  InvoicePaginatedResponseDto,
+} from "@/api";
 import {
   Select,
   SelectContent,
@@ -35,83 +38,220 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatInEST } from "@/lib/utils";
 import useClientInvoicesQuery from "@/queries/useClientInvoicesQuery";
-import { invoiceStatuses } from "@/lib/constants";
+import {
+  InvoiceStatusEnum,
+  invoiceStatuses,
+  transformInvoiceStatusEnumWithEmptyStringIntoNullableInvoiceStatusEnum,
+} from "@/lib/constants";
+import EnumHeader from "@/components/table/EnumHeader";
+import SearchHeader from "@/components/table/SearchHeader";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
 
-const columns = [
-  columnHelper.accessor("clientOrganization.name", {
-    header: "Organization",
-  }),
-  columnHelper.accessor("servicePeriodDate", {
-    header: "Service Period Month",
-    cell: ({ getValue }) =>
-      format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
-  }),
-  columnHelper.accessor("status", {
-    header: "Status",
-    cell: ({ getValue }) => {
-      const value = getValue();
-      const status = invoiceStatuses[value];
+const TABLE_NAME = "ClientInvoices";
 
-      return (
-        <div className={`flex items-center`}>
-          <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-          <span className="whitespace-nowrap">{status.value}</span>
-        </div>
-      );
-    },
-  }),
-  columnHelper.accessor("invoiceDate", {
-    header: "Invoice Date (EST)",
-    cell: ({ getValue }) => formatInEST(getValue()),
-  }),
-  columnHelper.accessor("terms", {
-    header: "Terms",
-  }),
-  columnHelper.accessor("dueDate", {
-    header: "Due Date (EST)",
-    cell: ({ getValue }) => formatInEST(getValue()),
-  }),
-  columnHelper.accessor("notesToClient", {
-    header: "Notes to Client",
-  }),
-  columnHelper.accessor("subtotal", {
-    header: "Subtotal",
-  }),
-  columnHelper.accessor("discount", {
-    header: "Discount",
-  }),
-  columnHelper.accessor("total", {
-    header: "Total",
-  }),
-  columnHelper.accessor("createdAt", {
-    header: "Date Created (EST)",
-    cell: ({ getValue }) => formatInEST(getValue()),
-  }),
-];
+interface Props {
+  type: "All" | InvoiceStatusEnum;
+}
 
-export default function ClientInvoicesTable() {
+export default function ClientInvoicesTable({ type }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindInvoicePaginatedHttpControllerGetParams>();
 
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(
+      encodeURIComponent(`${TABLE_NAME}${type}pageIndex`)
+    )
+      ? Number(
+          searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}pageIndex`))
+        )
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(
+      encodeURIComponent(`${TABLE_NAME}${type}pageSize`)
+    )
+      ? Number(
+          searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}pageSize`))
+        )
       : 10,
   };
+  const orgNameSearchParam =
+    searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}orgName`)) ?? "";
+  const invoiceStatusSearchParamParseResult = InvoiceStatusEnum.safeParse(
+    searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}invoiceStatus`))
+  );
+  const invoiceStatusSearchParam = invoiceStatusSearchParamParseResult.success
+    ? invoiceStatusSearchParamParseResult.data
+    : type === "All"
+    ? ""
+    : type;
 
-  const { data, isLoading } = useClientInvoicesQuery(
-    {
+  const params: FindInvoicePaginatedHttpControllerGetParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-    },
-    true
+      status:
+        transformInvoiceStatusEnumWithEmptyStringIntoNullableInvoiceStatusEnum.parse(
+          invoiceStatusSearchParam
+        ),
+      organizationName: orgNameSearchParam,
+    }),
+    [
+      invoiceStatusSearchParam,
+      orgNameSearchParam,
+      pagination.pageIndex,
+      pagination.pageSize,
+    ]
+  );
+
+  const { data, isLoading, isFetching } = useClientInvoicesQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("clientOrganization.name", {
+        header: () => (
+          <SearchHeader
+            initialValue={orgNameSearchParam}
+            buttonText="Organization"
+            onFilterButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set(
+                encodeURIComponent(`${TABLE_NAME}${type}orgName`),
+                value
+              );
+              newSearchParams.set(
+                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
+                "0"
+              );
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isFiltered={orgNameSearchParam !== ""}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete(
+                encodeURIComponent(`${TABLE_NAME}${type}orgName`)
+              );
+              newSearchParams.set(
+                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
+                "0"
+              );
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            isLoading={
+              syncedParams != null &&
+              params.organizationName !== syncedParams.organizationName
+            }
+          />
+        ),
+      }),
+      columnHelper.accessor("servicePeriodDate", {
+        header: "Service Period Month",
+        cell: ({ getValue }) =>
+          format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+      }),
+      columnHelper.accessor("status", {
+        header: () => (
+          <EnumHeader
+            buttonText="Status"
+            isFiltered={invoiceStatusSearchParam !== ""}
+            items={InvoiceStatusEnum.options}
+            onItemButtonClick={(value) => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.set(
+                encodeURIComponent(`${TABLE_NAME}${type}invoiceStatus`),
+                value
+              );
+              newSearchParams.set(
+                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
+                "0"
+              );
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete(
+                encodeURIComponent(`${TABLE_NAME}${type}invoiceStatus`)
+              );
+              newSearchParams.set(
+                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
+                "0"
+              );
+
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
+            selectedValue={invoiceStatusSearchParam}
+            isLoading={
+              syncedParams != null && params.status !== syncedParams.status
+            }
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = invoiceStatuses[value];
+
+          return (
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("invoiceDate", {
+        header: "Invoice Date (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+      columnHelper.accessor("terms", {
+        header: "Terms",
+      }),
+      columnHelper.accessor("dueDate", {
+        header: "Due Date (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+      columnHelper.accessor("notesToClient", {
+        header: "Notes to Client",
+      }),
+      columnHelper.accessor((row) => `$${row.subtotal}`, {
+        header: "Subtotal",
+      }),
+      columnHelper.accessor((row) => `$${row.discount}`, {
+        header: "Discount",
+      }),
+      columnHelper.accessor((row) => `$${row.total}`, {
+        header: "Total",
+      }),
+      columnHelper.accessor("createdAt", {
+        header: "Date Created (EST)",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+    ],
+    [
+      invoiceStatusSearchParam,
+      orgNameSearchParam,
+      params,
+      pathname,
+      router,
+      searchParams,
+      syncedParams,
+      type,
+    ]
   );
 
   const table = useReactTable({
@@ -124,8 +264,14 @@ export default function ClientInvoicesTable() {
       if (typeof updater === "function") {
         const { pageIndex, pageSize } = updater(pagination);
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
+        newSearchParams.set(
+          encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
+          String(pageIndex)
+        );
+        newSearchParams.set(
+          encodeURIComponent(`${TABLE_NAME}${type}pageSize`),
+          String(pageSize)
+        );
         router.replace(`${pathname}?${newSearchParams.toString()}`, {
           scroll: false,
         });

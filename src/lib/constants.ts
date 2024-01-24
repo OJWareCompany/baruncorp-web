@@ -426,6 +426,13 @@ export type UserStatusEnum = z.infer<typeof UserStatusEnum>;
 
 // "Unissued" | "Issued" | "Paid"
 export const InvoiceStatusEnum = z.enum(["Unissued", "Issued", "Paid"]);
+// "Unissued" | "Issued" | "Paid" | ""
+export const InvoiceStatusEnumWithEmptyString = InvoiceStatusEnum.or(
+  z.literal("")
+);
+// "Unissued" | "Issued" | "Paid" | "" => "Unissued" | "Issued" | "Paid" | null
+export const transformInvoiceStatusEnumWithEmptyStringIntoNullableInvoiceStatusEnum =
+  InvoiceStatusEnumWithEmptyString.transform((v) => (v === "" ? null : v));
 export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
 
 /* -------------------------------------------------------------------------- */

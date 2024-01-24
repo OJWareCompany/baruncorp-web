@@ -1,4 +1,5 @@
 "use client";
+import * as React from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -13,10 +14,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Loader2,
-  MoreHorizontal,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -25,11 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  FindPtoDetailPaginatedHttpControllerGetParams,
-  PtoDetailPaginatedResponseDto,
-  PtoDetailResponseDto,
-} from "@/api";
+import { ClientWithOutstandingBalancesPaginatedResponseDto } from "@/api";
 import {
   Select,
   SelectContent,
@@ -38,32 +32,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import usePtoDetailsQuery from "@/queries/usePtoDetailsQuery";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import SearchHeader from "@/components/table/SearchHeader";
+import useClientsWithOutstandingBalancesQuery from "@/queries/useClientsWithOutstandingBalancesQuery";
 
 const columnHelper =
-  createColumnHelper<PtoDetailPaginatedResponseDto["items"][number]>();
+  createColumnHelper<
+    ClientWithOutstandingBalancesPaginatedResponseDto["items"][number]
+  >();
 
-interface Props {
-  deletePto: (ptoId: string) => void;
-  modifyPto: (target: PtoDetailResponseDto) => void;
-}
+const columns = [
+  columnHelper.accessor("organizationName", {
+    header: "Organization",
+  }),
+  columnHelper.accessor((row) => `$${row.totalBalanceDue}`, {
+    header: "Total Balance Due",
+  }),
+];
 
-const TABLE_NAME = "PTODetails";
+const TABLE_NAME = "ClientsWithOutstandingBalances";
 
-export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
+export default function ClientsWithOutstandingBalancesTable() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [syncedParams, setSyncedParams] =
-    useState<FindPtoDetailPaginatedHttpControllerGetParams>();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
@@ -73,143 +63,20 @@ export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
       ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
       : 10,
   };
-  const nameSearchParam =
-    searchParams.get(encodeURIComponent(`${TABLE_NAME}name`)) ?? "";
 
-  const params: FindPtoDetailPaginatedHttpControllerGetParams = useMemo(
-    () => ({
+  const { data, isLoading } = useClientsWithOutstandingBalancesQuery(
+    {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      userName: nameSearchParam,
-    }),
-    [nameSearchParam, pagination.pageIndex, pagination.pageSize]
-  );
-
-  const { data, isLoading, isFetching } = usePtoDetailsQuery(params, true);
-
-  useEffect(() => {
-    if (!isFetching) {
-      setSyncedParams(params);
-    }
-  }, [isFetching, params]);
-
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor(
-        (row) => {
-          const { startedAt, endedAt } = row;
-          const formattedStartedAt = format(new Date(startedAt), "MM-dd-yyyy");
-          const formattedEndedAt = format(new Date(endedAt), "MM-dd-yyyy");
-          if (startedAt === endedAt) {
-            return formattedStartedAt;
-          }
-
-          return `${formattedStartedAt} ~ ${formattedEndedAt}`;
-        },
-        {
-          header: "Period",
-        }
-      ),
-      columnHelper.accessor(
-        (row) => `${row.userFirstName} ${row.userLastName}`,
-        {
-          id: "fullName",
-          header: () => (
-            <SearchHeader
-              initialValue={nameSearchParam}
-              buttonText="Name"
-              onFilterButtonClick={(value) => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}name`),
-                  value
-                );
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              isFiltered={nameSearchParam !== ""}
-              onResetButtonClick={() => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete(encodeURIComponent(`${TABLE_NAME}name`));
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              isLoading={
-                syncedParams != null &&
-                params.userName !== syncedParams.userName
-              }
-            />
-          ),
-        }
-      ),
-      columnHelper.accessor("ptoTypeName", {
-        header: "Type",
-      }),
-      columnHelper.accessor("amount", {
-        header: "Amount",
-      }),
-      columnHelper.display({
-        id: "action",
-        cell: ({ row }) => {
-          return (
-            <div className="text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      modifyPto(row.original);
-                    }}
-                  >
-                    Modify
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => {
-                      deletePto(row.id);
-                    }}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        },
-      }),
-    ],
-    [
-      deletePto,
-      modifyPto,
-      nameSearchParam,
-      params,
-      pathname,
-      router,
-      searchParams,
-      syncedParams,
-    ]
+    },
+    true
   );
 
   const table = useReactTable({
     data: data?.items ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getRowId: ({ id }) => id,
+    getRowId: ({ organizationId }) => organizationId,
     pageCount: data?.totalPage ?? -1,
     onPaginationChange: (updater) => {
       if (typeof updater === "function") {

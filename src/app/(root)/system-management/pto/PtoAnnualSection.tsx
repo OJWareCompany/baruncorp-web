@@ -107,7 +107,7 @@ const columns = [
   ),
 ];
 
-const TABLE_NAME = "PTO Annual";
+const TABLE_NAME = "PTOAnnual";
 
 export default function PtoAnnualSection() {
   const router = useRouter();
@@ -115,11 +115,11 @@ export default function PtoAnnualSection() {
   const searchParams = useSearchParams();
 
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME} pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME} pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
+      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME} pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME} pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`))
+      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
       : 10,
   };
 
@@ -131,7 +131,7 @@ export default function PtoAnnualSection() {
     .min(2018)
     .max(currentYear)
     .safeParse(
-      Number(searchParams.get(encodeURIComponent(`${TABLE_NAME} targetYear`)))
+      Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}targetYear`)))
     );
 
   const targetYearSearchParam = targetYearSearchParamParseResult.success
@@ -160,11 +160,11 @@ export default function PtoAnnualSection() {
         const { pageIndex, pageSize } = updater(pagination);
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME} pageIndex`),
+          encodeURIComponent(`${TABLE_NAME}pageIndex`),
           String(pageIndex)
         );
         newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME} pageSize`),
+          encodeURIComponent(`${TABLE_NAME}pageSize`),
           String(pageSize)
         );
         router.replace(`${pathname}?${newSearchParams.toString()}`, {
@@ -187,11 +187,11 @@ export default function PtoAnnualSection() {
           onValueChange={(newValue) => {
             const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.set(
-              encodeURIComponent(`${TABLE_NAME} targetYear`),
+              encodeURIComponent(`${TABLE_NAME}targetYear`),
               newValue
             );
             newSearchParams.set(
-              encodeURIComponent(`${TABLE_NAME} pageIndex`),
+              encodeURIComponent(`${TABLE_NAME}pageIndex`),
               "0"
             );
             router.replace(`${pathname}?${newSearchParams.toString()}`, {

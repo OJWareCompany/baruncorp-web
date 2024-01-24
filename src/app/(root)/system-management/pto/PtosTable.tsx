@@ -82,17 +82,17 @@ export default function PtosTable() {
   const queryClient = useQueryClient();
 
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME} pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME} pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
+      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME} pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME} pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`))
+      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
       : 10,
   };
   const nameSearchParam =
-    searchParams.get(encodeURIComponent(`${TABLE_NAME} name`)) ?? "";
+    searchParams.get(encodeURIComponent(`${TABLE_NAME}name`)) ?? "";
   const paidSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${TABLE_NAME} paid`))
+    searchParams.get(encodeURIComponent(`${TABLE_NAME}paid`))
   );
   const paidSearchParam = paidSearchParamParseResult.success
     ? paidSearchParamParseResult.data
@@ -151,11 +151,11 @@ export default function PtosTable() {
               onFilterButtonClick={(value) => {
                 const newSearchParams = new URLSearchParams(searchParams);
                 newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME} name`),
+                  encodeURIComponent(`${TABLE_NAME}name`),
                   value
                 );
                 newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME} pageIndex`),
+                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
                   "0"
                 );
                 router.replace(`${pathname}?${newSearchParams.toString()}`, {
@@ -165,11 +165,9 @@ export default function PtosTable() {
               isFiltered={nameSearchParam !== ""}
               onResetButtonClick={() => {
                 const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete(
-                  encodeURIComponent(`${TABLE_NAME} name`)
-                );
+                newSearchParams.delete(encodeURIComponent(`${TABLE_NAME}name`));
                 newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME} pageIndex`),
+                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
                   "0"
                 );
                 router.replace(`${pathname}?${newSearchParams.toString()}`, {
@@ -208,11 +206,11 @@ export default function PtosTable() {
             onItemButtonClick={(value) => {
               const newSearchParams = new URLSearchParams(searchParams);
               newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME} paid`),
+                encodeURIComponent(`${TABLE_NAME}paid`),
                 value
               );
               newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME} pageIndex`),
+                encodeURIComponent(`${TABLE_NAME}pageIndex`),
                 "0"
               );
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
@@ -221,9 +219,9 @@ export default function PtosTable() {
             }}
             onResetButtonClick={() => {
               const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${TABLE_NAME} paid`));
+              newSearchParams.delete(encodeURIComponent(`${TABLE_NAME}paid`));
               newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME} pageIndex`),
+                encodeURIComponent(`${TABLE_NAME}pageIndex`),
                 "0"
               );
               router.replace(`${pathname}?${newSearchParams.toString()}`, {
@@ -305,11 +303,11 @@ export default function PtosTable() {
         const { pageIndex, pageSize } = updater(pagination);
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME} pageIndex`),
+          encodeURIComponent(`${TABLE_NAME}pageIndex`),
           String(pageIndex)
         );
         newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME} pageSize`),
+          encodeURIComponent(`${TABLE_NAME}pageSize`),
           String(pageSize)
         );
         router.replace(`${pathname}?${newSearchParams.toString()}`, {
