@@ -933,12 +933,12 @@ export interface UpdateAhjNoteRequestDto {
 }
 
 export interface AhjNoteHistoryResponseDto {
-  id: number;
   historyType: "Created" | "Modified";
   general: General;
   design: Design;
   engineering: Engineering;
   electricalEngineering: ElectricalEngineering;
+  beforeModification?: AhjNoteHistoryResponseDto;
 }
 
 export interface AhjNoteHistoryListResponseDto {
@@ -1489,7 +1489,7 @@ export interface CreatePtoDetailRequestDto {
   /**
    * @min 0
    * @max 1
-   * @default 1.5
+   * @default 1
    */
   amountPerDay: number;
   /**
@@ -2188,17 +2188,6 @@ export interface InformationPaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: InformationResponseDto[];
-}
-
-export interface CreateClientNoteRequestDto {
-  /** @default "ebf47426-2f8d-4b7c-9ef1-81209db8e3ad" */
-  organizationId: string;
-  /** @default "Blah - Blah" */
-  designNotes: string;
-  /** @default "Blah - Blah" */
-  electricalEngineeringNotes: string;
-  /** @default "Blah - Blah" */
-  structuralEngineeringNotes: string;
 }
 
 export interface UpdateClientNoteRequestDto {
@@ -6220,18 +6209,35 @@ export class Api<
     /**
      * No description
      *
-     * @name CreateClientNoteHttpControllerPatch
-     * @request POST:/client-note
+     * @name UpdateClientNoteHttpControllerPatch
+     * @request PATCH:/client-note/{organizationId}
      */
-    createClientNoteHttpControllerPatch: (
-      data: CreateClientNoteRequestDto,
+    updateClientNoteHttpControllerPatch: (
+      organizationId: string,
+      data: UpdateClientNoteRequestDto,
       params: RequestParams = {}
     ) =>
-      this.request<IdResponse, any>({
-        path: `/client-note`,
-        method: "POST",
+      this.request<void, any>({
+        path: `/client-note/${organizationId}`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindClientNoteHttpControllerGet
+     * @request GET:/client-note/{clientNoteId}
+     */
+    findClientNoteHttpControllerGet: (
+      clientNoteId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<ClientNoteDetailResponseDto, any>({
+        path: `/client-note/${clientNoteId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
@@ -6250,42 +6256,6 @@ export class Api<
         path: `/client-note`,
         method: "GET",
         query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateClientNoteHttpControllerPatch
-     * @request PATCH:/client-note/{clientNoteId}
-     */
-    updateClientNoteHttpControllerPatch: (
-      clientNoteId: string,
-      data: UpdateClientNoteRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/client-note/${clientNoteId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindClientNoteHttpControllerGet
-     * @request GET:/client-note/{clientNoteSnapshotId}
-     */
-    findClientNoteHttpControllerGet: (
-      clientNoteSnapshotId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<ClientNoteDetailResponseDto, any>({
-        path: `/client-note/${clientNoteSnapshotId}`,
-        method: "GET",
         format: "json",
         ...params,
       }),

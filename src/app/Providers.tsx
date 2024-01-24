@@ -26,7 +26,6 @@ export default function Providers({ children }: Props) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            refetchOnWindowFocus: false,
             retry: (failureCount, error) => {
               if (failureCount > 2) {
                 return false;

@@ -5,7 +5,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
 import {
   Table,
   TableBody,
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { PtoPaginatedResponseDto } from "@/api";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<PtoPaginatedResponseDto["items"][number]>();
@@ -50,12 +51,12 @@ const columns = [
 ];
 
 interface Props {
-  items: PtoPaginatedResponseDto["items"];
+  ptos: PtoPaginatedResponseDto;
 }
 
-export default function PreviousTable({ items }: Props) {
+export default function HistoryTable({ ptos }: Props) {
   const table = useReactTable({
-    data: items,
+    data: ptos.items,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
@@ -92,6 +93,12 @@ export default function PreviousTable({ items }: Props) {
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className={cn(
+                  isWithinInterval(new Date(), {
+                    start: startOfDay(new Date(row.original.startedAt)),
+                    end: endOfDay(new Date(row.original.endedAt)),
+                  }) && "bg-muted/50"
+                )}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
