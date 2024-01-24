@@ -1,4 +1,4 @@
-import { DollarSign } from "lucide-react";
+import { DollarSign, ScrollText } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,14 @@ interface Props {
 export default function PageHeaderAction({ organization }: Props) {
   return (
     <div className="flex gap-2">
+      <Button asChild size={"sm"} variant={"outline"}>
+        <Link
+          href={`/system-management/organizations/${organization.id}/client-notes`}
+        >
+          <ScrollText className="mr-2 h-4 w-4" />
+          View Client Notes
+        </Link>
+      </Button>
       <Button variant={"outline"} size={"sm"} asChild>
         <Link
           href={`/system-management/organizations/${organization.id}/custom-pricings`}
