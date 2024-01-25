@@ -7,6 +7,7 @@ import { z } from "zod";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import JobsTable from "./JobsTable";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -136,7 +137,19 @@ export default function NewClientInvoiceSheet() {
         });
         setOpen(false);
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
   }
 
   return (

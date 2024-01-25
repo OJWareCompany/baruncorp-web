@@ -8,6 +8,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { PositionResponseDto } from "@/api";
 import {
@@ -74,14 +75,29 @@ export default function TasksTable({ position }: Props) {
                   taskId: row.original.taskId,
                   autoAssignmentType:
                     newValue as AutoAssignmentPropertyTypeEnum,
-                }).then(() => {
-                  toast({
-                    title: "Success",
+                })
+                  .then(() => {
+                    toast({
+                      title: "Success",
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: getPositionQueryKey(position.id),
+                    });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                   });
-                  queryClient.invalidateQueries({
-                    queryKey: getPositionQueryKey(position.id),
-                  });
-                });
               }}
             >
               <SelectTrigger>
@@ -128,11 +144,26 @@ export default function TasksTable({ position }: Props) {
                           deletePositionTaskMutateAsync({
                             positionId: position.id,
                             taskId: row.original.taskId,
-                          }).then(() => {
-                            queryClient.invalidateQueries({
-                              queryKey: getPositionQueryKey(position.id),
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({
+                                queryKey: getPositionQueryKey(position.id),
+                              });
+                            })
+                            .catch((error: AxiosError<ErrorResponseData>) => {
+                              if (
+                                error.response &&
+                                error.response.data.errorCode.filter(
+                                  (value) => value != null
+                                ).length !== 0
+                              ) {
+                                toast({
+                                  title: error.response.data.message,
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
                             });
-                          });
                         }}
                       >
                         Continue

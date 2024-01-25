@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Ban, Mail, RotateCcw } from "lucide-react";
 import React, { useState } from "react";
+import { AxiosError } from "axios";
 import { UserResponseDto } from "@/api";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -81,8 +82,18 @@ export default function StatusSectionHeaderAction({ user }: Props) {
                 });
                 toast({ title: "Success" });
               })
-              .catch(() => {
-                // TODO: error handling
+              .catch((error: AxiosError<ErrorResponseData>) => {
+                if (
+                  error.response &&
+                  error.response.data.errorCode.filter((value) => value != null)
+                    .length !== 0
+                ) {
+                  toast({
+                    title: error.response.data.message,
+                    variant: "destructive",
+                  });
+                  return;
+                }
               });
           }}
         >

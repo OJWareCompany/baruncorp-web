@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowUp, Loader2 } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import InvoiceDocument from "./InvoiceDocument";
 import { InvoiceResponseDto, OrganizationResponseDto } from "@/api";
 import { InvoiceStatusEnum, invoiceStatuses } from "@/lib/constants";
@@ -118,7 +119,20 @@ export default function ClientInvoiceStatus({
                         title: "Success",
                       });
                     })
-                    .catch(() => {});
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
                 };
               }}
             >

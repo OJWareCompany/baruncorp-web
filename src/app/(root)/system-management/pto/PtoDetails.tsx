@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { DayContent, DayContentProps } from "react-day-picker";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, isWithinInterval, startOfDay, subMonths } from "date-fns";
+import { AxiosError } from "axios";
 import PtoDialog from "./PtoDialog";
 import PtoDetailsTable from "./PtoDetailsTable";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CustomDayContentProps extends DayContentProps {
   deletePto: (ptoId: string) => void;
@@ -203,6 +205,7 @@ export default function PtoDetails() {
   const [ptoDialogState, setPtoDialogState] = useState<PtoDialogState>({
     open: false,
   });
+  const { toast } = useToast();
 
   const { mutateAsync: deletePtoDetailMutateAsync } =
     useDeletePtoDetailMutation();
@@ -322,14 +325,40 @@ export default function PtoDetails() {
 
                 deletePtoDetailMutateAsync({
                   ptoId: alertDialogState.ptoId,
-                }).then(() => {
-                  queryClient.invalidateQueries({
-                    queryKey: getPtoDetailsQueryKey({}),
+                })
+                  .then(() => {
+                    queryClient.invalidateQueries({
+                      queryKey: getPtoDetailsQueryKey({}),
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: getPtosQueryKey({}),
+                    });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    switch (error.response?.status) {
+                      case 400:
+                        if (error.response?.data.errorCode.includes("20809")) {
+                          toast({
+                            title: "PTO cannot be deleted if it is paid",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                    }
+
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                   });
-                  queryClient.invalidateQueries({
-                    queryKey: getPtosQueryKey({}),
-                  });
-                });
               }}
             >
               Continue

@@ -273,7 +273,9 @@ export default function JobForm({ project, job }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("40004")) {
               form.setError(
                 "numberOfWetStamp",
@@ -282,20 +284,36 @@ export default function JobForm({ project, job }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("40006")) {
               toast({
                 title: "Completed jobs cannot be modified",
                 variant: "destructive",
               });
+              return;
             }
+
             if (error.response?.data.errorCode.includes("40002")) {
               toast({
-                title: error.response.data.message,
+                title: "Job cannot be updated after invoice is issued",
                 variant: "destructive",
               });
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

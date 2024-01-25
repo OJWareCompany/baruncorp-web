@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import ItemsContainer from "@/components/ItemsContainer";
 import usePostServiceMutation from "@/mutations/usePostServiceMutation";
 import { getServicesQueryKey } from "@/queries/useServicesQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Props {
   onSuccess?: () => void;
@@ -49,6 +50,7 @@ export default function ServiceForm({ onSuccess }: Props) {
     isComRevPriceExist: false,
   });
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const formSchema = useMemo(
     () =>
@@ -291,7 +293,9 @@ export default function ServiceForm({ onSuccess }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("40101")) {
               form.setError(
                 "billingCode",
@@ -300,8 +304,20 @@ export default function ServiceForm({ onSuccess }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

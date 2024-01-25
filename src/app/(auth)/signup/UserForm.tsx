@@ -122,16 +122,17 @@ export default function UserForm({ user }: Props) {
         toast({ title: "Sign-up success" });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.data.statusCode) {
-        //   case 404:
-        //     toast({
-        //       title: "Invalid code",
-        //       description:
-        //         "Please check your email again. If the problem persists, please contact the Barun Corp Manager.",
-        //       variant: "destructive",
-        //     });
-        //     break;
-        // }
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

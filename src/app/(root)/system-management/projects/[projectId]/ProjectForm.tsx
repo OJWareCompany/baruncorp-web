@@ -34,6 +34,7 @@ import {
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   organization: z
@@ -82,6 +83,8 @@ export default function ProjectForm({ project }: Props) {
     defaultValues: getFieldValues(project),
   });
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const { mutateAsync } = usePatchProjectMutation(projectId);
 
   async function onSubmit(values: FieldValues) {
@@ -136,7 +139,9 @@ export default function ProjectForm({ project }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("30003")) {
               form.setError(
                 "projectNumber",
@@ -145,8 +150,20 @@ export default function ProjectForm({ project }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

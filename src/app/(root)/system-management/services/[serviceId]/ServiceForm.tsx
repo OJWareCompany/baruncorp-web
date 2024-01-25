@@ -40,6 +40,7 @@ import ItemsContainer from "@/components/ItemsContainer";
 import { ServiceResponseDto } from "@/api";
 import usePatchServiceMutation from "@/mutations/usePatchServiceMutation";
 import { getServiceQueryKey } from "@/queries/useServiceQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Props {
   service: ServiceResponseDto;
@@ -78,6 +79,7 @@ export default function ServiceForm({ service }: Props) {
     };
   });
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const formSchema = useMemo(
     () =>
@@ -337,28 +339,17 @@ export default function ServiceForm({ service }: Props) {
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.status) {
-        //   case 409:
-        //     if (error.response?.data.errorCode.includes("30002")) {
-        //       form.setError(
-        //         "address",
-        //         {
-        //           message: `${values.address.fullAddress} already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //     }
-        //     if (error.response?.data.errorCode.includes("30003")) {
-        //       form.setError(
-        //         "projectNumber",
-        //         {
-        //           message: `${values.projectNumber} already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //     }
-        //     break;
-        // }
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

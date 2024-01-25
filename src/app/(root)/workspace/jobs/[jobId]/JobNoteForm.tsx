@@ -3,6 +3,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -16,6 +17,7 @@ import LoadingButton from "@/components/LoadingButton";
 import usePostJobNoteMutation from "@/mutations/usePostJobNoteMutation";
 import { getJobNotesQueryKey } from "@/queries/useJobNotesQuery";
 import { JobResponseDto } from "@/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   content: z.string().trim().min(1, {
@@ -39,6 +41,7 @@ export default function JobNoteForm({ job }: Props) {
 
   const { mutateAsync } = usePostJobNoteMutation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
@@ -51,7 +54,19 @@ export default function JobNoteForm({ job }: Props) {
           queryKey: getJobNotesQueryKey(job.id),
         });
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
   }
 
   return (

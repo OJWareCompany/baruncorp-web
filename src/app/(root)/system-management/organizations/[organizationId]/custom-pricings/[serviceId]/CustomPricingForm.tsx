@@ -38,6 +38,7 @@ import { AffixInput } from "@/components/AffixInput";
 import LoadingButton from "@/components/LoadingButton";
 import usePutCustomPricingMutation from "@/mutations/usePutCustomPricingMutation";
 import { getCustomPricingQueryKey } from "@/queries/useCustomPricingQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Props {
   customPricing: CustomPricingResponseDto;
@@ -68,6 +69,8 @@ export default function CustomPricingForm({
   });
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const { mutateAsync } = usePutCustomPricingMutation({
     organizationId: organization.id,
     serviceId: customPricing.serviceId,
@@ -395,9 +398,6 @@ export default function CustomPricingForm({
         ),
     })
       .then(() => {
-        // toast({
-        //   title: "Success",
-        // });
         queryClient.invalidateQueries({
           queryKey: getCustomPricingQueryKey(
             organization.id,
@@ -406,28 +406,17 @@ export default function CustomPricingForm({
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.status) {
-        //   case 409:
-        //     serviceIdForm.setError(
-        //       "serviceId",
-        //       {
-        //         message: `This Organization already has Custom Pricing for the ${service.name}`,
-        //       },
-        //       { shouldFocus: true }
-        //     );
-        //     // if (error.response?.data.errorCode.includes("20001")) {
-        //     // form.setError(
-        //     //   "",
-        //     //   {
-        //     //     message: `${name} already exists`,
-        //     //   },
-        //     //   {
-        //     //     shouldFocus: true,
-        //     //   }
-        //     // );
-        //     // }
-        //     break;
-        // }
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

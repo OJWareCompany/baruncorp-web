@@ -3,6 +3,7 @@ import { Bell, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useSocketContext } from "./SocketProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -111,13 +112,28 @@ export default function Notification() {
                   onClick={(event) => {
                     event.stopPropagation();
 
-                    mutateAsync({ assigningTaskAlertId: value.id }).then(() => {
-                      queryClient.invalidateQueries({
-                        queryKey: getNotificationsQueryKey({
-                          limit: Number.MAX_SAFE_INTEGER,
-                        }),
+                    mutateAsync({ assigningTaskAlertId: value.id })
+                      .then(() => {
+                        queryClient.invalidateQueries({
+                          queryKey: getNotificationsQueryKey({
+                            limit: Number.MAX_SAFE_INTEGER,
+                          }),
+                        });
+                      })
+                      .catch((error: AxiosError<ErrorResponseData>) => {
+                        if (
+                          error.response &&
+                          error.response.data.errorCode.filter(
+                            (value) => value != null
+                          ).length !== 0
+                        ) {
+                          toast({
+                            title: error.response.data.message,
+                            variant: "destructive",
+                          });
+                          return;
+                        }
                       });
-                    });
                   }}
                 >
                   <X className="h-4 w-4" />

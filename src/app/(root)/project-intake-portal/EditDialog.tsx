@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Value } from "@udecode/plate-common";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Form,
   FormControl,
@@ -66,8 +67,18 @@ export default function EditDialog({ information }: Props) {
         setOpen(false);
         toast({ title: "Success" });
       })
-      .catch(() => {
-        // TODO
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

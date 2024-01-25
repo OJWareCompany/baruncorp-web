@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import { AxiosError } from "axios";
 import { OrganizationResponseDto } from "@/api";
 import {
   Form,
@@ -43,6 +44,7 @@ import LoadingButton from "@/components/LoadingButton";
 import usePatchOrganizationMutation from "@/mutations/usePatchOrganizationMutation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getOrganizationQueryKey } from "@/queries/useOrganizationQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z
   .object({
@@ -148,6 +150,7 @@ export default function OrganizationForm({ organization }: Props) {
 
   const { mutateAsync } = usePatchOrganizationMutation(organizationId);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (organization) {
@@ -190,7 +193,19 @@ export default function OrganizationForm({ organization }: Props) {
           queryKey: getOrganizationQueryKey(organizationId),
         });
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
   }
 
   return (

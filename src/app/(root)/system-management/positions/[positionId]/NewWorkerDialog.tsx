@@ -27,6 +27,7 @@ import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import { PositionResponseDto } from "@/api";
 import WorkersCombobox from "@/components/combobox/WorkerCombobox";
 import usePostUserPositionMutation from "@/mutations/usePostUserPositionMutation";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   userId: z.string().trim().min(1, { message: "User is required" }),
@@ -43,6 +44,7 @@ export default function NewTaskDialog({ position }: Props) {
   const { mutateAsync } = usePostUserPositionMutation();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
@@ -75,7 +77,9 @@ export default function NewTaskDialog({ position }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("20209")) {
               form.setError(
                 "userId",
@@ -84,8 +88,20 @@ export default function NewTaskDialog({ position }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

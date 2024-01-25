@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import AssigneeCombobox from "@/components/combobox/AssigneeCombobox";
 import {
   AlertDialog,
@@ -14,6 +15,7 @@ import usePatchAssignMutation from "@/mutations/usePatchAssignMutation";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import { JobStatusEnum } from "@/lib/constants";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Props {
   assignedTaskId: string;
@@ -33,6 +35,7 @@ export default function AssigneeField({
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { mutateAsync } = usePatchAssignMutation(assignedTaskId);
 
@@ -71,8 +74,19 @@ export default function AssigneeField({
                       queryKey: getProjectQueryKey(projectId),
                     });
                   })
-                  .catch(() => {
-                    // TODO: error handling
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                   });
               }}
             >

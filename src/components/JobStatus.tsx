@@ -1,7 +1,7 @@
 import { MoreHorizontal } from "lucide-react";
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useToast } from "./ui/use-toast";
 import { JobResponseDto, ProjectResponseDto } from "@/api";
 import { Button } from "@/components/ui/button";
@@ -194,7 +194,20 @@ export default function JobStatus({ job, project, readOnly = false }: Props) {
                             title: "Success",
                           });
                         })
-                        .catch(() => {});
+                        .catch((error: AxiosError<ErrorResponseData>) => {
+                          if (
+                            error.response &&
+                            error.response.data.errorCode.filter(
+                              (value) => value != null
+                            ).length !== 0
+                          ) {
+                            toast({
+                              title: error.response.data.message,
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                        });
                     })
                     .catch(console.error);
                   // patchJobCancelMutateAsync()

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Form,
   FormControl,
@@ -43,6 +44,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import usePatchInvoiceMutation from "@/mutations/usePatchInvoiceMutation";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   organization: z
@@ -90,6 +92,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
     clientInvoice.id
   );
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     form.reset(getFieldValues(clientInvoice));
@@ -108,7 +111,19 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
           queryKey: getClientInvoiceQueryKey(clientInvoice.id),
         });
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
   }
 
   return (

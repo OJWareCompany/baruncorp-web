@@ -39,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -70,6 +71,7 @@ interface Props {
 export default function TaskForm({ task, service }: Props) {
   const { taskId } = useParams() as { taskId: string };
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { mutateAsync } = usePatchTaskMutation(taskId);
 
@@ -93,28 +95,17 @@ export default function TaskForm({ task, service }: Props) {
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.status) {
-        //   case 409:
-        //     if (error.response?.data.errorCode.includes("30002")) {
-        //       form.setError(
-        //         "address",
-        //         {
-        //           message: `${values.address.fullAddress} already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //     }
-        //     if (error.response?.data.errorCode.includes("30003")) {
-        //       form.setError(
-        //         "projectNumber",
-        //         {
-        //           message: `${values.projectNumber} already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //     }
-        //     break;
-        // }
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

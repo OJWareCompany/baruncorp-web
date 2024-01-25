@@ -31,6 +31,7 @@ import { AffixInput } from "@/components/AffixInput";
 import LoadingButton from "@/components/LoadingButton";
 import usePatchExpensePricingMutation from "@/mutations/usePatchExpensePricingMutation";
 import { getExpensePricingQueryKey } from "@/queries/useExpensePricingQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z
   .object({
@@ -114,6 +115,8 @@ export default function ExpensePricingForm({
   organization,
 }: Props) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const { mutateAsync } = usePatchExpensePricingMutation({
     organizationId: organization.id,
     taskId: expensePricing.taskId,
@@ -155,28 +158,17 @@ export default function ExpensePricingForm({
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.status) {
-        //   case 409:
-        //     serviceIdForm.setError(
-        //       "serviceId",
-        //       {
-        //         message: `This Organization already has Expense Pricing for the ${service.name}`,
-        //       },
-        //       { shouldFocus: true }
-        //     );
-        //     // if (error.response?.data.errorCode.includes("20001")) {
-        //     // form.setError(
-        //     //   "",
-        //     //   {
-        //     //     message: `${name} already exists`,
-        //     //   },
-        //     //   {
-        //     //     shouldFocus: true,
-        //     //   }
-        //     // );
-        //     // }
-        //     break;
-        // }
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

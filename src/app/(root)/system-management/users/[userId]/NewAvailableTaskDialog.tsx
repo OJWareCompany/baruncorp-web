@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AxiosError } from "axios";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,7 @@ import usePostUserAvailableTaskMutation from "@/mutations/usePostUserAvailableTa
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import NoLicensedTasksCombobox from "@/components/combobox/NoLicensedTasksCombobox";
 import { UserResponseDto } from "@/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   taskId: z.string().trim().min(1, { message: "Task is required" }),
@@ -52,6 +54,8 @@ export default function NewAvailableTaskDialog({ user }: Props) {
   const { mutateAsync } = usePostUserAvailableTaskMutation(userId);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
@@ -74,8 +78,18 @@ export default function NewAvailableTaskDialog({ user }: Props) {
         });
         setOpen(false);
       })
-      .catch(() => {
-        // TODO
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

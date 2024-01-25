@@ -58,11 +58,23 @@ export default function SizeForRevisionField({
               case 400:
                 if (error.response?.data.errorCode.includes("40002")) {
                   toast({
-                    title: "Cannot be updated after an invoice has been issued",
+                    title: "Job cannot be updated after invoice is issued",
                     variant: "destructive",
                   });
+                  return;
                 }
-                break;
+            }
+
+            if (
+              error.response &&
+              error.response.data.errorCode.filter((value) => value != null)
+                .length !== 0
+            ) {
+              toast({
+                title: error.response.data.message,
+                variant: "destructive",
+              });
+              return;
             }
           });
       }}

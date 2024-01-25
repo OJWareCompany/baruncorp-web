@@ -36,6 +36,7 @@ import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import usePostPositionTaskMutation from "@/mutations/usePostPositionTaskMutation";
 import PositionsCombobox from "@/components/combobox/PositionsCombobox";
 import { TaskResponseDto } from "@/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   positionId: z.string().trim().min(1, { message: "Position is required" }),
@@ -52,6 +53,8 @@ export default function NewPositionDialog({ task }: Props) {
   const { taskId } = useParams() as { taskId: string };
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
@@ -89,8 +92,20 @@ export default function NewPositionDialog({ task }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

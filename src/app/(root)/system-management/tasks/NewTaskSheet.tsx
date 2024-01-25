@@ -91,28 +91,17 @@ export default function NewTaskSheet() {
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.status) {
-        //   case 409:
-        //     if (error.response?.data.errorCode.includes("40100")) {
-        //       form.setError(
-        //         "name",
-        //         {
-        //           message: `${values.name} already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //     }
-        //     if (error.response?.data.errorCode.includes("40101")) {
-        //       form.setError(
-        //         "billingCode",
-        //         {
-        //           message: `${values.billingCode} already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //     }
-        //     break;
-        // }
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

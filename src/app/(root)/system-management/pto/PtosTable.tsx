@@ -64,6 +64,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 const columnHelper =
   createColumnHelper<PtoPaginatedResponseDto["items"][number]>();
@@ -80,6 +81,7 @@ export default function PtosTable() {
     { open: false } | { open: true; ptoId: string; isPaid: boolean }
   >({ open: false });
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
@@ -483,16 +485,18 @@ export default function PtosTable() {
                     });
                   })
                   .catch((error: AxiosError<ErrorResponseData>) => {
-                    // switch (error.response?.status) {
-                    //   case 400:
-                    //     if (error.response?.data.errorCode.includes("20818")) {
-                    //       toast({
-                    //         title: "PTO must not be greater than 50",
-                    //         variant: "destructive",
-                    //       });
-                    //     }
-                    //     break;
-                    // }
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                   });
               }}
             >

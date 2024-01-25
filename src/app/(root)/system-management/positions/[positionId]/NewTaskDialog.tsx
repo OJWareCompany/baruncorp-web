@@ -36,6 +36,7 @@ import usePostPositionTaskMutation from "@/mutations/usePostPositionTaskMutation
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import TasksCombobox from "@/components/combobox/TasksCombobox";
 import { PositionResponseDto } from "@/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   taskId: z.string().trim().min(1, { message: "Task is required" }),
@@ -53,6 +54,7 @@ export default function NewTaskDialog({ position }: Props) {
   const { mutateAsync } = usePostPositionTaskMutation(positionId);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -84,8 +86,20 @@ export default function NewTaskDialog({ position }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

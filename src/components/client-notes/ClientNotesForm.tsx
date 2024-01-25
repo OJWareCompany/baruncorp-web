@@ -4,6 +4,8 @@ import { DefaultValues, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useToast } from "../ui/use-toast";
 import {
   Form,
   FormControl,
@@ -55,6 +57,7 @@ export default function ClientNotesForm({ clientNote, organizationId }: Props) {
   });
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { mutateAsync } = usePatchClientNoteMutation(organizationId);
 
@@ -77,8 +80,18 @@ export default function ClientNotesForm({ clientNote, organizationId }: Props) {
           queryKey: getClientNotesQueryKey({ organizationId }),
         });
       })
-      .catch(() => {
-        // TODO
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

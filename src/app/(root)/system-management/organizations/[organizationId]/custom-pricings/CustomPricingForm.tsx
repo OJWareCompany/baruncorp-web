@@ -377,14 +377,28 @@ export default function CustomPricingForm({
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
           case 409:
-            serviceIdForm.setError(
-              "serviceId",
-              {
-                message: `This Organization already has Custom Pricing for this`,
-              },
-              { shouldFocus: true }
-            );
-            break;
+            if (error.response?.data.errorCode.includes("30101")) {
+              serviceIdForm.setError(
+                "serviceId",
+                {
+                  message: `This Organization already has Custom Pricing for this`,
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

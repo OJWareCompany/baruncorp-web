@@ -9,6 +9,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Table,
   TableBody,
@@ -32,6 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useDeleteUserLicenseMutation from "@/mutations/useDeleteUserLicenseMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const columnHelper = createColumnHelper<UserResponseDto["licenses"][number]>();
 
@@ -44,6 +46,7 @@ export default function LicensesTable({ licenses }: Props) {
   const { userId } = useParams() as { userId: string };
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { mutateAsync } = useDeleteUserLicenseMutation();
 
   const columns = useMemo(
@@ -95,11 +98,26 @@ export default function LicensesTable({ licenses }: Props) {
                             abbreviation: row.original.abbreviation,
                             type: row.original.type,
                             userId,
-                          }).then(() => {
-                            queryClient.invalidateQueries({
-                              queryKey: getUserQueryKey(userId),
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({
+                                queryKey: getUserQueryKey(userId),
+                              });
+                            })
+                            .catch((error: AxiosError<ErrorResponseData>) => {
+                              if (
+                                error.response &&
+                                error.response.data.errorCode.filter(
+                                  (value) => value != null
+                                ).length !== 0
+                              ) {
+                                toast({
+                                  title: error.response.data.message,
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
                             });
-                          });
                         }}
                       >
                         Continue
@@ -113,7 +131,7 @@ export default function LicensesTable({ licenses }: Props) {
         },
       }),
     ],
-    [mutateAsync, queryClient, userId]
+    [mutateAsync, queryClient, toast, userId]
   );
 
   const table = useReactTable({

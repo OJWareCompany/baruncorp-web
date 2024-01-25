@@ -183,7 +183,9 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
                   },
                   { shouldFocus: true }
                 );
+                return;
               }
+
               if (error.response?.data.errorCode.includes("20806")) {
                 form.setError(
                   "rangeOfDays",
@@ -192,26 +194,50 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
                   },
                   { shouldFocus: true }
                 );
+                return;
               }
+
               if (error.response?.data.errorCode.includes("20808")) {
                 form.setError(
                   "rangeOfDays",
                   {
-                    message: `Pto cannot be registered by combining days before and after the date of joining the company`,
+                    message: `PTO cannot be registered by combining days before and after the date of joining the company`,
                   },
                   { shouldFocus: true }
                 );
+                return;
               }
+
+              if (error.response?.data.errorCode.includes("20810")) {
+                toast({
+                  title: "PTO cannot be registered if it is paid",
+                  variant: "destructive",
+                });
+                return;
+              }
+
               if (error.response?.data.errorCode.includes("20822")) {
                 form.setError(
                   "rangeOfDays",
                   {
-                    message: `Pto cannot be registered before the date of joining the company`,
+                    message: `PTO cannot be registered before the date of joining the company`,
                   },
                   { shouldFocus: true }
                 );
+                return;
               }
-              break;
+          }
+
+          if (
+            error.response &&
+            error.response.data.errorCode.filter((value) => value != null)
+              .length !== 0
+          ) {
+            toast({
+              title: error.response.data.message,
+              variant: "destructive",
+            });
+            return;
           }
         });
     }
@@ -244,15 +270,6 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
         .catch((error: AxiosError<ErrorResponseData>) => {
           switch (error.response?.status) {
             case 400:
-              if (error.response?.data.errorCode.includes("20813")) {
-                form.setError(
-                  "rangeOfDays",
-                  {
-                    message: `Range of Days overlaps with an already existing pto day`,
-                  },
-                  { shouldFocus: true }
-                );
-              }
               if (error.response?.data.errorCode.includes("20806")) {
                 form.setError(
                   "rangeOfDays",
@@ -261,26 +278,61 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
                   },
                   { shouldFocus: true }
                 );
+                return;
               }
+
               if (error.response?.data.errorCode.includes("20808")) {
                 form.setError(
                   "rangeOfDays",
                   {
-                    message: `Pto cannot be registered by combining days before and after the date of joining the company`,
+                    message: `PTO cannot be registered by combining days before and after the date of joining the company`,
                   },
                   { shouldFocus: true }
                 );
+                return;
               }
+
+              if (error.response?.data.errorCode.includes("20810")) {
+                toast({
+                  title: "PTO cannot be updated if it is paid",
+                  variant: "destructive",
+                });
+                return;
+              }
+
+              if (error.response?.data.errorCode.includes("20813")) {
+                form.setError(
+                  "rangeOfDays",
+                  {
+                    message: `Range of Days overlaps with an already existing pto day`,
+                  },
+                  { shouldFocus: true }
+                );
+                return;
+              }
+
               if (error.response?.data.errorCode.includes("20822")) {
                 form.setError(
                   "rangeOfDays",
                   {
-                    message: `Pto cannot be registered before the date of joining the company`,
+                    message: `PTO cannot be registered before the date of joining the company`,
                   },
                   { shouldFocus: true }
                 );
+                return;
               }
-              break;
+          }
+
+          if (
+            error.response &&
+            error.response.data.errorCode.filter((value) => value != null)
+              .length !== 0
+          ) {
+            toast({
+              title: error.response.data.message,
+              variant: "destructive",
+            });
+            return;
           }
         });
     }

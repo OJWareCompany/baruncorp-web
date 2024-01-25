@@ -76,8 +76,20 @@ export default function PtoField({ id, pto }: Props) {
                 title: "PTO must not be greater than 50",
                 variant: "destructive",
               });
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

@@ -28,6 +28,7 @@ import {
 } from "@/lib/constants";
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -56,6 +57,7 @@ interface Props {
 export default function PositionForm({ position }: Props) {
   const { positionId } = useParams() as { positionId: string };
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { mutateAsync } = usePatchPositionMutation(positionId);
 
@@ -88,8 +90,20 @@ export default function PositionForm({ position }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

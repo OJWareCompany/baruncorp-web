@@ -61,6 +61,7 @@ import LoadingButton from "@/components/LoadingButton";
 import PageLoading from "@/components/PageLoading";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { isEditorValueEmpty } from "@/lib/plate-utils";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function NewServiceOrderForm() {
   const [organizationId, setOrganizationId] = useState("");
@@ -297,6 +298,7 @@ export default function NewServiceOrderForm() {
   const watchClientUser = form.watch("clientUser");
   const watchServices = form.watch("services");
   const watchTypeOfWetStamp = form.watch("typeOfWetStamp");
+  const { toast } = useToast();
 
   const { data: user } = useUserQuery(watchClientUser.id);
 
@@ -518,7 +520,9 @@ export default function NewServiceOrderForm() {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("40004")) {
               form.setError(
                 "numberOfWetStamp",
@@ -527,8 +531,20 @@ export default function NewServiceOrderForm() {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

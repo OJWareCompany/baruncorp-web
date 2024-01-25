@@ -7,6 +7,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, X } from "lucide-react";
 import { useMemo } from "react";
+import { AxiosError } from "axios";
 import PaymentDialog from "./PaymentDialog";
 import { InvoiceResponseDto } from "@/api";
 import { AffixInput } from "@/components/AffixInput";
@@ -39,6 +40,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["payments"][number]>();
@@ -50,6 +52,7 @@ interface Props {
 export default function PaymentsTable({ clientInvoice }: Props) {
   const { mutateAsync } = usePatchPaymentCancelMutation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const columns = useMemo(
     () => [
@@ -137,7 +140,20 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                                 ),
                               });
                             })
-                            .catch(() => {});
+                            .catch((error: AxiosError<ErrorResponseData>) => {
+                              if (
+                                error.response &&
+                                error.response.data.errorCode.filter(
+                                  (value) => value != null
+                                ).length !== 0
+                              ) {
+                                toast({
+                                  title: error.response.data.message,
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+                            });
                         }}
                       >
                         Continue
@@ -151,7 +167,7 @@ export default function PaymentsTable({ clientInvoice }: Props) {
         },
       }),
     ],
-    [clientInvoice.id, mutateAsync, queryClient]
+    [clientInvoice.id, mutateAsync, queryClient, toast]
   );
 
   const table = useReactTable({

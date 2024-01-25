@@ -4,6 +4,7 @@ import { AlignJustify, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { TaskResponseDto } from "@/api";
 import {
@@ -28,6 +29,7 @@ import {
 import useDeletePositionTaskMutation from "@/mutations/useDeletePositionTaskMutation";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import usePatchTaskPositionOrderMutation from "@/mutations/usePatchTaskPositionOrderMutation";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Props {
   task: TaskResponseDto;
@@ -42,6 +44,8 @@ export default function PositionsTable({ task }: Props) {
   const isInitialRef = useRef(true);
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const { mutateAsync: deletePositionTaskMutateAsync } =
     useDeletePositionTaskMutation();
   const { mutateAsync: patchTaskPositionOrderMutateAsync } =
@@ -76,17 +80,32 @@ export default function PositionsTable({ task }: Props) {
         ...value,
         order: index + 1,
       })),
-    }).then(() => {
-      queryClient.invalidateQueries({
-        queryKey: getTaskQueryKey(task.id),
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: getTaskQueryKey(task.id),
+        });
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
-    });
   }, [
     list.items,
     patchTaskPositionOrderMutateAsync,
     queryClient,
     session.status,
     task.id,
+    toast,
   ]);
 
   return (
@@ -161,11 +180,26 @@ export default function PositionsTable({ task }: Props) {
                           deletePositionTaskMutateAsync({
                             positionId: item.positionId,
                             taskId: task.id,
-                          }).then(() => {
-                            queryClient.invalidateQueries({
-                              queryKey: getTaskQueryKey(task.id),
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({
+                                queryKey: getTaskQueryKey(task.id),
+                              });
+                            })
+                            .catch((error: AxiosError<ErrorResponseData>) => {
+                              if (
+                                error.response &&
+                                error.response.data.errorCode.filter(
+                                  (value) => value != null
+                                ).length !== 0
+                              ) {
+                                toast({
+                                  title: error.response.data.message,
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
                             });
-                          });
                         }}
                       >
                         Continue

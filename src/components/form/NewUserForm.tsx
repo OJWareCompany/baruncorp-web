@@ -12,6 +12,7 @@ import OrganizationsCombobox from "../combobox/OrganizationsCombobox";
 import { Checkbox } from "../ui/checkbox";
 import LoadingButton from "../LoadingButton";
 import DateOfJoiningDatePicker from "../DateOfJoiningDatePicker";
+import { useToast } from "../ui/use-toast";
 import usePostUserMutation from "@/mutations/usePostUserMutation";
 import {
   Form,
@@ -107,6 +108,7 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
     name: "emailAddressesToReceiveDeliverables",
   });
   const { mutateAsync } = usePostUserMutation();
+  const { toast } = useToast();
 
   const watchTenure = form.watch("tenure");
   const watchDateOfJoining = form.watch("dateOfJoining");
@@ -171,8 +173,8 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
           case 409:
             if (error.response?.data.errorCode.includes("10017")) {
               form.setError(
@@ -184,8 +186,20 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
                   shouldFocus: true,
                 }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

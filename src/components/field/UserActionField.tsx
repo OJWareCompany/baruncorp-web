@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Mail, MoreHorizontal } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { Button } from "../ui/button";
 import { useToast } from "../ui/use-toast";
 import { UserPaginatedResponseDto } from "@/api";
@@ -98,8 +99,19 @@ export default function UserActionField({
                       });
                       toast({ title: "Success" });
                     })
-                    .catch(() => {
-                      // TODO: error handling
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
                     });
                   return;
                 }}

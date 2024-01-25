@@ -9,6 +9,7 @@ import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Table,
   TableBody,
@@ -87,14 +88,29 @@ export default function AvailableTasksTable({ user }: Props) {
                   taskId: row.original.id,
                   autoAssignmentType:
                     newValue as AutoAssignmentPropertyTypeEnum,
-                }).then(() => {
-                  toast({
-                    title: "Success",
+                })
+                  .then(() => {
+                    toast({
+                      title: "Success",
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: getUserQueryKey(user.id),
+                    });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                   });
-                  queryClient.invalidateQueries({
-                    queryKey: getUserQueryKey(user.id),
-                  });
-                });
               }}
             >
               <SelectTrigger>
@@ -145,11 +161,26 @@ export default function AvailableTasksTable({ user }: Props) {
                           deleteUserAvailableTaskMutateAsync({
                             userId: user.id,
                             taskId: row.original.id,
-                          }).then(() => {
-                            queryClient.invalidateQueries({
-                              queryKey: getUserQueryKey(user.id),
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({
+                                queryKey: getUserQueryKey(user.id),
+                              });
+                            })
+                            .catch((error: AxiosError<ErrorResponseData>) => {
+                              if (
+                                error.response &&
+                                error.response.data.errorCode.filter(
+                                  (value) => value != null
+                                ).length !== 0
+                              ) {
+                                toast({
+                                  title: error.response.data.message,
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
                             });
-                          });
                         }}
                       >
                         Continue

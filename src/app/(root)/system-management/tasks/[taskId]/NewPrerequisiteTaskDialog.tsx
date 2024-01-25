@@ -27,6 +27,7 @@ import usePostPrerequisiteTaskMutation from "@/mutations/usePostPrerequisiteTask
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import TasksCombobox from "@/components/combobox/TasksCombobox";
 import { TaskResponseDto } from "@/api";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   taskId: z.string().trim().min(1, { message: "Task is required" }),
@@ -43,6 +44,7 @@ export default function NewPrerequisiteTaskDialog({ task }: Props) {
   const { mutateAsync } = usePostPrerequisiteTaskMutation(taskId);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
@@ -74,8 +76,20 @@ export default function NewPrerequisiteTaskDialog({ task }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

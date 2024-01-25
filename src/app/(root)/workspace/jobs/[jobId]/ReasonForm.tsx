@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import LoadingButton from "@/components/LoadingButton";
 import usePatchAssignedTaskRejectMutation from "@/mutations/usePatchAssignedTaskRejectMutation";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   reason: z.string().trim().min(1, { message: "Reason is required" }),
@@ -34,6 +35,7 @@ export default function ReasonForm({ assignedTaskId, onSuccess }: Props) {
   });
   const { mutateAsync: patchAssignedTaskRejectMutateAsync } =
     usePatchAssignedTaskRejectMutation(assignedTaskId);
+  const { toast } = useToast();
 
   async function onSubmit(values: FieldValues) {
     await patchAssignedTaskRejectMutateAsync({ reason: values.reason })
@@ -41,19 +43,17 @@ export default function ReasonForm({ assignedTaskId, onSuccess }: Props) {
         onSuccess?.();
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.status) {
-        //   case 409:
-        //     if (error.response?.data.errorCode.includes("20301")) {
-        //       form.setError(
-        //         "taskId",
-        //         {
-        //           message: `This task already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //     }
-        //     break;
-        // }
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

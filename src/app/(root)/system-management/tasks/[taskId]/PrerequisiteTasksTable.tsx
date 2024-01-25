@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Table,
   TableBody,
@@ -31,6 +32,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const columnHelper =
   createColumnHelper<TaskResponseDto["prerequisiteTask"][number]>();
@@ -43,6 +45,7 @@ export default function PrerequisiteTasksTable({ task }: Props) {
   const router = useRouter();
   const { mutateAsync } = useDeletePrerequisiteTaskMutation(task.id);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const columns = useMemo(
     () => [
@@ -76,11 +79,26 @@ export default function PrerequisiteTasksTable({ task }: Props) {
                         onClick={() => {
                           mutateAsync({
                             prerequisiteTaskId: row.original.taskId,
-                          }).then(() => {
-                            queryClient.invalidateQueries({
-                              queryKey: getTaskQueryKey(task.id),
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({
+                                queryKey: getTaskQueryKey(task.id),
+                              });
+                            })
+                            .catch((error: AxiosError<ErrorResponseData>) => {
+                              if (
+                                error.response &&
+                                error.response.data.errorCode.filter(
+                                  (value) => value != null
+                                ).length !== 0
+                              ) {
+                                toast({
+                                  title: error.response.data.message,
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
                             });
-                          });
                         }}
                       >
                         Continue
@@ -94,7 +112,7 @@ export default function PrerequisiteTasksTable({ task }: Props) {
         },
       }),
     ],
-    [mutateAsync, queryClient, task.id]
+    [mutateAsync, queryClient, task.id, toast]
   );
 
   const table = useReactTable({

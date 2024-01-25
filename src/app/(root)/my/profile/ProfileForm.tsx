@@ -27,6 +27,7 @@ import {
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
 import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
 import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
   organization: z.string().trim().min(1, {
@@ -95,6 +96,7 @@ export default function ProfileForm({ profile }: Props) {
 
   const queryClient = useQueryClient();
   const { mutateAsync } = usePatchProfileMutation();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (profile) {
@@ -130,7 +132,9 @@ export default function ProfileForm({ profile }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("20821")) {
               form.setError(
                 "dateOfJoining",
@@ -139,8 +143,20 @@ export default function ProfileForm({ profile }: Props) {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

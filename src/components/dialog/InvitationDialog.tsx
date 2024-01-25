@@ -1,4 +1,5 @@
 import React from "react";
+import { AxiosError } from "axios";
 import { Button } from "../ui/button";
 import LoadingButton from "../LoadingButton";
 import { useToast } from "../ui/use-toast";
@@ -69,13 +70,28 @@ export default function InvitationDialog({
               postInvitationsMutateAsync({
                 email: dialogState.email,
                 organizationId: dialogState.organizationId,
-              }).then(() => {
-                toast({
-                  title: "Success",
+              })
+                .then(() => {
+                  toast({
+                    title: "Success",
+                  });
+                  onInviteSuccess();
+                  closeDialog();
+                })
+                .catch((error: AxiosError<ErrorResponseData>) => {
+                  if (
+                    error.response &&
+                    error.response.data.errorCode.filter(
+                      (value) => value != null
+                    ).length !== 0
+                  ) {
+                    toast({
+                      title: error.response.data.message,
+                      variant: "destructive",
+                    });
+                    return;
+                  }
                 });
-                onInviteSuccess();
-                closeDialog();
-              });
             }}
             isLoading={isPostInvitationMutationLoading}
           >

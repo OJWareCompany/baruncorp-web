@@ -38,6 +38,7 @@ import {
 import usePostPaymentMutation from "@/mutations/usePostPaymentMutation";
 import { AffixInput } from "@/components/AffixInput";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
+import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z
   .object({
@@ -82,6 +83,7 @@ export default function PaymentDialog() {
   });
   const { mutateAsync } = usePostPaymentMutation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
@@ -108,7 +110,9 @@ export default function PaymentDialog() {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
+
             if (error.response?.data.errorCode.includes("70203")) {
               form.setError(
                 "amount",
@@ -117,8 +121,20 @@ export default function PaymentDialog() {
                 },
                 { shouldFocus: true }
               );
+              return;
             }
-            break;
+        }
+
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
         }
       });
   }

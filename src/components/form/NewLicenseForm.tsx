@@ -2,10 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { AxiosError } from "axios";
 import LoadingButton from "../LoadingButton";
 import DatePicker from "../DatePicker";
 import StatesCombobox from "../combobox/StatesCombobox";
 import WorkersCombobox from "../combobox/WorkerCombobox";
+import { useToast } from "../ui/use-toast";
 import {
   Form,
   FormControl,
@@ -51,6 +53,7 @@ export default function NewLicenseForm({
   filteringIds,
 }: Props) {
   const { mutateAsync } = usePostUserLicenseMutation();
+  const { toast } = useToast();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -73,8 +76,18 @@ export default function NewLicenseForm({
       .then(() => {
         onSuccess?.();
       })
-      .catch(() => {
-        // TODO
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
       });
   }
 

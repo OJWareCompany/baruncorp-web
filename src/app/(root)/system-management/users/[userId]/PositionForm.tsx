@@ -81,7 +81,9 @@ export default function PositionForm({ positionId }: Props) {
                                 },
                                 { shouldFocus: true }
                               );
+                              return;
                             }
+
                             if (
                               error.response?.data.errorCode.includes("20209")
                             ) {
@@ -92,8 +94,21 @@ export default function PositionForm({ positionId }: Props) {
                                 },
                                 { shouldFocus: true }
                               );
+                              return;
                             }
-                            break;
+                        }
+
+                        if (
+                          error.response &&
+                          error.response.data.errorCode.filter(
+                            (value) => value != null
+                          ).length !== 0
+                        ) {
+                          toast({
+                            title: error.response.data.message,
+                            variant: "destructive",
+                          });
+                          return;
                         }
                       });
                   }}
