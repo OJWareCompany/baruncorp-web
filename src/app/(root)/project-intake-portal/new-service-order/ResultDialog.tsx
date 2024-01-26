@@ -3,6 +3,7 @@ import { DialogProps } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNewServiceOrderData } from "./NewServiceOrderDataProvider";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ interface Props extends DialogProps {
 }
 
 export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
+  const { isBarunCorpMember } = useNewServiceOrderData();
   const router = useRouter();
   const { toast } = useToast();
   const [progressState, setProgressState] = useState({
@@ -147,7 +149,12 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
                 return;
               }
 
-              router.push(`/system-management/jobs/${jobId}`);
+              if (isBarunCorpMember) {
+                router.push(`/system-management/jobs/${jobId}`);
+                return;
+              }
+
+              router.push(`/jobs/${jobId}`);
             }}
             disabled={files.length !== 0 && progressState.value !== 100}
           >

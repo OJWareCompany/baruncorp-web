@@ -87,7 +87,7 @@ export default function JobsTable({ project }: Props) {
   const router = useRouter();
 
   const table = useReactTable({
-    data: project.jobs.filter((value) => value.id != null), // TODO: db 싱크가 안맞아서 생기는 이상한 데이터에 대응함 나중에 제거
+    data: project.jobs,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,

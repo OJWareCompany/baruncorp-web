@@ -24,11 +24,15 @@ interface Props {
   organizationId: string;
   userId: string;
   onUserIdChange: (newUserId: string) => void;
+  disabled?: boolean;
   modal?: boolean;
 }
 
 const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ organizationId, userId, onUserIdChange, modal = false }, ref) => {
+  (
+    { organizationId, userId, onUserIdChange, disabled = false, modal = false },
+    ref
+  ) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -64,7 +68,7 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
               variant="outline"
               className="px-3 font-normal gap-2"
               ref={ref}
-              disabled={isUsersQueryLoading}
+              disabled={disabled}
             >
               <span className="flex-1 text-start">
                 {!isSelected
