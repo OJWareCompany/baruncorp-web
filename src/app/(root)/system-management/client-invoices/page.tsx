@@ -7,7 +7,7 @@ import CollapsibleSection from "@/components/CollapsibleSection";
 
 export default function Page() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="space-y-4">
       <PageHeader
         items={[
           {
@@ -17,24 +17,26 @@ export default function Page() {
         ]}
         action={<NewClientInvoiceSheet />}
       />
-      <CollapsibleSection title="All">
-        <ClientInvoicesTable type="All" />
-      </CollapsibleSection>
-      <CollapsibleSection title="Unissued">
-        <ClientInvoicesTable type="Unissued" />
-      </CollapsibleSection>
-      <CollapsibleSection title="Open (Issued)">
-        <ClientInvoicesTable type="Issued" />
-      </CollapsibleSection>
-      <CollapsibleSection title="Overdue">
-        <OverdueClientInvoicesTable />
-      </CollapsibleSection>
-      <CollapsibleSection title="Paid">
-        <ClientInvoicesTable type="Paid" />
-      </CollapsibleSection>
-      <CollapsibleSection title="Clients With Outstanding Balances">
-        <ClientsWithOutstandingBalancesTable />
-      </CollapsibleSection>
+      <div className="space-y-6">
+        <CollapsibleSection title="All">
+          <ClientInvoicesTable type="All" />
+        </CollapsibleSection>
+        <CollapsibleSection title="Unissued">
+          <ClientInvoicesTable type="Unissued" />
+        </CollapsibleSection>
+        <CollapsibleSection title="Open (Issued)">
+          <ClientInvoicesTable type="Issued" />
+        </CollapsibleSection>
+        <CollapsibleSection title="Overdue">
+          <OverdueClientInvoicesTable />
+        </CollapsibleSection>
+        <CollapsibleSection title="Paid">
+          <ClientInvoicesTable type="Paid" />
+        </CollapsibleSection>
+        <CollapsibleSection title="Clients With Outstanding Balances">
+          <ClientsWithOutstandingBalancesTable />
+        </CollapsibleSection>
+      </div>
     </div>
   );
 }

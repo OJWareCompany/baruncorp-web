@@ -6,6 +6,7 @@ import AhjNoteForm from "@/components/form/AhjNoteForm";
 import useNotFound from "@/hook/useNotFound";
 import AhjNoteHistories from "@/components/ahj/AhjNoteHistories";
 import OpenAhjFolderButton from "@/components/OpenAhjFolderButton";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -41,10 +42,9 @@ export default function Page({ params: { geoId } }: Props) {
         <section>
           <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />
         </section>
-        <section className="space-y-2">
-          <h2 className="h4">History</h2>
+        <CollapsibleSection title="History">
           <AhjNoteHistories geoId={geoId} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

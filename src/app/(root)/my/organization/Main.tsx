@@ -1,7 +1,7 @@
 "use client";
-
 import OrganizationForm from "./OrganizationForm";
 import UsersTable from "./UsersTable";
+import CollapsibleSection from "@/components/CollapsibleSection";
 import PageLoading from "@/components/PageLoading";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useProfileQuery from "@/queries/useProfileQuery";
@@ -25,10 +25,9 @@ export default function Main() {
       <section>
         <OrganizationForm organization={organization} />
       </section>
-      <section className="space-y-2">
-        <h2 className="h4">Users</h2>
+      <CollapsibleSection title="Users">
         <UsersTable organization={organization} />
-      </section>
+      </CollapsibleSection>
     </div>
   );
 }

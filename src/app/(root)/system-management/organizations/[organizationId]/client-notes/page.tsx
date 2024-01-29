@@ -8,6 +8,7 @@ import useClientNotesQuery from "@/queries/useClientNotesQuery";
 import useClientNoteQuery from "@/queries/useClientNoteQuery";
 import ClientNoteHistories from "@/components/client-notes/ClientNoteHistories";
 import ClientNotesForm from "@/components/client-notes/ClientNotesForm";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -68,10 +69,10 @@ export default function Page({ params: { organizationId } }: Props) {
             organizationId={organizationId}
           />
         </section>
-        <section>
-          <h2 className="h4 mb-2">History</h2>
+
+        <CollapsibleSection title="History">
           <ClientNoteHistories organizationId={organizationId} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

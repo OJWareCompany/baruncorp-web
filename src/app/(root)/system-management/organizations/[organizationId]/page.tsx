@@ -7,6 +7,7 @@ import PageHeader from "@/components/PageHeader";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -42,13 +43,14 @@ export default function Page({ params: { organizationId } }: Props) {
         <section>
           <OrganizationForm organization={organization} />
         </section>
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="h4">Users</h2>
+        <CollapsibleSection
+          title="Users"
+          action={
             <NewUserByOrganizationSheet organizationId={organizationId} />
-          </div>
+          }
+        >
           <UsersTable organization={organization} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

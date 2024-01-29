@@ -1,5 +1,6 @@
 import AhjNoteHistories from "../ahj/AhjNoteHistories";
 import OpenAhjFolderButton from "../OpenAhjFolderButton";
+import CollapsibleSection from "../CollapsibleSection";
 import { ProjectResponseDto } from "@/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transformProjectAssociatedRegulatoryBodyIntoArray } from "@/lib/ahj";
@@ -31,10 +32,9 @@ function AhjTabsContent({ geoId, value }: AhjTabsContentProps) {
         <section>
           <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />
         </section>
-        <section className="space-y-2">
-          <h2 className="h4">History</h2>
+        <CollapsibleSection title="History">
           <AhjNoteHistories geoId={geoId} />
-        </section>
+        </CollapsibleSection>
       </div>
     </TabsContent>
   );

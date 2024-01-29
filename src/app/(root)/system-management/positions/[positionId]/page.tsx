@@ -8,6 +8,7 @@ import PageHeader from "@/components/PageHeader";
 import usePositionQuery from "@/queries/usePositionQuery";
 import useNotFound from "@/hook/useNotFound";
 import PageLoading from "@/components/PageLoading";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -42,20 +43,18 @@ export default function Page({ params: { positionId } }: Props) {
         <section>
           <PositionForm position={position} />
         </section>
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="h4">Tasks</h2>
-            <NewTaskDialog position={position} />
-          </div>
+        <CollapsibleSection
+          title="Tasks"
+          action={<NewTaskDialog position={position} />}
+        >
           <TasksTable position={position} />
-        </section>
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="h4">Workers</h2>
-            <NewWorkerDialog position={position} />
-          </div>
+        </CollapsibleSection>
+        <CollapsibleSection
+          title="Workers"
+          action={<NewWorkerDialog position={position} />}
+        >
           <WorkersTable position={position} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

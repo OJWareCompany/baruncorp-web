@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/select";
 import { getCustomPricingsQueryKey } from "@/queries/useCustomPricingsQuery";
 import { getCreatableCustomPricingsQueryKey } from "@/queries/useCreatableCustomPricingsQuery";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   onSuccess?: () => void;
@@ -424,229 +425,204 @@ export default function CustomPricingForm({
   if (service.pricingType === "Standard") {
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
-          <section className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="h4">Residential New Price</h2>
-              {standardSectionExisting.isResiNewPriceExist && (
-                <Button
-                  variant={"outline"}
-                  size={"sm"}
-                  className="h-[28px] text-xs px-2"
-                  onClick={() => {
-                    setStandardSectionExisting((prev) => ({
-                      ...prev,
-                      isResiNewPriceExist: false,
-                    }));
-                    form.setValue(
-                      "standardPricing.residentialNewServicePricingType",
-                      "",
-                      {
-                        shouldDirty: true,
-                      }
-                    );
-                    form.setValue(
-                      "standardPricing.residentialNewServiceFlatPrice",
-                      "",
-                      {
-                        shouldDirty: true,
-                      }
-                    );
-                    form.setValue(
-                      "standardPricing.residentialNewServiceFlatGmPrice",
-                      "",
-                      {
-                        shouldDirty: true,
-                      }
-                    );
-                    form.setValue(
-                      "standardPricing.residentialNewServiceTiers",
-                      [],
-                      {
-                        shouldDirty: true,
-                      }
-                    );
-                  }}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Remove
-                </Button>
-              )}
-            </div>
-            {standardSectionExisting.isResiNewPriceExist ? (
-              <ItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="standardPricing.residentialNewServicePricingType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel required>Charge Type</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            if (
-                              value ===
-                              ResidentialNewPriceChargeTypeEnum.Values.Flat
-                            ) {
-                              form.setValue(
-                                "standardPricing.residentialNewServiceFlatPrice",
-                                "",
-                                {
-                                  shouldDirty: true,
-                                }
-                              );
-                              form.setValue(
-                                "standardPricing.residentialNewServiceFlatGmPrice",
-                                "",
-                                {
-                                  shouldDirty: true,
-                                }
-                              );
-                            } else {
-                              form.setValue(
-                                "standardPricing.residentialNewServiceTiers",
-                                [
-                                  {
-                                    startingPoint: "1",
-                                    finishingPoint: "",
-                                    price: "",
-                                    gmPrice: "",
-                                  },
-                                ],
-                                { shouldDirty: true }
-                              );
-                            }
-                          }}
-                        >
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue placeholder="Select a charge type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              {ResidentialNewPriceChargeTypeEnum.options.map(
-                                (option) => (
-                                  <SelectItem key={option} value={option}>
-                                    {option}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {watchResidentialNewServicePricingType === "Flat" && (
-                  <RowItemsContainer>
-                    <FormField
-                      control={form.control}
-                      name="standardPricing.residentialNewServiceFlatPrice"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>New Price</FormLabel>
-                          <FormControl>
-                            <AffixInput
-                              prefixElement={
-                                <span className="text-muted-foreground">$</span>
-                              }
-                              value={field.value}
-                              onChange={(event) => {
-                                const { value } = event.target;
-                                if (
-                                  value === "" ||
-                                  toTwoDecimalRegExp.test(value)
-                                ) {
-                                  field.onChange(event);
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="standardPricing.residentialNewServiceFlatGmPrice"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>New GM Price</FormLabel>
-                          <FormControl>
-                            <AffixInput
-                              prefixElement={
-                                <span className="text-muted-foreground">$</span>
-                              }
-                              {...field}
-                              onChange={(event) => {
-                                const { value } = event.target;
-                                if (
-                                  value === "" ||
-                                  toTwoDecimalRegExp.test(value)
-                                ) {
-                                  field.onChange(event);
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </RowItemsContainer>
-                )}
-                {watchResidentialNewServicePricingType === "Tier" && (
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
+          <div className="space-y-6">
+            <CollapsibleSection
+              title="Residential New Price"
+              action={
+                standardSectionExisting.isResiNewPriceExist && (
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    className="h-[28px] text-xs px-2"
+                    onClick={() => {
+                      setStandardSectionExisting((prev) => ({
+                        ...prev,
+                        isResiNewPriceExist: false,
+                      }));
+                      form.setValue(
+                        "standardPricing.residentialNewServicePricingType",
+                        "",
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                      form.setValue(
+                        "standardPricing.residentialNewServiceFlatPrice",
+                        "",
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                      form.setValue(
+                        "standardPricing.residentialNewServiceFlatGmPrice",
+                        "",
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                      form.setValue(
+                        "standardPricing.residentialNewServiceTiers",
+                        [],
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                    }}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Remove
+                  </Button>
+                )
+              }
+            >
+              {standardSectionExisting.isResiNewPriceExist ? (
+                <ItemsContainer>
                   <FormField
                     control={form.control}
-                    name="standardPricing.residentialNewServiceTiers"
-                    render={() => {
-                      return (
-                        <FormItem>
-                          {residentialNewServiceTiersFields.map(
-                            (field, index) => (
-                              <RowItemsContainer key={field.id}>
-                                <FormField
-                                  control={form.control}
-                                  name={`standardPricing.residentialNewServiceTiers.${index}.startingPoint`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      {index === 0 && (
-                                        <FormLabel required>
-                                          Starting Point
-                                        </FormLabel>
-                                      )}
-                                      <FormControl>
-                                        <AffixInput
-                                          suffixElement={
-                                            <span className="text-muted-foreground">
-                                              Volume
-                                            </span>
-                                          }
-                                          disabled
-                                          {...field}
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name={`standardPricing.residentialNewServiceTiers.${index}.finishingPoint`}
-                                  render={({ field }) => {
-                                    const isLast =
-                                      residentialNewServiceTiersFields.length -
-                                        1 ===
-                                      index;
-
-                                    return (
+                    name="standardPricing.residentialNewServicePricingType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Charge Type</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              if (
+                                value ===
+                                ResidentialNewPriceChargeTypeEnum.Values.Flat
+                              ) {
+                                form.setValue(
+                                  "standardPricing.residentialNewServiceFlatPrice",
+                                  "",
+                                  {
+                                    shouldDirty: true,
+                                  }
+                                );
+                                form.setValue(
+                                  "standardPricing.residentialNewServiceFlatGmPrice",
+                                  "",
+                                  {
+                                    shouldDirty: true,
+                                  }
+                                );
+                              } else {
+                                form.setValue(
+                                  "standardPricing.residentialNewServiceTiers",
+                                  [
+                                    {
+                                      startingPoint: "1",
+                                      finishingPoint: "",
+                                      price: "",
+                                      gmPrice: "",
+                                    },
+                                  ],
+                                  { shouldDirty: true }
+                                );
+                              }
+                            }}
+                          >
+                            <SelectTrigger ref={field.ref}>
+                              <SelectValue placeholder="Select a charge type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                {ResidentialNewPriceChargeTypeEnum.options.map(
+                                  (option) => (
+                                    <SelectItem key={option} value={option}>
+                                      {option}
+                                    </SelectItem>
+                                  )
+                                )}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {watchResidentialNewServicePricingType === "Flat" && (
+                    <RowItemsContainer>
+                      <FormField
+                        control={form.control}
+                        name="standardPricing.residentialNewServiceFlatPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required>New Price</FormLabel>
+                            <FormControl>
+                              <AffixInput
+                                prefixElement={
+                                  <span className="text-muted-foreground">
+                                    $
+                                  </span>
+                                }
+                                value={field.value}
+                                onChange={(event) => {
+                                  const { value } = event.target;
+                                  if (
+                                    value === "" ||
+                                    toTwoDecimalRegExp.test(value)
+                                  ) {
+                                    field.onChange(event);
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="standardPricing.residentialNewServiceFlatGmPrice"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required>New GM Price</FormLabel>
+                            <FormControl>
+                              <AffixInput
+                                prefixElement={
+                                  <span className="text-muted-foreground">
+                                    $
+                                  </span>
+                                }
+                                {...field}
+                                onChange={(event) => {
+                                  const { value } = event.target;
+                                  if (
+                                    value === "" ||
+                                    toTwoDecimalRegExp.test(value)
+                                  ) {
+                                    field.onChange(event);
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </RowItemsContainer>
+                  )}
+                  {watchResidentialNewServicePricingType === "Tier" && (
+                    <FormField
+                      control={form.control}
+                      name="standardPricing.residentialNewServiceTiers"
+                      render={() => {
+                        return (
+                          <FormItem>
+                            {residentialNewServiceTiersFields.map(
+                              (field, index) => (
+                                <RowItemsContainer key={field.id}>
+                                  <FormField
+                                    control={form.control}
+                                    name={`standardPricing.residentialNewServiceTiers.${index}.startingPoint`}
+                                    render={({ field }) => (
                                       <FormItem>
                                         {index === 0 && (
                                           <FormLabel required>
-                                            Finishing Point
+                                            Starting Point
                                           </FormLabel>
                                         )}
                                         <FormControl>
@@ -656,93 +632,90 @@ export default function CustomPricingForm({
                                                 Volume
                                               </span>
                                             }
+                                            disabled
                                             {...field}
-                                            prefixElement={
-                                              isLast ? (
-                                                <Infinity className="w-4 h-4" />
-                                              ) : null
-                                            }
-                                            disabled={isLast}
-                                            value={isLast ? "" : field.value}
-                                            onChange={(event) => {
-                                              const { value } = event.target;
-                                              if (isLast) {
-                                                return;
-                                              }
-
-                                              if (
-                                                value === "" ||
-                                                toTwoDecimalRegExp.test(value)
-                                              ) {
-                                                field.onChange(event);
-                                                form.setValue(
-                                                  `standardPricing.residentialNewServiceTiers.${
-                                                    index + 1
-                                                  }.startingPoint`,
-                                                  String(
-                                                    (Number(value) + 1).toFixed(
-                                                      0
-                                                    )
-                                                  ),
-                                                  {
-                                                    shouldValidate:
-                                                      form.formState
-                                                        .isSubmitted,
-                                                  }
-                                                );
-                                              }
-                                            }}
                                           />
                                         </FormControl>
                                         <FormMessage />
                                       </FormItem>
-                                    );
-                                  }}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name={`standardPricing.residentialNewServiceTiers.${index}.price`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      {index === 0 && (
-                                        <FormLabel required>
-                                          New Price
-                                        </FormLabel>
-                                      )}
-                                      <FormControl>
-                                        <AffixInput
-                                          prefixElement={
-                                            <span className="text-muted-foreground">
-                                              $
-                                            </span>
-                                          }
-                                          {...field}
-                                          onChange={(event) => {
-                                            const { value } = event.target;
-                                            if (
-                                              value === "" ||
-                                              toTwoDecimalRegExp.test(value)
-                                            ) {
-                                              field.onChange(event);
-                                            }
-                                          }}
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <FormField
-                                  control={form.control}
-                                  name={`standardPricing.residentialNewServiceTiers.${index}.gmPrice`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      {index === 0 && (
-                                        <FormLabel required>
-                                          New GM Price
-                                        </FormLabel>
-                                      )}
-                                      <div className="flex gap-2">
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`standardPricing.residentialNewServiceTiers.${index}.finishingPoint`}
+                                    render={({ field }) => {
+                                      const isLast =
+                                        residentialNewServiceTiersFields.length -
+                                          1 ===
+                                        index;
+
+                                      return (
+                                        <FormItem>
+                                          {index === 0 && (
+                                            <FormLabel required>
+                                              Finishing Point
+                                            </FormLabel>
+                                          )}
+                                          <FormControl>
+                                            <AffixInput
+                                              suffixElement={
+                                                <span className="text-muted-foreground">
+                                                  Volume
+                                                </span>
+                                              }
+                                              {...field}
+                                              prefixElement={
+                                                isLast ? (
+                                                  <Infinity className="w-4 h-4" />
+                                                ) : null
+                                              }
+                                              disabled={isLast}
+                                              value={isLast ? "" : field.value}
+                                              onChange={(event) => {
+                                                const { value } = event.target;
+                                                if (isLast) {
+                                                  return;
+                                                }
+
+                                                if (
+                                                  value === "" ||
+                                                  toTwoDecimalRegExp.test(value)
+                                                ) {
+                                                  field.onChange(event);
+                                                  form.setValue(
+                                                    `standardPricing.residentialNewServiceTiers.${
+                                                      index + 1
+                                                    }.startingPoint`,
+                                                    String(
+                                                      (
+                                                        Number(value) + 1
+                                                      ).toFixed(0)
+                                                    ),
+                                                    {
+                                                      shouldValidate:
+                                                        form.formState
+                                                          .isSubmitted,
+                                                    }
+                                                  );
+                                                }
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      );
+                                    }}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`standardPricing.residentialNewServiceTiers.${index}.price`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        {index === 0 && (
+                                          <FormLabel required>
+                                            New Price
+                                          </FormLabel>
+                                        )}
                                         <FormControl>
                                           <AffixInput
                                             prefixElement={
@@ -762,231 +735,268 @@ export default function CustomPricingForm({
                                             }}
                                           />
                                         </FormControl>
-                                        {index !== 0 && (
-                                          <Button
-                                            size={"icon"}
-                                            className="shrink-0"
-                                            variant={"outline"}
-                                            onClick={() => {
-                                              removeResidentialNewServiceTiers(
-                                                index
-                                              );
-                                            }}
-                                          >
-                                            <X className="h-4 w-4" />
-                                          </Button>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name={`standardPricing.residentialNewServiceTiers.${index}.gmPrice`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        {index === 0 && (
+                                          <FormLabel required>
+                                            New GM Price
+                                          </FormLabel>
                                         )}
-                                      </div>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </RowItemsContainer>
-                            )
-                          )}
-                          <Button
-                            variant={"outline"}
-                            className="w-full"
-                            onClick={() => {
-                              const {
-                                standardPricing: { residentialNewServiceTiers },
-                              } = form.getValues();
+                                        <div className="flex gap-2">
+                                          <FormControl>
+                                            <AffixInput
+                                              prefixElement={
+                                                <span className="text-muted-foreground">
+                                                  $
+                                                </span>
+                                              }
+                                              {...field}
+                                              onChange={(event) => {
+                                                const { value } = event.target;
+                                                if (
+                                                  value === "" ||
+                                                  toTwoDecimalRegExp.test(value)
+                                                ) {
+                                                  field.onChange(event);
+                                                }
+                                              }}
+                                            />
+                                          </FormControl>
+                                          {index !== 0 && (
+                                            <Button
+                                              size={"icon"}
+                                              className="shrink-0"
+                                              variant={"outline"}
+                                              onClick={() => {
+                                                removeResidentialNewServiceTiers(
+                                                  index
+                                                );
+                                              }}
+                                            >
+                                              <X className="h-4 w-4" />
+                                            </Button>
+                                          )}
+                                        </div>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </RowItemsContainer>
+                              )
+                            )}
+                            <Button
+                              variant={"outline"}
+                              className="w-full"
+                              onClick={() => {
+                                const {
+                                  standardPricing: {
+                                    residentialNewServiceTiers,
+                                  },
+                                } = form.getValues();
 
-                              form.setValue(
-                                `standardPricing.residentialNewServiceTiers.${
-                                  residentialNewServiceTiersFields.length - 1
-                                }.finishingPoint`,
-                                "",
-                                {
-                                  shouldValidate: form.formState.isSubmitted,
-                                }
-                              );
+                                form.setValue(
+                                  `standardPricing.residentialNewServiceTiers.${
+                                    residentialNewServiceTiersFields.length - 1
+                                  }.finishingPoint`,
+                                  "",
+                                  {
+                                    shouldValidate: form.formState.isSubmitted,
+                                  }
+                                );
 
-                              appendResidentialNewServiceTiers({
-                                startingPoint: String(
-                                  (
-                                    Number(
-                                      residentialNewServiceTiers[
-                                        residentialNewServiceTiers.length - 1
-                                      ]?.finishingPoint ?? 0
-                                    ) + 1
-                                  ).toFixed(0)
-                                ),
-                                finishingPoint: "",
-                                price: "",
-                                gmPrice: "",
-                              });
-                            }}
-                          >
-                            Add Tier
-                          </Button>
-                        </FormItem>
+                                appendResidentialNewServiceTiers({
+                                  startingPoint: String(
+                                    (
+                                      Number(
+                                        residentialNewServiceTiers[
+                                          residentialNewServiceTiers.length - 1
+                                        ]?.finishingPoint ?? 0
+                                      ) + 1
+                                    ).toFixed(0)
+                                  ),
+                                  finishingPoint: "",
+                                  price: "",
+                                  gmPrice: "",
+                                });
+                              }}
+                            >
+                              Add Tier
+                            </Button>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  )}
+                </ItemsContainer>
+              ) : (
+                <Button
+                  variant={"outline"}
+                  className="w-full"
+                  onClick={() => {
+                    setStandardSectionExisting((prev) => ({
+                      ...prev,
+                      isResiNewPriceExist: true,
+                    }));
+                  }}
+                >
+                  Add Residential New Price
+                </Button>
+              )}
+            </CollapsibleSection>
+            <CollapsibleSection
+              title={
+                organization.isSpecialRevisionPricing
+                  ? "Residential Revision Price (After Free Revision)"
+                  : "Residential Revision Price"
+              }
+              action={
+                standardSectionExisting.isResiRevPriceExist && (
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    className="h-[28px] text-xs px-2"
+                    onClick={() => {
+                      setStandardSectionExisting((prev) => ({
+                        ...prev,
+                        isResiRevPriceExist: false,
+                      }));
+                      form.setValue(
+                        "standardPricing.residentialRevisionPrice",
+                        "",
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                      form.setValue(
+                        "standardPricing.residentialRevisionGmPrice",
+                        "",
+                        {
+                          shouldDirty: true,
+                        }
                       );
                     }}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Remove
+                  </Button>
+                )
+              }
+            >
+              {standardSectionExisting.isResiRevPriceExist ? (
+                <RowItemsContainer>
+                  <FormField
+                    control={form.control}
+                    name="standardPricing.residentialRevisionPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>
+                          {organization.isSpecialRevisionPricing
+                            ? "Revision Price"
+                            : "Major Revision Price"}
+                        </FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            prefixElement={
+                              <span className="text-muted-foreground">$</span>
+                            }
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                )}
-              </ItemsContainer>
-            ) : (
-              <Button
-                variant={"outline"}
-                className="w-full"
-                onClick={() => {
-                  setStandardSectionExisting((prev) => ({
-                    ...prev,
-                    isResiNewPriceExist: true,
-                  }));
-                }}
-              >
-                Add Residential New Price
-              </Button>
-            )}
-          </section>
-          <section className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="h4">
-                {organization.isSpecialRevisionPricing
-                  ? "Residential Revision Price (After Free Revision)"
-                  : "Residential Revision Price"}
-              </h2>
-              {standardSectionExisting.isResiRevPriceExist && (
+                  <FormField
+                    control={form.control}
+                    name="standardPricing.residentialRevisionGmPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>
+                          {organization.isSpecialRevisionPricing
+                            ? "Revision GM Price"
+                            : "Major Revision GM Price"}
+                        </FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            prefixElement={
+                              <span className="text-muted-foreground">$</span>
+                            }
+                            {...field}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </RowItemsContainer>
+              ) : (
                 <Button
                   variant={"outline"}
-                  size={"sm"}
-                  className="h-[28px] text-xs px-2"
+                  className="w-full"
                   onClick={() => {
                     setStandardSectionExisting((prev) => ({
                       ...prev,
-                      isResiRevPriceExist: false,
+                      isResiRevPriceExist: true,
                     }));
-                    form.setValue(
-                      "standardPricing.residentialRevisionPrice",
-                      "",
-                      {
-                        shouldDirty: true,
-                      }
-                    );
-                    form.setValue(
-                      "standardPricing.residentialRevisionGmPrice",
-                      "",
-                      {
-                        shouldDirty: true,
-                      }
-                    );
                   }}
                 >
-                  <X className="mr-2 h-4 w-4" />
-                  Remove
+                  Add Residential Revision Price
                 </Button>
               )}
-            </div>
-            {standardSectionExisting.isResiRevPriceExist ? (
-              <RowItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="standardPricing.residentialRevisionPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel required>
-                        {organization.isSpecialRevisionPricing
-                          ? "Revision Price"
-                          : "Major Revision Price"}
-                      </FormLabel>
-                      <FormControl>
-                        <AffixInput
-                          prefixElement={
-                            <span className="text-muted-foreground">$</span>
-                          }
-                          value={field.value}
-                          onChange={(event) => {
-                            const { value } = event.target;
-                            if (
-                              value === "" ||
-                              toTwoDecimalRegExp.test(value)
-                            ) {
-                              field.onChange(event);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="standardPricing.residentialRevisionGmPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel required>
-                        {organization.isSpecialRevisionPricing
-                          ? "Revision GM Price"
-                          : "Major Revision GM Price"}
-                      </FormLabel>
-                      <FormControl>
-                        <AffixInput
-                          prefixElement={
-                            <span className="text-muted-foreground">$</span>
-                          }
-                          {...field}
-                          onChange={(event) => {
-                            const { value } = event.target;
-                            if (
-                              value === "" ||
-                              toTwoDecimalRegExp.test(value)
-                            ) {
-                              field.onChange(event);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </RowItemsContainer>
-            ) : (
-              <Button
-                variant={"outline"}
-                className="w-full"
-                onClick={() => {
-                  setStandardSectionExisting((prev) => ({
-                    ...prev,
-                    isResiRevPriceExist: true,
-                  }));
-                }}
-              >
-                Add Residential Revision Price
-              </Button>
-            )}
-          </section>
-          <section className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="h4">Commercial New Price</h2>
-              {standardSectionExisting.isComNewPriceExist && (
-                <Button
-                  variant={"outline"}
-                  size={"sm"}
-                  className="h-[28px] text-xs px-2"
-                  onClick={() => {
-                    setStandardSectionExisting((prev) => ({
-                      ...prev,
-                      isComNewPriceExist: false,
-                    }));
-                    form.setValue(
-                      "standardPricing.commercialNewServiceTiers",
-                      [],
-                      {
-                        shouldDirty: true,
-                      }
-                    );
-                  }}
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Remove
-                </Button>
-              )}
-            </div>
-            <ItemsContainer>
+            </CollapsibleSection>
+            <CollapsibleSection
+              title="Commercial New Price"
+              action={
+                standardSectionExisting.isComNewPriceExist && (
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    className="h-[28px] text-xs px-2"
+                    onClick={() => {
+                      setStandardSectionExisting((prev) => ({
+                        ...prev,
+                        isComNewPriceExist: false,
+                      }));
+                      form.setValue(
+                        "standardPricing.commercialNewServiceTiers",
+                        [],
+                        {
+                          shouldDirty: true,
+                        }
+                      );
+                    }}
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Remove
+                  </Button>
+                )
+              }
+            >
               {standardSectionExisting.isComNewPriceExist ? (
                 <FormField
                   control={form.control}
@@ -1215,15 +1225,15 @@ export default function CustomPricingForm({
                   Add Commercial New Price
                 </Button>
               )}
-              <LoadingButton
-                type="submit"
-                className="w-full"
-                isLoading={form.formState.isSubmitting}
-              >
-                Submit
-              </LoadingButton>
-            </ItemsContainer>
-          </section>
+            </CollapsibleSection>
+          </div>
+          <LoadingButton
+            type="submit"
+            className="w-full"
+            isLoading={form.formState.isSubmitting}
+          >
+            Submit
+          </LoadingButton>
         </form>
       </Form>
     );

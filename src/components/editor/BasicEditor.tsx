@@ -24,7 +24,7 @@ export default function BasicEditor({ disabled, ...props }: Props) {
   }
 
   return (
-    <div className="border rounded-md h-full">
+    <div className="border rounded-md flex flex-col h-full">
       <Plate plugins={basicEditorPlugins} {...props}>
         <Toolbar>
           <ToolbarButtons />

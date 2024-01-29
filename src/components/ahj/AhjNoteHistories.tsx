@@ -19,6 +19,7 @@ import { useState } from "react";
 import Item from "../Item";
 import { Label } from "../ui/label";
 import PageLoading from "../PageLoading";
+import CollapsibleSection from "../CollapsibleSection";
 import {
   Table,
   TableBody,
@@ -270,8 +271,7 @@ interface AhjNoteHistoryFormProps {
 function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
   return (
     <>
-      <section>
-        <h2 className="h4 mb-2">General</h2>
+      <CollapsibleSection title="General">
         <div className="flex flex-col gap-4">
           <RowItemsContainer>
             <Item>
@@ -307,9 +307,8 @@ function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
             </Item>
           </RowItemsContainer>
         </div>
-      </section>
-      <section>
-        <h2 className="h4 mb-2">Design</h2>
+      </CollapsibleSection>
+      <CollapsibleSection title="Design">
         <div className="flex flex-col gap-4">
           <RowItemsContainer>
             <Item>
@@ -351,9 +350,9 @@ function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
             />
           </Item>
         </div>
-      </section>
-      <section>
-        <h2 className="h4 mb-2">Structural Engineering</h2>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Structural Engineering">
         <div className="flex flex-col gap-4">
           <RowItemsContainer>
             <Item>
@@ -427,9 +426,8 @@ function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
             />
           </Item>
         </div>
-      </section>
-      <section>
-        <h2 className="h4 mb-2">Electrical Engineering</h2>
+      </CollapsibleSection>
+      <CollapsibleSection title="Electrical Engineering">
         <Item>
           <Label>Engineering Notes</Label>
           <BasicEditor
@@ -437,7 +435,7 @@ function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
             disabled
           />
         </Item>
-      </section>
+      </CollapsibleSection>
     </>
   );
 }

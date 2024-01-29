@@ -35,6 +35,7 @@ import CreatableExpensePricingCombobox from "@/components/combobox/CreatableExpe
 import usePostExpensePricingMutation from "@/mutations/usePostExpensePricingMutation";
 import { getExpensePricingsQueryKey } from "@/queries/useExpensePricingsQuery";
 import { getCreatableExpensePricingsQueryKey } from "@/queries/useCreatableExpensePricingsQuery";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 const formSchema = z
   .object({
@@ -209,421 +210,433 @@ export default function ExpensePricingForm({ onSuccess }: Props) {
             </FormItem>
           )}
         />
-        <section className="space-y-2">
-          <h2 className="h4">Residential New Price</h2>
-          <RowItemsContainer>
-            <FormField
-              control={form.control}
-              name="resiNewExpenseType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Expense Type</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        form.setValue("resiNewValue", "", {
-                          shouldDirty: true,
-                        });
-                        form.clearErrors("resiNewValue");
-                      }}
-                    >
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select an expense type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {ExpenseTypeEnum.options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {watchResiNewExpenseType === "Fixed" ? (
-              <FormField
-                control={form.control}
-                name="resiNewValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Price</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        prefixElement={
-                          <span className="text-muted-foreground">$</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || toTwoDecimalRegExp.test(value)) {
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <FormField
-                control={form.control}
-                name="resiNewValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Percentage</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        suffixElement={
-                          <span className="text-muted-foreground">%</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || digitRegExp.test(value)) {
-                            if (Number(value) > 100) {
-                              field.onChange({
-                                ...event,
-                                target: {
-                                  ...event.target,
-                                  value: "100",
-                                },
-                              });
-                              return;
+        <div className="space-y-4">
+          <div className="space-y-6">
+            <CollapsibleSection title="Residential New Price">
+              <RowItemsContainer>
+                <FormField
+                  control={form.control}
+                  name="resiNewExpenseType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>Expense Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            form.setValue("resiNewValue", "", {
+                              shouldDirty: true,
+                            });
+                            form.clearErrors("resiNewValue");
+                          }}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select an expense type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {ExpenseTypeEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {watchResiNewExpenseType === "Fixed" ? (
+                  <FormField
+                    control={form.control}
+                    name="resiNewValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Price</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            prefixElement={
+                              <span className="text-muted-foreground">$</span>
                             }
-
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-          </RowItemsContainer>
-        </section>
-        <section className="space-y-2">
-          <h2 className="h4">Residential Revision Price</h2>
-          <RowItemsContainer>
-            <FormField
-              control={form.control}
-              name="resiRevExpenseType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Expense Type</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        form.setValue("resiRevValue", "", {
-                          shouldDirty: true,
-                        });
-                        form.clearErrors("resiRevValue");
-                      }}
-                    >
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select an expense type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {ExpenseTypeEnum.options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {watchResiRevExpenseType === "Fixed" ? (
-              <FormField
-                control={form.control}
-                name="resiRevValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Price</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        prefixElement={
-                          <span className="text-muted-foreground">$</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || toTwoDecimalRegExp.test(value)) {
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <FormField
-                control={form.control}
-                name="resiRevValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Percentage</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        suffixElement={
-                          <span className="text-muted-foreground">%</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || digitRegExp.test(value)) {
-                            if (Number(value) > 100) {
-                              field.onChange({
-                                ...event,
-                                target: {
-                                  ...event.target,
-                                  value: "100",
-                                },
-                              });
-                              return;
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="resiNewValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Percentage</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            suffixElement={
+                              <span className="text-muted-foreground">%</span>
                             }
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (value === "" || digitRegExp.test(value)) {
+                                if (Number(value) > 100) {
+                                  field.onChange({
+                                    ...event,
+                                    target: {
+                                      ...event.target,
+                                      value: "100",
+                                    },
+                                  });
+                                  return;
+                                }
 
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
-            )}
-          </RowItemsContainer>
-        </section>
-        <section className="space-y-2">
-          <h2 className="h4">Commercial New Price</h2>
-          <RowItemsContainer>
-            <FormField
-              control={form.control}
-              name="comNewExpenseType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Expense Type</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        form.setValue("comNewValue", "", {
-                          shouldDirty: true,
-                        });
-                        form.clearErrors("comNewValue");
-                      }}
-                    >
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select an expense type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {ExpenseTypeEnum.options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {watchComNewExpenseType === "Fixed" ? (
-              <FormField
-                control={form.control}
-                name="comNewValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Price</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        prefixElement={
-                          <span className="text-muted-foreground">$</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || toTwoDecimalRegExp.test(value)) {
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <FormField
-                control={form.control}
-                name="comNewValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Percentage</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        suffixElement={
-                          <span className="text-muted-foreground">%</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || digitRegExp.test(value)) {
-                            if (Number(value) > 100) {
-                              field.onChange({
-                                ...event,
-                                target: {
-                                  ...event.target,
-                                  value: "100",
-                                },
-                              });
-                              return;
+              </RowItemsContainer>
+            </CollapsibleSection>
+            <CollapsibleSection title="Residential Revision Price">
+              <RowItemsContainer>
+                <FormField
+                  control={form.control}
+                  name="resiRevExpenseType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>Expense Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            form.setValue("resiRevValue", "", {
+                              shouldDirty: true,
+                            });
+                            form.clearErrors("resiRevValue");
+                          }}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select an expense type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {ExpenseTypeEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {watchResiRevExpenseType === "Fixed" ? (
+                  <FormField
+                    control={form.control}
+                    name="resiRevValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Price</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            prefixElement={
+                              <span className="text-muted-foreground">$</span>
                             }
-
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-          </RowItemsContainer>
-        </section>
-        <section className="space-y-2">
-          <h2 className="h4">Commercial Revision Price</h2>
-          <RowItemsContainer>
-            <FormField
-              control={form.control}
-              name="comRevExpenseType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Expense Type</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        form.setValue("comRevValue", "", {
-                          shouldDirty: true,
-                        });
-                        form.clearErrors("comRevValue");
-                      }}
-                    >
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select an expense type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {ExpenseTypeEnum.options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {watchComRevExpenseType === "Fixed" ? (
-              <FormField
-                control={form.control}
-                name="comRevValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Price</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        prefixElement={
-                          <span className="text-muted-foreground">$</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || toTwoDecimalRegExp.test(value)) {
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <FormField
-                control={form.control}
-                name="comRevValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Percentage</FormLabel>
-                    <FormControl>
-                      <AffixInput
-                        suffixElement={
-                          <span className="text-muted-foreground">%</span>
-                        }
-                        value={field.value}
-                        onChange={(event) => {
-                          const { value } = event.target;
-                          if (value === "" || digitRegExp.test(value)) {
-                            if (Number(value) > 100) {
-                              field.onChange({
-                                ...event,
-                                target: {
-                                  ...event.target,
-                                  value: "100",
-                                },
-                              });
-                              return;
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="resiRevValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Percentage</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            suffixElement={
+                              <span className="text-muted-foreground">%</span>
                             }
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (value === "" || digitRegExp.test(value)) {
+                                if (Number(value) > 100) {
+                                  field.onChange({
+                                    ...event,
+                                    target: {
+                                      ...event.target,
+                                      value: "100",
+                                    },
+                                  });
+                                  return;
+                                }
 
-                            field.onChange(event);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
-            )}
-          </RowItemsContainer>
-        </section>
-        <LoadingButton
-          type="submit"
-          className="w-full"
-          isLoading={form.formState.isSubmitting}
-        >
-          Submit
-        </LoadingButton>
+              </RowItemsContainer>
+            </CollapsibleSection>
+            <CollapsibleSection title="Commercial New Price">
+              <RowItemsContainer>
+                <FormField
+                  control={form.control}
+                  name="comNewExpenseType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>Expense Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            form.setValue("comNewValue", "", {
+                              shouldDirty: true,
+                            });
+                            form.clearErrors("comNewValue");
+                          }}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select an expense type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {ExpenseTypeEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {watchComNewExpenseType === "Fixed" ? (
+                  <FormField
+                    control={form.control}
+                    name="comNewValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Price</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            prefixElement={
+                              <span className="text-muted-foreground">$</span>
+                            }
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="comNewValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Percentage</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            suffixElement={
+                              <span className="text-muted-foreground">%</span>
+                            }
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (value === "" || digitRegExp.test(value)) {
+                                if (Number(value) > 100) {
+                                  field.onChange({
+                                    ...event,
+                                    target: {
+                                      ...event.target,
+                                      value: "100",
+                                    },
+                                  });
+                                  return;
+                                }
+
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </RowItemsContainer>
+            </CollapsibleSection>
+            <CollapsibleSection title="Commercial Revision Price">
+              <RowItemsContainer>
+                <FormField
+                  control={form.control}
+                  name="comRevExpenseType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel required>Expense Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            form.setValue("comRevValue", "", {
+                              shouldDirty: true,
+                            });
+                            form.clearErrors("comRevValue");
+                          }}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select an expense type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {ExpenseTypeEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {watchComRevExpenseType === "Fixed" ? (
+                  <FormField
+                    control={form.control}
+                    name="comRevValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Price</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            prefixElement={
+                              <span className="text-muted-foreground">$</span>
+                            }
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="comRevValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Percentage</FormLabel>
+                        <FormControl>
+                          <AffixInput
+                            suffixElement={
+                              <span className="text-muted-foreground">%</span>
+                            }
+                            value={field.value}
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              if (value === "" || digitRegExp.test(value)) {
+                                if (Number(value) > 100) {
+                                  field.onChange({
+                                    ...event,
+                                    target: {
+                                      ...event.target,
+                                      value: "100",
+                                    },
+                                  });
+                                  return;
+                                }
+
+                                field.onChange(event);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </RowItemsContainer>
+            </CollapsibleSection>
+          </div>
+          <LoadingButton
+            type="submit"
+            className="w-full"
+            isLoading={form.formState.isSubmitting}
+          >
+            Submit
+          </LoadingButton>
+        </div>
       </form>
     </Form>
   );

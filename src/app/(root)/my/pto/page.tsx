@@ -5,6 +5,7 @@ import PtoDetails from "./PtoDetails";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import usePtosQuery from "@/queries/usePtosQuery";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 export default function Page() {
   const { data: session } = useSession();
@@ -24,10 +25,9 @@ export default function Page() {
     <div className="flex flex-col gap-4">
       <PageHeader items={[{ href: "/my/pto", name: "My PTO" }]} />
       <div className="space-y-6">
-        <section>
-          <h2 className="h4 mb-2">History</h2>
+        <CollapsibleSection title="History">
           <HistoryTable ptos={ptos} />
-        </section>
+        </CollapsibleSection>
         <section>
           <PtoDetails userId={session.id} />
         </section>

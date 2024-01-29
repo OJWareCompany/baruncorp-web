@@ -5,6 +5,7 @@ import PageHeader from "@/components/PageHeader";
 import useServiceQuery from "@/queries/useServiceQuery";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -37,10 +38,9 @@ export default function Page({ params: { serviceId } }: Props) {
       />
       <div className="space-y-6">
         <ServiceForm service={service} />
-        <section>
-          <h2 className="h4 mb-2">Tasks Related to Service</h2>
+        <CollapsibleSection title="Tasks Related to Service">
           <TasksTable service={service} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

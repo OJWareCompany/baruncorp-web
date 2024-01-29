@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { ProjectResponseDto } from "@/api";
 import Item from "@/components/Item";
 import ItemsContainer from "@/components/ItemsContainer";
@@ -6,6 +7,8 @@ import Minimap from "@/components/Minimap";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import CollapsibleSection from "@/components/CollapsibleSection";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   project: ProjectResponseDto;
@@ -13,10 +16,21 @@ interface Props {
 
 export default function ProjectSection({ project }: Props) {
   return (
-    <section>
-      <Link href={`/workspace/projects/${project.projectId}`}>
-        <h2 className="h4 mb-2 underline inline-block">Project</h2>
-      </Link>
+    <CollapsibleSection
+      title="Project"
+      action={
+        <Link href={`/workspace/projects/${project.projectId}`}>
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            className="h-[28px] text-xs px-2"
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            View Detail
+          </Button>
+        </Link>
+      }
+    >
       <ItemsContainer>
         <Item>
           <Label>Organization</Label>
@@ -80,6 +94,6 @@ export default function ProjectSection({ project }: Props) {
           </div>
         </div>
       </ItemsContainer>
-    </section>
+    </CollapsibleSection>
   );
 }

@@ -14,6 +14,7 @@ import PageLoading from "@/components/PageLoading";
 import ItemsContainer from "@/components/ItemsContainer";
 import useNotFound from "@/hook/useNotFound";
 import JobStatus from "@/components/JobStatus";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -64,29 +65,24 @@ export default function Page({ params: { jobId } }: Props) {
       />
       <div className="space-y-6">
         <ProjectSection project={project} />
-        <section>
-          <h2 className="h4 mb-2">Jobs Related to Project</h2>
+        <CollapsibleSection title="Jobs Related to Project">
           <JobsTable project={project} />
-        </section>
-        <section>
-          <h2 className="h4 mb-2">Job</h2>
+        </CollapsibleSection>
+        <CollapsibleSection title="Job">
           <JobForm job={job} project={project} />
-        </section>
-        <section>
-          <h2 className="h4 mb-2">Job Note</h2>
+        </CollapsibleSection>
+        <CollapsibleSection title="Job Note">
           <ItemsContainer>
             <JobNotesTable jobNotes={jobNotes} />
             <JobNoteForm job={job} />
           </ItemsContainer>
-        </section>
-        <section>
-          <h2 className="h4 mb-2">Status</h2>
+        </CollapsibleSection>
+        <CollapsibleSection title="Status">
           <JobStatus job={job} project={project} />
-        </section>
-        <section>
-          <h2 className="h4 mb-2">Tasks</h2>
+        </CollapsibleSection>
+        <CollapsibleSection title="Tasks">
           <TasksTable job={job} project={project} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import useClientInvoiceQuery from "@/queries/useClientInvoiceQuery";
 import useNotFound from "@/hook/useNotFound";
 import PageLoading from "@/components/PageLoading";
 import PageHeader from "@/components/PageHeader";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -69,26 +70,24 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
         <section>
           <ClientInvoiceForm clientInvoice={clientInvoice} />
         </section>
-        <section className="space-y-2">
-          <h2 className="h4">Status</h2>
+        <CollapsibleSection title="Status">
           <ClientInvoiceStatus
             organization={organization}
             clientInvoice={clientInvoice}
           />
-        </section>
+        </CollapsibleSection>
         {clientInvoice.status !== "Unissued" && (
-          <section>
-            <h2 className="h4 mb-2">Payments</h2>
+          <CollapsibleSection title="Payments">
             <PaymentsTable clientInvoice={clientInvoice} />
-          </section>
+          </CollapsibleSection>
         )}
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="h4">Jobs</h2>
-            <DownloadCSVButton clientInvoice={clientInvoice} />
-          </div>
+
+        <CollapsibleSection
+          title="Jobs"
+          action={<DownloadCSVButton clientInvoice={clientInvoice} />}
+        >
           <JobsTable clientInvoice={clientInvoice} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

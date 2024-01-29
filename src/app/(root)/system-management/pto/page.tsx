@@ -6,6 +6,7 @@ import PtosTable from "./PtosTable";
 import PtoAnnualSection from "./PtoAnnualSection";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 export default function Page() {
   return (
@@ -24,10 +25,9 @@ export default function Page() {
       <section>
         <PtoDetails />
       </section>
-      <section>
-        <h2 className="h4 mb-2">History</h2>
+      <CollapsibleSection title="History">
         <PtosTable />
-      </section>
+      </CollapsibleSection>
       <PtoAnnualSection />
     </div>
   );

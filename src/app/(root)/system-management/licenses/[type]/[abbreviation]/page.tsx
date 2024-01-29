@@ -14,6 +14,7 @@ import PageLoading from "@/components/PageLoading";
 import { LicenseTypeEnum } from "@/lib/constants";
 import useLicenseQuery from "@/queries/useLicenseQuery";
 import useNotFound from "@/hook/useNotFound";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -72,17 +73,19 @@ export default function Page({ params: { type, abbreviation } }: Props) {
         <section>
           <LicenseForm license={license} />
         </section>
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="h4">Licensed Workers</h2>
+
+        <CollapsibleSection
+          title="Licensed Workers"
+          action={
             <NewLicensedWorkerDialog
               type={type}
               abbreviation={abbreviation}
               license={license}
             />
-          </div>
+          }
+        >
           <LicensedWorkersTable license={license} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

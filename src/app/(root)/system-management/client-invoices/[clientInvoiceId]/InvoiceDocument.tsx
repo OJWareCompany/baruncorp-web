@@ -120,12 +120,12 @@ export default function InvoiceDocument({
           {clientInvoice.lineItems.map((value, index) => (
             <View key={index} style={styles.tableRow}>
               <Text style={[styles.tableCell, { flexBasis: 20 }]}>{index}</Text>
-              <Text style={[styles.tableCell, { flex: 1 }]}>
+              {/* <Text style={[styles.tableCell, { flex: 1 }]}>
                 {value.description}
               </Text>
               <Text style={[styles.tableCell, { flexBasis: 65 }]}>
                 {value.propertyType}
-              </Text>
+              </Text> */}
               <Text style={[styles.tableCell, { flexBasis: 70 }]}>
                 {value.billingCodes.map((value) => `(${value})`).join(" ")}
               </Text>

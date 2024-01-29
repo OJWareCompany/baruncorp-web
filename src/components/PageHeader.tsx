@@ -1,9 +1,9 @@
-import { ReactElement } from "react";
+import { ReactNode } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "./ui/breadcrumb";
 
 interface Props {
   items: { href: string; name: string }[];
-  action?: ReactElement;
+  action?: ReactNode;
 }
 
 export default function PageHeader({ items, action }: Props) {

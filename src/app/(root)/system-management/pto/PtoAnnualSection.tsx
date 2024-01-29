@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useAnnualPtosQuery from "@/queries/useAnnualPtosQuery";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 function getYearsArray(startYear: number) {
   const currentYear = new Date().getFullYear();
@@ -179,9 +180,9 @@ export default function PtoAnnualSection() {
   });
 
   return (
-    <section className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h2 className="h4">Yearly PTO Tracking</h2>
+    <CollapsibleSection
+      title="Yearly PTO Tracking"
+      action={
         <Select
           value={String(targetYearSearchParam)}
           onValueChange={(newValue) => {
@@ -210,7 +211,8 @@ export default function PtoAnnualSection() {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      }
+    >
       <div className="space-y-2">
         <div className="rounded-md border">
           <Table>
@@ -341,6 +343,6 @@ export default function PtoAnnualSection() {
           </div>
         </div>
       </div>
-    </section>
+    </CollapsibleSection>
   );
 }

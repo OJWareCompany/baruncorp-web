@@ -11,6 +11,7 @@ import useUserQuery from "@/queries/useUserQuery";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
 import { BARUNCORP_ORGANIZATION_ID, userStatuses } from "@/lib/constants";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -47,39 +48,32 @@ export default function Page({ params: { userId } }: Props) {
         <section>
           <UserForm user={user} />
         </section>
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="h4">Status</h2>
-            <StatusSectionHeaderAction user={user} />
-          </div>
+        <CollapsibleSection
+          title="Status"
+          action={<StatusSectionHeaderAction user={user} />}
+        >
           <div className="flex h-10 px-3 py-2 rounded-md text-sm border border-input bg-background flex-1">
             <div className="flex items-center flex-1 gap-2">
               <status.Icon className={`w-4 h-4 ${status.color}`} />
               <span>{status.value}</span>
             </div>
           </div>
-        </section>
+        </CollapsibleSection>
         {(user.isVendor ||
           user.organizationId === BARUNCORP_ORGANIZATION_ID) && (
           <>
-            <section className="space-y-2">
-              <h2 className="h4">Position</h2>
+            <CollapsibleSection title="Position">
               <PositionForm positionId={user.position?.id ?? ""} />
-            </section>
-            <section className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h2 className="h4">Licenses</h2>
-                <NewLicenseDialog />
-              </div>
+            </CollapsibleSection>
+            <CollapsibleSection title="Licenses" action={<NewLicenseDialog />}>
               <LicensesTabs user={user} />
-            </section>
-            <section className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h2 className="h4">Available Tasks</h2>
-                <NewAvailableTaskDialog user={user} />
-              </div>
+            </CollapsibleSection>
+            <CollapsibleSection
+              title="Available Tasks"
+              action={<NewAvailableTaskDialog user={user} />}
+            >
               <AvailableTasksTable user={user} />
-            </section>
+            </CollapsibleSection>
           </>
         )}
       </div>

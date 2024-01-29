@@ -6,6 +6,7 @@ import useProjectQuery from "@/queries/useProjectQuery";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
   params: {
@@ -41,10 +42,9 @@ export default function Page({ params: { projectId } }: Props) {
         <section>
           <ProjectForm project={project} />
         </section>
-        <section>
-          <h2 className="h4 mb-2">Jobs Related to Project</h2>
+        <CollapsibleSection title="Jobs Related to Project">
           <JobsTable project={project} />
-        </section>
+        </CollapsibleSection>
       </div>
     </div>
   );

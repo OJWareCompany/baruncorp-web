@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import { ArrowDownToLine } from "lucide-react";
 import { useMemo } from "react";
-import { getLineItemTableExportDataFromLineItem } from "./JobsTable";
+import { getLineItemsTableExportDataFromLineItems } from "./JobsTable";
 import { Button } from "@/components/ui/button";
 import { InvoiceResponseDto } from "@/api";
 
@@ -28,7 +28,7 @@ export default function DownloadCSVButton({ clientInvoice }: Props) {
       className="h-[28px] text-xs px-2"
       onClick={() => {
         const csv = generateCsv(csvConfig)(
-          getLineItemTableExportDataFromLineItem(clientInvoice.lineItems)
+          getLineItemsTableExportDataFromLineItems(clientInvoice.lineItems)
         );
         download(csvConfig)(csv);
       }}
