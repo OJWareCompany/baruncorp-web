@@ -610,15 +610,26 @@ export type AutoAssignmentPropertyTypeEnum = z.infer<
 /* -------------------------------------------------------------------------- */
 
 /**
- * 1
- * 11
- * 11.
- * 11.1
- * 11.11
- * .1
- * .11
+ * 1 ✅
+ * 11 ✅
+ * 11. ✅
+ * 11.1 ✅
+ * 11.11 ✅
+ * 11.111 ❌
+ * .1 ❌
+ * .11 ❌
  */
 export const toTwoDecimalRegExp = new RegExp(/^\d+(\.\d{0,2})?$/);
+/**
+ * 1 ✅
+ * 11 ✅
+ * 11. ✅
+ * 11.1 ✅
+ * 11.11 ❌
+ * .1 ❌
+ * .11 ❌
+ */
+export const toOneDecimalRegExp = new RegExp(/^\d+(\.\d{0,1})?$/);
 export const digitRegExp = new RegExp(/^\d+$/);
 
 /* -------------------------------------------------------------------------- */

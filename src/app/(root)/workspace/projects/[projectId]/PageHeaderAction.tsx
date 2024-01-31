@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProjectResponseDto } from "@/api";
+import { ProjectResponseDto } from "@/api/api-spec";
 import OpenProjectFolderButton from "@/components/OpenProjectFolderButton";
 import {
   DropdownMenu,

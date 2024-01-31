@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateTaskDurationRequestDto } from "@/api";
+import { UpdateTaskDurationRequestDto } from "@/api/api-spec";
 
 const usePatchAssignedTaskDurationMutation = (assignedTaskId: string) => {
   const api = useApi();

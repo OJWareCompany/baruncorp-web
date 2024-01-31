@@ -31,7 +31,7 @@ import {
 import {
   AhjNoteHistoryPaginatedResponseDto,
   AhjNoteHistoryResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,
@@ -481,7 +481,7 @@ function Content({ geoId, updatedAt }: ContentProps) {
     </section>
   );
 
-  if (data.historyType === "Modified" && data.beforeModification != null) {
+  if (data.historyType === "Modify" && data.beforeModification != null) {
     return (
       <div className="space-y-4">
         {metaData}

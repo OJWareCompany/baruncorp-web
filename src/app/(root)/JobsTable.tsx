@@ -35,7 +35,7 @@ import useMyOrderedJobsQuery from "@/queries/useMyOrderedJobsQuery";
 import {
   FindMyOrderedJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   JobStatusEnum,
   MountingTypeEnum,
@@ -345,6 +345,18 @@ export default function JobsTable({ type }: Props) {
       columnHelper.accessor("receivedAt", {
         header: "Date Received (EST)",
         cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+      columnHelper.accessor("dueDate", {
+        header: "Date Due (EST)",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
+        },
       }),
     ];
   }, [

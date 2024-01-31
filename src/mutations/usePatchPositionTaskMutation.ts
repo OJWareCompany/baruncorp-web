@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdatePositionTaskAutoAssignmentTypeRequestDto } from "@/api";
+import { UpdatePositionTaskAutoAssignmentTypeRequestDto } from "@/api/api-spec";
 
 interface Variables extends UpdatePositionTaskAutoAssignmentTypeRequestDto {
   taskId: string;

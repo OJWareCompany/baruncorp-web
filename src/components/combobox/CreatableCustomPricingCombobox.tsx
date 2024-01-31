@@ -34,7 +34,7 @@ const CreatableCustomPricingCombobox = forwardRef<HTMLButtonElement, Props>(
       isLoading: isCreatableCustomPricingQueryLoading,
     } = useCreatableCustomPricingsQuery({ organizationId });
 
-    const placeholderText = "Select a service";
+    const placeholderText = "Select a scope";
 
     if (
       isCreatableCustomPricingQueryLoading ||
@@ -78,10 +78,10 @@ const CreatableCustomPricingCombobox = forwardRef<HTMLButtonElement, Props>(
           <Command>
             <CommandInput placeholder="Search" />
             {isEmpty ? (
-              <div className="py-6 text-center text-sm">No service found.</div>
+              <div className="py-6 text-center text-sm">No scope found.</div>
             ) : (
               <>
-                <CommandEmpty>No service found.</CommandEmpty>
+                <CommandEmpty>No scope found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
                     {creatableCustomPricings.map((service) => (

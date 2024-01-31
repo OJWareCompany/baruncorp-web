@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindClientWithOutstandingBalancesHttpControllerGetParams,
   ClientWithOutstandingBalancesPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getClientsWithOutstandingBalancesQueryKey = (
   params: FindClientWithOutstandingBalancesHttpControllerGetParams

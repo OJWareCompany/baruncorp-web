@@ -21,12 +21,12 @@ export default function NewServiceSheet() {
       <SheetTrigger asChild>
         <Button variant={"outline"} size={"sm"}>
           <Plus className="mr-2 h-4 w-4" />
-          New Service
+          New Scope
         </Button>
       </SheetTrigger>
       <SheetContent className="sm:max-w-[1400px] w-full">
         <SheetHeader className="mb-6">
-          <SheetTitle>New Service</SheetTitle>
+          <SheetTitle>New Scope</SheetTitle>
         </SheetHeader>
         <ServiceForm
           onSuccess={() => {

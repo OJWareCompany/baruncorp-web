@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { PositionUnregisteredUserResponseDto } from "@/api";
+import { PositionUnregisteredUserResponseDto } from "@/api/api-spec";
 
 export const getWorkersQueryKey = () => ["workers", "list"];
 

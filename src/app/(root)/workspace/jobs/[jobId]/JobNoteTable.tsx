@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobNoteListResponseDto } from "@/api";
+import { JobNoteListResponseDto } from "@/api/api-spec";
 
 const columnHelper =
   createColumnHelper<JobNoteListResponseDto["notes"][number]>();

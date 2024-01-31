@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindPositionPaginatedHttpControllerGetParams,
   PositionPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getPositionsQueryKey = (
   params: FindPositionPaginatedHttpControllerGetParams

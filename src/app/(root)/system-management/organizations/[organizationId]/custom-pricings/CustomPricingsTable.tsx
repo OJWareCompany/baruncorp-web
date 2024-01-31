@@ -19,7 +19,7 @@ import {
 import {
   CustomPricingPaginatedResponseDto,
   OrganizationResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import useCustomPricingsQuery from "@/queries/useCustomPricingsQuery";
 
 const columnHelper =

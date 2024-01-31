@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import useApi from "@/hook/useApi";
 // import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
-// import { DepartmentControllerDeleteTerminateServiceMemberIsInChargeOfParams } from "@/api";
+// import { DepartmentControllerDeleteTerminateServiceMemberIsInChargeOfParams } from "@/api/api-spec";
 
 // const useDeleteMemberServiceMutation = (userId: string | undefined) => {
 //   const api = useApi();

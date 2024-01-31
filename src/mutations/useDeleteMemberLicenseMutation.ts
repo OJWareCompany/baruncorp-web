@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import useApi from "@/hook/useApi";
 // import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
-// import { UsersControllerDeleteRemoveMemberLicenseParams } from "@/api";
+// import { UsersControllerDeleteRemoveMemberLicenseParams } from "@/api/api-spec";
 
 // const useDeleteMemberLicenseMutation = (userId: string | undefined) => {
 //   const api = useApi();

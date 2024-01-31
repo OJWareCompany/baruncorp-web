@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { InvoiceResponseDto, JobResponseDto } from "@/api";
+import { InvoiceResponseDto, JobResponseDto } from "@/api/api-spec";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";

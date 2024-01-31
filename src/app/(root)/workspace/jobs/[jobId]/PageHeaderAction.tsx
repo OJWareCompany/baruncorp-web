@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JobResponseDto, ProjectResponseDto } from "@/api";
+import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import OpenJobFolderButton from "@/components/OpenJobFolderButton";
 import {
   DropdownMenu,

@@ -6,7 +6,7 @@ import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import { transformProjectAssociatedRegulatoryBodyIntoArray } from "@/lib/ahj";
 import useApi from "@/hook/useApi";
-import { AhjNoteResponseDto } from "@/api";
+import { AhjNoteResponseDto } from "@/api/api-spec";
 import AhjTabs from "@/components/tab/AhjTabs";
 import useNotFound from "@/hook/useNotFound";
 

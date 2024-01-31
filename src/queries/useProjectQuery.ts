@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { ProjectResponseDto } from "@/api";
+import { ProjectResponseDto } from "@/api/api-spec";
 
 export const getProjectQueryKey = (projectId: string) => [
   "projects",

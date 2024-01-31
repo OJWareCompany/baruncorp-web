@@ -7,6 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,26 +16,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ServiceResponseDto } from "@/api";
+import { ServiceResponseDto } from "@/api/api-spec";
+import useServicesQuery from "@/queries/useServicesQuery";
 
-const columnHelper =
-  createColumnHelper<ServiceResponseDto["relatedTasks"][number]>();
+const columnHelper = createColumnHelper<ServiceResponseDto>();
 
 const columns = [
   columnHelper.accessor("name", {
     header: "Name",
   }),
+  columnHelper.accessor("billingCode", {
+    header: "Billing Code",
+  }),
 ];
 
-interface Props {
-  service: ServiceResponseDto;
-}
-
-export default function TasksTable({ service }: Props) {
+export default function ServicesTable() {
   const router = useRouter();
+  const { data, isLoading } = useServicesQuery({
+    limit: Number.MAX_SAFE_INTEGER,
+  });
 
   const table = useReactTable({
-    data: service.relatedTasks,
+    data: data?.items ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
@@ -60,7 +63,15 @@ export default function TasksTable({ service }: Props) {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length === 0 ? (
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24">
+                <div className="flex justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
@@ -72,7 +83,7 @@ export default function TasksTable({ service }: Props) {
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
-                  router.push(`/system-management/tasks/${row.id}`);
+                  router.push(`/system-management/scopes/${row.id}`);
                 }}
                 className="cursor-pointer"
               >

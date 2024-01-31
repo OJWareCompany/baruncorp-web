@@ -37,7 +37,7 @@ import {
   getFieldValuesFromAhjNote,
   getUpdateAhjNoteRequestDtoFromFieldValues,
 } from "@/lib/ahj";
-import { AhjNoteResponseDto } from "@/api";
+import { AhjNoteResponseDto } from "@/api/api-spec";
 import { getAhjNoteQueryKey } from "@/queries/useAhjNoteQuery";
 import { getAhjNoteHistoriesQueryKey } from "@/queries/useAhjNoteHistoriesQuery";
 

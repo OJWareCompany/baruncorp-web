@@ -4,7 +4,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
-import { ExpensePricingResponseDto, OrganizationResponseDto } from "@/api";
+import {
+  ExpensePricingResponseDto,
+  OrganizationResponseDto,
+} from "@/api/api-spec";
 import {
   ExpenseTypeEnum,
   digitRegExp,

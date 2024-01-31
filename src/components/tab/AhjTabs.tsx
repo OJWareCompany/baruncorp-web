@@ -1,7 +1,7 @@
 import AhjNoteHistories from "../ahj/AhjNoteHistories";
 import OpenAhjFolderButton from "../OpenAhjFolderButton";
 import CollapsibleSection from "../CollapsibleSection";
-import { ProjectResponseDto } from "@/api";
+import { ProjectResponseDto } from "@/api/api-spec";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transformProjectAssociatedRegulatoryBodyIntoArray } from "@/lib/ahj";
 import AhjNoteForm from "@/components/form/AhjNoteForm";

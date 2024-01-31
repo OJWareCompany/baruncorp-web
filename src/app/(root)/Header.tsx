@@ -1,5 +1,7 @@
+"use client";
 import Link from "next/link";
 import React from "react";
+import { useSession } from "next-auth/react";
 import User from "./User";
 import HandToggle from "./HandToggle";
 import Notification from "./Notification";
@@ -13,6 +15,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu-trigger-style";
+import useProfileQuery from "@/queries/useProfileQuery";
 
 const systemManagementItems: {
   title: string;
@@ -35,8 +38,8 @@ const systemManagementItems: {
     href: "/system-management/jobs",
   },
   {
-    title: "Services",
-    href: "/system-management/services",
+    title: "Scopes",
+    href: "/system-management/scopes",
   },
   {
     title: "Tasks",
@@ -104,6 +107,12 @@ const ListItem = React.forwardRef<
 ListItem.displayName = "ListItem";
 
 export default function Header() {
+  const { data: session } = useSession();
+  const { data: profile } = useProfileQuery();
+
+  const isWorker =
+    (session && session.isBarunCorpMember) || (profile && profile.isVendor);
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white">
       <div className="container px-6 flex h-16 items-center justify-between">
@@ -111,91 +120,72 @@ export default function Header() {
           <Link href="/">
             <h1 className="h3 pointer-events-none">Barun Corp</h1>
           </Link>
-          <nav>
-            <NavigationMenu delayDuration={0}>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>
-                    System Management
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="p-1 w-56">
-                      {systemManagementItems.map((item) => (
-                        <li key={item.title}>
-                          <Link
-                            href={item.href}
-                            className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-                          >
-                            {item.title}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-                {/* <NavigationMenuItem>
-                  <Link href="/workspace" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Workspace
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem> */}
-                <NavigationMenuItem>
-                  <Link href="/workspace" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Workspace
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Link href="/project-intake-portal" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Project Intake Portal
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Link href="/invoices" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Invoices
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-                {/* <NavigationMenuItem>
-                  <Link href="/project-management" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Project Management
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Link href="/invoice" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Invoice
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem> */}
-              </NavigationMenuList>
-            </NavigationMenu>
-          </nav>
+          {session && profile && (
+            <nav className="animate-in fade-in">
+              <NavigationMenu delayDuration={0}>
+                <NavigationMenuList>
+                  {session.isBarunCorpMember && (
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger>
+                        System Management
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="p-1 w-56">
+                          {systemManagementItems.map((item) => (
+                            <li key={item.title}>
+                              <Link
+                                href={item.href}
+                                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                              >
+                                {item.title}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  )}
+                  {isWorker && (
+                    <NavigationMenuItem>
+                      <Link href="/workspace" legacyBehavior passHref>
+                        <NavigationMenuLink
+                          className={navigationMenuTriggerStyle()}
+                        >
+                          Workspace
+                        </NavigationMenuLink>
+                      </Link>
+                    </NavigationMenuItem>
+                  )}
+                  <NavigationMenuItem>
+                    <Link href="/project-intake-portal" legacyBehavior passHref>
+                      <NavigationMenuLink
+                        className={navigationMenuTriggerStyle()}
+                      >
+                        Project Intake Portal
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem>
+                    <Link href="/invoices" legacyBehavior passHref>
+                      <NavigationMenuLink
+                        className={navigationMenuTriggerStyle()}
+                      >
+                        Invoices
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </nav>
+          )}
         </div>
-        <div className="flex gap-2">
-          <HandToggle />
-          <Notification />
-          <User />
-        </div>
+        {session && profile && (
+          <div className="flex gap-2 animate-in fade-in">
+            {session.isBarunCorpMember && <HandToggle />}
+            <Notification />
+            <User />
+          </div>
+        )}
       </div>
     </header>
   );

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import LicensesTable from "./LicensesTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LicenseTypeEnum } from "@/lib/constants";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 
 interface LicenseTabsContentProps {
   licenses: UserResponseDto["licenses"];

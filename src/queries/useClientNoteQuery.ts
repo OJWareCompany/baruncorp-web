@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { ClientNoteDetailResponseDto } from "@/api";
+import { ClientNoteDetailResponseDto } from "@/api/api-spec";
 
 export const getClientNoteQueryKey = (clientNoteId: string) => [
   "client-notes",

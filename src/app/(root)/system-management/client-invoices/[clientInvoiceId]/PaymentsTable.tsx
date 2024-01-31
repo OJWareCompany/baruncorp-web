@@ -9,7 +9,7 @@ import { AlertTriangle, X } from "lucide-react";
 import { useMemo } from "react";
 import { AxiosError } from "axios";
 import PaymentDialog from "./PaymentDialog";
-import { InvoiceResponseDto } from "@/api";
+import { InvoiceResponseDto } from "@/api/api-spec";
 import { AffixInput } from "@/components/AffixInput";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";

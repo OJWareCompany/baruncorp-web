@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import useApi from "@/hook/useApi";
 // import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
-// import { CreateMemberPositionRequestDto } from "@/api";
+// import { CreateMemberPositionRequestDto } from "@/api/api-spec";
 
 // const usePostMemberPositionMutation = (userId: string | undefined) => {
 //   const api = useApi();

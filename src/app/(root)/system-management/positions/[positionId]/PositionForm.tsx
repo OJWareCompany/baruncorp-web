@@ -19,7 +19,7 @@ import LoadingButton from "@/components/LoadingButton";
 import { Input } from "@/components/ui/input";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import ItemsContainer from "@/components/ItemsContainer";
-import { PositionResponseDto } from "@/api";
+import { PositionResponseDto } from "@/api/api-spec";
 import usePatchPositionMutation from "@/mutations/usePatchPositionMutation";
 import {
   transformNullishStringIntoString,

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { CustomPricingResponseDto } from "@/api";
+import { CustomPricingResponseDto } from "@/api/api-spec";
 
 export const getCustomPricingQueryKey = (
   organizationId: string,

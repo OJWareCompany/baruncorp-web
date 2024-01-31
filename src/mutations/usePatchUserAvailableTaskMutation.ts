@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { ModifyAssignmentTypeOfAvailableTaskRequestDto } from "@/api";
+import { ModifyAssignmentTypeOfAvailableTaskRequestDto } from "@/api/api-spec";
 
 interface Variables extends ModifyAssignmentTypeOfAvailableTaskRequestDto {
   taskId: string;

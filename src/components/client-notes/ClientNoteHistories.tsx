@@ -27,7 +27,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClientNoteDetail, ClientNotePaginatedResponseDto } from "@/api";
+import {
+  ClientNoteDetail,
+  ClientNotePaginatedResponseDto,
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateTaskRequestDto } from "@/api";
+import { UpdateTaskRequestDto } from "@/api/api-spec";
 
 const usePatchTaskMutation = (taskId: string) => {
   const api = useApi();

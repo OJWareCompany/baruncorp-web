@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PositionPaginatedResponseDto } from "@/api";
+import { PositionPaginatedResponseDto } from "@/api/api-spec";
 import usePositionsQuery from "@/queries/usePositionsQuery";
 import { Badge } from "@/components/ui/badge";
 

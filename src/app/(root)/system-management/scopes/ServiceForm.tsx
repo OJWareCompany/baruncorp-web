@@ -1,11 +1,8 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import {
@@ -22,8 +19,8 @@ import RowItemsContainer from "@/components/RowItemsContainer";
 import {
   ServicePricingTypeEnum,
   digitRegExp,
+  toOneDecimalRegExp,
   toTwoDecimalRegExp,
-  transformNullishStringIntoString,
   transformStringIntoNullableNumber,
 } from "@/lib/constants";
 import {
@@ -37,47 +34,22 @@ import {
 import { AffixInput } from "@/components/AffixInput";
 import { Button } from "@/components/ui/button";
 import ItemsContainer from "@/components/ItemsContainer";
-import { ServiceResponseDto } from "@/api";
-import usePatchServiceMutation from "@/mutations/usePatchServiceMutation";
-import { getServiceQueryKey } from "@/queries/useServiceQuery";
+import usePostServiceMutation from "@/mutations/usePostServiceMutation";
+import { getServicesQueryKey } from "@/queries/useServicesQuery";
 import { useToast } from "@/components/ui/use-toast";
 import CollapsibleSection from "@/components/CollapsibleSection";
 
 interface Props {
-  service: ServiceResponseDto;
+  onSuccess?: () => void;
 }
 
-export default function ServiceForm({ service }: Props) {
-  const { serviceId } = useParams() as { serviceId: string };
-  const [standardSectionExisting, setStandardSectionExisting] = useState<{
-    isResiNewPriceExist: boolean;
-    isResiRevPriceExist: boolean;
-    isComNewPriceExist: boolean;
-    isComRevPriceExist: boolean;
-  }>(() => {
-    if (service.pricingType === "Fixed") {
-      return {
-        isResiNewPriceExist: false,
-        isResiRevPriceExist: false,
-        isComNewPriceExist: false,
-        isComRevPriceExist: false,
-      };
-    }
-
-    return {
-      isResiNewPriceExist:
-        service.standardPricing?.residentialPrice != null ||
-        service.standardPricing?.residentialGmPrice != null,
-      isResiRevPriceExist:
-        service.standardPricing?.residentialRevisionPrice != null ||
-        service.standardPricing?.residentialRevisionGmPrice != null,
-      isComNewPriceExist:
-        service.standardPricing?.commercialNewServiceTiers != null &&
-        service.standardPricing.commercialNewServiceTiers.length !== 0,
-      isComRevPriceExist:
-        service.standardPricing?.commercialRevisionCostPerUnit != null ||
-        service.standardPricing?.commercialRevisionMinutesPerUnit != null,
-    };
+export default function ServiceForm({ onSuccess }: Props) {
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [standardSectionExisting, setStandardSectionExisting] = useState({
+    isResiNewPriceExist: false,
+    isResiRevPriceExist: false,
+    isComNewPriceExist: false,
+    isComRevPriceExist: false,
   });
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -120,7 +92,11 @@ export default function ServiceForm({ service }: Props) {
               })
             ),
           }),
-          fixedPrice: z.string(),
+          fixedPrice: z.string().trim(),
+          commercialNewEstimatedTaskDuration: z.string().trim(),
+          commercialRevisionEstimatedTaskDuration: z.string().trim(),
+          residentialNewEstimatedTaskDuration: z.string().trim(),
+          residentialRevisionEstimatedTaskDuration: z.string().trim(),
         })
         .superRefine((values, ctx) => {
           if (values.pricingType === "Standard") {
@@ -239,65 +215,38 @@ export default function ServiceForm({ service }: Props) {
     [standardSectionExisting]
   );
 
-  const { mutateAsync } = usePatchServiceMutation(serviceId);
+  const { mutateAsync } = usePostServiceMutation();
 
   type FieldValues = z.infer<typeof formSchema>;
 
-  const getFieldValues = useCallback(
-    (service: ServiceResponseDto): FieldValues => {
-      return {
-        name: service.name,
-        billingCode: service.billingCode,
-        pricingType: service.pricingType,
-        fixedPrice: transformNullishStringIntoString.parse(service.fixedPrice),
-        standardPricing: {
-          commercialNewServiceTiers:
-            service.standardPricing == null
-              ? []
-              : service.standardPricing.commercialNewServiceTiers.map<
-                  FieldValues["standardPricing"]["commercialNewServiceTiers"][number]
-                >((value) => ({
-                  finishingPoint: String(value.finishingPoint),
-                  startingPoint: String(value.startingPoint),
-                  price: String(value.price),
-                  gmPrice: String(value.gmPrice),
-                })),
-          commercialRevisionCostPerUnit: transformNullishStringIntoString.parse(
-            service.standardPricing?.commercialRevisionCostPerUnit
-          ),
-          commercialRevisionMinutesPerUnit:
-            transformNullishStringIntoString.parse(
-              service.standardPricing?.commercialRevisionMinutesPerUnit
-            ),
-          residentialGmPrice: transformNullishStringIntoString.parse(
-            service.standardPricing?.residentialGmPrice
-          ),
-          residentialPrice: transformNullishStringIntoString.parse(
-            service.standardPricing?.residentialPrice
-          ),
-          residentialRevisionGmPrice: transformNullishStringIntoString.parse(
-            service.standardPricing?.residentialRevisionGmPrice
-          ),
-          residentialRevisionPrice: transformNullishStringIntoString.parse(
-            service.standardPricing?.residentialRevisionPrice
-          ),
-        },
-      };
-    },
-    []
-  );
-
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: getFieldValues(service),
+    defaultValues: {
+      name: "",
+      billingCode: "",
+      fixedPrice: "",
+      standardPricing: {
+        commercialNewServiceTiers: [],
+        commercialRevisionCostPerUnit: "",
+        commercialRevisionMinutesPerUnit: "",
+        residentialGmPrice: "",
+        residentialPrice: "",
+        residentialRevisionGmPrice: "",
+        residentialRevisionPrice: "",
+      },
+      commercialNewEstimatedTaskDuration: "",
+      commercialRevisionEstimatedTaskDuration: "",
+      residentialNewEstimatedTaskDuration: "",
+      residentialRevisionEstimatedTaskDuration: "",
+    },
   });
 
   const watchPricingType = form.watch("pricingType");
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
-      name: values.name.trim(),
-      billingCode: values.billingCode.trim(),
+      name: values.name,
+      billingCode: values.billingCode,
       pricingType: values.pricingType,
       fixedPrice: transformStringIntoNullableNumber.parse(values.fixedPrice),
       standardPricing: {
@@ -328,18 +277,59 @@ export default function ServiceForm({ service }: Props) {
           values.standardPricing.residentialRevisionPrice
         ),
       },
-      // TODO
-      commercialNewEstimatedTaskDuration: null,
-      commercialRevisionEstimatedTaskDuration: null,
-      residentialNewEstimatedTaskDuration: null,
-      residentialRevisionEstimatedTaskDuration: null,
+      commercialNewEstimatedTaskDuration:
+        transformStringIntoNullableNumber.parse(
+          values.commercialNewEstimatedTaskDuration
+        ),
+      commercialRevisionEstimatedTaskDuration:
+        transformStringIntoNullableNumber.parse(
+          values.commercialRevisionEstimatedTaskDuration
+        ),
+      residentialNewEstimatedTaskDuration:
+        transformStringIntoNullableNumber.parse(
+          values.residentialNewEstimatedTaskDuration
+        ),
+      residentialRevisionEstimatedTaskDuration:
+        transformStringIntoNullableNumber.parse(
+          values.residentialRevisionEstimatedTaskDuration
+        ),
     })
       .then(() => {
+        setIsSubmitSuccessful(true);
         queryClient.invalidateQueries({
-          queryKey: getServiceQueryKey(serviceId),
+          queryKey: getServicesQueryKey({
+            limit: Number.MAX_SAFE_INTEGER,
+          }),
         });
+        onSuccess?.();
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
+        // TODO: estimated days에 10이상 담았을 때에 대한 에러 핸들링
+        switch (error.response?.status) {
+          case 409:
+            if (error.response?.data.errorCode.includes("40100")) {
+              form.setError(
+                "name",
+                {
+                  message: `${values.name} already exists`,
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+
+            if (error.response?.data.errorCode.includes("40101")) {
+              form.setError(
+                "billingCode",
+                {
+                  message: `${values.billingCode} already exists`,
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+        }
+
         if (
           error.response &&
           error.response.data.errorCode.filter((value) => value != null)
@@ -364,75 +354,187 @@ export default function ServiceForm({ service }: Props) {
   });
 
   useEffect(() => {
-    form.reset(getFieldValues(service));
-  }, [form, getFieldValues, service]);
+    if (isSubmitSuccessful) {
+      form.reset();
+      setIsSubmitSuccessful(false);
+    }
+  }, [form, isSubmitSuccessful]);
+
+  const common = (
+    <>
+      <RowItemsContainer>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="billingCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Billing Code</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </RowItemsContainer>
+      <RowItemsContainer>
+        <FormField
+          control={form.control}
+          name="residentialNewEstimatedTaskDuration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Estimated Days to Complete (Residential New)
+              </FormLabel>
+              <FormControl>
+                <AffixInput
+                  placeholder="0"
+                  suffixElement={
+                    <span className="text-muted-foreground">Days</span>
+                  }
+                  {...field}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    if (value === "" || toOneDecimalRegExp.test(value)) {
+                      field.onChange(event);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="residentialRevisionEstimatedTaskDuration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Estimated Days to Complete (Residential Rev)
+              </FormLabel>
+              <FormControl>
+                <AffixInput
+                  placeholder="0"
+                  suffixElement={
+                    <span className="text-muted-foreground">Days</span>
+                  }
+                  {...field}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    if (value === "" || toOneDecimalRegExp.test(value)) {
+                      field.onChange(event);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="commercialNewEstimatedTaskDuration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estimated Days to Complete (Commercial New)</FormLabel>
+              <FormControl>
+                <AffixInput
+                  placeholder="0"
+                  suffixElement={
+                    <span className="text-muted-foreground">Days</span>
+                  }
+                  {...field}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    if (value === "" || toOneDecimalRegExp.test(value)) {
+                      field.onChange(event);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="commercialRevisionEstimatedTaskDuration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estimated Days to Complete (Commercial Rev)</FormLabel>
+              <FormControl>
+                <AffixInput
+                  placeholder="0"
+                  suffixElement={
+                    <span className="text-muted-foreground">Days</span>
+                  }
+                  {...field}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    if (value === "" || toOneDecimalRegExp.test(value)) {
+                      field.onChange(event);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </RowItemsContainer>
+      <FormField
+        control={form.control}
+        name="pricingType"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel required>Pricing Type</FormLabel>
+            <FormControl>
+              <Select
+                value={field.value}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                }}
+              >
+                <SelectTrigger ref={field.ref}>
+                  <SelectValue placeholder="Select a pricing type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {ServicePricingTypeEnum.options.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </>
+  );
 
   if (watchPricingType === "Standard") {
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <section>
-            <RowItemsContainer>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="billingCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Billing Code</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="pricingType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Pricing Type</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          form.clearErrors();
-                        }}
-                      >
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue placeholder="Select a pricing type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {ServicePricingTypeEnum.options.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </RowItemsContainer>
-          </section>
+          <section className="space-y-4">{common}</section>
           <div className="space-y-4">
             <div className="space-y-6">
               <CollapsibleSection
@@ -947,154 +1049,99 @@ export default function ServiceForm({ service }: Props) {
                   )
                 }
               >
-                {standardSectionExisting.isComRevPriceExist ? (
-                  <RowItemsContainer>
-                    <FormField
-                      control={form.control}
-                      name="standardPricing.commercialRevisionMinutesPerUnit"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>Minutes per Unit</FormLabel>
-                          <FormControl>
-                            <AffixInput
-                              suffixElement={
-                                <span className="text-muted-foreground">
-                                  min
-                                </span>
-                              }
-                              {...field}
-                              onChange={(event) => {
-                                const { value } = event.target;
-                                if (value === "" || digitRegExp.test(value)) {
-                                  field.onChange(event);
+                <ItemsContainer>
+                  {standardSectionExisting.isComRevPriceExist ? (
+                    <RowItemsContainer>
+                      <FormField
+                        control={form.control}
+                        name="standardPricing.commercialRevisionMinutesPerUnit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required>Minutes per Unit</FormLabel>
+                            <FormControl>
+                              <AffixInput
+                                suffixElement={
+                                  <span className="text-muted-foreground">
+                                    min
+                                  </span>
                                 }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="standardPricing.commercialRevisionCostPerUnit"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel required>Price per Unit</FormLabel>
-                          <FormControl>
-                            <AffixInput
-                              prefixElement={
-                                <span className="text-muted-foreground">$</span>
-                              }
-                              {...field}
-                              onChange={(event) => {
-                                const { value } = event.target;
-                                if (
-                                  value === "" ||
-                                  toTwoDecimalRegExp.test(value)
-                                ) {
-                                  field.onChange(event);
+                                {...field}
+                                onChange={(event) => {
+                                  const { value } = event.target;
+                                  if (value === "" || digitRegExp.test(value)) {
+                                    field.onChange(event);
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="standardPricing.commercialRevisionCostPerUnit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel required>Price per Unit</FormLabel>
+                            <FormControl>
+                              <AffixInput
+                                prefixElement={
+                                  <span className="text-muted-foreground">
+                                    $
+                                  </span>
                                 }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </RowItemsContainer>
-                ) : (
-                  <Button
-                    variant={"outline"}
-                    className="w-full"
-                    onClick={() => {
-                      setStandardSectionExisting((prev) => ({
-                        ...prev,
-                        isComRevPriceExist: true,
-                      }));
-                    }}
-                  >
-                    Add Commercial Revision Price
-                  </Button>
-                )}
+                                {...field}
+                                onChange={(event) => {
+                                  const { value } = event.target;
+                                  if (
+                                    value === "" ||
+                                    toTwoDecimalRegExp.test(value)
+                                  ) {
+                                    field.onChange(event);
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </RowItemsContainer>
+                  ) : (
+                    <Button
+                      variant={"outline"}
+                      className="w-full"
+                      onClick={() => {
+                        setStandardSectionExisting((prev) => ({
+                          ...prev,
+                          isComRevPriceExist: true,
+                        }));
+                      }}
+                    >
+                      Add Commercial Revision Price
+                    </Button>
+                  )}
+                </ItemsContainer>
               </CollapsibleSection>
             </div>
             <LoadingButton
               type="submit"
               className="w-full"
               isLoading={form.formState.isSubmitting}
-              disabled={!form.formState.isDirty}
             >
-              Edit
+              Submit
             </LoadingButton>
           </div>
         </form>
       </Form>
     );
-  } else {
+  } else if (watchPricingType === "Fixed") {
     return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <ItemsContainer>
-            <RowItemsContainer>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="billingCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Billing Code</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="pricingType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel required>Pricing Type</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                        }}
-                      >
-                        <SelectTrigger ref={field.ref}>
-                          <SelectValue placeholder="Select a pricing type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {ServicePricingTypeEnum.options.map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </RowItemsContainer>
+            {common}
             <FormField
               control={form.control}
               name="fixedPrice"
@@ -1123,11 +1170,18 @@ export default function ServiceForm({ service }: Props) {
               type="submit"
               className="w-full"
               isLoading={form.formState.isSubmitting}
-              disabled={!form.formState.isDirty}
             >
-              Edit
+              Submit
             </LoadingButton>
           </ItemsContainer>
+        </form>
+      </Form>
+    );
+  } else {
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {common}
         </form>
       </Form>
     );

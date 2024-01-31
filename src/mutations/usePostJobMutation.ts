@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { CreateJobRequestDto, IdResponse } from "@/api";
+import { CreateJobRequestDto, IdResponse } from "@/api/api-spec";
 
 const usePostJobMutation = () => {
   const api = useApi();

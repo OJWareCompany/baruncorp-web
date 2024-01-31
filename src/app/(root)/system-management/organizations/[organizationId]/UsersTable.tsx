@@ -28,7 +28,7 @@ import {
   FindUsersHttpControllerGetFindUsersParams,
   OrganizationResponseDto,
   UserPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,

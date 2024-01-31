@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getJobsQueryKey = (
   params: FindJobPaginatedHttpControllerFindJobParams

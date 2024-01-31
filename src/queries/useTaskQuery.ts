@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { TaskResponseDto } from "@/api";
+import { TaskResponseDto } from "@/api/api-spec";
 
 export const getTaskQueryKey = (taskId: string) => ["tasks", "detail", taskId];
 

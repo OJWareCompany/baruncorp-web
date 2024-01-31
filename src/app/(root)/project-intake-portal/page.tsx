@@ -3,6 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { Info } from "lucide-react";
 import { Plate, PlateContent } from "@udecode/plate-common";
+import { useSession } from "next-auth/react";
 import EditDialog from "./EditDialog";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export default function Page() {
     limit: 1,
   });
   useNotFound(informationsQueryError);
+  const { data: session } = useSession();
 
   if (isInformationsQueryLoading || informations == null) {
     return <PageLoading />;
@@ -52,9 +54,11 @@ export default function Page() {
             </Plate>
           </AlertDescription>
         </Alert>
-        <div className="absolute top-[17px] right-[17px]">
-          <EditDialog information={information} />
-        </div>
+        {session && session.isBarunCorpMember && (
+          <div className="absolute top-[17px] right-[17px]">
+            <EditDialog information={information} />
+          </div>
+        )}
       </div>
       <Button asChild>
         <Link href={`/project-intake-portal/new-service-order`}>

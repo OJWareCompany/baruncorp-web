@@ -3,6 +3,7 @@ import { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import api from "@/api";
+import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
 
 const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -43,7 +44,14 @@ const authOptions: NextAuthOptions = {
             throw new Error("0");
           });
 
-        return { accessToken, refreshToken, email, id, organizationId };
+        return {
+          accessToken,
+          refreshToken,
+          email,
+          id,
+          organizationId,
+          isBarunCorpMember: organizationId === BARUNCORP_ORGANIZATION_ID,
+        };
       },
     }),
   ],
@@ -93,9 +101,24 @@ const authOptions: NextAuthOptions = {
       return { ...token, authError: "REFRESH_TOKEN_ERROR" };
     },
     async session({ session, token }) {
-      const { accessToken, email, id, organizationId, authError } = token;
+      const {
+        accessToken,
+        email,
+        id,
+        organizationId,
+        authError,
+        isBarunCorpMember,
+      } = token;
 
-      return { ...session, accessToken, authError, email, id, organizationId };
+      return {
+        ...session,
+        accessToken,
+        authError,
+        email,
+        id,
+        organizationId,
+        isBarunCorpMember,
+      };
     },
   },
   session: {

@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import { PaginationState } from "@tanstack/react-table";
 // import useApi from "@/hook/useApi";
-// import { PaymentPaginatedResponseDto } from "@/api";
+// import { PaymentPaginatedResponseDto } from "@/api/api-spec";
 
 // interface Props {
 //   pagination: PaginationState;

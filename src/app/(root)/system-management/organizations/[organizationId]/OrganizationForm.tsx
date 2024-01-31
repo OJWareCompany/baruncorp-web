@@ -6,7 +6,7 @@ import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { AxiosError } from "axios";
-import { OrganizationResponseDto } from "@/api";
+import { OrganizationResponseDto } from "@/api/api-spec";
 import {
   Form,
   FormControl,
@@ -82,6 +82,7 @@ const formSchema = z
     isSpecialRevisionPricing: z.boolean(),
     numberOfFreeRevisionCount: z.string().trim(),
     isVendor: z.boolean(),
+    isDelinquent: z.boolean(),
   })
   .superRefine((values, ctx) => {
     const { isSpecialRevisionPricing, numberOfFreeRevisionCount } = values;
@@ -132,6 +133,7 @@ function getFieldValues(organization: OrganizationResponseDto): FieldValues {
       organization.numberOfFreeRevisionCount
     ),
     isVendor: organization.isVendor,
+    isDelinquent: organization.isDelinquent,
   };
 }
 
@@ -186,7 +188,7 @@ export default function OrganizationForm({ organization }: Props) {
         ? Number(values.numberOfFreeRevisionCount)
         : null,
       isVendor: values.isVendor,
-      isDelinquent: false, // TODO
+      isDelinquent: values.isDelinquent,
     })
       .then(() => {
         queryClient.invalidateQueries({
@@ -424,6 +426,25 @@ export default function OrganizationForm({ organization }: Props) {
             render={({ field }) => (
               <FormItem className="flex-row-reverse justify-end items-center gap-3">
                 <FormLabel>Vendor</FormLabel>
+                <FormControl>
+                  <Checkbox
+                    ref={field.ref}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {organization.organizationType !== "administration" && (
+          <FormField
+            control={form.control}
+            name="isDelinquent"
+            render={({ field }) => (
+              <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                <FormLabel>Delinquent</FormLabel>
                 <FormControl>
                   <Checkbox
                     ref={field.ref}

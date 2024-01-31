@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TaskPaginatedResponseFields } from "@/api";
+import { TaskPaginatedResponseFields } from "@/api/api-spec";
 import useTasksQuery from "@/queries/useTasksQuery";
 import { Badge } from "@/components/ui/badge";
 
@@ -30,11 +30,11 @@ const columns = [
     header: "License Type",
   }),
   columnHelper.accessor("serviceName", {
-    header: "Service",
+    header: "Scope",
   }),
   columnHelper.accessor("taskPositions", {
     header: "Positions",
-    cell: ({ getValue, column }) => {
+    cell: ({ getValue }) => {
       return (
         <div className="flex flex-wrap gap-1">
           {getValue().map((value) => (

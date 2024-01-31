@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobResponseDto, ProjectResponseDto } from "@/api";
+import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,8 +57,8 @@ interface Data {
   serviceId: string | null;
   isActive: boolean;
   prerequisiteTasks: string[] | null;
+  pricingType: JobResponseDto["orderedServices"][number]["pricingType"] | null;
   subRows?: Data[];
-  // basePrice: number | null;
 }
 
 const columnHelper = createColumnHelper<Data>();
@@ -83,7 +83,7 @@ export default function TasksTable({ job, project }: Props) {
           serviceId,
           sizeForRevision,
           isRevision,
-          // basePrice,
+          pricingType,
         } = value;
 
         const filteredAssignedTasks = job.assignedTasks.filter(
@@ -114,7 +114,7 @@ export default function TasksTable({ job, project }: Props) {
           serviceId,
           isActive: true,
           prerequisiteTasks: null,
-          // basePrice,
+          pricingType,
           subRows: filteredAssignedTasks.map<Data>((value) => ({
             assigneeId: value.assigneeId,
             description: value.description,
@@ -146,7 +146,7 @@ export default function TasksTable({ job, project }: Props) {
             prerequisiteTasks: value.prerequisiteTasks.map(
               (value) => value.prerequisiteTaskName
             ),
-            // basePrice: null,
+            pricingType: null,
           })),
         };
       }),
@@ -257,7 +257,11 @@ export default function TasksTable({ job, project }: Props) {
                 return;
               }
 
-              if (!row.original.isRevision) {
+              if (
+                !row.original.isRevision ||
+                row.original.pricingType === "Base Fixed Price" ||
+                row.original.pricingType === "Custom Fixed Price"
+              ) {
                 return <p className="text-muted-foreground">-</p>;
               }
 

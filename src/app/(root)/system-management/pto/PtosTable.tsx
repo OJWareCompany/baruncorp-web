@@ -30,7 +30,7 @@ import {
 import {
   FindPtoPaginatedHttpControllerGetParams,
   PtoPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
 import usePtosQuery, { getPtosQueryKey } from "@/queries/usePtosQuery";
 import SearchHeader from "@/components/table/SearchHeader";

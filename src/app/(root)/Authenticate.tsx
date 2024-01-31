@@ -1,8 +1,8 @@
 "use client";
-
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -15,6 +15,7 @@ export default function Authenticate({ children }: Props) {
   const { data: session, status } = useSession();
   const { toast } = useToast();
   const isSignOutTriggeredRef = useRef(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (
@@ -39,9 +40,10 @@ export default function Authenticate({ children }: Props) {
         break;
     }
 
+    queryClient.clear(); // 로그아웃시킬 때 cache를 지워서 다음 로그인 때 cache가 남아있지 않게 하기 위함
+    isSignOutTriggeredRef.current = true; // authError로 로그아웃이 되었을 때, signOut이 trigger 되었다는 값을 기억하게 해서 여러 번 이 코드가 실행되지 않도록 함
     signOut({ redirect: false });
-    isSignOutTriggeredRef.current = true;
-  }, [session, status, toast]);
+  }, [queryClient, session, status, toast]);
 
   useEffect(() => {
     if (status === "unauthenticated") {

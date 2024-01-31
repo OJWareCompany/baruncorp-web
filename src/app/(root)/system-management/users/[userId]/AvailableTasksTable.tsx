@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -41,7 +41,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
+import {
+  AutoAssignmentPropertyTypeEnum,
+  BARUNCORP_ORGANIZATION_ID,
+} from "@/lib/constants";
 import usePatchUserAvailableTaskMutation from "@/mutations/usePatchUserAvailableTaskMutation";
 
 const columnHelper =
@@ -208,6 +211,11 @@ export default function AvailableTasksTable({ user }: Props) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
+    state: {
+      columnVisibility: {
+        autoAssignmentType: user.organizationId === BARUNCORP_ORGANIZATION_ID,
+      },
+    },
   });
 
   return (

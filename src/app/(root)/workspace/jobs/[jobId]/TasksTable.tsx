@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobResponseDto, ProjectResponseDto } from "@/api";
+import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

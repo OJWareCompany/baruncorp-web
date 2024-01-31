@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindServicePaginatedHttpControllerGetParams,
   ServicePaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getServicesQueryKey = (
   params: FindServicePaginatedHttpControllerGetParams

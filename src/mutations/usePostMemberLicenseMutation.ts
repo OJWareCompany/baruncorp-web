@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
 // import useApi from "@/hook/useApi";
-// import { CreateLicenseRequestDto } from "@/api";
+// import { CreateLicenseRequestDto } from "@/api/api-spec";
 
 // const usePostMemberLicenseMutation = (userId: string | undefined) => {
 //   const api = useApi();

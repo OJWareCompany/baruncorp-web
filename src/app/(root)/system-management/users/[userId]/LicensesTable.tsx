@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import { formatInEST } from "@/lib/utils";
 import {
   AlertDialog,

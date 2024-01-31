@@ -26,7 +26,7 @@ import {
 import {
   AhjNotePaginatedResponseDto,
   GeographyControllerGetFindNotesParams,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,

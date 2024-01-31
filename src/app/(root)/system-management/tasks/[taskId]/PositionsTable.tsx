@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
-import { TaskResponseDto } from "@/api";
+import { TaskResponseDto } from "@/api/api-spec";
 import {
   Select,
   SelectContent,

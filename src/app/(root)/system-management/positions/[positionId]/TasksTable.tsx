@@ -10,7 +10,7 @@ import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
-import { PositionResponseDto } from "@/api";
+import { PositionResponseDto } from "@/api/api-spec";
 import {
   Table,
   TableBody,

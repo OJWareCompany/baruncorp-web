@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import validator from "validator";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import {
   Form,

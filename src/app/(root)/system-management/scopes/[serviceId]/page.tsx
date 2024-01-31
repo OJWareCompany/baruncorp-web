@@ -29,16 +29,16 @@ export default function Page({ params: { serviceId } }: Props) {
     <div className="flex flex-col gap-4">
       <PageHeader
         items={[
-          { href: "/system-management/services", name: "Services" },
+          { href: "/system-management/scopes", name: "Scopes" },
           {
-            href: `/system-management/services/${serviceId}}`,
+            href: `/system-management/scopes/${serviceId}}`,
             name: service.name,
           },
         ]}
       />
       <div className="space-y-6">
         <ServiceForm service={service} />
-        <CollapsibleSection title="Tasks Related to Service">
+        <CollapsibleSection title="Tasks Related to Scope">
           <TasksTable service={service} />
         </CollapsibleSection>
       </div>

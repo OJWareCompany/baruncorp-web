@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateInvoiceRequestDto } from "@/api";
+import { UpdateInvoiceRequestDto } from "@/api/api-spec";
 
 const usePatchInvoiceMutation = (invoiceId: string) => {
   const api = useApi();

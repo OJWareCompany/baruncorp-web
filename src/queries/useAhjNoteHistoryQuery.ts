@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   AhjNoteHistoryResponseDto,
   GeographyControllerGetFinNoteUpdateHistoryDetailParams,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getAhjNoteHistoryQueryKey = (
   params: GeographyControllerGetFinNoteUpdateHistoryDetailParams

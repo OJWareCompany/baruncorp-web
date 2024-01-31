@@ -23,7 +23,11 @@ import {
   transformResidentialNewPriceChargeTypeEnumWithEmptyStringIntoNullableResidentialNewPriceChargeTypeEnum,
   transformStringIntoNullableNumber,
 } from "@/lib/constants";
-import { OrganizationResponseDto, ServiceResponseDto, Tier } from "@/api";
+import {
+  OrganizationResponseDto,
+  ServiceResponseDto,
+  Tier,
+} from "@/api/api-spec";
 import { AffixInput } from "@/components/AffixInput";
 import { Button } from "@/components/ui/button";
 import ItemsContainer from "@/components/ItemsContainer";

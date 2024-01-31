@@ -26,7 +26,7 @@ import {
 import usePostPrerequisiteTaskMutation from "@/mutations/usePostPrerequisiteTaskMutation";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import TasksCombobox from "@/components/combobox/TasksCombobox";
-import { TaskResponseDto } from "@/api";
+import { TaskResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({

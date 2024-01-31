@@ -35,7 +35,7 @@ import {
 import usePostPositionTaskMutation from "@/mutations/usePostPositionTaskMutation";
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import TasksCombobox from "@/components/combobox/TasksCombobox";
-import { PositionResponseDto } from "@/api";
+import { PositionResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({

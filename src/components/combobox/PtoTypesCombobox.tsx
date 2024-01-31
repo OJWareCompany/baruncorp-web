@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/command";
 import usePtoTypesQuery from "@/queries/usePtoTypesQuery";
 import { cn } from "@/lib/utils";
-import { PtoTypeResponseDto } from "@/api";
+import { PtoTypeResponseDto } from "@/api/api-spec";
 
 interface Props {
   ptoTypeId: string;

@@ -5,7 +5,7 @@ import Minimap from "@/components/Minimap";
 import ItemsContainer from "@/components/ItemsContainer";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
-import { OrganizationResponseDto } from "@/api";
+import { OrganizationResponseDto } from "@/api/api-spec";
 
 interface Props {
   organization: OrganizationResponseDto;

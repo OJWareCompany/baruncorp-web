@@ -26,7 +26,7 @@ import {
 import {
   FindProjectsHttpControllerFindUsersParams,
   ProjectPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import { formatInEST } from "@/lib/utils";
 import SearchHeader from "@/components/table/SearchHeader";

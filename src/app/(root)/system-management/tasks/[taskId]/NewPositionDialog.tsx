@@ -35,7 +35,7 @@ import {
 import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import usePostPositionTaskMutation from "@/mutations/usePostPositionTaskMutation";
 import PositionsCombobox from "@/components/combobox/PositionsCombobox";
-import { TaskResponseDto } from "@/api";
+import { TaskResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({

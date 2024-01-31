@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import usePatchProfileMutation from "@/mutations/usePatchProfileMutation";
 import LoadingButton from "@/components/LoadingButton";
 import RowItemsContainer from "@/components/RowItemsContainer";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import {
   BARUNCORP_ORGANIZATION_ID,
   transformStringIntoNullableString,

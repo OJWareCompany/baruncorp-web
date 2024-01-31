@@ -72,7 +72,7 @@ export default function NewCustomPricingSheet() {
               name="serviceId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Service</FormLabel>
+                  <FormLabel required>Scope</FormLabel>
                   <FormControl>
                     <CreatableCustomPricingCombobox
                       organizationId={organizationId}

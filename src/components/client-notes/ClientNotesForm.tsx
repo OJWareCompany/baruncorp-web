@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import LoadingButton from "@/components/LoadingButton";
 import BasicEditor from "@/components/editor/BasicEditor";
-import { ClientNoteDetail, ClientNoteDetailResponseDto } from "@/api";
+import { ClientNoteDetail, ClientNoteDetailResponseDto } from "@/api/api-spec";
 import {
   getEditorValue,
   transformEditorValueToStringOrNull,

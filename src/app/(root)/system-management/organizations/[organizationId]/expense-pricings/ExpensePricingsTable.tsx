@@ -19,7 +19,7 @@ import {
 import {
   ExpensePricingPaginatedResponseDto,
   OrganizationResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import useExpensePricingsQuery from "@/queries/useExpensePricingsQuery";
 
 const columnHelper =

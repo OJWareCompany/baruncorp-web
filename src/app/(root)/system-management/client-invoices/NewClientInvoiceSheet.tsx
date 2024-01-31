@@ -55,6 +55,7 @@ import { AffixInput } from "@/components/AffixInput";
 import usePostInvoiceMutation from "@/mutations/usePostInvoiceMutation";
 import { getOrganizationsToInvoiceQueryKey } from "@/queries/useOrganizationsToInvoiceQuery";
 import { getClientInvoicesQueryKey } from "@/queries/useClientInvoicesQuery";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 const formSchema = z.object({
   organizationId: z
@@ -322,8 +323,7 @@ export default function NewClientInvoiceSheet() {
           {watchOrganizationId !== "" &&
             watchServicePeriodMonth !== "" &&
             jobs && (
-              <section>
-                <h2 className="h4 mb-2">Jobs</h2>
+              <CollapsibleSection title="Jobs">
                 <div className="flex flex-col gap-2">
                   <RowItemsContainer>
                     <Item>
@@ -359,7 +359,7 @@ export default function NewClientInvoiceSheet() {
                   </RowItemsContainer>
                   <JobsTable jobs={jobs} />
                 </div>
-              </section>
+              </CollapsibleSection>
             )}
         </div>
       </SheetContent>

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { AppointUserLicenseRequestDto } from "@/api";
+import { AppointUserLicenseRequestDto } from "@/api/api-spec";
 
 interface Variables extends AppointUserLicenseRequestDto {
   abbreviation: string;

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { AddPositionTaskRequestDto } from "@/api";
+import { AddPositionTaskRequestDto } from "@/api/api-spec";
 
 const usePostPositionTaskMutation = (positionId: string) => {
   const api = useApi();

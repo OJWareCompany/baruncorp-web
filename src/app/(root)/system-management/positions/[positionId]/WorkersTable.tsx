@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PositionResponseDto } from "@/api";
+import { PositionResponseDto } from "@/api/api-spec";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   CreatableExpensePricingResponse,
   FindCreatableExpensePricingHttpControllerGetParams,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getCreatableExpensePricingsQueryKey = (
   params: FindCreatableExpensePricingHttpControllerGetParams

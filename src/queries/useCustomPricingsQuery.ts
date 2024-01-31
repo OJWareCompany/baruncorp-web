@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   CustomPricingPaginatedResponseDto,
   FindCustomPricingPaginatedHttpControllerGetParams,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getCustomPricingsQueryKey = (
   params: FindCustomPricingPaginatedHttpControllerGetParams

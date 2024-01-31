@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
-import { PositionResponseDto } from "@/api";
+import { PositionResponseDto } from "@/api/api-spec";
 import WorkersCombobox from "@/components/combobox/WorkerCombobox";
 import usePostUserPositionMutation from "@/mutations/usePostUserPositionMutation";
 import { useToast } from "@/components/ui/use-toast";

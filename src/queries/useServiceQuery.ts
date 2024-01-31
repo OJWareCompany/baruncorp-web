@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { ServiceResponseDto } from "@/api";
+import { ServiceResponseDto } from "@/api/api-spec";
 
 export const getServiceQueryKey = (serviceId: string) => [
   "services",

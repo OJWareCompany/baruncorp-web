@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateClientNoteRequestDto } from "@/api";
+import { UpdateClientNoteRequestDto } from "@/api/api-spec";
 
 const usePatchClientNoteMutation = (organizationId: string) => {
   const api = useApi();

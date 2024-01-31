@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { VendorToInvoiceResponseDto } from "@/api";
+import { VendorToInvoiceResponseDto } from "@/api/api-spec";
 
 export const getVendorsToInvoiceQueryKey = () => ["vendors-to-invoice", "list"];
 

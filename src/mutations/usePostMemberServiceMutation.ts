@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import useApi from "@/hook/useApi";
 // import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
-// import { CreateMemberInChargeOfTheServiceRequestDto } from "@/api";
+// import { CreateMemberInChargeOfTheServiceRequestDto } from "@/api/api-spec";
 
 // const usePostMemberServiceMutation = (userId: string | undefined) => {
 //   const api = useApi();

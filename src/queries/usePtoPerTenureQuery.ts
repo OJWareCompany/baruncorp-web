@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindPtoTenurePolicyPaginatedHttpControllerGetParams,
   PtoTenurePolicyPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getPtoPerTenureQueryKey = (
   params: FindPtoTenurePolicyPaginatedHttpControllerGetParams

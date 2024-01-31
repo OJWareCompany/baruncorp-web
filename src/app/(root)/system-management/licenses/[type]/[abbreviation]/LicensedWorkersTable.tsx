@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatInEST } from "@/lib/utils";
-import { LicenseResponseDto } from "@/api";
+import { LicenseResponseDto } from "@/api/api-spec";
 
 const columnHelper =
   createColumnHelper<LicenseResponseDto["workers"][number]>();

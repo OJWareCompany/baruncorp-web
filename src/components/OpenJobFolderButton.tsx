@@ -1,7 +1,7 @@
 import React from "react";
 import { FolderOpen } from "lucide-react";
 import { Button } from "./ui/button";
-import { JobResponseDto, ProjectResponseDto } from "@/api";
+import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 
 interface Props {
   job: JobResponseDto;

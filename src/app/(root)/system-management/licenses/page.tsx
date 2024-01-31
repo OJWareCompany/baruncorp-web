@@ -1,11 +1,9 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
 import LicensesTable from "./LicensesTable";
 import PageHeader from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LicenseTypeEnum } from "@/lib/constants";
-import PageLoading from "@/components/PageLoading";
 
 interface LicenseTabsContentProps {
   value: LicenseTypeEnum;
@@ -26,30 +24,12 @@ export default function Page() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const typeSearchParam =
-    (searchParams.get("type") as LicenseTypeEnum) ??
-    LicenseTypeEnum.Values.Structural;
-
-  const isInvalid = useMemo(
-    () =>
-      typeSearchParam !== LicenseTypeEnum.Values.Structural &&
-      typeSearchParam !== LicenseTypeEnum.Values.Electrical,
-    [typeSearchParam]
+  const typeSearchParamParseResult = LicenseTypeEnum.safeParse(
+    searchParams.get("type")
   );
-
-  useEffect(() => {
-    if (isInvalid) {
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.set("type", LicenseTypeEnum.Values.Structural);
-      router.replace(`${pathname}?${newSearchParams.toString()}`, {
-        scroll: false,
-      });
-    }
-  }, [isInvalid, pathname, router, searchParams]);
-
-  if (isInvalid) {
-    return <PageLoading />;
-  }
+  const typeSearchParam = typeSearchParamParseResult.success
+    ? typeSearchParamParseResult.data
+    : LicenseTypeEnum.Values.Structural;
 
   return (
     <div className="flex flex-col">

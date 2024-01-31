@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindJobToInvoiceHttpControllerFindJobParams,
   JobToInvoiceResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getJobsForClientInvoiceQueryKey = (
   params: FindJobToInvoiceHttpControllerFindJobParams

@@ -29,7 +29,7 @@ import {
   FindPtoDetailPaginatedHttpControllerGetParams,
   PtoDetailPaginatedResponseDto,
   PtoDetailResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,

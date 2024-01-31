@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { HandsStatusResponseDto } from "@/api";
+import { HandsStatusResponseDto } from "@/api/api-spec";
 
 export const getHandsStatusQueryKey = () => ["handStatus"];
 

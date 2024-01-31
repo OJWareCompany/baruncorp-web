@@ -12,7 +12,7 @@ import {
 import { LicenseTypeEnum } from "@/lib/constants";
 import NewLicenseForm from "@/components/form/NewLicenseForm";
 import { getLicenseQueryKey } from "@/queries/useLicenseQuery";
-import { LicenseResponseDto } from "@/api";
+import { LicenseResponseDto } from "@/api/api-spec";
 
 interface Props {
   license: LicenseResponseDto;

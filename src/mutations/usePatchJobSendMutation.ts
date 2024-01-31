@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { SendDeliverablesRequestDto } from "@/api";
+import { SendDeliverablesRequestDto } from "@/api/api-spec";
 
 const usePatchJobSendMutation = (jobId: string) => {
   const api = useApi();

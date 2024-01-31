@@ -18,7 +18,7 @@ export default function AdditionalInformationHoverCard({ value }: Props) {
       <HoverCardTrigger className="underline">View Detail</HoverCardTrigger>
       <HoverCardContent
         className="max-w-[400px] w-[auto] max-h-[300px] overflow-y-auto cursor-default"
-        side="bottom"
+        side="top"
         onClick={(event) => {
           event.stopPropagation();
         }}

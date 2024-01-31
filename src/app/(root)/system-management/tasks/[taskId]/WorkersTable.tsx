@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TaskResponseDto } from "@/api";
+import { TaskResponseDto } from "@/api/api-spec";
 
 const columnHelper =
   createColumnHelper<TaskResponseDto["taskWorker"][number]>();

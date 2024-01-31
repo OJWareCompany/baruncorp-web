@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { AvailableWorkerResponseDto } from "@/api";
+import { AvailableWorkerResponseDto } from "@/api/api-spec";
 
 export const getAvailableWorkersQueryKey = (assignedTaskId: string) => [
   "available-workers",

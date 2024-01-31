@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdatePtoTotalRequestDto } from "@/api";
+import { UpdatePtoTotalRequestDto } from "@/api/api-spec";
 
 const usePatchPtoTotalMutation = (ptoId: string) => {
   const api = useApi();

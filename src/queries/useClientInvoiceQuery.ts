@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { InvoiceResponseDto } from "@/api";
+import { InvoiceResponseDto } from "@/api/api-spec";
 
 export const getClientInvoiceQueryKey = (invoiceId: string) => [
   "client-invoices",

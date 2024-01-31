@@ -2,6 +2,7 @@
 import { Grab, Hand } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
+import { AxiosError } from "axios";
 import { useSocketContext } from "./SocketProvider";
 import { Button } from "@/components/ui/button";
 import useHandsStatusQuery, {
@@ -67,23 +68,59 @@ export default function HandToggle() {
         }
 
         if (handStatus.status) {
-          postUserHandsDownMutateAsync().then(() => {
-            toast({
-              title: "Hands down",
+          postUserHandsDownMutateAsync()
+            .then(() => {
+              toast({
+                title: "Hands down",
+              });
+              queryClient.invalidateQueries({
+                queryKey: getHandsStatusQueryKey(),
+              });
+            })
+            .catch((error: AxiosError<ErrorResponseData>) => {
+              if (
+                error.response &&
+                error.response.data.errorCode.filter((value) => value != null)
+                  .length !== 0
+              ) {
+                toast({
+                  title: error.response.data.message,
+                  variant: "destructive",
+                });
+                return;
+              }
             });
-            queryClient.invalidateQueries({
-              queryKey: getHandsStatusQueryKey(),
-            });
-          });
         } else {
-          postUserHandsUpMutateAsync().then(() => {
-            // toast({
-            //   title: "Hands up",
-            // });
-            queryClient.invalidateQueries({
-              queryKey: getHandsStatusQueryKey(),
+          postUserHandsUpMutateAsync()
+            .then(() => {
+              queryClient.invalidateQueries({
+                queryKey: getHandsStatusQueryKey(),
+              });
+            })
+            .catch((error: AxiosError<ErrorResponseData>) => {
+              switch (error.response?.status) {
+                case 404:
+                  if (error.response?.data.errorCode.includes("20305")) {
+                    toast({
+                      title: "There are no available tasks set",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+              }
+
+              if (
+                error.response &&
+                error.response.data.errorCode.filter((value) => value != null)
+                  .length !== 0
+              ) {
+                toast({
+                  title: error.response.data.message,
+                  variant: "destructive",
+                });
+                return;
+              }
             });
-          });
         }
       }}
     >

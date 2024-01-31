@@ -35,7 +35,7 @@ import useJobsQuery from "@/queries/useJobsQuery";
 import {
   FindJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   JobStatusEnum,
@@ -330,6 +330,18 @@ export default function JobsTable() {
       columnHelper.accessor("receivedAt", {
         header: "Date Received (EST)",
         cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+      columnHelper.accessor("dueDate", {
+        header: "Date Due (EST)",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
+        },
       }),
     ];
   }, [

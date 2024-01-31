@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import { KNOWN_ERROR } from "@/lib/constants";
 
 export const getInvitationUserQueryKey = (userId: string) => [

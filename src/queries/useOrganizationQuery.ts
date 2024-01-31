@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { OrganizationResponseDto } from "@/api";
+import { OrganizationResponseDto } from "@/api/api-spec";
 
 export const getOrganizationQueryKey = (organizationId: string) => [
   "organizations",

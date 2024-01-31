@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   ClientNotePaginatedResponseDto,
   FindClientNotePaginatedHttpControllerGetParams,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getClientNotesQueryKey = (
   params: FindClientNotePaginatedHttpControllerGetParams

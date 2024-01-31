@@ -3,7 +3,7 @@ import { ArrowDownToLine } from "lucide-react";
 import React from "react";
 import InvoiceDocument from "./InvoiceDocument";
 import { Button } from "@/components/ui/button";
-import { InvoiceResponseDto, OrganizationResponseDto } from "@/api";
+import { InvoiceResponseDto, OrganizationResponseDto } from "@/api/api-spec";
 
 interface Props {
   clientInvoice: InvoiceResponseDto;

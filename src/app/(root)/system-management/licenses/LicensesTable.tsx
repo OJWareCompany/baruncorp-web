@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LicensePaginatedResponseDto } from "@/api";
+import { LicensePaginatedResponseDto } from "@/api/api-spec";
 import {
   Select,
   SelectContent,
@@ -71,15 +71,12 @@ export default function LicensesTable({ type }: Props) {
       ? Number(searchParams.get("pageSize"))
       : 10,
   };
-  const typeSearchParam =
-    (searchParams.get("type") as LicenseTypeEnum) ??
-    LicenseTypeEnum.Values.Structural;
 
   const { data, isLoading } = useLicensesQuery(
     {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      type: typeSearchParam,
+      type,
     },
     true
   );

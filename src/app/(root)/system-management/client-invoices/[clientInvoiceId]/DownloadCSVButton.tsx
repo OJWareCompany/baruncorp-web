@@ -4,7 +4,7 @@ import { ArrowDownToLine } from "lucide-react";
 import { useMemo } from "react";
 import { getLineItemsTableExportDataFromLineItems } from "./JobsTable";
 import { Button } from "@/components/ui/button";
-import { InvoiceResponseDto } from "@/api";
+import { InvoiceResponseDto } from "@/api/api-spec";
 
 interface Props {
   clientInvoice: InvoiceResponseDto;

@@ -1,9 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import {
-  IdResponse,
-} from "@/api";
+import { IdResponse } from "@/api/api-spec";
 
 const usePatchUserDeactivateMutation = (userId: string) => {
   const api = useApi();

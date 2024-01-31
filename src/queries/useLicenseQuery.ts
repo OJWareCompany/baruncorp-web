@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { FindLicenseHttpControllerGetParams, LicenseResponseDto } from "@/api";
+import {
+  FindLicenseHttpControllerGetParams,
+  LicenseResponseDto,
+} from "@/api/api-spec";
 import { LicenseTypeEnum } from "@/lib/constants";
 
 export const getLicenseQueryKey = (

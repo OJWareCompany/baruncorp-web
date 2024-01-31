@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TaskResponseDto } from "@/api";
+import { TaskResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import useDeletePrerequisiteTaskMutation from "@/mutations/useDeletePrerequisiteTaskMutation";
 import {

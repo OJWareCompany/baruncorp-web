@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindVendorInvoicePaginatedHttpControllerGetParams,
   VendorInvoicePaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getVendorInvoicesQueryKey = (
   params: FindVendorInvoicePaginatedHttpControllerGetParams

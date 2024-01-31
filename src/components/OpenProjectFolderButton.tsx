@@ -1,7 +1,7 @@
 import React from "react";
 import { FolderOpen } from "lucide-react";
 import { Button } from "./ui/button";
-import { ProjectResponseDto } from "@/api";
+import { ProjectResponseDto } from "@/api/api-spec";
 
 interface Props {
   project: ProjectResponseDto;

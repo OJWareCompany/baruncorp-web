@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { AddAvailableTaskRequestDto } from "@/api";
+import { AddAvailableTaskRequestDto } from "@/api/api-spec";
 
 const usePostUserAvailableTaskMutation = (userId: string) => {
   const api = useApi();

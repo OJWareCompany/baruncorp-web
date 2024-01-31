@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobToInvoiceResponseDto } from "@/api";
+import { JobToInvoiceResponseDto } from "@/api/api-spec";
 
 const columnHelper =
   createColumnHelper<JobToInvoiceResponseDto["items"][number]>();

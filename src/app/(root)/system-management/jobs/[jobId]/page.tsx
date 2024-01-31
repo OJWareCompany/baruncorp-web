@@ -6,6 +6,7 @@ import JobNotesTable from "./JobNoteTable";
 import JobNoteForm from "./JobNoteForm";
 import TasksTable from "./TasksTable";
 import JobsTable from "./JobsTable";
+import HistoryTable from "./HistoryTable";
 import useProjectQuery from "@/queries/useProjectQuery";
 import useJobQuery from "@/queries/useJobQuery";
 import PageHeader from "@/components/PageHeader";
@@ -82,6 +83,9 @@ export default function Page({ params: { jobId } }: Props) {
         </CollapsibleSection>
         <CollapsibleSection title="Tasks">
           <TasksTable job={job} project={project} />
+        </CollapsibleSection>
+        <CollapsibleSection title="History">
+          <HistoryTable job={job} />
         </CollapsibleSection>
       </div>
     </div>

@@ -26,7 +26,7 @@ import {
 import {
   FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams,
   OrganizationPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,
@@ -267,6 +267,10 @@ export default function OrganizationsTable() {
             }
           />
         ),
+        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+      }),
+      columnHelper.accessor("isDelinquent", {
+        header: "Delinquent",
         cell: ({ getValue }) => <Checkbox checked={getValue()} />,
       }),
     ];

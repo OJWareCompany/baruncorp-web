@@ -1,5 +1,5 @@
 import React from "react";
-import { LicenseResponseDto } from "@/api";
+import { LicenseResponseDto } from "@/api/api-spec";
 import Item from "@/components/Item";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { Input } from "@/components/ui/input";

@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { InvoiceResponseDto } from "@/api";
+import { InvoiceResponseDto } from "@/api/api-spec";
 import {
   TermsEnum,
   transformNullishStringIntoString,

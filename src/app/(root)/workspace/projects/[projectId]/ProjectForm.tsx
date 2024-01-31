@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import { ProjectResponseDto } from "@/api";
+import { ProjectResponseDto } from "@/api/api-spec";
 import {
   Form,
   FormControl,

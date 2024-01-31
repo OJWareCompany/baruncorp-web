@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import {
   Form,
   FormControl,

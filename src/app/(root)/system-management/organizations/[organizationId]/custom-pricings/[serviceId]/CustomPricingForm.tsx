@@ -5,7 +5,11 @@ import { z } from "zod";
 import { Infinity, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { CustomPricingResponseDto, OrganizationResponseDto, Tier } from "@/api";
+import {
+  CustomPricingResponseDto,
+  OrganizationResponseDto,
+  Tier,
+} from "@/api/api-spec";
 import {
   ResidentialNewPriceChargeTypeEnum,
   ResidentialNewPriceChargeTypeEnumWithEmptyString,

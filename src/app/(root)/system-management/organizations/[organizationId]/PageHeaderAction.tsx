@@ -2,7 +2,7 @@ import { DollarSign, ScrollText } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { OrganizationResponseDto } from "@/api";
+import { OrganizationResponseDto } from "@/api/api-spec";
 
 interface Props {
   organization: OrganizationResponseDto;

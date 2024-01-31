@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import useApi from "@/hook/useApi";
 // import useProfileByUserIdQueryInvalidation from "@/hook/useProfileByUserIdQueryInvalidation";
-// import { DepartmentControllerDeleteRevokePositionParams } from "@/api";
+// import { DepartmentControllerDeleteRevokePositionParams } from "@/api/api-spec";
 
 // const useDeleteMemberPositionMutation = (userId: string | undefined) => {
 //   const api = useApi();

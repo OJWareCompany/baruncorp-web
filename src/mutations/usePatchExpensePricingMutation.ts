@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateExpensePricingRequestDto } from "@/api";
+import { UpdateExpensePricingRequestDto } from "@/api/api-spec";
 
 const usePatchExpensePricingMutation = ({
   organizationId,

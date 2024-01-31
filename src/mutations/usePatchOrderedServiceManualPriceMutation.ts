@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateManualPriceRequestDto } from "@/api";
+import { UpdateManualPriceRequestDto } from "@/api/api-spec";
 
 const usePatchOrderedServiceManualPriceMutation = (
   orderedServiceId: string

@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   AssigningTaskAlertPaginatedResponse,
   FindAssigningTaskAlertPaginatedHttpControllerFindParams,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getNotificationsQueryKey = (
   params: FindAssigningTaskAlertPaginatedHttpControllerFindParams

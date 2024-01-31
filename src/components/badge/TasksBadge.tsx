@@ -4,7 +4,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { AssignedTaskResponseFields } from "@/api";
+import { AssignedTaskResponseFields } from "@/api/api-spec";
 import { jobStatuses } from "@/lib/constants";
 
 interface Props {

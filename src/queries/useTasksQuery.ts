@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindTaskPaginatedHttpControllerGetParams,
   TaskPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getTasksQueryKey = (
   params: FindTaskPaginatedHttpControllerGetParams

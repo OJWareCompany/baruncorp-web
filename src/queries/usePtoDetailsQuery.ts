@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindPtoDetailPaginatedHttpControllerGetParams,
   PtoDetailPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getPtoDetailsQueryKey = (
   params: FindPtoDetailPaginatedHttpControllerGetParams

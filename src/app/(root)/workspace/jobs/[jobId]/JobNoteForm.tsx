@@ -16,7 +16,7 @@ import {
 import LoadingButton from "@/components/LoadingButton";
 import usePostJobNoteMutation from "@/mutations/usePostJobNoteMutation";
 import { getJobNotesQueryKey } from "@/queries/useJobNotesQuery";
-import { JobResponseDto } from "@/api";
+import { JobResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({

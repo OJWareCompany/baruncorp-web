@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { Button } from "../ui/button";
 import { useToast } from "../ui/use-toast";
-import { UserPaginatedResponseDto } from "@/api";
+import { UserPaginatedResponseDto } from "@/api/api-spec";
 import {
   AlertDialog,
   AlertDialogAction,

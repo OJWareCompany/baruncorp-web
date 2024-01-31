@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindInformationPaginatedHttpControllerGetParams,
   InformationPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getInformationsQueryKey = (
   params: FindInformationPaginatedHttpControllerGetParams

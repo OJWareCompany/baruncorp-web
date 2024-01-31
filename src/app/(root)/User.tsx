@@ -38,6 +38,7 @@ export default function User() {
       });
     }
 
+    queryClient.clear(); // 로그아웃시킬 때 cache를 지워서 다음 로그인 때 cache가 남아있지 않게 하기 위함
     signOut({ redirect: false });
     toast({ title: "Sign-out success" });
   };

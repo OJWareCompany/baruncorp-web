@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindPtoAnnualPaginatedHttpControllerGetParams,
   PtoAnnualPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getAnnualPtosQueryKey = (
   params: FindPtoAnnualPaginatedHttpControllerGetParams

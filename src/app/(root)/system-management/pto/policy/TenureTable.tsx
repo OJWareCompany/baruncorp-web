@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PtoTenurePolicyPaginatedResponseDto } from "@/api";
+import { PtoTenurePolicyPaginatedResponseDto } from "@/api/api-spec";
 import usePtoPerTenureQuery from "@/queries/usePtoPerTenureQuery";
 import PtoField from "@/components/field/PtoField";
 

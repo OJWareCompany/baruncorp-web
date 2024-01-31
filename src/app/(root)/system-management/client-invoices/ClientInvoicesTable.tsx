@@ -27,7 +27,7 @@ import {
 import {
   FindInvoicePaginatedHttpControllerGetParams,
   InvoicePaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,

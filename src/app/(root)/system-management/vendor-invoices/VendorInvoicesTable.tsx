@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { VendorInvoicePaginatedResponseDto } from "@/api";
+import { VendorInvoicePaginatedResponseDto } from "@/api/api-spec";
 import {
   Select,
   SelectContent,

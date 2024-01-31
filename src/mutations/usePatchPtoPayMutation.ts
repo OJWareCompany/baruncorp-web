@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdatePtoPayRequestDto } from "@/api";
+import { UpdatePtoPayRequestDto } from "@/api/api-spec";
 
 interface Variables extends UpdatePtoPayRequestDto {
   ptoId: string;

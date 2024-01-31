@@ -23,7 +23,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
+import {
+  AutoAssignmentPropertyTypeEnum,
+  BARUNCORP_ORGANIZATION_ID,
+} from "@/lib/constants";
 import {
   Select,
   SelectContent,
@@ -35,7 +38,7 @@ import {
 import usePostUserAvailableTaskMutation from "@/mutations/usePostUserAvailableTaskMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import NoLicensedTasksCombobox from "@/components/combobox/NoLicensedTasksCombobox";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
@@ -140,34 +143,41 @@ export default function NewAvailableTaskDialog({ user }: Props) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="autoAssignmentPropertyType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Auto Assignment Property Type</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select a property type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {AutoAssignmentPropertyTypeEnum.options.map(
-                            (option) => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {user.organizationId === BARUNCORP_ORGANIZATION_ID && (
+              <FormField
+                control={form.control}
+                name="autoAssignmentPropertyType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>
+                      Auto Assignment Property Type
+                    </FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue placeholder="Select a property type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {AutoAssignmentPropertyTypeEnum.options.map(
+                              (option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <LoadingButton
               type="submit"
               isLoading={form.formState.isSubmitting}

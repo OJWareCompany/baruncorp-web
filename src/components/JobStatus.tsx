@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { useToast } from "./ui/use-toast";
-import { JobResponseDto, ProjectResponseDto } from "@/api";
+import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import { JobStatusEnum, jobStatuses } from "@/lib/constants";
 import {

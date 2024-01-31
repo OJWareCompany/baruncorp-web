@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams,
   OrganizationPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getOrganizationsQueryKey = (
   params: FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams

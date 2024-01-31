@@ -24,7 +24,7 @@ import {
   AhjNoteResponseDto,
   ProjectAssociatedRegulatoryBodyDto,
   UpdateAhjNoteRequestDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const formSchema = z.object({
   // general

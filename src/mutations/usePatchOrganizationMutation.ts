@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateOrganizationRequestDto } from "@/api";
+import { UpdateOrganizationRequestDto } from "@/api/api-spec";
 
 const usePatchOrganizationMutation = (organizationId: string) => {
   const api = useApi();

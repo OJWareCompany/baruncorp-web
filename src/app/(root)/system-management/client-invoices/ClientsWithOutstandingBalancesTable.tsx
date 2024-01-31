@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClientWithOutstandingBalancesPaginatedResponseDto } from "@/api";
+import { ClientWithOutstandingBalancesPaginatedResponseDto } from "@/api/api-spec";
 import {
   Select,
   SelectContent,

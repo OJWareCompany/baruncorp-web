@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindUsersHttpControllerGetFindUsersParams,
   UserPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getUsersQueryKey = (
   params: FindUsersHttpControllerGetFindUsersParams

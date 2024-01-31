@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { SignUpRequestDto } from "@/api";
+import { SignUpRequestDto } from "@/api/api-spec";
 
 const usePostSignupMutation = (userId: string) => {
   const api = useApi();

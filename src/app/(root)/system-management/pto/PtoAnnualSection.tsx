@@ -27,7 +27,7 @@ import {
 import {
   FindPtoAnnualPaginatedHttpControllerGetParams,
   PtoAnnualPaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,

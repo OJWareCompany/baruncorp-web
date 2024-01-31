@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { JobResponseDto } from "@/api";
+import { JobResponseDto } from "@/api/api-spec";
 
 export const getJobQueryKey = (jobId: string) => ["jobs", "detail", jobId];
 

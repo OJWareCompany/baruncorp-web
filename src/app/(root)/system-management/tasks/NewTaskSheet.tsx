@@ -146,7 +146,7 @@ export default function NewTaskSheet() {
                   name="serviceId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel required>Service</FormLabel>
+                      <FormLabel required>Scope</FormLabel>
                       <FormControl>
                         <ServicesCombobox
                           serviceId={field.value}

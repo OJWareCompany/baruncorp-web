@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Ban, Mail, RotateCcw } from "lucide-react";
 import React, { useState } from "react";
 import { AxiosError } from "axios";
-import { UserResponseDto } from "@/api";
+import { UserResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import usePostInvitationsMutation from "@/mutations/usePostInvitationsMutation";

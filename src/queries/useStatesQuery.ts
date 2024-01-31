@@ -1,7 +1,7 @@
 // import { useQuery } from "@tanstack/react-query";
 // import { AxiosError } from "axios";
 // import useApi from "@/hook/useApi";
-// import { StatesResponseDto } from "@/api";
+// import { StatesResponseDto } from "@/api/api-spec";
 
 // const useStatesQuery = () => {
 //   const api = useApi();

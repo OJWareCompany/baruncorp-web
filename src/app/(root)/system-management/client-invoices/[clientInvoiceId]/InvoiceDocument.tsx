@@ -1,6 +1,6 @@
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 import { format } from "date-fns";
-import { InvoiceResponseDto, OrganizationResponseDto } from "@/api";
+import { InvoiceResponseDto, OrganizationResponseDto } from "@/api/api-spec";
 import { billingCodes } from "@/lib/constants";
 
 interface Props {
@@ -132,9 +132,9 @@ export default function InvoiceDocument({
               <Text style={[styles.tableCell, { flexBasis: 40 }]}>
                 ${value.price}
               </Text>
-              <Text style={[styles.tableCell, { flexBasis: 60 }]}>
+              {/* <Text style={[styles.tableCell, { flexBasis: 60 }]}>
                 {format(new Date(value.dateSentToClient), "MM-dd-yyyy")}
-              </Text>
+              </Text> */}
             </View>
           ))}
         </View>

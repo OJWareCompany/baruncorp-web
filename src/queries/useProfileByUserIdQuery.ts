@@ -2,7 +2,7 @@
 // import { AxiosError } from "axios";
 // import { QUERY_KEY as profileQueryKey } from "./useProfileQuery";
 // import useApi from "@/hook/useApi";
-// import { UserResponseDto } from "@/api";
+// import { UserResponseDto } from "@/api/api-spec";
 
 // const useProfileByUserIdQuery = (userId: string) => {
 //   const api = useApi();

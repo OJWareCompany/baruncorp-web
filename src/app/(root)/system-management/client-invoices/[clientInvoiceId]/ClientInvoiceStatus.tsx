@@ -4,7 +4,7 @@ import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import InvoiceDocument from "./InvoiceDocument";
-import { InvoiceResponseDto, OrganizationResponseDto } from "@/api";
+import { InvoiceResponseDto, OrganizationResponseDto } from "@/api/api-spec";
 import { InvoiceStatusEnum, invoiceStatuses } from "@/lib/constants";
 import {
   AlertDialog,

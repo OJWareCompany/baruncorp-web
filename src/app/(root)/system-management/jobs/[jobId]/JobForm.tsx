@@ -15,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { JobResponseDto, ProjectResponseDto } from "@/api";
+import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import { Input } from "@/components/ui/input";
 import AddressSearchButton from "@/components/AddressSearchButton";
 import LoadingButton from "@/components/LoadingButton";
@@ -39,6 +39,7 @@ import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { getEditorValue, isEditorValueEmpty } from "@/lib/plate-utils";
+import DateTimePicker from "@/components/date-time-picker/DateTimePicker";
 
 interface Props {
   project: ProjectResponseDto;
@@ -79,6 +80,7 @@ export default function JobForm({ project, job }: Props) {
           }),
           additionalInformation: z.custom<Value>(),
           mountingType: MountingTypeEnum,
+          dueDate: z.date().nullable(),
           isExpedited: z.boolean(),
           systemSize: z.string().trim(),
           numberOfWetStamp: z.string().trim(),
@@ -176,6 +178,7 @@ export default function JobForm({ project, job }: Props) {
           ? INITIAL_EDITOR_VALUE
           : getEditorValue(job.additionalInformationFromClient),
       mountingType: job.mountingType as z.infer<typeof MountingTypeEnum>,
+      dueDate: job.dueDate == null ? null : new Date(job.dueDate),
       isExpedited: job.isExpedited,
       systemSize: job.systemSize == null ? "" : String(job.systemSize),
       numberOfWetStamp:
@@ -252,7 +255,7 @@ export default function JobForm({ project, job }: Props) {
       numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
       mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
       isExpedited: values.isExpedited,
-      dueDate: null, // TODO
+      dueDate: values.dueDate == null ? null : values.dueDate.toISOString(),
     })
       .then(() => {
         queryClient.invalidateQueries({
@@ -549,6 +552,27 @@ export default function JobForm({ project, job }: Props) {
                 <FormLabel>Additional Information</FormLabel>
                 <FormControl>
                   <BasicEditor {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="dueDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Date Due (EST)</FormLabel>
+                <FormControl>
+                  <DateTimePicker
+                    value={field.value}
+                    onChange={(...args) => {
+                      const newValue = args[0];
+                      // https://react-hook-form.com/docs/usecontroller/controller
+                      // field.onChange에 undefined를 담을 수 없음
+                      field.onChange(newValue === undefined ? null : newValue);
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

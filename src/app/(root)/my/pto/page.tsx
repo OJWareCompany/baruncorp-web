@@ -1,14 +1,19 @@
 "use client";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import HistoryTable from "./HistoryTable";
 import PtoDetails from "./PtoDetails";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import usePtosQuery from "@/queries/usePtosQuery";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Page() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { toast } = useToast();
   const { data: ptos, isLoading: isPtosQueryLoading } = usePtosQuery({
     params: {
       userId: session?.id,
@@ -17,7 +22,19 @@ export default function Page() {
     enabled: session != null,
   });
 
-  if (ptos == null || isPtosQueryLoading || session == null) {
+  const isValid = status === "authenticated" && session.isBarunCorpMember;
+
+  useEffect(() => {
+    if (status === "authenticated" && !session.isBarunCorpMember) {
+      router.push("/");
+      toast({
+        title: "Invalid access",
+        variant: "destructive",
+      });
+    }
+  }, [router, session?.isBarunCorpMember, status, toast]);
+
+  if (ptos == null || isPtosQueryLoading || session == null || !isValid) {
     return <PageLoading />;
   }
 

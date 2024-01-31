@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { UpdateJobRequestDto } from "@/api";
+import { UpdateJobRequestDto } from "@/api/api-spec";
 
 const usePatchJobMutation = (jobId: string) => {
   const api = useApi();

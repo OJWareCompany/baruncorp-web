@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import {
   FindLicensePaginatedHttpControllerGetParams,
   LicensePaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 
 export const getLicensesQueryKey = (
   params: FindLicensePaginatedHttpControllerGetParams

@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { Button } from "@/components/ui/button";
 import ItemsContainer from "@/components/ItemsContainer";
-import { ServiceResponseDto, TaskResponseDto } from "@/api";
+import { ServiceResponseDto, TaskResponseDto } from "@/api/api-spec";
 import usePatchTaskMutation from "@/mutations/usePatchTaskMutation";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import {
@@ -136,7 +136,7 @@ export default function TaskForm({ task, service }: Props) {
               name="service"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel required>Service</FormLabel>
+                  <FormLabel required>Scope</FormLabel>
                   <div className="flex gap-2">
                     <FormControl>
                       <Input {...field} disabled />
@@ -147,7 +147,7 @@ export default function TaskForm({ task, service }: Props) {
                       className="shrink-0"
                       asChild
                     >
-                      <Link href={`/system-management/services/${service.id}`}>
+                      <Link href={`/system-management/scopes/${service.id}`}>
                         <ExternalLink className="h-4 w-4" />
                       </Link>
                     </Button>

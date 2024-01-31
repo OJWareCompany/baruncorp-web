@@ -19,6 +19,7 @@ import Minimap from "@/components/Minimap";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -53,7 +54,7 @@ import {
   OrganizationResponseDto,
   ProjectResponseDto,
   ServicePaginatedResponseDto,
-} from "@/api";
+} from "@/api/api-spec";
 import useUserQuery from "@/queries/useUserQuery";
 import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizationCombobox";
 import { AffixInput } from "@/components/AffixInput";
@@ -64,6 +65,7 @@ import LoadingButton from "@/components/LoadingButton";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { isEditorValueEmpty } from "@/lib/plate-utils";
 import { useToast } from "@/components/ui/use-toast";
+import DateTimePicker from "@/components/date-time-picker/DateTimePicker";
 
 interface JobSectionWithDataProps {
   project: ProjectResponseDto;
@@ -137,6 +139,7 @@ function JobSectionWithData({
             coordinates: z.array(z.number()),
           }),
           additionalInformation: z.custom<Value>(),
+          dueDate: z.date().nullable(),
           isExpedited: z.boolean(),
         })
         .superRefine((values, ctx) => {
@@ -274,6 +277,7 @@ function JobSectionWithData({
       },
       typeOfWetStamp: [],
       additionalInformation: INITIAL_EDITOR_VALUE,
+      dueDate: null,
       isExpedited: false,
     },
   });
@@ -496,9 +500,9 @@ function JobSectionWithData({
       numberOfWetStamp: isWetStampChecked
         ? Number(values.numberOfWetStamp)
         : null,
+      dueDate: values.dueDate == null ? null : values.dueDate.toISOString(),
     })
       .then(({ id }) => {
-        // TODO: client인 경우 어떻게? project-management/jobs/:jobId로 이동?
         setResult({ open: true, jobId: id });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
@@ -704,7 +708,8 @@ function JobSectionWithData({
                 name="services"
                 render={() => (
                   <FormItem>
-                    <FormLabel required>Services</FormLabel>
+                    {/** Services를 Scopes라고 부르기로 하였으나, 코드 상에서는 services라는 이름으로 사용되고 있기 때문에, 보여지는 쪽에만 우선 Scopes를 적용함 */}
+                    <FormLabel required>Scopes</FormLabel>
                     <div className="grid grid-cols-3 gap-y-2 gap-x-4">
                       {services.items
                         .filter(
@@ -1163,25 +1168,54 @@ function JobSectionWithData({
                 )}
               />
               {isBarunCorpMember && (
-                <FormField
-                  control={form.control}
-                  name="isExpedited"
-                  render={({ field }) => (
-                    <FormItem className="flex-row-reverse justify-end items-center gap-3">
-                      <FormLabel>Expedite</FormLabel>
-                      <FormControl>
-                        <Checkbox
-                          ref={field.ref}
-                          checked={field.value}
-                          onCheckedChange={(newChecked) => {
-                            field.onChange(newChecked);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <>
+                  <FormField
+                    control={form.control}
+                    name="dueDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date Due (EST)</FormLabel>
+                        <FormControl>
+                          <DateTimePicker
+                            value={field.value}
+                            onChange={(...args) => {
+                              const newValue = args[0];
+                              // https://react-hook-form.com/docs/usecontroller/controller
+                              // field.onChange에 undefined를 담을 수 없음
+                              field.onChange(
+                                newValue === undefined ? null : newValue
+                              );
+                            }}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          If not entered, it will be automatically calculated
+                          based on the selected scopes.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="isExpedited"
+                    render={({ field }) => (
+                      <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                        <FormLabel>Expedite</FormLabel>
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              field.onChange(newChecked);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               )}
               <Dropzone files={files} onFilesChange={setFiles} />
               <LoadingButton

@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PtoDetailResponseDto } from "@/api";
+import { PtoDetailResponseDto } from "@/api/api-spec";
 import useDeletePtoDetailMutation from "@/mutations/useDeletePtoDetailMutation";
 import usePtoDetailsQuery, {
   getPtoDetailsQueryKey,

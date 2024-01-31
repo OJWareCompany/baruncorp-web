@@ -1,7 +1,7 @@
 // import { useQuery } from "@tanstack/react-query";
 // import { AxiosError } from "axios";
 // import useApi from "@/hook/useApi";
-// import { PaymentResponseDto } from "@/api";
+// import { PaymentResponseDto } from "@/api/api-spec";
 
 // const usePaymentQuery = ({ paymentId }: { paymentId: string }) => {
 //   const api = useApi();

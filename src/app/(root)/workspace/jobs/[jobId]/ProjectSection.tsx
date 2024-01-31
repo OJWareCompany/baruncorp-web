@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-import { ProjectResponseDto } from "@/api";
+import { ProjectResponseDto } from "@/api/api-spec";
 import Item from "@/components/Item";
 import ItemsContainer from "@/components/ItemsContainer";
 import Minimap from "@/components/Minimap";

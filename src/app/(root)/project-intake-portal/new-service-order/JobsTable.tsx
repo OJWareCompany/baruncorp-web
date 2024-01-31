@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobResponseDto } from "@/api";
+import { JobResponseDto } from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
 import { jobStatuses } from "@/lib/constants";
 import TasksBadge from "@/components/badge/TasksBadge";
@@ -75,6 +75,18 @@ const columns = [
   columnHelper.accessor("receivedAt", {
     header: "Date Received (EST)",
     cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+  columnHelper.accessor("dueDate", {
+    header: "Date Due (EST)",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return formatInEST(value);
+    },
   }),
 ];
 
