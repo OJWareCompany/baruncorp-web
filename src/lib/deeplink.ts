@@ -59,6 +59,37 @@ export function openJobFolder({
   window.location.href = url;
 }
 
+/**
+ * @example
+ * openJobNoteFolder({
+ *   organization: "hello world",
+ *   type: "Residential",
+ *   project: "Warren City Ctr, Warrenton, Missouri 63383, United States",
+ *   job: `Job 5`,
+ *   jobNote: `#3232 message`,
+ * });
+ */
+export function openJobNoteFolder({
+  organization,
+  type,
+  project,
+  job,
+  jobNote,
+}: {
+  organization: string;
+  type: string;
+  project: string;
+  job: string;
+  jobNote: string;
+}) {
+  checkBarunFinderApp();
+
+  const url = `barun://open-job-note?payload=${encodeURIComponent(
+    JSON.stringify({ organization, type, project, job, jobNote })
+  )}`;
+  window.location.href = url;
+}
+
 export function openAhjFolder({ fullAhjName }: { fullAhjName: string }) {
   checkBarunFinderApp();
 

@@ -526,6 +526,7 @@ export interface JobResponseDto {
   state: string;
   /** @format date-time */
   dueDate: string | null;
+  jobFolderId: string;
 }
 
 export interface JobPaginatedResponseDto {

@@ -5,3 +5,9 @@ interface ErrorResponseData {
   timestamp: string;
   path: string;
 }
+
+interface FileServerErrorResponseData {
+  message: string;
+  statusCode: number;
+  errorCode: string;
+}
