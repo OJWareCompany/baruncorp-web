@@ -1,8 +1,7 @@
 "use client";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect } from "react";
 import { useNewServiceOrderData } from "./NewServiceOrderDataProvider";
 import {
   Dialog,
@@ -15,9 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/components/ui/use-toast";
 import useJobQuery from "@/queries/useJobQuery";
 import { errorToastDescription } from "@/lib/constants";
+import useUploadJobFilesMutation from "@/mutations/useUploadJobFilesMutation";
+import { toast } from "@/components/ui/use-toast";
 
 interface Props extends DialogProps {
   onOpenChange: (open: boolean) => void;
@@ -28,55 +28,28 @@ interface Props extends DialogProps {
 export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
   const { isBarunCorpMember } = useNewServiceOrderData();
   const router = useRouter();
-  const { toast } = useToast();
-  const [progressState, setProgressState] = useState({
-    value: 0,
-    error: false,
-  });
   const { data: job } = useJobQuery(jobId ?? "");
 
+  const {
+    mutationResult: { mutateAsync },
+    progressState,
+  } = useUploadJobFilesMutation();
+
   useEffect(() => {
-    if (dialogProps.open && job) {
-      if (!job.jobFolderId) {
-        toast({
-          title: "Upload failed",
-          description: errorToastDescription,
-          variant: "destructive",
-        });
-        setProgressState({ value: 100, error: true });
-        return;
-      }
-      if (files.length !== 0) {
-        const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobFiles`;
+    if (!dialogProps.open) return;
+    if (files.length === 0) return;
+    if (!job || !job?.jobFolderId) return;
 
-        const formData = new FormData();
-        formData.append("jobFolderId", job.jobFolderId);
-        for (const file of files) {
-          formData.append("files", file);
-        }
-
-        axios
-          .post(url, formData, {
-            onUploadProgress: (axiosProgressEvent) => {
-              setProgressState({
-                value: (axiosProgressEvent?.progress ?? 0) * 100,
-                error: false,
-              });
-            },
-          })
-          .then(console.log)
-          .catch(() => {
-            toast({
-              title: "Upload failed",
-              description: errorToastDescription,
-              variant: "destructive",
-            });
-            setProgressState({ value: 100, error: true });
-          });
-      }
-    } else {
-      setProgressState({ value: 0, error: false });
-    }
+    mutateAsync({
+      files: files,
+      jobFolderId: job.jobFolderId,
+    }).catch(() => {
+      toast({
+        title: "Upload failed",
+        description: errorToastDescription,
+        variant: "destructive",
+      });
+    });
   }, [dialogProps.open, files, job, toast]);
 
   return (
