@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -47,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SearchHeader from "@/components/table/SearchHeader";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<PtoDetailPaginatedResponseDto["items"][number]>();
@@ -60,29 +61,38 @@ const TABLE_NAME = "PTODetails";
 
 export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindPtoDetailPaginatedHttpControllerGetParams>();
 
+  const userNameSearchParamName = `${TABLE_NAME}userName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
-  const nameSearchParam =
-    searchParams.get(encodeURIComponent(`${TABLE_NAME}name`)) ?? "";
+  const userNameSearchParam =
+    searchParams.get(encodeURIComponent(userNameSearchParamName)) ?? "";
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindPtoDetailPaginatedHttpControllerGetParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      userName: nameSearchParam,
+      userName: userNameSearchParam,
     }),
-    [nameSearchParam, pagination.pageIndex, pagination.pageSize]
+    [userNameSearchParam, pagination.pageIndex, pagination.pageSize]
   );
 
   const { data, isLoading, isFetching } = usePtoDetailsQuery(params, true);
@@ -116,34 +126,9 @@ export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
           id: "fullName",
           header: () => (
             <SearchHeader
-              initialValue={nameSearchParam}
               buttonText="Name"
-              onFilterButtonClick={(value) => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}name`),
-                  value
-                );
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              isFiltered={nameSearchParam !== ""}
-              onResetButtonClick={() => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete(encodeURIComponent(`${TABLE_NAME}name`));
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
+              searchParamName={userNameSearchParamName}
+              pageIndexSearchParamName={pageIndexSearchParamName}
               isLoading={
                 syncedParams != null &&
                 params.userName !== syncedParams.userName
@@ -194,14 +179,12 @@ export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
       }),
     ],
     [
-      deletePto,
-      modifyPto,
-      nameSearchParam,
-      params,
-      pathname,
-      router,
-      searchParams,
+      userNameSearchParamName,
+      pageIndexSearchParamName,
       syncedParams,
+      params.userName,
+      modifyPto,
+      deletePto,
     ]
   );
 
@@ -211,23 +194,7 @@ export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageIndex`),
-          String(pageIndex)
-        );
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageSize`),
-          String(pageSize)
-        );
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -40,6 +40,7 @@ import { formatInEST } from "@/lib/utils";
 import { invoiceStatuses } from "@/lib/constants";
 import useOverdueClientInvoicesQuery from "@/queries/useOverdueClientInvoicesQuery";
 import SearchHeader from "@/components/table/SearchHeader";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -48,21 +49,30 @@ const TABLE_NAME = "OverdueClientInvoices";
 
 export default function OverdueClientInvoicesTable() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindOverdueInvoicePaginatedHttpControllerGetParams>();
 
+  const orgNameSearchParamName = `${TABLE_NAME}orgName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
   const orgNameSearchParam =
-    searchParams.get(encodeURIComponent(`${TABLE_NAME}orgName`)) ?? "";
+    searchParams.get(encodeURIComponent(orgNameSearchParamName)) ?? "";
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindOverdueInvoicePaginatedHttpControllerGetParams = useMemo(
     () => ({
@@ -89,36 +99,9 @@ export default function OverdueClientInvoicesTable() {
       columnHelper.accessor("clientOrganization.name", {
         header: () => (
           <SearchHeader
-            initialValue={orgNameSearchParam}
             buttonText="Organization"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}orgName`),
-                value
-              );
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                "0"
-              );
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={orgNameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(
-                encodeURIComponent(`${TABLE_NAME}orgName`)
-              );
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                "0"
-              );
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={orgNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.organizationName !== syncedParams.organizationName
@@ -173,7 +156,12 @@ export default function OverdueClientInvoicesTable() {
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],
-    [orgNameSearchParam, params, pathname, router, searchParams, syncedParams]
+    [
+      orgNameSearchParamName,
+      pageIndexSearchParamName,
+      params.organizationName,
+      syncedParams,
+    ]
   );
 
   const table = useReactTable({
@@ -182,23 +170,7 @@ export default function OverdueClientInvoicesTable() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageIndex`),
-          String(pageIndex)
-        );
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageSize`),
-          String(pageSize)
-        );
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

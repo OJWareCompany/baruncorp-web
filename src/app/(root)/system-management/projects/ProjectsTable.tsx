@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -43,42 +43,57 @@ import {
 } from "@/lib/constants";
 import useProjectsQuery from "@/queries/useProjectsQuery";
 import EnumHeader from "@/components/table/EnumHeader";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<ProjectPaginatedResponseDto["items"][number]>();
 
 export default function ProjectsTable() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindProjectsHttpControllerFindUsersParams>();
 
+  const addressSearchParamName = "address";
+  const orgNameSearchParamName = "orgName";
+  const projectNumberSearchParamName = "projectNumber";
+  const propertyOwnerSearchParamName = "propertyOwner";
+  const propertyTypeSearchParamName = "propertyType";
+  const pageIndexSearchParamName = "pageIndex";
+  const pageSizeSearchParamName = "pageSize";
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(pageIndexSearchParamName)
+      ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(pageSizeSearchParamName)
+      ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
-  const addressSearchParam = searchParams.get("address") ?? "";
-  const organizationSearchParam = searchParams.get("organization") ?? "";
-  const projectNumberSearchParam = searchParams.get("projectNumber") ?? "";
-  const propertyOwnerSearchParam = searchParams.get("propertyOwner") ?? "";
+  const addressSearchParam = searchParams.get(addressSearchParamName) ?? "";
+  const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
+  const projectNumberSearchParam =
+    searchParams.get(projectNumberSearchParamName) ?? "";
+  const propertyOwnerSearchParam =
+    searchParams.get(propertyOwnerSearchParamName) ?? "";
   const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
-    searchParams.get("propertyType")
+    searchParams.get(propertyTypeSearchParamName)
   );
   const propertyTypeSearchParam = propertyTypeSearchParamParseResult.success
     ? propertyTypeSearchParamParseResult.data
     : "";
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindProjectsHttpControllerFindUsersParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       propertyFullAddress: addressSearchParam,
-      organizationName: organizationSearchParam,
+      organizationName: orgNameSearchParam,
       propertyType:
         transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum.parse(
           propertyTypeSearchParam
@@ -88,7 +103,7 @@ export default function ProjectsTable() {
     }),
     [
       addressSearchParam,
-      organizationSearchParam,
+      orgNameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
       projectNumberSearchParam,
@@ -110,25 +125,9 @@ export default function ProjectsTable() {
       columnHelper.accessor("organizationName", {
         header: () => (
           <SearchHeader
-            initialValue={organizationSearchParam}
             buttonText="Organization"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("organization", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={organizationSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("organization");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={orgNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.organizationName !== syncedParams.organizationName
@@ -139,25 +138,9 @@ export default function ProjectsTable() {
       columnHelper.accessor("propertyFullAddress", {
         header: () => (
           <SearchHeader
-            initialValue={addressSearchParam}
             buttonText="Address"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("address", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={addressSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("address");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={addressSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.propertyFullAddress !== syncedParams.propertyFullAddress
@@ -169,25 +152,9 @@ export default function ProjectsTable() {
         header: () => (
           <EnumHeader
             buttonText="Property Type"
-            isFiltered={propertyTypeSearchParam !== ""}
-            items={PropertyTypeEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("propertyType", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("propertyType");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={propertyTypeSearchParam}
+            searchParamName={propertyTypeSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={PropertyTypeEnum}
             isLoading={
               syncedParams != null &&
               params.propertyType !== syncedParams.propertyType
@@ -198,25 +165,9 @@ export default function ProjectsTable() {
       columnHelper.accessor("propertyOwnerName", {
         header: () => (
           <SearchHeader
-            initialValue={propertyOwnerSearchParam}
             buttonText="Property Owner"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("propertyOwner", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={propertyOwnerSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("propertyOwner");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={propertyOwnerSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.projectPropertyOwner !== syncedParams.projectPropertyOwner
@@ -235,25 +186,9 @@ export default function ProjectsTable() {
       columnHelper.accessor("projectNumber", {
         header: () => (
           <SearchHeader
-            initialValue={projectNumberSearchParam}
             buttonText="Project Number"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("projectNumber", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={projectNumberSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("projectNumber");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={projectNumberSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.projectNumber !== syncedParams.projectNumber
@@ -277,18 +212,7 @@ export default function ProjectsTable() {
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],
-    [
-      addressSearchParam,
-      organizationSearchParam,
-      params,
-      pathname,
-      projectNumberSearchParam,
-      propertyOwnerSearchParam,
-      propertyTypeSearchParam,
-      router,
-      searchParams,
-      syncedParams,
-    ]
+    [params, syncedParams]
   );
 
   const table = useReactTable({
@@ -297,17 +221,7 @@ export default function ProjectsTable() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ projectId }) => projectId,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

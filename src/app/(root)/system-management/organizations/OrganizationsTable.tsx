@@ -13,7 +13,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   Table,
@@ -43,35 +43,49 @@ import {
   YesOrNoEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<OrganizationPaginatedResponseDto["items"][number]>();
 
 export default function OrganizationsTable() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams>();
 
+  const emailSearchParamName = "email";
+  const orgNameSearchParamName = "orgName";
+  const addressSearchParamName = "address";
+  const phoneNumberSearchParamName = "phoneNumber";
+  const vendorSearchParamName = "vendor";
+  const pageIndexSearchParamName = "pageIndex";
+  const pageSizeSearchParamName = "pageSize";
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(pageIndexSearchParamName)
+      ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(pageSizeSearchParamName)
+      ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
-  const addressSearchParam = searchParams.get("address") ?? "";
-  const nameSearchParam = searchParams.get("name") ?? "";
-  const emailSearchParam = searchParams.get("email") ?? "";
-  const phoneNumberSearchParam = searchParams.get("phoneNumber") ?? "";
+  const addressSearchParam = searchParams.get(addressSearchParamName) ?? "";
+  const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
+  const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
+  const phoneNumberSearchParam =
+    searchParams.get(phoneNumberSearchParamName) ?? "";
   const vendorSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get("vendor")
+    searchParams.get(vendorSearchParamName)
   );
   const vendorSearchParam = vendorSearchParamParseResult.success
     ? vendorSearchParamParseResult.data
     : "";
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams =
     useMemo(
@@ -79,7 +93,7 @@ export default function OrganizationsTable() {
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         fullAddress: addressSearchParam,
-        name: nameSearchParam,
+        name: orgNameSearchParam,
         phoneNumber: phoneNumberSearchParam,
         email: emailSearchParam,
         isVendor:
@@ -90,7 +104,7 @@ export default function OrganizationsTable() {
       [
         addressSearchParam,
         emailSearchParam,
-        nameSearchParam,
+        orgNameSearchParam,
         pagination.pageIndex,
         pagination.pageSize,
         phoneNumberSearchParam,
@@ -111,25 +125,9 @@ export default function OrganizationsTable() {
       columnHelper.accessor("name", {
         header: () => (
           <SearchHeader
-            initialValue={nameSearchParam}
             buttonText="Name"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("name", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={nameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("name");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={orgNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.name !== syncedParams.name
             }
@@ -139,25 +137,9 @@ export default function OrganizationsTable() {
       columnHelper.accessor("fullAddress", {
         header: () => (
           <SearchHeader
-            initialValue={addressSearchParam}
             buttonText="Address"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("address", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={addressSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("address");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={addressSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.fullAddress !== syncedParams.fullAddress
@@ -168,25 +150,9 @@ export default function OrganizationsTable() {
       columnHelper.accessor("invoiceRecipientEmail", {
         header: () => (
           <SearchHeader
-            initialValue={emailSearchParam}
             buttonText="Email Address to Receive Invoice"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("email", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={emailSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("email");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={emailSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.email !== syncedParams.email
             }
@@ -205,25 +171,9 @@ export default function OrganizationsTable() {
       columnHelper.accessor("phoneNumber", {
         header: () => (
           <SearchHeader
-            initialValue={phoneNumberSearchParam}
             buttonText="Phone Number"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("phoneNumber", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={phoneNumberSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("phoneNumber");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={phoneNumberSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.phoneNumber !== syncedParams.phoneNumber
@@ -243,25 +193,9 @@ export default function OrganizationsTable() {
         header: () => (
           <EnumHeader
             buttonText="Vendor"
-            isFiltered={vendorSearchParam !== ""}
-            items={YesOrNoEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("vendor", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("vendor");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={vendorSearchParam}
+            searchParamName={vendorSearchParam}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={YesOrNoEnum}
             isLoading={
               syncedParams != null && params.isVendor !== syncedParams.isVendor
             }
@@ -275,14 +209,11 @@ export default function OrganizationsTable() {
       }),
     ];
   }, [
-    addressSearchParam,
-    emailSearchParam,
-    nameSearchParam,
-    params,
-    pathname,
-    phoneNumberSearchParam,
-    router,
-    searchParams,
+    params.email,
+    params.fullAddress,
+    params.isVendor,
+    params.name,
+    params.phoneNumber,
     syncedParams,
     vendorSearchParam,
   ]);
@@ -293,17 +224,7 @@ export default function OrganizationsTable() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

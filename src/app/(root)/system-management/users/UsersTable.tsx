@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -46,35 +46,46 @@ import {
 import SearchHeader from "@/components/table/SearchHeader";
 import EnumHeader from "@/components/table/EnumHeader";
 import UserActionField from "@/components/field/UserActionField";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
 
 export default function UsersTable() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindUsersHttpControllerGetFindUsersParams>();
 
+  const emailSearchParamName = "email";
+  const userNameSearchParamName = "userName";
+  const orgNameSearchParamName = "orgName";
+  const contractorSearchParamName = "contractor";
+  const pageIndexSearchParamName = "pageIndex";
+  const pageSizeSearchParamName = "pageSize";
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(pageIndexSearchParamName)
+      ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(pageSizeSearchParamName)
+      ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
-  const emailSearchParam = searchParams.get("email") ?? "";
-  const nameSearchParam = searchParams.get("name") ?? "";
-  const organizationNameSearchParam =
-    searchParams.get("organizationName") ?? "";
+  const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
+  const nameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
+  const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
   const contractorSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get("contractor")
+    searchParams.get(contractorSearchParamName)
   );
   const contractorSearchParam = contractorSearchParamParseResult.success
     ? contractorSearchParamParseResult.data
     : "";
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindUsersHttpControllerGetFindUsersParams = useMemo(
     () => ({
@@ -86,13 +97,13 @@ export default function UsersTable() {
         transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           contractorSearchParam
         ),
-      organizationName: organizationNameSearchParam,
+      organizationName: orgNameSearchParam,
     }),
     [
       contractorSearchParam,
       emailSearchParam,
       nameSearchParam,
-      organizationNameSearchParam,
+      orgNameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
     ]
@@ -111,25 +122,9 @@ export default function UsersTable() {
       columnHelper.accessor("organization", {
         header: () => (
           <SearchHeader
-            initialValue={organizationNameSearchParam}
             buttonText="Organization"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("organizationName", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={organizationNameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("organizationName");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={orgNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.organizationName !== syncedParams.organizationName
@@ -140,25 +135,9 @@ export default function UsersTable() {
       columnHelper.accessor("fullName", {
         header: () => (
           <SearchHeader
-            initialValue={nameSearchParam}
             buttonText="Name"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("name", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={nameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("name");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={userNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.userName !== syncedParams.userName
             }
@@ -168,25 +147,9 @@ export default function UsersTable() {
       columnHelper.accessor("email", {
         header: () => (
           <SearchHeader
-            initialValue={emailSearchParam}
             buttonText="Email"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("email", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={emailSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("email");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={emailSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.email !== syncedParams.email
             }
@@ -209,25 +172,9 @@ export default function UsersTable() {
         header: () => (
           <EnumHeader
             buttonText="Contractor"
-            isFiltered={contractorSearchParam !== ""}
-            items={YesOrNoEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("contractor", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("contractor");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={contractorSearchParam}
+            searchParamName={contractorSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={YesOrNoEnum}
             isLoading={
               syncedParams != null &&
               params.isContractor !== syncedParams.isContractor
@@ -270,17 +217,7 @@ export default function UsersTable() {
         },
       }),
     ];
-  }, [
-    contractorSearchParam,
-    emailSearchParam,
-    nameSearchParam,
-    organizationNameSearchParam,
-    params,
-    pathname,
-    router,
-    searchParams,
-    syncedParams,
-  ]);
+  }, [params, syncedParams]);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -288,17 +225,7 @@ export default function UsersTable() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

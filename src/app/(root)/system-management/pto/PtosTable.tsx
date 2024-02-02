@@ -65,6 +65,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<PtoPaginatedResponseDto["items"][number]>();
@@ -83,35 +84,45 @@ export default function PtosTable() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const userNameSearchParamName = `${TABLE_NAME}userName`;
+  const paidSearchParamName = `${TABLE_NAME}paid`;
+  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
-  const nameSearchParam =
-    searchParams.get(encodeURIComponent(`${TABLE_NAME}name`)) ?? "";
+  const userNameSearchParam =
+    searchParams.get(encodeURIComponent(userNameSearchParamName)) ?? "";
   const paidSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${TABLE_NAME}paid`))
+    searchParams.get(encodeURIComponent(paidSearchParamName))
   );
   const paidSearchParam = paidSearchParamParseResult.success
     ? paidSearchParamParseResult.data
     : "";
 
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
+
   const params: FindPtoPaginatedHttpControllerGetParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      userName: nameSearchParam,
+      userName: userNameSearchParam,
       isPaid:
         transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           paidSearchParam
         ) ?? undefined,
     }),
     [
-      nameSearchParam,
+      userNameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
       paidSearchParam,
@@ -148,34 +159,9 @@ export default function PtosTable() {
           id: "fullName",
           header: () => (
             <SearchHeader
-              initialValue={nameSearchParam}
               buttonText="Name"
-              onFilterButtonClick={(value) => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}name`),
-                  value
-                );
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              isFiltered={nameSearchParam !== ""}
-              onResetButtonClick={() => {
-                const newSearchParams = new URLSearchParams(searchParams);
-                newSearchParams.delete(encodeURIComponent(`${TABLE_NAME}name`));
-                newSearchParams.set(
-                  encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                  "0"
-                );
-                router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
+              searchParamName={userNameSearchParamName}
+              pageIndexSearchParamName={pageIndexSearchParamName}
               isLoading={
                 syncedParams != null &&
                 params.userName !== syncedParams.userName
@@ -203,34 +189,9 @@ export default function PtosTable() {
         header: () => (
           <EnumHeader
             buttonText="Paid"
-            isFiltered={paidSearchParam !== ""}
-            items={YesOrNoEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}paid`),
-                value
-              );
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                "0"
-              );
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${TABLE_NAME}paid`));
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}pageIndex`),
-                "0"
-              );
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={paidSearchParam}
+            searchParamName={paidSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={YesOrNoEnum}
             isLoading={
               syncedParams != null && params.isPaid !== syncedParams.isPaid
             }
@@ -284,13 +245,12 @@ export default function PtosTable() {
       }),
     ],
     [
-      nameSearchParam,
-      paidSearchParam,
-      params,
-      pathname,
-      router,
-      searchParams,
+      userNameSearchParamName,
+      pageIndexSearchParamName,
       syncedParams,
+      params.userName,
+      params.isPaid,
+      paidSearchParamName,
     ]
   );
 
@@ -300,23 +260,7 @@ export default function PtosTable() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageIndex`),
-          String(pageIndex)
-        );
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageSize`),
-          String(pageSize)
-        );
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

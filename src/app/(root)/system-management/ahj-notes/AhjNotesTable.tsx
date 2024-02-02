@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -38,27 +38,37 @@ import { Button } from "@/components/ui/button";
 import { formatInEST } from "@/lib/utils";
 import useAhjNotesQuery from "@/queries/useAhjNotesQuery";
 import SearchHeader from "@/components/table/SearchHeader";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<AhjNotePaginatedResponseDto["items"][number]>();
 
 export default function AhjNotesTable() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<GeographyControllerGetFindNotesParams>();
 
+  const nameSearchParamName = "name";
+  const fullNameSearchParamName = "fullName";
+  const pageIndexSearchParamName = "pageIndex";
+  const pageSizeSearchParamName = "pageSize";
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(pageIndexSearchParamName)
+      ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(pageSizeSearchParamName)
+      ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
-  const fullNameSearchParam = searchParams.get("fullName") ?? "";
-  const nameSearchParam = searchParams.get("name") ?? "";
+  const fullNameSearchParam = searchParams.get(fullNameSearchParamName) ?? "";
+  const nameSearchParam = searchParams.get(nameSearchParamName) ?? "";
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: GeographyControllerGetFindNotesParams = useMemo(
     () => ({
@@ -88,25 +98,9 @@ export default function AhjNotesTable() {
       columnHelper.accessor("name", {
         header: () => (
           <SearchHeader
-            initialValue={nameSearchParam}
             buttonText="Name"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("name", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={nameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("name");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={nameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.name !== syncedParams.name
             }
@@ -116,25 +110,9 @@ export default function AhjNotesTable() {
       columnHelper.accessor("fullAhjName", {
         header: () => (
           <SearchHeader
-            initialValue={fullNameSearchParam}
             buttonText="Full Name"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("fullName", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={fullNameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("fullName");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={fullNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.fullAhjName !== syncedParams.fullAhjName
@@ -165,15 +143,7 @@ export default function AhjNotesTable() {
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],
-    [
-      fullNameSearchParam,
-      nameSearchParam,
-      params,
-      pathname,
-      router,
-      searchParams,
-      syncedParams,
-    ]
+    [params.fullAhjName, params.name, syncedParams]
   );
 
   const table = useReactTable({
@@ -182,17 +152,7 @@ export default function AhjNotesTable() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ geoId }) => geoId,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -45,6 +45,7 @@ import {
 } from "@/lib/constants";
 import EnumHeader from "@/components/table/EnumHeader";
 import SearchHeader from "@/components/table/SearchHeader";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -57,37 +58,39 @@ interface Props {
 
 export default function ClientInvoicesTable({ type }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindInvoicePaginatedHttpControllerGetParams>();
 
+  const orgNameSearchParamName = `${TABLE_NAME}${type}orgName`;
+  const invoiceStatusSearchParamName = `${TABLE_NAME}${type}invoiceStatus`;
+  const pageIndexSearchParamName = `${TABLE_NAME}${type}pageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}${type}pageSize`;
+
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(
-      encodeURIComponent(`${TABLE_NAME}${type}pageIndex`)
-    )
-      ? Number(
-          searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}pageIndex`))
-        )
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(
-      encodeURIComponent(`${TABLE_NAME}${type}pageSize`)
-    )
-      ? Number(
-          searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}pageSize`))
-        )
+    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
   const orgNameSearchParam =
-    searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}orgName`)) ?? "";
+    searchParams.get(encodeURIComponent(orgNameSearchParamName)) ?? "";
   const invoiceStatusSearchParamParseResult = InvoiceStatusEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${TABLE_NAME}${type}invoiceStatus`))
+    searchParams.get(encodeURIComponent(invoiceStatusSearchParamName))
   );
   const invoiceStatusSearchParam = invoiceStatusSearchParamParseResult.success
     ? invoiceStatusSearchParamParseResult.data
     : type === "All"
     ? ""
     : type;
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindInvoicePaginatedHttpControllerGetParams = useMemo(
     () => ({
@@ -120,36 +123,9 @@ export default function ClientInvoicesTable({ type }: Props) {
       columnHelper.accessor("clientOrganization.name", {
         header: () => (
           <SearchHeader
-            initialValue={orgNameSearchParam}
             buttonText="Organization"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}${type}orgName`),
-                value
-              );
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
-                "0"
-              );
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={orgNameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(
-                encodeURIComponent(`${TABLE_NAME}${type}orgName`)
-              );
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
-                "0"
-              );
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={orgNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null &&
               params.organizationName !== syncedParams.organizationName
@@ -166,37 +142,10 @@ export default function ClientInvoicesTable({ type }: Props) {
         header: () => (
           <EnumHeader
             buttonText="Status"
-            isFiltered={invoiceStatusSearchParam !== ""}
-            items={InvoiceStatusEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}${type}invoiceStatus`),
-                value
-              );
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
-                "0"
-              );
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(
-                encodeURIComponent(`${TABLE_NAME}${type}invoiceStatus`)
-              );
-              newSearchParams.set(
-                encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
-                "0"
-              );
-
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={invoiceStatusSearchParam}
+            searchParamName={invoiceStatusSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={InvoiceStatusEnum}
+            defaultValue={type === "All" ? null : type}
             isLoading={
               syncedParams != null && params.status !== syncedParams.status
             }
@@ -243,12 +192,11 @@ export default function ClientInvoicesTable({ type }: Props) {
       }),
     ],
     [
-      invoiceStatusSearchParam,
-      orgNameSearchParam,
-      params,
-      pathname,
-      router,
-      searchParams,
+      invoiceStatusSearchParamName,
+      orgNameSearchParamName,
+      pageIndexSearchParamName,
+      params.organizationName,
+      params.status,
       syncedParams,
       type,
     ]
@@ -260,23 +208,7 @@ export default function ClientInvoicesTable({ type }: Props) {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}${type}pageIndex`),
-          String(pageIndex)
-        );
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}${type}pageSize`),
-          String(pageSize)
-        );
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

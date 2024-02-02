@@ -1,6 +1,8 @@
 import React from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useCommandState } from "cmdk";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { EnumValues, ZodEnum } from "zod";
 import { Button } from "../ui/button";
 import {
   Popover,
@@ -49,25 +51,34 @@ function FilterButton({
   );
 }
 
-interface Props {
+interface Props<T extends EnumValues> {
   buttonText: string;
-  onItemButtonClick: (value: string) => void;
-  onResetButtonClick: () => void;
-  isFiltered: boolean;
-  selectedValue: string;
-  items: string[];
   isLoading: boolean | undefined;
+  searchParamName: string;
+  pageIndexSearchParamName: string;
+  zodEnum: ZodEnum<T>;
+  defaultValue?: T[number] | null;
 }
 
-export default function EnumHeader({
+export default function EnumHeader<T extends EnumValues>({
   buttonText,
-  onItemButtonClick,
-  onResetButtonClick,
-  isFiltered,
-  selectedValue,
-  items,
   isLoading = false,
-}: Props) {
+  searchParamName,
+  pageIndexSearchParamName,
+  zodEnum,
+  defaultValue,
+}: Props<T>) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchParam = searchParams.get(searchParamName) ?? "";
+  const searchParamParseResult = zodEnum.safeParse(searchParam);
+  const data = searchParamParseResult.success
+    ? searchParamParseResult.data
+    : defaultValue ?? "";
+
+  const isFiltered = data !== "";
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -92,18 +103,31 @@ export default function EnumHeader({
           <CommandInput />
           <CommandEmpty>No {buttonText} found.</CommandEmpty>
           <CommandGroup>
-            {items.map((value) => (
+            {zodEnum.options.map((value) => (
               <CommandItem
                 key={value}
                 value={value}
                 onSelect={() => {
-                  onItemButtonClick(value);
+                  const newSearchParams = new URLSearchParams(
+                    searchParams.toString()
+                  );
+                  newSearchParams.set(
+                    encodeURIComponent(searchParamName),
+                    value
+                  );
+                  newSearchParams.set(
+                    encodeURIComponent(pageIndexSearchParamName),
+                    "0"
+                  );
+                  router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                    scroll: false,
+                  });
                 }}
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === selectedValue ? "opacity-100" : "opacity-0"
+                    value === data ? "opacity-100" : "opacity-0"
                   )}
                 />
                 {value}
@@ -112,7 +136,19 @@ export default function EnumHeader({
           </CommandGroup>
           <FilterButton
             isFiltered={isFiltered}
-            onResetButtonClick={onResetButtonClick}
+            onResetButtonClick={() => {
+              const newSearchParams = new URLSearchParams(
+                searchParams.toString()
+              );
+              newSearchParams.delete(encodeURIComponent(searchParamName));
+              newSearchParams.set(
+                encodeURIComponent(pageIndexSearchParamName),
+                "0"
+              );
+              router.replace(`${pathname}?${newSearchParams.toString()}`, {
+                scroll: false,
+              });
+            }}
           />
         </Command>
       </PopoverContent>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronsUpDown, Loader2 } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
 import {
   Popover,
@@ -16,22 +17,24 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   buttonText: string;
-  onFilterButtonClick: (inputValue: string) => void;
-  onResetButtonClick: () => void;
-  isFiltered: boolean;
-  initialValue: string;
   isLoading: boolean | undefined;
+  searchParamName: string;
+  pageIndexSearchParamName: string;
 }
 
 export default function SearchHeader({
   buttonText,
-  onFilterButtonClick,
-  onResetButtonClick,
-  isFiltered,
-  initialValue,
   isLoading = false,
+  searchParamName,
+  pageIndexSearchParamName,
 }: Props) {
-  const [value, setValue] = useState(initialValue);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchParam = searchParams.get(searchParamName) ?? "";
+  const [value, setValue] = useState(searchParam);
+
+  const isFiltered = searchParam !== "";
 
   return (
     <Popover>
@@ -58,7 +61,14 @@ export default function SearchHeader({
           <CommandGroup>
             <CommandItem
               onSelect={() => {
-                onFilterButtonClick(value);
+                const newSearchParams = new URLSearchParams(
+                  searchParams.toString()
+                );
+                newSearchParams.set(searchParamName, value);
+                newSearchParams.set(pageIndexSearchParamName, "0");
+                router.push(`${pathname}?${newSearchParams.toString()}`, {
+                  scroll: false,
+                });
               }}
               className="justify-center"
             >
@@ -69,7 +79,14 @@ export default function SearchHeader({
             <CommandGroup className="border-t">
               <CommandItem
                 onSelect={() => {
-                  onResetButtonClick();
+                  const newSearchParams = new URLSearchParams(
+                    searchParams.toString()
+                  );
+                  newSearchParams.delete(searchParamName);
+                  newSearchParams.set(pageIndexSearchParamName, "0");
+                  router.push(`${pathname}?${newSearchParams.toString()}`, {
+                    scroll: false,
+                  });
                 }}
                 className="justify-center"
               >

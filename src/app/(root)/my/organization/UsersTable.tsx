@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -39,7 +39,8 @@ import {
 import { Button } from "@/components/ui/button";
 import useUsersQuery from "@/queries/useUsersQuery";
 import SearchHeader from "@/components/table/SearchHeader";
-import { BARUNCORP_ORGANIZATION_ID, userStatuses } from "@/lib/constants";
+import { userStatuses } from "@/lib/constants";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -50,33 +51,42 @@ interface Props {
 
 export default function UsersTable({ organization }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindUsersHttpControllerGetFindUsersParams>();
 
+  const emailSearchParamName = "email";
+  const userNameSearchParamName = "userName";
+  const pageIndexSearchParamName = "pageIndex";
+  const pageSizeSearchParamName = "pageSize";
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(pageIndexSearchParamName)
+      ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(pageSizeSearchParamName)
+      ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
-  const nameSearchParam = searchParams.get("name") ?? "";
-  const emailSearchParam = searchParams.get("email") ?? "";
+  const userNameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
+  const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindUsersHttpControllerGetFindUsersParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       organizationId: organization.id,
-      userName: nameSearchParam,
+      userName: userNameSearchParam,
       email: emailSearchParam,
     }),
     [
       emailSearchParam,
-      nameSearchParam,
+      userNameSearchParam,
       organization.id,
       pagination.pageIndex,
       pagination.pageSize,
@@ -96,25 +106,9 @@ export default function UsersTable({ organization }: Props) {
       columnHelper.accessor("fullName", {
         header: () => (
           <SearchHeader
-            initialValue={nameSearchParam}
             buttonText="Name"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("name", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={nameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("name");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={userNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.userName !== syncedParams.userName
             }
@@ -124,25 +118,9 @@ export default function UsersTable({ organization }: Props) {
       columnHelper.accessor("email", {
         header: () => (
           <SearchHeader
-            initialValue={emailSearchParam}
             buttonText="Email"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set("email", value);
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={emailSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete("email");
-              newSearchParams.set("pageIndex", "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={emailSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.email !== syncedParams.email
             }
@@ -187,15 +165,7 @@ export default function UsersTable({ organization }: Props) {
         },
       }),
     ],
-    [
-      emailSearchParam,
-      nameSearchParam,
-      params,
-      pathname,
-      router,
-      searchParams,
-      syncedParams,
-    ]
+    [params.email, params.userName, syncedParams]
   );
 
   const table = useReactTable({
@@ -204,23 +174,10 @@ export default function UsersTable({ organization }: Props) {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility: {
-        dateOfJoining: organization.id === BARUNCORP_ORGANIZATION_ID,
-      },
     },
   });
 

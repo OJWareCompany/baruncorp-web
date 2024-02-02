@@ -13,7 +13,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   Table,
@@ -53,6 +53,7 @@ import SearchHeader from "@/components/table/SearchHeader";
 import TasksBadge from "@/components/badge/TasksBadge";
 import { formatInEST } from "@/lib/utils";
 import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -63,24 +64,29 @@ interface Props {
 
 export default function JobsTable({ type }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
 
+  const jobStatusSearchParamName = `${type}jobStatus`;
+  const jobNameSearchParamName = `${type}jobName`;
+  const propertyTypeSearchParamName = `${type}propertyType`;
+  const mountingTypeSearchParamName = `${type}mountingType`;
+  const expediteSearchParamName = `${type}expedite`;
+  const pageIndexSearchParamName = `${type}pageIndex`;
+  const pageSizeSearchParamName = `${type}pageSize`;
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${type}pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${type}pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${type}pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${type}pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
-
-  const nameSearchParam =
-    searchParams.get(encodeURIComponent(`${type}name`)) ?? "";
+  const jobNameSearchParam =
+    searchParams.get(encodeURIComponent(jobNameSearchParamName)) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type}jobStatus`))
+    searchParams.get(encodeURIComponent(jobStatusSearchParamName))
   );
   const jobStatusSearchParam = jobStatusSearchParamParseResult.success
     ? jobStatusSearchParamParseResult.data
@@ -88,29 +94,35 @@ export default function JobsTable({ type }: Props) {
     ? ""
     : type;
   const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type}propertyType`))
+    searchParams.get(encodeURIComponent(propertyTypeSearchParamName))
   );
   const propertyTypeSearchParam = propertyTypeSearchParamParseResult.success
     ? propertyTypeSearchParamParseResult.data
     : "";
   const mountingTypeSearchParamParseResult = MountingTypeEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type}mountingType`))
+    searchParams.get(encodeURIComponent(mountingTypeSearchParamName))
   );
   const mountingTypeSearchParam = mountingTypeSearchParamParseResult.success
     ? mountingTypeSearchParamParseResult.data
     : "";
   const expediteSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get(encodeURIComponent(`${type}expedite`))
+    searchParams.get(encodeURIComponent(expediteSearchParamName))
   );
   const expediteSearchParam = expediteSearchParamParseResult.success
     ? expediteSearchParamParseResult.data
     : "";
 
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
+
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      jobName: nameSearchParam,
+      jobName: jobNameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -132,7 +144,7 @@ export default function JobsTable({ type }: Props) {
       expediteSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
-      nameSearchParam,
+      jobNameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
       propertyTypeSearchParam,
@@ -153,25 +165,9 @@ export default function JobsTable({ type }: Props) {
         header: () => (
           <EnumHeader
             buttonText="Expedite"
-            isFiltered={expediteSearchParam !== ""}
-            items={YesOrNoEnum.options}
-            selectedValue={expediteSearchParam}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(encodeURIComponent(`${type}expedite`), value);
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type}expedite`));
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={expediteSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={YesOrNoEnum}
             isLoading={
               syncedParams != null &&
               params.isExpedited !== syncedParams.isExpedited
@@ -186,25 +182,9 @@ export default function JobsTable({ type }: Props) {
       columnHelper.accessor("jobName", {
         header: () => (
           <SearchHeader
-            initialValue={nameSearchParam}
             buttonText="Name"
-            onFilterButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(encodeURIComponent(`${type}name`), value);
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            isFiltered={nameSearchParam !== ""}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type}name`));
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
+            searchParamName={jobNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
             isLoading={
               syncedParams != null && params.jobName !== syncedParams.jobName
             }
@@ -215,29 +195,9 @@ export default function JobsTable({ type }: Props) {
         header: () => (
           <EnumHeader
             buttonText="Status"
-            isFiltered={jobStatusSearchParam !== ""}
-            items={JobStatusEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${type}jobStatus`),
-                value
-              );
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type}jobStatus`));
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={jobStatusSearchParam}
+            searchParamName={jobStatusSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={JobStatusEnum}
             isLoading={
               syncedParams != null &&
               params.jobStatus !== syncedParams.jobStatus
@@ -264,29 +224,9 @@ export default function JobsTable({ type }: Props) {
         header: () => (
           <EnumHeader
             buttonText="Property Type"
-            isFiltered={propertyTypeSearchParam !== ""}
-            items={PropertyTypeEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${type}propertyType`),
-                value
-              );
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type}propertyType`));
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={propertyTypeSearchParam}
+            searchParamName={propertyTypeSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={PropertyTypeEnum}
             isLoading={
               syncedParams != null &&
               params.projectPropertyType !== syncedParams.projectPropertyType
@@ -298,29 +238,9 @@ export default function JobsTable({ type }: Props) {
         header: () => (
           <EnumHeader
             buttonText="Mounting Type"
-            isFiltered={mountingTypeSearchParam !== ""}
-            items={MountingTypeEnum.options}
-            onItemButtonClick={(value) => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.set(
-                encodeURIComponent(`${type}mountingType`),
-                value
-              );
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            onResetButtonClick={() => {
-              const newSearchParams = new URLSearchParams(searchParams);
-              newSearchParams.delete(encodeURIComponent(`${type}mountingType`));
-              newSearchParams.set(encodeURIComponent(`${type}pageIndex`), "0");
-
-              router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            selectedValue={mountingTypeSearchParam}
+            searchParamName={mountingTypeSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={MountingTypeEnum}
             isLoading={
               syncedParams != null &&
               params.mountingType !== syncedParams.mountingType
@@ -360,17 +280,18 @@ export default function JobsTable({ type }: Props) {
       }),
     ];
   }, [
-    expediteSearchParam,
-    jobStatusSearchParam,
-    mountingTypeSearchParam,
-    nameSearchParam,
-    params,
-    pathname,
-    propertyTypeSearchParam,
-    router,
-    searchParams,
+    expediteSearchParamName,
+    pageIndexSearchParamName,
     syncedParams,
-    type,
+    params.isExpedited,
+    params.jobName,
+    params.jobStatus,
+    params.projectPropertyType,
+    params.mountingType,
+    jobNameSearchParamName,
+    jobStatusSearchParamName,
+    propertyTypeSearchParamName,
+    mountingTypeSearchParamName,
   ]);
 
   const table = useReactTable({
@@ -379,23 +300,7 @@ export default function JobsTable({ type }: Props) {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set(
-          encodeURIComponent(`${type}pageIndex`),
-          String(pageIndex)
-        );
-        newSearchParams.set(
-          encodeURIComponent(`${type}pageSize`),
-          String(pageSize)
-        );
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,
