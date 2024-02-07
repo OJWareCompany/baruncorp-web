@@ -73,6 +73,7 @@ export default function NewTaskDialog({ position }: Props) {
         queryClient.invalidateQueries({
           queryKey: getPositionQueryKey(positionId),
         });
+        toast({ title: "Success" });
         setOpen(false);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

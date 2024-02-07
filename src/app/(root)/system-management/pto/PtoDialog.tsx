@@ -346,7 +346,7 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
   }
 
   return (
-    <Dialog open={state.open} {...dialogProps}>
+    <Dialog {...dialogProps} open={state.open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>PTO</DialogTitle>
