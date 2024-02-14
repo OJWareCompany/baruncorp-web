@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
+import { Plus } from "lucide-react";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   PaymentMethodEnum,
+  toTwoDecimalRegExp,
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import {
@@ -48,15 +50,6 @@ const formSchema = z
   })
   .superRefine((values, ctx) => {
     const { amount } = values;
-
-    if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(amount)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Amount should be a number",
-        path: [`amount`],
-      });
-      return;
-    }
 
     if (Number(amount) <= 0) {
       ctx.addIssue({
@@ -142,8 +135,13 @@ export default function PaymentDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={"outline"} className="w-full">
-          Add Payment
+        <Button
+          variant={"outline"}
+          size={"sm"}
+          className="h-[28px] text-xs px-2"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          New Payment
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -194,6 +192,12 @@ export default function PaymentDialog() {
                         <span className="text-muted-foreground">$</span>
                       }
                       {...field}
+                      onChange={(event) => {
+                        const { value } = event.target;
+                        if (value === "" || toTwoDecimalRegExp.test(value)) {
+                          field.onChange(event);
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

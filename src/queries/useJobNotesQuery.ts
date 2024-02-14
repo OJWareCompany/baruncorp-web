@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { JobNoteListResponseDto } from "@/api/api-spec";
+import { JobNoteResponseDto } from "@/api/api-spec";
 
 export const getJobNotesQueryKey = (jobId: string) => [
   "job-notes",
@@ -12,7 +12,7 @@ export const getJobNotesQueryKey = (jobId: string) => [
 const useJobNotesQuery = (jobId: string) => {
   const api = useApi();
 
-  return useQuery<JobNoteListResponseDto, AxiosError<ErrorResponseData>>({
+  return useQuery<JobNoteResponseDto, AxiosError<ErrorResponseData>>({
     queryKey: getJobNotesQueryKey(jobId),
     queryFn: () =>
       api.orderedJobNotes

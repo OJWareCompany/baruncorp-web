@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -22,10 +22,11 @@ interface Props {
   serviceId: string;
   onServiceIdChange: (newServiceId: string) => void;
   modal?: boolean;
+  filteringIds?: string[];
 }
 
 const ServicesCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ serviceId, onServiceIdChange, modal = false }, ref) => {
+  ({ serviceId, onServiceIdChange, modal = false, filteringIds }, ref) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const { data: services, isLoading: isServicesQueryLoading } =
@@ -34,6 +35,18 @@ const ServicesCombobox = forwardRef<HTMLButtonElement, Props>(
       });
 
     const placeholderText = "Select a scope";
+
+    const items = useMemo(() => {
+      if (services == null) {
+        return [];
+      }
+
+      if (filteringIds == null) {
+        return services.items;
+      }
+
+      return services.items.filter((value) => !filteringIds.includes(value.id));
+    }, [filteringIds, services]);
 
     if (isServicesQueryLoading || services == null) {
       return (
@@ -50,7 +63,7 @@ const ServicesCombobox = forwardRef<HTMLButtonElement, Props>(
     }
 
     const isSelected = serviceId !== "";
-    const isEmpty = services.items.length === 0;
+    const isEmpty = items.length === 0;
 
     return (
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal={modal}>
@@ -79,7 +92,7 @@ const ServicesCombobox = forwardRef<HTMLButtonElement, Props>(
                 <CommandEmpty>No scope found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
-                    {services.items.map((service) => (
+                    {items.map((service) => (
                       <CommandItem
                         key={service.id}
                         value={service.name}

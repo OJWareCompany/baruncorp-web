@@ -1,11 +1,15 @@
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 import { format } from "date-fns";
-import { InvoiceResponseDto, OrganizationResponseDto } from "@/api/api-spec";
-import { billingCodes } from "@/lib/constants";
+import {
+  InvoiceResponseDto,
+  OrganizationResponseDto,
+  ServicePaginatedResponseDto,
+} from "@/api/api-spec";
 
 interface Props {
   clientInvoice: InvoiceResponseDto;
   organization: OrganizationResponseDto;
+  services: ServicePaginatedResponseDto;
 }
 
 const styles = StyleSheet.create({
@@ -26,6 +30,7 @@ const styles = StyleSheet.create({
 export default function InvoiceDocument({
   clientInvoice,
   organization,
+  services,
 }: Props) {
   return (
     <Document>
@@ -87,13 +92,13 @@ export default function InvoiceDocument({
               fontSize: 10,
             }}
           >
-            {billingCodes.map((value) => (
+            {services.items.map((value) => (
               <View
-                key={value.code}
+                key={value.billingCode}
                 style={{ flexBasis: "33%", flexDirection: "row" }}
               >
                 <Text style={[styles.bold, { flexBasis: 20 }]}>
-                  {value.code}
+                  {value.billingCode}
                 </Text>
                 <Text>{value.name}</Text>
               </View>

@@ -7,12 +7,15 @@ import JobsTable from "./JobsTable";
 import PageHeaderAction from "./PageHeaderAction";
 import DownloadCSVButton from "./DownloadCSVButton";
 import PaymentsTable from "./PaymentsTable";
+import PaymentDialog from "./PaymentDialog";
+import IssueButton from "./IssueButton";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useClientInvoiceQuery from "@/queries/useClientInvoiceQuery";
 import useNotFound from "@/hook/useNotFound";
 import PageLoading from "@/components/PageLoading";
 import PageHeader from "@/components/PageHeader";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import useServicesQuery from "@/queries/useServicesQuery";
 
 interface Props {
   params: {
@@ -31,14 +34,24 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
     isLoading: isOrganizationQueryLoading,
     error: organizationQueryError,
   } = useOrganizationQuery(clientInvoice?.clientOrganization.id ?? "");
+  const {
+    data: services,
+    isLoading: isServicesQueryLoading,
+    error: servicesQueryError,
+  } = useServicesQuery({
+    limit: Number.MAX_SAFE_INTEGER,
+  });
   useNotFound(clientInvoiceQueryError);
   useNotFound(organizationQueryError);
+  useNotFound(servicesQueryError);
 
   if (
     isClientInvoiceQueryLoading ||
     clientInvoice == null ||
     isOrganizationQueryLoading ||
-    organization == null
+    organization == null ||
+    isServicesQueryLoading ||
+    services == null
   ) {
     return <PageLoading />;
   }
@@ -63,6 +76,7 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
           <PageHeaderAction
             clientInvoice={clientInvoice}
             organization={organization}
+            services={services}
           />
         }
       />
@@ -70,14 +84,20 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
         <section>
           <ClientInvoiceForm clientInvoice={clientInvoice} />
         </section>
-        <CollapsibleSection title="Status">
-          <ClientInvoiceStatus
-            organization={organization}
-            clientInvoice={clientInvoice}
-          />
+        <CollapsibleSection
+          title="Status"
+          action={
+            <IssueButton
+              organization={organization}
+              clientInvoice={clientInvoice}
+              services={services}
+            />
+          }
+        >
+          <ClientInvoiceStatus clientInvoice={clientInvoice} />
         </CollapsibleSection>
         {clientInvoice.status !== "Unissued" && (
-          <CollapsibleSection title="Payments">
+          <CollapsibleSection title="Payments" action={<PaymentDialog />}>
             <PaymentsTable clientInvoice={clientInvoice} />
           </CollapsibleSection>
         )}

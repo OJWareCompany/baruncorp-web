@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<
@@ -69,52 +70,60 @@ const columns = [
   columnHelper.accessor("attribute", {
     header: "Attribute",
   }),
-  columnHelper.accessor(
-    ({ afterValue, beforeValue }) => {
-      if (beforeValue == null && afterValue == null) {
+  columnHelper.accessor("beforeValue", {
+    header: "Before",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      if (value == null) {
         return <p className="text-muted-foreground">-</p>;
       }
 
-      if (beforeValue == null && afterValue != null) {
-        return afterValue;
-      }
-
-      if (beforeValue != null && afterValue == null) {
-        return beforeValue;
-      }
-
-      if (beforeValue != null && afterValue != null) {
-        return `${beforeValue} > ${afterValue}`;
-      }
+      return value;
     },
-    {
-      id: "value",
-      header: "Value",
-    }
-  ),
+  }),
+  columnHelper.accessor("afterValue", {
+    header: "After",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return value;
+    },
+  }),
   columnHelper.accessor("modifiedAt", {
     header: "Date Modified (EST)",
     cell: ({ getValue }) => formatInEST(getValue()),
   }),
 ];
 
+const TABLE_NAME = "History";
+
 interface Props {
   job: JobResponseDto;
 }
 
 export default function HistoryTable({ job }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(pageIndexSearchParamName)
+      ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
+    pageSize: searchParams.get(pageSizeSearchParamName)
+      ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams =
     useMemo(
@@ -133,17 +142,7 @@ export default function HistoryTable({ job }: Props) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

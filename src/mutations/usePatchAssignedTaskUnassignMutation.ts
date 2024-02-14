@@ -2,14 +2,20 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 
-const usePatchAssignedTaskUnassignMutation = (assignedTaskId: string) => {
+interface Variables {
+  assignedTaskId: string;
+}
+
+const usePatchAssignedTaskUnassignMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>>(() => {
-    return api.assignedTasks
-      .unassignAssignedTaskHttpControllerPatch(assignedTaskId)
-      .then(({ data: resData }) => resData);
-  });
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
+    ({ assignedTaskId }) => {
+      return api.assignedTasks
+        .unassignAssignedTaskHttpControllerPatch(assignedTaskId)
+        .then(({ data: resData }) => resData);
+    }
+  );
 };
 
 export default usePatchAssignedTaskUnassignMutation;

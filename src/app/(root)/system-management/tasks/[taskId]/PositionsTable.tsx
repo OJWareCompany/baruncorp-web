@@ -144,11 +144,8 @@ export default function PositionsTable({ task }: Props) {
               </div>
               <div className="p-4 flex-1">{item.positionName}</div>
               <div className="p-4 flex-1">
-                <Select
-                  value={item.autoAssignmentType}
-                  // onValueChange={field.onChange}
-                >
-                  <SelectTrigger>
+                <Select value={item.autoAssignmentType}>
+                  <SelectTrigger className="-ml-[13px]">
                     <SelectValue placeholder="Select a property type" />
                   </SelectTrigger>
                   <SelectContent>

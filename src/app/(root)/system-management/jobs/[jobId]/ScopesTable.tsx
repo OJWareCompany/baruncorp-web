@@ -15,6 +15,7 @@ import {
   CornerDownRight,
 } from "lucide-react";
 import AssigneeField from "./AssigneeField";
+import OrderedServiceStatusField from "./OrderedServiceStatusField";
 import PriceField from "@/components/field/PriceField";
 import {
   Table,
@@ -28,36 +29,38 @@ import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  AssignedTaskStatusEnum,
+  BARUNCORP_ORGANIZATION_ID,
   JobStatusEnum,
   OrderedServiceStatusEnum,
-  jobStatuses,
-  orderedServiceStatuses,
+  assignedTaskStatuses,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import SizeForRevisionField from "@/components/field/SizeForRevisionField";
 import DurationField from "@/components/field/DurationField";
-import AssignedTaskActionField from "@/components/field/AssignedTaskActionField";
-import OrderedServiceActionField from "@/components/field/OrderedServiceActionField";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import CostField from "@/components/field/CostField";
 
 interface Data {
   id: string;
   name: string;
   description: string | null;
-  status: JobStatusEnum | OrderedServiceStatusEnum;
+  status: OrderedServiceStatusEnum | AssignedTaskStatusEnum;
   price: number | null;
+  cost: number | null;
   sizeForRevision: "Major" | "Minor" | null;
   duration: number | null;
   isRevision: boolean;
   assigneeId: string | null;
+  assigneeOrganizationId: string | null;
   serviceId: string | null;
   isActive: boolean;
   prerequisiteTasks: string[] | null;
-  pricingType: JobResponseDto["orderedServices"][number]["pricingType"] | null;
+  pricingType: JobResponseDto["orderedServices"][number]["pricingType"];
   subRows?: Data[];
 }
 
@@ -68,7 +71,7 @@ interface Props {
   project: ProjectResponseDto;
 }
 
-export default function TasksTable({ job, project }: Props) {
+export default function ScopesTable({ job, project }: Props) {
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
   const data = useMemo(
@@ -95,6 +98,7 @@ export default function TasksTable({ job, project }: Props) {
           id: orderedServiceId,
           name: serviceName,
           price,
+          cost: null,
           sizeForRevision:
             project.propertyType === "Residential" ? sizeForRevision : null,
           duration: filteredAssignedTasks.reduce<number | null>((prev, cur) => {
@@ -111,16 +115,19 @@ export default function TasksTable({ job, project }: Props) {
           isRevision,
           status,
           assigneeId: null,
+          assigneeOrganizationId: null,
           serviceId,
           isActive: true,
           prerequisiteTasks: null,
           pricingType,
           subRows: filteredAssignedTasks.map<Data>((value) => ({
             assigneeId: value.assigneeId,
+            assigneeOrganizationId: value.assigneeOrganizationId,
             description: value.description,
-            id: value.assignTaskId,
+            id: value.id,
             name: value.taskName,
             price: null,
+            cost: value.cost,
             sizeForRevision: null,
             duration:
               project.propertyType === "Commercial" ? value.duration : null,
@@ -146,7 +153,7 @@ export default function TasksTable({ job, project }: Props) {
             prerequisiteTasks: value.prerequisiteTasks.map(
               (value) => value.prerequisiteTaskName
             ),
-            pricingType: null,
+            pricingType,
           })),
         };
       }),
@@ -281,6 +288,14 @@ export default function TasksTable({ job, project }: Props) {
                 return;
               }
 
+              if (
+                !row.original.isRevision ||
+                row.original.pricingType === "Base Fixed Price" ||
+                row.original.pricingType === "Custom Fixed Price"
+              ) {
+                return <p className="text-muted-foreground">-</p>;
+              }
+
               const duration = getValue();
 
               if (row.depth === 0) {
@@ -301,18 +316,6 @@ export default function TasksTable({ job, project }: Props) {
                   jobId={job.id}
                 />
               );
-
-              // if (!row.original.isRevision) {
-              //   return <p className="text-muted-foreground">-</p>;
-              // }
-
-              // return (
-              //   <SizeForRevisionField
-              //     sizeForRevision={getValue()}
-              //     jobId={job.id}
-              //     orderedServiceId={row.id}
-              //   />
-              // );
             },
           }),
       columnHelper.accessor("price", {
@@ -335,24 +338,50 @@ export default function TasksTable({ job, project }: Props) {
           );
         },
       }),
+      columnHelper.accessor("cost", {
+        header: "Cost",
+        cell: ({ row, getValue }) => {
+          if (row.depth === 0) {
+            return;
+          }
+
+          if (
+            row.original.assigneeOrganizationId === BARUNCORP_ORGANIZATION_ID ||
+            row.original.assigneeId == null
+          ) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return (
+            <CostField
+              // disabled={
+              //   row.original.isRevision &&
+              //   row.original.sizeForRevision === "Minor"
+              // }
+              assignedTaskId={row.id}
+              cost={getValue()}
+              jobId={job.id}
+            />
+          );
+        },
+      }),
       columnHelper.accessor("status", {
         header: "Status",
         cell: ({ getValue, row }) => {
           const value = getValue();
 
           if (row.depth === 0) {
-            const status =
-              orderedServiceStatuses[value as OrderedServiceStatusEnum];
-
             return (
-              <div className="flex items-center">
-                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-                <span className="whitespace-nowrap">{status.value}</span>
-              </div>
+              <OrderedServiceStatusField
+                status={value as OrderedServiceStatusEnum}
+                orderedServiceId={row.id}
+                jobId={job.id}
+                projectId={project.projectId}
+              />
             );
           }
 
-          const status = jobStatuses[value as JobStatusEnum];
+          const status = assignedTaskStatuses[value as AssignedTaskStatusEnum];
 
           return (
             <div className="flex items-center">
@@ -380,33 +409,26 @@ export default function TasksTable({ job, project }: Props) {
           );
         },
       }),
-      columnHelper.display({
-        id: "action",
-        cell: ({ row }) => {
-          if (row.depth === 0) {
-            return (
-              <OrderedServiceActionField
-                orderedServiceId={row.id}
-                status={row.original.status as OrderedServiceStatusEnum}
-                jobId={job.id}
-                projectId={job.projectId}
-              />
-            );
-          }
+      // columnHelper.display({
+      //   id: "action",
+      //   cell: ({ row }) => {
+      //     if (row.depth === 0) {
+      //       return;
+      //     }
 
-          return (
-            <AssignedTaskActionField
-              assignedTaskId={row.id}
-              status={row.original.status as JobStatusEnum}
-              jobId={job.id}
-              projectId={job.projectId}
-              page="SYSTEM_MANAGEMENT"
-            />
-          );
-        },
-      }),
+      //     return (
+      //       <AssignedTaskActionField
+      //         assignedTaskId={row.id}
+      //         status={row.original.status as JobStatusEnum}
+      //         jobId={job.id}
+      //         projectId={job.projectId}
+      //         page="SYSTEM_MANAGEMENT"
+      //       />
+      //     );
+      //   },
+      // }),
     ],
-    [job.id, job.projectId, project.propertyType]
+    [job.id, job.projectId, project.projectId, project.propertyType]
   );
 
   const table = useReactTable({

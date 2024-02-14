@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Textarea } from "@/components/ui/textarea";
+import { PlateEditor, Value, createPlateEditor } from "@udecode/plate-common";
+import { serializeHtml } from "@udecode/plate-serializer-html";
 import {
   Form,
   FormControl,
@@ -18,11 +19,22 @@ import usePostJobNoteMutation from "@/mutations/usePostJobNoteMutation";
 import { getJobNotesQueryKey } from "@/queries/useJobNotesQuery";
 import { JobResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
+import MentionEditor from "@/components/editor/MentionEditor";
+import {
+  findAllEmails,
+  isEditorValueEmpty,
+  trimValue,
+} from "@/lib/plate-utils";
+import { INITIAL_EDITOR_VALUE } from "@/lib/constants";
+import { mentionEditorPlugins } from "@/lib/plate/plugins";
+import Dropzone from "@/components/Dropzone";
+
+const editor = createPlateEditor({ plugins: mentionEditorPlugins });
 
 const formSchema = z.object({
-  content: z.string().trim().min(1, {
-    message: "Content is required",
-  }),
+  content: z
+    .custom<Value>()
+    .refine((value) => !isEditorValueEmpty(value), "Content is required"),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -32,24 +44,55 @@ interface Props {
 }
 
 export default function JobNoteForm({ job }: Props) {
+  const [files, setFiles] = useState<File[]>([]);
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      content: "",
+      content: INITIAL_EDITOR_VALUE,
     },
   });
-
   const { mutateAsync } = usePostJobNoteMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const editorRef = useRef<PlateEditor<Value>>(null);
+
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      form.reset();
+      setIsSubmitSuccessful(false);
+    }
+  }, [form, isSubmitSuccessful]);
 
   async function onSubmit(values: FieldValues) {
+    const trimmedContent = trimValue(values.content);
+    const emails = findAllEmails(trimmedContent);
+    const hasMention = emails.length !== 0;
+
+    let emailBody: string | undefined = undefined;
+    if (hasMention) {
+      emailBody = serializeHtml(editor, {
+        nodes: trimmedContent,
+      })
+        .split('<div class="slate-p"></div>')
+        .filter((value) => value !== "")
+        .join("<br />");
+    }
+
     await mutateAsync({
       jobId: job.id,
-      content: values.content,
+      content: JSON.stringify(trimmedContent),
+      type: hasMention ? "RFI" : "JobNote",
+      receiverEmails: hasMention ? emails : ["yunwoo@oj.vision"],
+      emailBody,
+      files,
     })
       .then(() => {
-        form.reset();
+        setIsSubmitSuccessful(true);
+        toast({
+          title: "Success",
+        });
+        setFiles([]);
         queryClient.invalidateQueries({
           queryKey: getJobNotesQueryKey(job.id),
         });
@@ -79,12 +122,17 @@ export default function JobNoteForm({ job }: Props) {
             <FormItem>
               <FormLabel required>Content</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <MentionEditor
+                  {...field}
+                  editorRef={editorRef}
+                  key={String(isSubmitSuccessful)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        <Dropzone files={files} onFilesChange={setFiles} />
         <LoadingButton
           type="submit"
           isLoading={form.formState.isSubmitting}

@@ -12,6 +12,7 @@ import {
   createMentionPlugin,
   ELEMENT_MENTION,
   ELEMENT_MENTION_INPUT,
+  MentionPlugin,
 } from "@udecode/plate-mention";
 import { createComboboxPlugin } from "@udecode/plate-combobox";
 import {
@@ -95,7 +96,17 @@ export const mentionEditorPlugins = createPlugins(
     createLinkPlugin({
       renderAfterEditable: LinkFloatingToolbar as RenderAfterEditable,
     }),
-    createMentionPlugin(),
+    createMentionPlugin<MentionPlugin<{ email: string }>>({
+      options: {
+        createMentionNode: (item) => ({
+          children: [{ text: "" }],
+          type: "mention",
+          value: item.text,
+          email: item.data.email,
+        }),
+        insertSpaceAfterMention: true,
+      },
+    }),
 
     // Block Style
     createIndentPlugin({

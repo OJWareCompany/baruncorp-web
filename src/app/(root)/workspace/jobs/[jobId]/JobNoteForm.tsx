@@ -3,7 +3,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/form";
 import LoadingButton from "@/components/LoadingButton";
 import usePostJobNoteMutation from "@/mutations/usePostJobNoteMutation";
-import { getJobNotesQueryKey } from "@/queries/useJobNotesQuery";
 import { JobResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -44,29 +42,29 @@ export default function JobNoteForm({ job }: Props) {
   const { toast } = useToast();
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      jobId: job.id,
-      content: values.content,
-    })
-      .then(() => {
-        form.reset();
-        queryClient.invalidateQueries({
-          queryKey: getJobNotesQueryKey(job.id),
-        });
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
-        ) {
-          toast({
-            title: error.response.data.message,
-            variant: "destructive",
-          });
-          return;
-        }
-      });
+    // await mutateAsync({
+    //   jobId: job.id,
+    //   content: values.content,
+    // })
+    //   .then(() => {
+    //     form.reset();
+    //     queryClient.invalidateQueries({
+    //       queryKey: getJobNotesQueryKey(job.id),
+    //     });
+    //   })
+    //   .catch((error: AxiosError<ErrorResponseData>) => {
+    //     if (
+    //       error.response &&
+    //       error.response.data.errorCode.filter((value) => value != null)
+    //         .length !== 0
+    //     ) {
+    //       toast({
+    //         title: error.response.data.message,
+    //         variant: "destructive",
+    //       });
+    //       return;
+    //     }
+    //   });
   }
 
   return (

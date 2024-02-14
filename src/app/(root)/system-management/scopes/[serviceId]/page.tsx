@@ -1,6 +1,7 @@
 "use client";
 import ServiceForm from "./ServiceForm";
 import TasksTable from "./TasksTable";
+import PageHeaderAction from "./PageHeaderAction";
 import PageHeader from "@/components/PageHeader";
 import useServiceQuery from "@/queries/useServiceQuery";
 import PageLoading from "@/components/PageLoading";
@@ -35,6 +36,7 @@ export default function Page({ params: { serviceId } }: Props) {
             name: service.name,
           },
         ]}
+        action={<PageHeaderAction scopeId={serviceId} />}
       />
       <div className="space-y-6">
         <ServiceForm service={service} />

@@ -116,7 +116,7 @@ export default function AvailableTasksTable({ user }: Props) {
                   });
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="-ml-[13px]">
                 <SelectValue placeholder="Select a property type" />
               </SelectTrigger>
               <SelectContent>

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
+import React, { ForwardedRef, MutableRefObject } from "react";
 import { format, startOfDay } from "date-fns";
 import { formatInTimeZone, zonedTimeToUtc } from "date-fns-tz";
 import { utcToZonedTime } from "date-fns-tz";
@@ -71,4 +71,27 @@ export function getDiffHoursFromLocalToEST() {
   const differenceInHours = (timestamp2 - timestamp1) / (1000 * 60 * 60);
 
   return differenceInHours;
+}
+
+export function stringToHexCode(str: string) {
+  // Simple hash function to convert string to a number
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  // Convert the hash to a 6-digit hex code
+  let hex = (hash & 0xffffff).toString(16).toUpperCase();
+  // Ensure it's 6 digits by padding with leading zeros if necessary
+  return hex.padStart(6, "0");
+}
+
+export function isMutableRefObject<T>(
+  ref: ForwardedRef<T>
+): ref is MutableRefObject<T> {
+  if (typeof ref === "function" || ref == null) {
+    return false;
+  }
+
+  return true;
 }

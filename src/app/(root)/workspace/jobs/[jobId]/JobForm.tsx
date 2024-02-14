@@ -32,6 +32,8 @@ import {
   INITIAL_EDITOR_VALUE,
   MountingTypeEnum,
   STRUCTURAL_WET_STAMP_SERVICE_ID,
+  digitRegExp,
+  toTwoDecimalRegExp,
 } from "@/lib/constants";
 import useUserQuery from "@/queries/useUserQuery";
 import { getJobQueryKey } from "@/queries/useJobQuery";
@@ -110,15 +112,6 @@ export default function JobForm({ project, job }: Props) {
             });
             return;
           }
-
-          if (!/^\d+$/.test(numberOfWetStamp)) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Number of Wet Stamp should be a number",
-              path: [`numberOfWetStamp`],
-            });
-            return;
-          }
         })
         .superRefine((value, ctx) => {
           if (!hasWetStamp) {
@@ -144,15 +137,6 @@ export default function JobForm({ project, job }: Props) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: "System Size is required",
-                path: ["systemSize"],
-              });
-              return;
-            }
-
-            if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(systemSize)) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "System Size should be a number",
                 path: ["systemSize"],
               });
               return;
@@ -414,6 +398,12 @@ export default function JobForm({ project, job }: Props) {
                           <span className="text-muted-foreground">kW</span>
                         }
                         {...field}
+                        onChange={(event) => {
+                          const { value } = event.target;
+                          if (value === "" || toTwoDecimalRegExp.test(value)) {
+                            field.onChange(event);
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -461,7 +451,15 @@ export default function JobForm({ project, job }: Props) {
                     <FormItem>
                       <FormLabel required>Number of Wet Stamp</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          onChange={(event) => {
+                            const { value } = event.target;
+                            if (value === "" || digitRegExp.test(value)) {
+                              field.onChange(event);
+                            }
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

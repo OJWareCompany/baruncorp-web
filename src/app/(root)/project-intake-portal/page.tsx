@@ -48,7 +48,7 @@ export default function Page() {
               plugins={basicEditorPlugins}
               readOnly
               value={information}
-              key={JSON.stringify(information)}
+              key={JSON.stringify(information)} // 어떤 이유에서인지 re-render가 안되서, information 값이 바뀔 때 마다 key 값을 바꿔줘서 re-render 시킴
             >
               <PlateContent />
             </Plate>

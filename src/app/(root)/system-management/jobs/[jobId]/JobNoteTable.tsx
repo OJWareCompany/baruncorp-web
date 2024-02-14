@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Plate, PlateContent } from "@udecode/plate-common";
 import {
   Table,
   TableBody,
@@ -14,33 +15,84 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobNoteListResponseDto } from "@/api/api-spec";
+import { JobNoteResponseDto } from "@/api/api-spec";
+import { formatInEST } from "@/lib/utils";
+import { mentionEditorPlugins } from "@/lib/plate/plugins";
+import { getEditorValue } from "@/lib/plate-utils";
+import { Badge } from "@/components/ui/badge";
 
-const columnHelper =
-  createColumnHelper<JobNoteListResponseDto["notes"][number]>();
+const columnHelper = createColumnHelper<JobNoteResponseDto["data"][number]>();
 
 const columns = [
+  columnHelper.accessor("jobNoteNumber", {
+    header: "#",
+  }),
+  columnHelper.accessor("creatorName", {
+    header: "Created By",
+  }),
+  columnHelper.accessor("senderMail", {
+    header: "From",
+    cell: ({ row, getValue }) => {
+      if (row.original.type === "JobNote") {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return <Badge variant={"outline"}>{getValue()}</Badge>;
+    },
+  }),
+  columnHelper.accessor("receiverMails", {
+    header: "To",
+    cell: ({ row, getValue }) => {
+      const value = getValue();
+      if (row.original.type === "JobNote" || value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return (
+        <div className="flex flex-col items-start gap-1">
+          {value.map((mail) => (
+            <Badge key={mail} variant={"outline"}>
+              {mail}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+  }),
   columnHelper.accessor("content", {
     header: "Content",
+    cell: ({ getValue }) => (
+      <Plate
+        plugins={mentionEditorPlugins}
+        readOnly
+        value={getEditorValue(getValue())}
+      >
+        <PlateContent />
+      </Plate>
+    ),
   }),
-  columnHelper.accessor("commenterName", {
-    header: "Commenter",
+  columnHelper.accessor("fileShareLink", {
+    header: "fileShareLink",
   }),
+  // columnHelper.accessor("type", {
+  //   header: "type",
+  // }),
   columnHelper.accessor("createdAt", {
-    header: "Date Created",
+    header: "Date Created (EST)",
+    cell: ({ getValue }) => formatInEST(getValue()),
   }),
 ];
 
 interface Props {
-  jobNotes: JobNoteListResponseDto;
+  jobNotes: JobNoteResponseDto;
 }
 
 export default function JobNotesTable({ jobNotes }: Props) {
   const table = useReactTable({
-    data: jobNotes.notes,
+    data: jobNotes.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getRowId: ({ jobNoteId }) => jobNoteId,
+    getRowId: ({ id }) => id,
   });
 
   return (

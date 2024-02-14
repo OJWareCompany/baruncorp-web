@@ -50,7 +50,7 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
         variant: "destructive",
       });
     });
-  }, [dialogProps.open, files, job, toast]);
+  }, [dialogProps.open, files, job, mutateAsync]);
 
   return (
     <Dialog

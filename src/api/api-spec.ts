@@ -52,10 +52,10 @@ export interface AvailableTaskResponseDto {
   name: string;
   /** @default "Residential / Commercial" */
   autoAssignmentType:
-  | "None"
-  | "Residential"
-  | "Commercial"
-  | "Residential / Commercial";
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
   /** @default "Structural" */
   licenseType: "Structural" | "Electrical" | null;
 }
@@ -184,19 +184,19 @@ export interface AddAvailableTaskRequestDto {
   taskId: string;
   /** @default "Residential" */
   autoAssignmentType:
-  | "None"
-  | "Residential"
-  | "Commercial"
-  | "Residential / Commercial";
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
 }
 
 export interface ModifyAssignmentTypeOfAvailableTaskRequestDto {
   /** @default "Residential" */
   autoAssignmentType:
-  | "None"
-  | "Residential"
-  | "Commercial"
-  | "Residential / Commercial";
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
 }
 
 export interface HandsStatusResponseDto {
@@ -213,12 +213,12 @@ export interface InviteRequestDto {
 export interface ChangeUserRoleRequestDto {
   /** @default "Viewer" */
   newRole:
-  | "Special Admin"
-  | "Admin"
-  | "Member"
-  | "Client Company Manager"
-  | "Client Company Employee"
-  | "Viewer";
+    | "Special Admin"
+    | "Admin"
+    | "Member"
+    | "Client Company Manager"
+    | "Client Company Employee"
+    | "Viewer";
 }
 
 export interface AddressDto {
@@ -343,7 +343,7 @@ export interface CreateJobRequestDto {
   mountingType: "Roof Mount" | "Ground Mount";
   /** @default "Self" */
   loadCalcOrigin?: "Self" | "Client Provided";
-  /** @default [{"serviceId":"e5d81943-3fef-416d-a85b-addb8be296c0","description":""},{"serviceId":"9e773832-ad39-401d-b1c2-16d74f9268ea","description":""},{"serviceId":"99ff64ee-fe47-4235-a026-db197628d077","description":""},{"serviceId":"5c29f1ae-d50b-4400-a6fb-b1a2c87126e9","description":""},{"serviceId":"2a2a256b-57a5-46f5-8cfb-1855cc29238a","description":"This is not on the menu."}] */
+  /** @default [{"serviceId":"e5d81943-3fef-416d-a85b-addb8be296c0","description":""},{"serviceId":"99ff64ee-fe47-4235-a026-db197628d077","description":""},{"serviceId":"5c29f1ae-d50b-4400-a6fb-b1a2c87126e9","description":""},{"serviceId":"2a2a256b-57a5-46f5-8cfb-1855cc29238a","description":"This is not on the menu."}] */
   taskIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[];
   mailingAddressForWetStamp: AddressDto | null;
   /** @default 3 */
@@ -353,6 +353,7 @@ export interface CreateJobRequestDto {
   /**
    * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
    * @format date-time
+   * @default null
    */
   dueDate?: string | null;
 }
@@ -378,6 +379,7 @@ export interface UpdateJobRequestDto {
   /**
    * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
    * @format date-time
+   * @default null
    */
   dueDate: string | null;
 }
@@ -385,12 +387,12 @@ export interface UpdateJobRequestDto {
 export interface UpdateJobStatusRequestDto {
   /** @default "Completed" */
   status:
-  | "Not Started"
-  | "In Progress"
-  | "On Hold"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)";
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)";
 }
 
 export interface PrerequisiteTaskVO {
@@ -398,19 +400,36 @@ export interface PrerequisiteTaskVO {
   prerequisiteTaskName: string;
 }
 
-export interface AssignedTaskResponseFields {
-  assignTaskId: string;
-  /** @example "Not Started" */
-  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
-  taskName: string;
+export interface AssignedTaskResponseDto {
+  id: string;
   taskId: string;
+  taskName: string;
   orderedServiceId: string;
-  startedAt: string | null;
-  assigneeName: string | null;
-  assigneeId: string | null;
-  doneAt: string | null;
+  serviceName: string;
+  jobId: string;
+  /** @default "Not Started" */
+  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
   description: string | null;
+  assigneeId: string | null;
+  assigneeName: string | null;
+  assigneeOrganizationId: string | null;
+  assigneeOrganizationName: string | null;
+  projectId: string;
+  organizationId: string;
+  organizationName: string;
+  projectPropertyType: string;
+  mountingType: string;
+  serviceId: string;
+  vendorInvoiceId: string | null;
+  isVendor: boolean;
+  /** @format date-time */
+  startedAt: string | null;
+  /** @format date-time */
+  doneAt: string | null;
+  /** @format date-time */
+  createdAt: string | null;
   duration: number | null;
+  cost: number | null;
   prerequisiteTasks: PrerequisiteTaskVO[];
 }
 
@@ -420,38 +439,40 @@ export interface OrderedServiceResponseFields {
   sizeForRevision: "Major" | "Minor" | null;
   serviceName: string;
   pricingType:
-  | "Base Residential New Price"
-  | "Base Residential GM Price"
-  | "Base Residential Revision Price"
-  | "Base Residential Revision GM Price"
-  | "Base Commercial New Price"
-  | "Base Commercial GM Price"
-  | "Base Commercial Revision Price"
-  | "Base Commercial Revision GM Price"
-  | "Base Fixed Price"
-  | "Custom Residential New Price"
-  | "Custom Residential GM Price"
-  | "Custom Residential New Flat Price"
-  | "Custom Residential GM Flat Price"
-  | "Custom Residential Revision Price"
-  | "Custom Residential Revision GM Price"
-  | "Custom Commercial New Price"
-  | "Custom Commercial GM Price"
-  | "Custom Fixed Price"
-  | "Custom Special Revision Price"
-  | "Custom Special Revision Fee"
-  | "No Pricing Type";
+    | "Base Residential New Price"
+    | "Base Residential GM Price"
+    | "Base Residential Revision Price"
+    | "Base Residential Revision GM Price"
+    | "Base Commercial New Price"
+    | "Base Commercial GM Price"
+    | "Base Commercial Revision Price"
+    | "Base Commercial Revision GM Price"
+    | "Base Fixed Price"
+    | "Custom Residential New Price"
+    | "Custom Residential GM Price"
+    | "Custom Residential New Flat Price"
+    | "Custom Residential GM Flat Price"
+    | "Custom Residential Revision Price"
+    | "Custom Residential Revision GM Price"
+    | "Custom Commercial New Price"
+    | "Custom Commercial GM Price"
+    | "Custom Fixed Price"
+    | "Custom Special Revision Price"
+    | "Custom Special Revision Free"
+    | "Base Minor Revision Free"
+    | "No Pricing Type";
   isRevision: boolean;
   description: string | null;
   price: number | null;
   priceOverride: number | null;
-  /** @example "Not Started" */
+  /** @default "Completed" */
   status:
-  | "Not Started"
-  | "In Progress"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)";
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "On Hold";
   orderedAt: string;
   doneAt: string | null;
 }
@@ -500,16 +521,16 @@ export interface JobResponseDto {
   jobRequestNumber: number;
   /** @example "In Progress" */
   jobStatus:
-  | "Not Started"
-  | "In Progress"
-  | "On Hold"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)"
-  | "Sent To Client";
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client";
   /** @example "Self" */
   loadCalcOrigin: "Self" | "Client Provided";
-  assignedTasks: AssignedTaskResponseFields[];
+  assignedTasks: AssignedTaskResponseDto[];
   orderedServices: OrderedServiceResponseFields[];
   clientInfo: ClientInformationFields;
   /** @example "2023-08-11 09:10:31" */
@@ -526,7 +547,8 @@ export interface JobResponseDto {
   state: string;
   /** @format date-time */
   dueDate: string | null;
-  jobFolderId: string;
+  /** @example "GnpyEmUZfZ1k7e6Jsvy_fcG8r-PWCQswP" */
+  jobFolderId: string | null;
 }
 
 export interface JobPaginatedResponseDto {
@@ -546,10 +568,6 @@ export interface JobToInvoiceResponseDto {
   subtotal: number;
   discount: number;
   total: number;
-}
-
-export interface SendDeliverablesRequestDto {
-  // deliverablesLink: string;
 }
 
 export interface CommercialTier {
@@ -590,13 +608,25 @@ export interface CreateServiceRequestDto {
   standardPricing: StandardPricingRequestDtoFields | null;
   /** @default null */
   fixedPrice: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   residentialNewEstimatedTaskDuration: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   residentialRevisionEstimatedTaskDuration: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   commercialNewEstimatedTaskDuration: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   commercialRevisionEstimatedTaskDuration: number | null;
 }
 
@@ -610,13 +640,25 @@ export interface UpdateServiceRequestDto {
   standardPricing: StandardPricingRequestDtoFields | null;
   /** @default null */
   fixedPrice: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   residentialNewEstimatedTaskDuration: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   residentialRevisionEstimatedTaskDuration: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   commercialNewEstimatedTaskDuration: number | null;
-  /** @default null */
+  /**
+   * @max 9
+   * @default null
+   */
   commercialRevisionEstimatedTaskDuration: number | null;
 }
 
@@ -672,6 +714,8 @@ export interface CreateProjectRequestDto {
   /** @default "000152" */
   projectNumber: string | null;
   projectPropertyAddress: AddressDto;
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  utilityId?: string;
 }
 
 export interface UpdateProjectRequestDto {
@@ -682,6 +726,8 @@ export interface UpdateProjectRequestDto {
   /** @default "50021" */
   projectNumber: string | null;
   projectPropertyAddress: AddressDto;
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  utilityId?: string;
 }
 
 export interface ProjectPaginatedResponseFields {
@@ -780,6 +826,8 @@ export interface ProjectResponseDto {
   hasHistoryElectricalPEStamp: boolean;
   /** @example false */
   hasHistoryStructuralPEStamp: boolean;
+  /** @example "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
+  utilityId: string | null;
   /** @example [] */
   jobs: JobResponseDto[];
 }
@@ -873,12 +921,12 @@ export interface Engineering {
   ofWetStamps: string | null;
   /** @default "ANSI B (11x17 INCH)" */
   wetStampSize:
-  | "ANSI A (8.5x11 INCH)"
-  | "ANSI B (11x17 INCH)"
-  | "ANSI D (22x34 INCH)"
-  | "ARCH D (24x36 INCH)"
-  | "See Notes"
-  | null;
+    | "ANSI A (8.5x11 INCH)"
+    | "ANSI B (11x17 INCH)"
+    | "ANSI D (22x34 INCH)"
+    | "ARCH D (24x36 INCH)"
+    | "See Notes"
+    | null;
   /** @default "engineeringNotes..." */
   engineeringNotes: string | null;
 }
@@ -948,38 +996,6 @@ export interface AssignTaskRequestDto {
   assigneeId: string;
 }
 
-export interface AssignedTaskResponseDto {
-  id: string;
-  taskId: string;
-  taskName: string;
-  orderedServiceId: string;
-  serviceName: string;
-  jobId: string;
-  /** @default "Not Started" */
-  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
-  description: string | null;
-  assigneeId: string | null;
-  assigneeName: string | null;
-  assigneeOrganizationId: string | null;
-  assigneeOrganizationName: string | null;
-  projectId: string;
-  organizationId: string;
-  organizationName: string;
-  projectPropertyType: string;
-  mountingType: string;
-  serviceId: string;
-  vendorInvoiceId: string | null;
-  isVendor: boolean;
-  /** @format date-time */
-  startedAt: string | null;
-  /** @format date-time */
-  doneAt: string | null;
-  /** @format date-time */
-  createdAt: string | null;
-  duration: number | null;
-  cost: number | null;
-}
-
 export interface AssignedTaskPaginatedResponseDto {
   /** @default 1 */
   page: number;
@@ -990,6 +1006,89 @@ export interface AssignedTaskPaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: AssignedTaskResponseDto[];
+}
+
+export interface AssignedTaskSummaryDoneResponseDto {
+  userId: string;
+  organizationName: string;
+  userName: string;
+  doneAssignedTaskCount: number;
+  completedAssignedTaskCount: number;
+  canceledAssignedTaskCount: number;
+}
+
+export interface AssignedTaskSummaryDonePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: AssignedTaskSummaryDoneResponseDto[];
+}
+
+export interface AssignedTaskSummaryDetailResponseDto {
+  jobName: string;
+  taskName: string;
+  jobId: string;
+  status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
+}
+
+export interface AssignedTaskSummaryDetailPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: AssignedTaskSummaryDetailResponseDto[];
+}
+
+export interface AssignedTaskSummaryInProgressResponseDto {
+  userId: string;
+  organizationName: string;
+  userName: string;
+  inProgressAssignedTaskCount: number;
+}
+
+export interface AssignedTaskSummaryInProgressPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: AssignedTaskSummaryInProgressResponseDto[];
+}
+
+export interface CompletedTaskCountDto {
+  taskId: string;
+  taskName: string;
+  count: number;
+}
+
+export interface AssignedTaskSummaryTotalResponseDto {
+  userId: string;
+  userName: string;
+  tasks: CompletedTaskCountDto[];
+}
+
+export interface AssignedTaskSummaryTotalPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: AssignedTaskSummaryTotalResponseDto[];
 }
 
 export interface UpdateTaskDurationRequestDto {
@@ -1406,19 +1505,19 @@ export interface AddPositionTaskRequestDto {
   taskId: string;
   /** @default "Residential / Commercial" */
   autoAssignmentType:
-  | "None"
-  | "Residential"
-  | "Commercial"
-  | "Residential / Commercial";
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
 }
 
 export interface UpdatePositionTaskAutoAssignmentTypeRequestDto {
   /** @default "Residential / Commercial" */
   autoAssignmentType:
-  | "None"
-  | "Residential"
-  | "Commercial"
-  | "Residential / Commercial";
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
 }
 
 export interface AddPositionWorkerRequestDto {
@@ -1715,12 +1814,12 @@ export interface OrderedServiceResponseDto {
   jobId: string;
   /** @default "Completed" */
   status:
-  | "Not Started"
-  | "In Progress"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)"
-  | "On Hold";
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "On Hold";
   orderedAt: string | null;
   doneAt: string | null;
   isRevision: boolean;
@@ -1732,11 +1831,11 @@ export interface OrderedServiceResponseDto {
 export interface UpdateOrderedScopeStatusRequestDto {
   /** @default "In Progress" */
   status:
-  | "Not Started"
-  | "In Progress"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)";
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)";
 }
 
 export interface UpdateManualPriceRequestDto {
@@ -1787,25 +1886,152 @@ export interface IntegratedOrderModificationHistoryPaginatedResponseDto {
   items: IntegratedOrderModificationHistoryResponseDto[];
 }
 
-export interface CreateJobNoteRequestDto {
-  /** @default "what do you think about Jazz?" */
-  content: string;
-  /** @default "hs8da-cdef-gh22321ask-xzcm12e3" */
-  jobId: string;
+export interface CreateUtilityRequestDto {
+  /** @default "Sample Utility" */
+  name: string;
+  /** @default ["AL","AK","AZ"] */
+  stateAbbreviations: string[];
+  /** @default "Blah - Blah" */
+  notes?: string;
 }
 
-export interface JobNoteResponseDto {
-  jobNoteId: string;
+export interface UpdateUtilityRequestDto {
+  /** @default "Sample Utility" */
+  name?: string;
+  /** @default ["AL","AK","AZ"] */
+  stateAbbreviations?: string[];
+  /** @default "Blah - Blah" */
+  notes?: string;
+}
+
+export interface UtilityResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "Sample Utility" */
+  name: string;
+  /** @default ["AL","AK","AZ"] */
+  stateAbbreviations: string[];
+  /** @default "Blah - Blah" */
+  notes: string;
+}
+
+export interface UtilityPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: UtilityResponseDto[];
+}
+
+export interface UtilityHistoryDetail {
+  /** @default "Sample Utility" */
+  name: string;
+  /** @default ["AL","AK","AZ"] */
+  stateAbbreviations: string[];
+  /** @default "Blah - Blah" */
+  notes: string;
+}
+
+export interface UtilityHistoryDetailResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "dglee" */
+  userName: string;
+  /** @default "Create" */
+  type: string;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  updatedAt: string;
+  beforeModificationDetail: UtilityHistoryDetail | null;
+  afterModificationDetail: UtilityHistoryDetail;
+}
+
+export interface UtilityHistoryResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "dglee" */
+  userName: string;
+  /** @default "Create" */
+  type: string;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  updatedAt: string;
+}
+
+export interface UtilityHistoryPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: UtilityHistoryResponseDto[];
+}
+
+export interface CreateJobNoteRequestDto {
+  /** @default "hs8da-cdef-gh22321ask-xzcm12e3" */
+  jobId: string;
+  /** @default "This is Job Note Content" */
+  content: string;
+  /** @default "<div class=......>hello world</div>" */
+  emailBody?: string;
+  /** @default "JobNote" */
+  type: "JobNote" | "RFI";
+  /** @default ["yunwoo@oj.vision","antifragilista@oj.vision"] */
+  receiverEmails?: string[];
+  files: File[];
+}
+
+export interface CreateJobNoteResponseDto {
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  id: string;
+  /** @default 1 */
+  jobNoteNumber: number;
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  jobNoteFolderId: string | null;
+}
+
+export interface JobNoteDetailResponseDto {
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  id: string;
+  /** @default "JobNote" */
+  type: "JobNote" | "RFI";
+  /** @example "Chris Kim" */
+  creatorName: string;
   /** @example "what do you think about Jazz?" */
   content: string;
-  jobId: string;
-  commenterName: string;
-  commenterUserId: string;
+  /** @default 1 */
+  jobNoteNumber: number;
+  /** @default "yunwoo@oj.vision" */
+  senderMail: string | null;
+  /** @default ["yunwoo@oj.vision"] */
+  receiverMails: string[] | null;
+  /** @default ["https://drive.google.com/drive/folders/1MFhV8NTBNsPM3pvfBz6UKKTdKntXfWd7"] */
+  fileShareLink: string | null;
+  /** @format date-time */
   createdAt: string;
 }
 
-export interface JobNoteListResponseDto {
-  notes: JobNoteResponseDto[];
+export interface JobNoteResponseDto {
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  clientOrganizationName: string;
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  projectType: string;
+  /** @example "Chris Kim" */
+  propertyAddress: string;
+  /** @example 1 */
+  jobRequestNumber: number;
+  data: JobNoteDetailResponseDto[];
 }
 
 export interface CreateTaskRequestDto {
@@ -1829,10 +2055,10 @@ export interface TaskPosition {
   positionName: string;
   order: number;
   autoAssignmentType:
-  | "None"
-  | "Residential"
-  | "Commercial"
-  | "Residential / Commercial";
+    | "None"
+    | "Residential"
+    | "Commercial"
+    | "Residential / Commercial";
 }
 
 export interface PrerequisiteTask {
@@ -2264,6 +2490,169 @@ export interface ClientNotePaginatedResponseDto {
   items: ClientNoteResponseDto[];
 }
 
+export interface CreateGoogleJobNoteFolderRequestDto {
+  /** @default "" */
+  id: string;
+  /** @default "" */
+  shareLink: string;
+  /** @default "" */
+  jobNotesFolderId: string;
+  /** @default "" */
+  jobNoteId: string;
+  /** @default "" */
+  sharedDriveId: string;
+}
+
+export interface JobFolderPaginatedResponseFields {
+  /** @example "1-1Fk8UI8sz0yh-LV1QCCZ04K40ZHJK05" */
+  id: string | null;
+  /** @example "93b7-40db58e-d8c42-b391-1af41a7b6b63" */
+  jobId: string | null;
+  /** @example "0AN-3RUk9PVA7ZK0JGs" */
+  sharedDriveId: string | null;
+}
+
+export interface JobFolderPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: JobFolderPaginatedResponseFields[];
+}
+
+export interface UpdateGoogleSharedDriveCountRequestDto {
+  /** @default "" */
+  jobFolderId: string;
+  /** @default "" */
+  count: number;
+}
+
+export interface CreateCouriersRequestDto {
+  /** @default "USP" */
+  name: string;
+  /** @default "https://www.usp.com/track?InqueryNumber1=" */
+  urlParam: string;
+}
+
+export interface UpdateCouriersRequestDto {
+  /** @default "USP" */
+  name?: string;
+  /** @default "https://www.usp.com/track?InqueryNumber1=" */
+  urlParam?: string;
+}
+
+export interface CouriersResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "USP" */
+  name: string;
+  /** @default "https://www.usp.com/track?InqueryNumber1=" */
+  urlParam: string;
+}
+
+export interface CouriersPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: CouriersResponseDto[];
+}
+
+export interface CreateTrackingNumbersRequestDto {
+  /** @default "b716ad65-8e06-4077-975e-4e4e0a56018f" */
+  jobId: string;
+  /** @default "b716ad65-8e06-4077-975e-4e4e0a56018f" */
+  courierId: string;
+  /** @default "77331858651" */
+  trackingNumber: string;
+}
+
+export interface UpdateTrackingNumbersRequestDto {
+  /** @default "529cec06-1fb7-4284-b56f-9f31219cd099" */
+  courierId?: string;
+  /** @default "77331858651" */
+  trackingNumber?: string;
+}
+
+export interface TrackingNumbersResponseDto {
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  id: string;
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  jobId: string;
+  /** @default "Job #2 sample..." */
+  jobName: string;
+  /** @default "bd2d7904-136d-4e2e-966a-679fe4f499d0" */
+  courierId: string;
+  /** @default "FedEx" */
+  courierName: string;
+  /** @default "77331858651" */
+  trackingNumber: string;
+  /** @default "77331858651" */
+  trackingNumberUri: string;
+  /** @default "chris.kim" */
+  createdBy: string;
+  /**
+   * @format date-time
+   * @default "2024-01-07T23:56:28.493Z"
+   */
+  createdAt: string;
+}
+
+export interface TrackingNumbersPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: TrackingNumbersResponseDto[];
+}
+
+export interface ScheduleDto {
+  /** @default "09:00:00" */
+  start: string;
+  /** @default "13:00:00" */
+  end: string;
+}
+
+export interface PutScheduleRequestDto {
+  /** @default [{"start":"09:00:00","end":"13:00:00"},{"start":"14:00:00","end":"18:00:00"}] */
+  schedules: ScheduleDto[];
+}
+
+export interface ScheduleResponseDto {
+  /** @default "529cec06-1fb7-4284-b56f-9f31219cd099" */
+  userId: string;
+  /** @default "John Doe" */
+  name: string;
+  /** @default "S- PE" */
+  position: string;
+  /** @default [{"start":"09:00:00","end":"13:00:00"},{"start":"14:00:00","end":"18:00:00"}] */
+  schedules: ScheduleDto[];
+}
+
+export interface SchedulePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: ScheduleResponseDto[];
+}
+
 export interface AuthenticationControllerPostSignInTimeParams {
   /** @default 20 */
   jwt: number;
@@ -2396,14 +2785,14 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Completed" */
   jobStatus?:
-  | "Not Started"
-  | "In Progress"
-  | "On Hold"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)"
-  | "Sent To Client"
-  | null;
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client"
+    | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
@@ -2442,14 +2831,14 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Completed" */
   jobStatus?:
-  | "Not Started"
-  | "In Progress"
-  | "On Hold"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)"
-  | "Sent To Client"
-  | null;
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client"
+    | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
@@ -2510,14 +2899,14 @@ export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Completed" */
   jobStatus?:
-  | "Not Started"
-  | "In Progress"
-  | "On Hold"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)"
-  | "Sent To Client"
-  | null;
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | "Sent To Client"
+    | null;
   /** @default "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
@@ -2653,12 +3042,12 @@ export interface FindAssignedTaskPaginatedHttpControllerGetParams {
   organizationName?: string | null;
   /** @default "Completed" */
   status?:
-  | "Not Started"
-  | "In Progress"
-  | "On Hold"
-  | "Canceled"
-  | "Completed"
-  | null;
+    | "Not Started"
+    | "In Progress"
+    | "On Hold"
+    | "Canceled"
+    | "Completed"
+    | null;
   /** @default "Commercial" */
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Ground Mount" */
@@ -2667,6 +3056,108 @@ export interface FindAssignedTaskPaginatedHttpControllerGetParams {
   isVendor?: boolean | null;
   /** @default false */
   isRevision?: boolean | null;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindAssignedTaskSummaryDonePaginatedHttpControllerGetParams {
+  /** @default "Barun Corp" */
+  organizationName?: string;
+  /** @default "John Doe" */
+  userName?: string;
+  /**
+   * @format date-time
+   * @default "2024-01-05"
+   */
+  startedAt?: string;
+  /**
+   * @format date-time
+   * @default "2025-01-06"
+   */
+  endedAt?: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindAssignedTaskSummaryDetailPaginatedHttpControllerGetParams {
+  /** @default "e53b4cc2-d527-4a80-895c-a52a8c39d49d" */
+  userId: string;
+  /** @default "Completed" */
+  status?: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
+  /**
+   * @format date-time
+   * @default "2024-01-05"
+   */
+  startedAt?: string;
+  /**
+   * @format date-time
+   * @default "2025-01-06"
+   */
+  endedAt?: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindAssignedTaskSummaryInProgressPaginatedHttpControllerGetParams {
+  /** @default "Barun Corp" */
+  organizationName?: string;
+  /** @default "John Doe" */
+  userName?: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindAssignedTaskSummaryTotalPaginatedHttpControllerGetParams {
+  /**
+   * @format date-time
+   * @default "2024-01-05"
+   */
+  startedAt?: string;
+  /**
+   * @format date-time
+   * @default "2025-01-06"
+   */
+  endedAt?: string;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2921,12 +3412,12 @@ export interface FindOrderedServicePaginatedHttpControllerGetParams {
   page?: number;
   /** @default "Completed" */
   orderedServiceStatus?:
-  | "Not Started"
-  | "In Progress"
-  | "Canceled"
-  | "Completed"
-  | "Canceled (Invoice)"
-  | null;
+    | "Not Started"
+    | "In Progress"
+    | "Canceled"
+    | "Completed"
+    | "Canceled (Invoice)"
+    | null;
   /** @default "Commercial" */
   projectPropertyType?: "Residential" | "Commercial" | null;
   /** @default "Ground Mount" */
@@ -2964,6 +3455,40 @@ export interface FindIntegratedOrderModificationHistoryPaginatedHttpControllerGe
    * @example 1
    */
   page?: number;
+}
+
+export interface FindUtilityPaginatedHttpControllerGetParams {
+  /** @default "AL" */
+  stateAbbreviation?: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindUtilityHistoryPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  /** @default "674e3b83-0255-46fe-bc4b-047fca3c43cf" */
+  utilityId: string;
 }
 
 export interface FindTaskPaginatedHttpControllerGetParams {
@@ -3151,6 +3676,72 @@ export interface FindClientNotePaginatedHttpControllerGetParams {
   page?: number;
 }
 
+export interface FindNonCountedJobFoldersHttpControllerFindNonCountedJobFoldersParams {
+  /** @format date-time */
+  fromDate: string;
+  /** @format date-time */
+  toDate: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindCouriersPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindTrackingNumbersPaginatedHttpControllerGetParams {
+  /** @default "674e3b83-0255-46fe-bc4b-047fca3c43cf" */
+  jobId?: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindSchedulePaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -3238,7 +3829,7 @@ export class HttpClient<SecurityDataType = unknown> {
       headers: {
         ...((method &&
           this.instance.defaults.headers[
-          method.toLowerCase() as keyof HeadersDefaults
+            method.toLowerCase() as keyof HeadersDefaults
           ]) ||
           {}),
         ...(params1.headers || {}),
@@ -3756,6 +4347,43 @@ export class Api<
         format: "json",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @name PutScheduleHttpControllerPut
+     * @request PUT:/users/{userId}/schedules
+     */
+    putScheduleHttpControllerPut: (
+      userId: string,
+      data: PutScheduleRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/${userId}/schedules`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindSchedulePaginatedHttpControllerGet
+     * @request GET:/users/schedule/total
+     */
+    findSchedulePaginatedHttpControllerGet: (
+      query: FindSchedulePaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<SchedulePaginatedResponseDto, any>({
+        path: `/users/schedule/total`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
   };
   licenses = {
     /**
@@ -4097,14 +4725,11 @@ export class Api<
      */
     sendDeliverablesHttpControllerUpdateJob: (
       jobId: string,
-      data: SendDeliverablesRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
         path: `/jobs/${jobId}/send-deliverables`,
         method: "PATCH",
-        body: data,
-        type: ContentType.Json,
         ...params,
       }),
   };
@@ -4229,21 +4854,21 @@ export class Api<
       this.request<
         void,
         | {
-          /** @example 404 */
-          statusCode: number;
-          /** @example "Service is not found." */
-          message: string;
-          /** @example "40102" */
-          error?: string;
-        }
+            /** @example 404 */
+            statusCode: number;
+            /** @example "Service is not found." */
+            message: string;
+            /** @example "40102" */
+            error?: string;
+          }
         | {
-          /** @example 409 */
-          statusCode: number;
-          /** @example "This service name is already existed." */
-          message: string;
-          /** @example "40100" */
-          error?: string;
-        }
+            /** @example 409 */
+            statusCode: number;
+            /** @example "This service name is already existed." */
+            message: string;
+            /** @example "40100" */
+            error?: string;
+          }
       >({
         path: `/services/${serviceId}`,
         method: "PUT",
@@ -4599,6 +5224,78 @@ export class Api<
     ) =>
       this.request<AssignedTaskPaginatedResponseDto, any>({
         path: `/assigned-tasks`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindAssignedTaskSummaryDonePaginatedHttpControllerGet
+     * @request GET:/assigned-tasks/summary/done
+     */
+    findAssignedTaskSummaryDonePaginatedHttpControllerGet: (
+      query: FindAssignedTaskSummaryDonePaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AssignedTaskSummaryDonePaginatedResponseDto, any>({
+        path: `/assigned-tasks/summary/done`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindAssignedTaskSummaryDetailPaginatedHttpControllerGet
+     * @request GET:/assigned-tasks/summary/detail
+     */
+    findAssignedTaskSummaryDetailPaginatedHttpControllerGet: (
+      query: FindAssignedTaskSummaryDetailPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AssignedTaskSummaryDetailPaginatedResponseDto, any>({
+        path: `/assigned-tasks/summary/detail`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindAssignedTaskSummaryInProgressPaginatedHttpControllerGet
+     * @request GET:/assigned-tasks/summary/in-progress
+     */
+    findAssignedTaskSummaryInProgressPaginatedHttpControllerGet: (
+      query: FindAssignedTaskSummaryInProgressPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AssignedTaskSummaryInProgressPaginatedResponseDto, any>({
+        path: `/assigned-tasks/summary/in-progress`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindAssignedTaskSummaryTotalPaginatedHttpControllerGet
+     * @request GET:/assigned-tasks/summary/total
+     */
+    findAssignedTaskSummaryTotalPaginatedHttpControllerGet: (
+      query: FindAssignedTaskSummaryTotalPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AssignedTaskSummaryTotalPaginatedResponseDto, any>({
+        path: `/assigned-tasks/summary/total`,
         method: "GET",
         query: query,
         format: "json",
@@ -5018,21 +5715,21 @@ export class Api<
       this.request<
         IdResponse,
         | {
-          /** @example 404 */
-          statusCode: number;
-          /** @example "Not Organization Found" */
-          message: string;
-          /** @example "20002" */
-          error?: string;
-        }
+            /** @example 404 */
+            statusCode: number;
+            /** @example "Not Organization Found" */
+            message: string;
+            /** @example "20002" */
+            error?: string;
+          }
         | {
-          /** @example 409 */
-          statusCode: number;
-          /** @example "CustomPricing is Already Existed" */
-          message: string;
-          /** @example "30101" */
-          error?: string;
-        }
+            /** @example 409 */
+            statusCode: number;
+            /** @example "CustomPricing is Already Existed" */
+            message: string;
+            /** @example "30101" */
+            error?: string;
+          }
       >({
         path: `/custom-pricings`,
         method: "POST",
@@ -5736,6 +6433,118 @@ export class Api<
         }
       ),
   };
+  utilities = {
+    /**
+     * No description
+     *
+     * @name CreateUtilityHttpControllerPost
+     * @request POST:/utilities
+     */
+    createUtilityHttpControllerPost: (
+      data: CreateUtilityRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/utilities`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindUtilityPaginatedHttpControllerGet
+     * @request GET:/utilities
+     */
+    findUtilityPaginatedHttpControllerGet: (
+      query: FindUtilityPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<UtilityPaginatedResponseDto, any>({
+        path: `/utilities`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateUtilityHttpControllerPatch
+     * @request PATCH:/utilities/{utilityId}
+     */
+    updateUtilityHttpControllerPatch: (
+      utilityId: string,
+      data: UpdateUtilityRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/utilities/${utilityId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindUtilityHttpControllerGet
+     * @request GET:/utilities/{utilityId}
+     */
+    findUtilityHttpControllerGet: (
+      utilityId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<UtilityResponseDto, any>({
+        path: `/utilities/${utilityId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindUtilityHistoryHttpControllerGet
+     * @request GET:/utilities/histories/{utilityHistoryId}
+     */
+    findUtilityHistoryHttpControllerGet: (
+      utilityHistoryId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<UtilityHistoryDetailResponseDto, any>({
+        path: `/utilities/histories/${utilityHistoryId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindUtilityHistoryPaginatedHttpControllerGet
+     * @request GET:/utilities/{utilityId}/histories
+     */
+    findUtilityHistoryPaginatedHttpControllerGet: (
+      {
+        utilityId,
+        ...query
+      }: FindUtilityHistoryPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<UtilityHistoryPaginatedResponseDto, any>({
+        path: `/utilities/${utilityId}/histories`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
   orderedJobNotes = {
     /**
      * No description
@@ -5747,11 +6556,11 @@ export class Api<
       data: CreateJobNoteRequestDto,
       params: RequestParams = {}
     ) =>
-      this.request<IdResponse, any>({
+      this.request<CreateJobNoteResponseDto, any>({
         path: `/ordered-job-notes`,
         method: "POST",
         body: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -5766,7 +6575,7 @@ export class Api<
       jobId: string,
       params: RequestParams = {}
     ) =>
-      this.request<JobNoteListResponseDto, any>({
+      this.request<JobNoteResponseDto, any>({
         path: `/ordered-job-notes/${jobId}`,
         method: "GET",
         format: "json",
@@ -6350,6 +7159,210 @@ export class Api<
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+  };
+  googleJobNoteFolder = {
+    /**
+     * No description
+     *
+     * @name CreateGoogleJobNoteFolderHttpControllerPost
+     * @request POST:/google-job-note-folder
+     */
+    createGoogleJobNoteFolderHttpControllerPost: (
+      data: CreateGoogleJobNoteFolderRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/google-job-note-folder`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  nonCountedJobFolder = {
+    /**
+     * No description
+     *
+     * @name FindNonCountedJobFoldersHttpControllerFindNonCountedJobFolders
+     * @summary Find non-counted-job-folder
+     * @request GET:/non-counted-job-folder
+     */
+    findNonCountedJobFoldersHttpControllerFindNonCountedJobFolders: (
+      query: FindNonCountedJobFoldersHttpControllerFindNonCountedJobFoldersParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<JobFolderPaginatedResponseDto, any>({
+        path: `/non-counted-job-folder`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+  };
+  googleSharedDriveCount = {
+    /**
+     * No description
+     *
+     * @name UpdateGoogleSharedDriveCountHttpControllerPatch
+     * @request PATCH:/google-shared-drive-count
+     */
+    updateGoogleSharedDriveCountHttpControllerPatch: (
+      data: UpdateGoogleSharedDriveCountRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/google-shared-drive-count`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  couriers = {
+    /**
+     * No description
+     *
+     * @name CreateCouriersHttpControllerPost
+     * @request POST:/couriers
+     */
+    createCouriersHttpControllerPost: (
+      data: CreateCouriersRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/couriers`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindCouriersPaginatedHttpControllerGet
+     * @request GET:/couriers
+     */
+    findCouriersPaginatedHttpControllerGet: (
+      query: FindCouriersPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<CouriersPaginatedResponseDto, any>({
+        path: `/couriers`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCouriersHttpControllerPatch
+     * @request PATCH:/couriers/{couriersId}
+     */
+    updateCouriersHttpControllerPatch: (
+      couriersId: string,
+      data: UpdateCouriersRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/couriers/${couriersId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeleteCouriersHttpControllerPatch
+     * @request DELETE:/couriers/{couriersId}
+     */
+    deleteCouriersHttpControllerPatch: (
+      couriersId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/couriers/${couriersId}`,
+        method: "DELETE",
+        ...params,
+      }),
+  };
+  trackingNumbers = {
+    /**
+     * No description
+     *
+     * @name CreateTrackingNumbersHttpControllerPost
+     * @request POST:/tracking-numbers
+     */
+    createTrackingNumbersHttpControllerPost: (
+      data: CreateTrackingNumbersRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/tracking-numbers`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindTrackingNumbersPaginatedHttpControllerGet
+     * @request GET:/tracking-numbers
+     */
+    findTrackingNumbersPaginatedHttpControllerGet: (
+      query: FindTrackingNumbersPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<TrackingNumbersPaginatedResponseDto, any>({
+        path: `/tracking-numbers`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateTrackingNumbersHttpControllerPatch
+     * @request PATCH:/tracking-numbers/{trackingNumberId}
+     */
+    updateTrackingNumbersHttpControllerPatch: (
+      trackingNumberId: string,
+      data: UpdateTrackingNumbersRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tracking-numbers/${trackingNumberId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeleteTrackingNumbersHttpControllerPatch
+     * @request DELETE:/tracking-numbers/{trackingNumberId}
+     */
+    deleteTrackingNumbersHttpControllerPatch: (
+      trackingNumberId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/tracking-numbers/${trackingNumberId}`,
+        method: "DELETE",
         ...params,
       }),
   };

@@ -1,12 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import {
-  AriaTimeFieldProps,
-  TimeValue,
-  useLocale,
-  useTimeField,
-} from "react-aria";
+import { AriaTimeFieldProps, TimeValue, useTimeField } from "react-aria";
 import { useTimeFieldState } from "react-stately";
 import { useDateSegment } from "react-aria";
 import { DateFieldState, DateSegment as IDateSegment } from "react-stately";
@@ -38,10 +33,9 @@ function DateSegment({ segment, state }: DateSegmentProps) {
 }
 
 export default function TimeField(props: AriaTimeFieldProps<TimeValue>) {
-  let { locale } = useLocale();
   let state = useTimeFieldState({
     ...props,
-    locale,
+    locale: "en-US",
   });
 
   let ref = useRef<HTMLDivElement | null>(null);

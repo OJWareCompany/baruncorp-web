@@ -201,15 +201,6 @@ function JobSectionWithData({
             });
             return;
           }
-
-          if (!/^\d+$/.test(numberOfWetStamp)) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Number of Wet Stamp should be a number",
-              path: [`numberOfWetStamp`],
-            });
-            return;
-          }
         })
         .superRefine((values, ctx) => {
           const { mailingAddress } = values;
@@ -233,15 +224,6 @@ function JobSectionWithData({
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: "System Size is required",
-                path: ["systemSize"],
-              });
-              return;
-            }
-
-            if (!/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/.test(systemSize)) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "System Size should be a number",
                 path: ["systemSize"],
               });
               return;
@@ -914,7 +896,7 @@ function JobSectionWithData({
                   name="descriptionForOtherServices"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Description for Other Service</FormLabel>
+                      <FormLabel>Description for Other Scope</FormLabel>
                       {otherServicesFields.map((field, index) => (
                         <FormField
                           key={field.id}
@@ -926,7 +908,7 @@ function JobSectionWithData({
                                 <FormControl>
                                   <Input
                                     {...field}
-                                    placeholder={`Other Service ${index + 1}`}
+                                    placeholder={`Other Scope ${index + 1}`}
                                   />
                                 </FormControl>
                                 {index !== 0 && (
@@ -955,7 +937,7 @@ function JobSectionWithData({
                         }}
                         type="button"
                       >
-                        Add Other Service
+                        Add Other Scope
                       </Button>
                     </FormItem>
                   )}

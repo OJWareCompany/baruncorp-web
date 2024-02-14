@@ -38,6 +38,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useAnnualPtosQuery from "@/queries/useAnnualPtosQuery";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 function getYearsArray(startYear: number) {
   const currentYear = new Date().getFullYear();
@@ -54,9 +55,6 @@ const columnHelper =
 const columns = [
   columnHelper.accessor((row) => `${row.userFirstName} ${row.userLastName}`, {
     header: "Name",
-  }),
-  columnHelper.accessor("totalAmount", {
-    header: "Total",
   }),
   columnHelper.accessor(
     (row) =>
@@ -106,6 +104,9 @@ const columns = [
       header: "Unpaid",
     }
   ),
+  columnHelper.accessor("totalAmount", {
+    header: "Total",
+  }),
 ];
 
 const TABLE_NAME = "PTOAnnual";
@@ -115,12 +116,16 @@ export default function PtoAnnualSection() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const targetYearSearchParamName = `${TABLE_NAME}targetYear`;
+  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
+    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
 
@@ -132,18 +137,26 @@ export default function PtoAnnualSection() {
     .min(2018)
     .max(currentYear)
     .safeParse(
-      Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}targetYear`)))
+      Number(searchParams.get(encodeURIComponent(targetYearSearchParamName)))
     );
-
-  const targetYearSearchParam = targetYearSearchParamParseResult.success
+  const targetYearData = targetYearSearchParamParseResult.success
     ? targetYearSearchParamParseResult.data
     : currentYear;
+  const targetYearSearchParam = targetYearSearchParamParseResult.success
+    ? searchParams.get(encodeURIComponent(targetYearSearchParamName))!
+    : String(currentYear);
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pageSizeSearchParamName,
+    pagination,
+  });
 
   const params: FindPtoAnnualPaginatedHttpControllerGetParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      targetYear: String(targetYearSearchParam),
+      targetYear: targetYearSearchParam,
     }),
     [pagination.pageIndex, pagination.pageSize, targetYearSearchParam]
   );
@@ -156,23 +169,7 @@ export default function PtoAnnualSection() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ userId }) => userId,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageIndex`),
-          String(pageIndex)
-        );
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageSize`),
-          String(pageSize)
-        );
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,
@@ -184,15 +181,17 @@ export default function PtoAnnualSection() {
       title="Yearly PTO Tracking"
       action={
         <Select
-          value={String(targetYearSearchParam)}
+          value={String(targetYearData)}
           onValueChange={(newValue) => {
-            const newSearchParams = new URLSearchParams(searchParams);
+            const newSearchParams = new URLSearchParams(
+              searchParams.toString()
+            );
             newSearchParams.set(
-              encodeURIComponent(`${TABLE_NAME}targetYear`),
+              encodeURIComponent(targetYearSearchParamName),
               newValue
             );
             newSearchParams.set(
-              encodeURIComponent(`${TABLE_NAME}pageIndex`),
+              encodeURIComponent(pageIndexSearchParamName),
               "0"
             );
             router.replace(`${pathname}?${newSearchParams.toString()}`, {
@@ -215,11 +214,11 @@ export default function PtoAnnualSection() {
     >
       <div className="space-y-2">
         <div className="rounded-md border">
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
+                  {headerGroup.headers.map((header, index) => (
                     <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
@@ -235,7 +234,7 @@ export default function PtoAnnualSection() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24">
+                  <TableCell colSpan={columns.length}>
                     <div className="flex justify-center">
                       <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
@@ -243,12 +242,7 @@ export default function PtoAnnualSection() {
                 </TableRow>
               ) : table.getRowModel().rows.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
+                  <TableCell colSpan={columns.length}>No results.</TableCell>
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
@@ -256,7 +250,7 @@ export default function PtoAnnualSection() {
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                   >
-                    {row.getVisibleCells().map((cell) => (
+                    {row.getVisibleCells().map((cell, index) => (
                       <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,

@@ -84,19 +84,20 @@ export default function EditCourierDialog({ state, ...dialogProps }: Props) {
         dialogProps.onOpenChange?.(false);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // switch (error.response?.status) {
-        //   case 409:
-        //     if (error.response?.data.errorCode.includes("20204")) {
-        //       form.setError(
-        //         "taskId",
-        //         {
-        //           message: `This task already exists`,
-        //         },
-        //         { shouldFocus: true }
-        //       );
-        //       return;
-        //     }
-        // }
+        switch (error.response?.status) {
+          case 404:
+            if (error.response?.data.errorCode.includes("21202")) {
+              form.setError(
+                "name",
+                {
+                  message: `${values.name} already exists`,
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+        }
+
         if (
           error.response &&
           error.response.data.errorCode.filter((value) => value != null)

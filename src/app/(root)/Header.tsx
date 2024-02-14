@@ -57,10 +57,6 @@ const systemManagementItems: {
     title: "Vendor Invoices",
     href: "/system-management/vendor-invoices",
   },
-  // {
-  //   title: "Payments",
-  //   href: "/system-management/payments",
-  // },
   {
     title: "Positions",
     href: "/system-management/positions",
@@ -77,6 +73,10 @@ const systemManagementItems: {
   //   title: "Task Summary",
   //   href: "/system-management/task-summary",
   // },
+  {
+    title: "Schedule",
+    href: "/system-management/schedule",
+  },
   {
     title: "Couriers",
     href: "/system-management/couriers",

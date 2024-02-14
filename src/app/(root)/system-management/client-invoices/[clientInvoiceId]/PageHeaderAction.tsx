@@ -3,16 +3,22 @@ import { ArrowDownToLine } from "lucide-react";
 import React from "react";
 import InvoiceDocument from "./InvoiceDocument";
 import { Button } from "@/components/ui/button";
-import { InvoiceResponseDto, OrganizationResponseDto } from "@/api/api-spec";
+import {
+  InvoiceResponseDto,
+  OrganizationResponseDto,
+  ServicePaginatedResponseDto,
+} from "@/api/api-spec";
 
 interface Props {
   clientInvoice: InvoiceResponseDto;
   organization: OrganizationResponseDto;
+  services: ServicePaginatedResponseDto;
 }
 
 export default function PageHeaderAction({
   clientInvoice,
   organization,
+  services,
 }: Props) {
   return (
     <PDFDownloadLink
@@ -20,6 +26,7 @@ export default function PageHeaderAction({
         <InvoiceDocument
           clientInvoice={clientInvoice}
           organization={organization}
+          services={services}
         />
       }
       fileName="invoice.pdf"

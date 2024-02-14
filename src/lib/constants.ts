@@ -7,9 +7,9 @@ import {
   LucideIcon,
   MailCheck,
   MailX,
+  Mails,
   PauseCircle,
   PlayCircle,
-  X,
   XCircle,
 } from "lucide-react";
 import { z } from "zod";
@@ -19,7 +19,7 @@ import { ToastProps } from "@/components/ui/toast";
  * Toast
  */
 export const errorToastDescription =
-  "Please try again in a few minutes. If the problem persists, please contact the Barun Corp Manager.";
+  "Please try again in a few minutes. If the problem persists, please contact a Barun Corp Manager.";
 export const defaultErrorToast: ToastProps & { description: string } = {
   title: "Something went wrong",
   description: errorToastDescription,
@@ -29,41 +29,6 @@ export const serverErrorToast: ToastProps & { description: string } = {
   title: "Server error",
   description: errorToastDescription,
   variant: "destructive",
-};
-
-export const orderedServiceStatuses: Record<
-  OrderedServiceStatusEnum,
-  {
-    value: OrderedServiceStatusEnum;
-    Icon: LucideIcon;
-    color: string;
-  }
-> = {
-  "Not Started": {
-    value: "Not Started",
-    Icon: CircleDot,
-    color: "text-neutral-500",
-  },
-  "In Progress": {
-    value: "In Progress",
-    Icon: PlayCircle,
-    color: "text-blue-500",
-  },
-  Completed: {
-    value: "Completed",
-    Icon: CheckCircle2,
-    color: "text-green-500",
-  },
-  Canceled: {
-    value: "Canceled",
-    Icon: XCircle,
-    color: "text-red-500",
-  },
-  "Canceled (Invoice)": {
-    value: "Canceled (Invoice)",
-    Icon: XCircle,
-    color: "text-red-500",
-  },
 };
 
 export const jobStatuses: Record<
@@ -89,6 +54,11 @@ export const jobStatuses: Record<
     Icon: CheckCircle2,
     color: "text-green-500",
   },
+  "On Hold": {
+    value: "On Hold",
+    Icon: PauseCircle,
+    color: "text-yellow-500",
+  },
   Canceled: {
     value: "Canceled",
     Icon: XCircle,
@@ -99,14 +69,84 @@ export const jobStatuses: Record<
     Icon: XCircle,
     color: "text-red-500",
   },
+  "Sent To Client": {
+    value: "Sent To Client",
+    Icon: Mails,
+    color: "text-sky-500",
+  },
+};
+
+export const orderedServiceStatuses: Record<
+  OrderedServiceStatusEnum,
+  {
+    value: OrderedServiceStatusEnum;
+    Icon: LucideIcon;
+    color: string;
+  }
+> = {
+  "Not Started": {
+    value: "Not Started",
+    Icon: CircleDot,
+    color: "text-neutral-500",
+  },
+  "In Progress": {
+    value: "In Progress",
+    Icon: PlayCircle,
+    color: "text-blue-500",
+  },
+  Completed: {
+    value: "Completed",
+    Icon: CheckCircle2,
+    color: "text-green-500",
+  },
   "On Hold": {
     value: "On Hold",
     Icon: PauseCircle,
     color: "text-yellow-500",
   },
-  "Sent To Client": {
-    value: "Sent To Client",
-    Icon: X,
+  Canceled: {
+    value: "Canceled",
+    Icon: XCircle,
+    color: "text-red-500",
+  },
+  "Canceled (Invoice)": {
+    value: "Canceled (Invoice)",
+    Icon: XCircle,
+    color: "text-red-500",
+  },
+};
+
+export const assignedTaskStatuses: Record<
+  AssignedTaskStatusEnum,
+  {
+    value: AssignedTaskStatusEnum;
+    Icon: LucideIcon;
+    color: string;
+  }
+> = {
+  "Not Started": {
+    value: "Not Started",
+    Icon: CircleDot,
+    color: "text-neutral-500",
+  },
+  "In Progress": {
+    value: "In Progress",
+    Icon: PlayCircle,
+    color: "text-blue-500",
+  },
+  Completed: {
+    value: "Completed",
+    Icon: CheckCircle2,
+    color: "text-green-500",
+  },
+  "On Hold": {
+    value: "On Hold",
+    Icon: PauseCircle,
+    color: "text-yellow-500",
+  },
+  Canceled: {
+    value: "Canceled",
+    Icon: XCircle,
     color: "text-red-500",
   },
 };
@@ -401,15 +441,28 @@ export type JobStatusEnum = z.infer<typeof JobStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
-// "Not Started" | "In Progress" | "Canceled" | "Completed" | "Canceled (Invoice)"
+// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled" | "Canceled (Invoice)"
 export const OrderedServiceStatusEnum = z.enum([
   "Not Started",
   "In Progress",
-  "Canceled",
   "Completed",
+  "On Hold",
+  "Canceled",
   "Canceled (Invoice)",
 ]);
 export type OrderedServiceStatusEnum = z.infer<typeof OrderedServiceStatusEnum>;
+
+/* -------------------------------------------------------------------------- */
+
+// "Not Started" | "In Progress" | "Completed" | "On Hold" | "Canceled"
+export const AssignedTaskStatusEnum = z.enum([
+  "Not Started",
+  "In Progress",
+  "Completed",
+  "On Hold",
+  "Canceled",
+]);
+export type AssignedTaskStatusEnum = z.infer<typeof AssignedTaskStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
@@ -511,28 +564,6 @@ export const STRUCTURAL_PE_STAMP_SERVICE_ID =
 export const ESS_STRUCTURAL_PE_STAMP_SERVICE_ID =
   "ab9cc5cf-62e4-4f27-8ffd-97488068f9fa";
 export const PV_DESIGN_SERVICE_ID = "e5d81943-3fef-416d-a85b-addb8be296c0";
-
-/* -------------------------------------------------------------------------- */
-
-export const billingCodes = [
-  { name: "ESS Electrical PE Stamp", code: "E6" },
-  { name: "ESS Structural PE Stamp", code: "S6" },
-  { name: "Electrical Load Calculation", code: "E2" },
-  { name: "Electrical Load Justification Letter", code: "E5" },
-  { name: "Electrical PE Stamp", code: "E3" },
-  { name: "Electrical Post Installed Letter", code: "E4" },
-  { name: "Electrical Wet Stamp", code: "WE" },
-  { name: "FL Statute Letter", code: "FL" },
-  { name: "PV Design", code: "PV" },
-  { name: "Shading Report", code: "SR" },
-  { name: "Special Inspection Form", code: "SI" },
-  { name: "Structural Calculation (Letter)", code: "S3" },
-  { name: "Structural Feasibility", code: "S1" },
-  { name: "Structural PE Stamp", code: "S4" },
-  { name: "Structural Post Installed Letter ", code: "S5" },
-  { name: "Structural Wet Stamp", code: "WS" },
-  { name: "Other", code: "O" },
-];
 
 /* -------------------------------------------------------------------------- */
 

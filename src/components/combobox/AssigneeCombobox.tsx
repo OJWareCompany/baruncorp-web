@@ -103,6 +103,10 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
                                 key={value.id}
                                 value={value.name}
                                 onSelect={() => {
+                                  if (value.id === userId) {
+                                    return;
+                                  }
+
                                   onUserIdChange(value.id);
                                   setOpen(false);
                                 }}

@@ -14,17 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { JobNoteListResponseDto } from "@/api/api-spec";
+import { JobNoteResponseDto } from "@/api/api-spec";
 
-const columnHelper =
-  createColumnHelper<JobNoteListResponseDto["notes"][number]>();
+const columnHelper = createColumnHelper<JobNoteResponseDto["data"][number]>();
 
 const columns = [
   columnHelper.accessor("content", {
     header: "Content",
-  }),
-  columnHelper.accessor("commenterName", {
-    header: "Commenter",
   }),
   columnHelper.accessor("createdAt", {
     header: "Date Created",
@@ -32,15 +28,15 @@ const columns = [
 ];
 
 interface Props {
-  jobNotes: JobNoteListResponseDto;
+  jobNotes: JobNoteResponseDto;
 }
 
 export default function JobNotesTable({ jobNotes }: Props) {
   const table = useReactTable({
-    data: jobNotes.notes,
+    data: jobNotes.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getRowId: ({ jobNoteId }) => jobNoteId,
+    getRowId: ({ id }) => id,
   });
 
   return (

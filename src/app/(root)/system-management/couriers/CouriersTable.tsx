@@ -357,6 +357,7 @@ export default function CouriersTable() {
                   courierId: alertDialogState.courierId,
                 })
                   .then(() => {
+                    toast({ title: "Success" });
                     queryClient.invalidateQueries({
                       queryKey: getCouriersQueryKey({}),
                     });

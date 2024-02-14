@@ -100,7 +100,7 @@ export default function TasksTable({ position }: Props) {
                   });
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="-ml-[13px]">
                 <SelectValue placeholder="Select a property type" />
               </SelectTrigger>
               <SelectContent>

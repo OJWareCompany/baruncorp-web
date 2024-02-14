@@ -1,9 +1,13 @@
 "use client";
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { addDays, format } from "date-fns";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import TasksTable from "./TasksTable";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Sheet,
@@ -22,21 +26,49 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import RowItemsContainer from "@/components/RowItemsContainer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import VendorsToInvoiceCombobox from "@/components/combobox/VendorsToInvoiceCombobox";
+import ServicePeriodMonthByVendorSelect from "@/components/combobox/ServicePeriodMonthByVendorSelect";
+import { TermsEnum, transformStringIntoNullableString } from "@/lib/constants";
+import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Item from "@/components/Item";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import LoadingButton from "@/components/LoadingButton";
+import useJobsForVendorInvoiceQuery from "@/queries/useJobsForVendorInvoiceQuery";
+import CollapsibleSection from "@/components/CollapsibleSection";
+import usePostVendorInvoiceMutation from "@/mutations/usePostVendorInvoiceMutation";
+import { getVendorsToInvoiceQueryKey } from "@/queries/useVendorsToInvoiceQuery";
+import { getVendorInvoicesQueryKey } from "@/queries/useVendorInvoicesQuery";
 
 const formSchema = z.object({
-  organizationId: z
+  vendorId: z.string().trim().min(1, { message: "Vendor is required" }),
+  servicePeriodMonth: z
+    .string()
+    .datetime({ message: "Service Period Month is required" }),
+  invoiceNumber: z
     .string()
     .trim()
-    .min(1, { message: "Organization is required" }),
-  // invoiceDate: z.date({
-  //   required_error: "A date of birth is required.",
-  // }),
-  // terms: TermsEnum,
-  // servicePeriodMonth: z
-  //   .string()
-  //   .datetime({ message: "Service Period Month is required" }),
-  // notesToClient: z.string().trim(),
+    .min(1, { message: "Invoice Number is required" }),
+  invoiceDate: z.date({
+    required_error: "A date of birth is required.",
+  }),
+  terms: TermsEnum,
+  notes: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -49,65 +81,77 @@ export default function NewClientInvoiceSheet() {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      organizationId: "",
-      // invoiceDate: new Date(),
-      // terms: "30",
-      // servicePeriodMonth: "",
-      // notesToClient: "",
+      vendorId: "",
+      servicePeriodMonth: "",
+      invoiceNumber: "",
+      invoiceDate: new Date(),
+      terms: "30",
+      notes: "",
     },
   });
-  const watchOrganizationId = form.watch("organizationId");
-  // const watchInvoiceDate = form.watch("invoiceDate");
-  // const watchTerms = form.watch("terms");
-  // const watchServicePeriodMonth = form.watch("servicePeriodMonth");
+  const watchVendorId = form.watch("vendorId");
+  const watchInvoiceDate = form.watch("invoiceDate");
+  const watchTerms = form.watch("terms");
+  const watchServicePeriodMonth = form.watch("servicePeriodMonth");
 
-  // const { data: jobsToInvoice } = useJobsToInvoiceQuery(
-  //   {
-  //     clientOrganizationId: watchOrganizationId,
-  //     serviceMonth:
-  //       watchServicePeriodMonth !== ""
-  //         ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
-  //         : "",
-  //   },
-  //   true
-  // );
-  // const { mutateAsync } = usePostInvoiceMutation();
-  // const queryClient = useQueryClient();
+  const { data: tasks } = useJobsForVendorInvoiceQuery(
+    {
+      clientOrganizationId: watchVendorId,
+      serviceMonth:
+        watchServicePeriodMonth !== ""
+          ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
+          : "",
+    },
+    true
+  );
+  const { mutateAsync } = usePostVendorInvoiceMutation();
+  const queryClient = useQueryClient();
 
-  // useEffect(() => {
-  //   if (isSubmitSuccessful) {
-  //     form.reset();
-  //     setIsSubmitSuccessful(false);
-  //   }
-  // }, [form, isSubmitSuccessful]);
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      form.reset();
+      setIsSubmitSuccessful(false);
+    }
+  }, [form, isSubmitSuccessful]);
 
   async function onSubmit(values: FieldValues) {
-    // await mutateAsync({
-    //   clientOrganizationId: values.organizationId,
-    //   invoiceDate: values.invoiceDate.toISOString(),
-    //   notesToClient: transformStringIntoNullableString.parse(
-    //     values.notesToClient
-    //   ),
-    //   serviceMonth: format(
-    //     new Date(values.servicePeriodMonth.slice(0, 7)),
-    //     "yyyy-MM"
-    //   ),
-    //   terms: Number(values.terms) as 21 | 30,
-    // })
-    //   .then(() => {
-    //     setIsSubmitSuccessful(true);
-    //     toast({
-    //       title: "Success",
-    //     });
-    //     queryClient.invalidateQueries({
-    //       queryKey: getOrganizationsToInvoiceQueryKey(),
-    //     });
-    //     queryClient.invalidateQueries({
-    //       queryKey: getClientInvoicesQueryKey({}),
-    //     });
-    //     setOpen(false);
-    //   })
-    //   .catch(() => {});
+    await mutateAsync({
+      organizationId: values.vendorId,
+      note: transformStringIntoNullableString.parse(values.notes),
+      terms: Number(values.terms) as 21 | 30,
+      serviceMonth: format(
+        new Date(values.servicePeriodMonth.slice(0, 7)),
+        "yyyy-MM"
+      ),
+      invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
+      invoiceNumber: values.invoiceNumber,
+    })
+      .then(() => {
+        setIsSubmitSuccessful(true);
+        toast({
+          title: "Success",
+        });
+        queryClient.invalidateQueries({
+          queryKey: getVendorsToInvoiceQueryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: getVendorInvoicesQueryKey({}),
+        });
+        setOpen(false);
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
   }
 
   return (
@@ -132,44 +176,59 @@ export default function NewClientInvoiceSheet() {
                 <RowItemsContainer>
                   <FormField
                     control={form.control}
-                    name="organizationId"
+                    name="vendorId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>Organization</FormLabel>
+                        <FormLabel required>Vendor</FormLabel>
                         <FormControl>
                           <VendorsToInvoiceCombobox
                             vendorId={field.value}
                             onVendorIdChange={(vendorId) => {
                               field.onChange(vendorId);
-                              // form.setValue("servicePeriodMonth", "", {
-                              //   shouldValidate: form.formState.isSubmitted,
-                              // });
+                              form.setValue("servicePeriodMonth", "", {
+                                shouldValidate: form.formState.isSubmitted,
+                              });
                             }}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  {/* <FormField
+                  <FormField
                     control={form.control}
                     name="servicePeriodMonth"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel required>Service Period Month</FormLabel>
                         <FormControl>
-                          <ServicePeriodMonthByOrganizationSelect
-                            organizationId={watchOrganizationId}
+                          <ServicePeriodMonthByVendorSelect
+                            vendorId={watchVendorId}
                             servicePeriodMonth={field.value}
                             onServicePeriodMonthChange={field.onChange}
+                            ref={field.ref}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
-                  /> */}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="invoiceNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel required>Invoice Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </RowItemsContainer>
-                {/* <RowItemsContainer>
+                <RowItemsContainer>
                   <FormField
                     control={form.control}
                     name="invoiceDate"
@@ -253,13 +312,13 @@ export default function NewClientInvoiceSheet() {
                       disabled
                     />
                   </Item>
-                </RowItemsContainer> */}
-                {/* <FormField
+                </RowItemsContainer>
+                <FormField
                   control={form.control}
-                  name="notesToClient"
+                  name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes to Client</FormLabel>
+                      <FormLabel>Notes</FormLabel>
                       <FormControl>
                         <Textarea {...field} />
                       </FormControl>
@@ -273,52 +332,15 @@ export default function NewClientInvoiceSheet() {
                   className="w-full"
                 >
                   Submit
-                </LoadingButton> */}
+                </LoadingButton>
               </form>
             </Form>
           </section>
-          {/* {watchOrganizationId !== "" &&
-            watchServicePeriodMonth !== "" &&
-            jobsToInvoice && (
-              <section>
-                <h4 className="h4 mb-2">Jobs</h4>
-                <div className="flex flex-col gap-2">
-                  <RowItemsContainer>
-                    <Item>
-                      <Label>Subtotal</Label>
-                      <AffixInput
-                        prefixElement={
-                          <span className="text-muted-foreground">$</span>
-                        }
-                        value={jobsToInvoice.subtotal}
-                        disabled
-                      />
-                    </Item>
-                    <Item>
-                      <Label>Discount</Label>
-                      <AffixInput
-                        prefixElement={
-                          <span className="text-muted-foreground">$</span>
-                        }
-                        value={jobsToInvoice.discount}
-                        disabled
-                      />
-                    </Item>
-                    <Item>
-                      <Label>Total</Label>
-                      <AffixInput
-                        prefixElement={
-                          <span className="text-muted-foreground">$</span>
-                        }
-                        value={jobsToInvoice.total}
-                        disabled
-                      />
-                    </Item>
-                  </RowItemsContainer>
-                  <JobsTable jobsToInvoice={jobsToInvoice} />
-                </div>
-              </section>
-            )} */}
+          {watchVendorId !== "" && watchServicePeriodMonth !== "" && tasks && (
+            <CollapsibleSection title="Tasks">
+              <TasksTable tasks={tasks} />
+            </CollapsibleSection>
+          )}
         </div>
       </SheetContent>
     </Sheet>

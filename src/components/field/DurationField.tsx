@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pencil } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -56,7 +56,7 @@ export default function DurationField({
       <AffixInput
         suffixElement={<span className="text-muted-foreground">min</span>}
         value={duration ? String(duration) : ""}
-        className="h-9 w-[150px]"
+        className="h-9 w-[150px] -ml-[13px]"
         disabled
       />
     );
@@ -119,7 +119,7 @@ export default function DurationField({
   return (
     <Form {...form}>
       <form
-        className="flex gap-2 w-[150px]"
+        className="flex gap-2 w-[150px] -ml-[13px]"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField
@@ -151,8 +151,17 @@ export default function DurationField({
           className="w-9 h-9 flex-shrink-0"
           type="submit"
           disabled={!form.formState.isDirty}
+          onClick={(event) => {
+            if (form.formState.isSubmitting) {
+              event.preventDefault();
+            }
+          }}
         >
-          <Pencil className="w-4 h-4" />
+          {form.formState.isSubmitting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Pencil className="w-4 h-4" />
+          )}
         </Button>
       </form>
     </Form>

@@ -4,11 +4,11 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { AssignedTaskResponseFields } from "@/api/api-spec";
+import { AssignedTaskResponseDto } from "@/api/api-spec";
 import { jobStatuses } from "@/lib/constants";
 
 interface Props {
-  tasks: AssignedTaskResponseFields[];
+  tasks: AssignedTaskResponseDto[];
 }
 
 export default function TasksBadge({ tasks }: Props) {
@@ -29,7 +29,7 @@ export default function TasksBadge({ tasks }: Props) {
             return (
               <div
                 className="flex items-center pl-2 pr-3 py-1.5 border-t first:border-0"
-                key={task.assignTaskId}
+                key={task.id}
               >
                 {status && (
                   <status.Icon

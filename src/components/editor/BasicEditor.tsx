@@ -5,7 +5,7 @@ import { Editor } from "../plate-ui/editor";
 import { Toolbar } from "../plate-ui/toolbar";
 import { basicEditorPlugins } from "@/lib/plate/plugins";
 
-interface Props extends Pick<PlateProps, "value" | "onChange" | "readOnly"> {
+interface Props extends Pick<PlateProps, "value" | "onChange"> {
   disabled?: boolean;
 }
 

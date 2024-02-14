@@ -36,8 +36,8 @@ let defaultValues: DefaultValues<FieldValues> = {
 };
 if (process.env.NODE_ENV === "development") {
   defaultValues = {
-    email: "ejsvk3284@kakao.com",
-    password: "WkdWkdaos123!",
+    email: "chrisk@baruncorp.com",
+    password: "Test123123!@#",
   };
 }
 

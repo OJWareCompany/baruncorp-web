@@ -8,7 +8,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, X } from "lucide-react";
 import { useMemo } from "react";
 import { AxiosError } from "axios";
-import PaymentDialog from "./PaymentDialog";
 import { InvoiceResponseDto } from "@/api/api-spec";
 import { AffixInput } from "@/components/AffixInput";
 import Item from "@/components/Item";
@@ -235,7 +234,6 @@ export default function PaymentsTable({ clientInvoice }: Props) {
           </TableBody>
         </Table>
       </div>
-      <PaymentDialog />
     </div>
   );
 }

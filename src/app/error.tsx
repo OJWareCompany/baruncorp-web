@@ -9,7 +9,7 @@ export default function NotFound() {
       <p className="mb-5 text-center">
         Please try again in a few minutes.
         <br />
-        If the problem persists, please contact the Barun Corp Manager.
+        If the problem persists, please contact a Barun Corp Manager.
       </p>
       <Button asChild>
         <Link href="/">Return Home</Link>
