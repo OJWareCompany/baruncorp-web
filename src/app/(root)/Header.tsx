@@ -69,10 +69,10 @@ const systemManagementItems: {
     title: "PTO",
     href: "/system-management/pto",
   },
-  // {
-  //   title: "Task Summary",
-  //   href: "/system-management/task-summary",
-  // },
+  {
+    title: "Task Summary",
+    href: "/system-management/task-summary",
+  },
   {
     title: "Schedule",
     href: "/system-management/schedule",
@@ -81,13 +81,13 @@ const systemManagementItems: {
     title: "Couriers",
     href: "/system-management/couriers",
   },
+  {
+    title: "Tracking Numbers",
+    href: "/system-management/tracking-numbers",
+  },
   // {
   //   title: "Utilities",
   //   href: "/system-management/utilities",
-  // },
-  // {
-  //   title: "Tracking Numbers",
-  //   href: "/system-management/tracking-numbers",
   // },
 ];
 

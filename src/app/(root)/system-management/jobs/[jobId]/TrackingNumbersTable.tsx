@@ -116,10 +116,10 @@ function InternalTable({
   const columns = useMemo(
     () => [
       columnHelper.accessor("courierName", {
-        header: "courierName",
+        header: "Courier",
       }),
       columnHelper.accessor("trackingNumber", {
-        header: "trackingNumber",
+        header: "Tracking Number",
         cell: ({ row, getValue }) => (
           <a
             href={row.original.trackingNumberUri}
