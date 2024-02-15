@@ -21,7 +21,13 @@ export default function TasksBadge({ tasks }: Props) {
       <HoverCardTrigger>
         <Badge variant={"outline"}>{tasks.length}</Badge>
       </HoverCardTrigger>
-      <HoverCardContent className="p-0 w-[auto] cursor-default" side="right">
+      <HoverCardContent
+        className="p-0 w-[auto] cursor-default"
+        side="right"
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
         <div>
           {tasks.map((task) => {
             const status = jobStatuses[task.status];

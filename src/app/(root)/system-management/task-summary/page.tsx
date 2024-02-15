@@ -11,7 +11,7 @@ export default function Page() {
           { href: "/system-management/task-summary", name: "Task Summary" },
         ]}
       />
-      <CollapsibleSection title="Overview of Current Tasks In Progress">
+      <CollapsibleSection title="Current Tasks In Progress">
         <InProgressTable />
       </CollapsibleSection>
       <PeriodSection />
