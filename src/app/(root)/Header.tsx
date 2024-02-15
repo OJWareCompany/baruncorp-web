@@ -85,6 +85,10 @@ const systemManagementItems: {
     title: "Tracking Numbers",
     href: "/system-management/tracking-numbers",
   },
+  {
+    title: "Performance Dashboard",
+    href: "/system-management/performance-dashboard",
+  },
   // {
   //   title: "Utilities",
   //   href: "/system-management/utilities",

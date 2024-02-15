@@ -38,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import useAssignedTasksSummaryInProgressQuery from "@/queries/useAssignedTasksSummaryInProgressQuery";
+import NumberOfTasksHoverCard from "@/components/hover-card/NumberOfTasksHoverCard";
 
 const columnHelper =
   createColumnHelper<
@@ -126,6 +127,15 @@ export default function InProgressTable() {
       }),
       columnHelper.accessor("inProgressAssignedTaskCount", {
         header: "# of Tasks In Progress",
+        cell: ({ getValue, row }) => {
+          return (
+            <NumberOfTasksHoverCard
+              count={getValue()}
+              userId={row.original.userId}
+              status={"In Progress"}
+            />
+          );
+        },
       }),
     ];
   }, [

@@ -132,8 +132,19 @@ export default function StatusSectionHeaderAction({ user }: Props) {
                       });
                       toast({ title: "Success" });
                     })
-                    .catch(() => {
-                      // TODO: error handling
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
                     });
                   return;
                 }
@@ -146,8 +157,19 @@ export default function StatusSectionHeaderAction({ user }: Props) {
                       });
                       toast({ title: "Success" });
                     })
-                    .catch(() => {
-                      // TODO: error handling
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
                     });
                   return;
                 }

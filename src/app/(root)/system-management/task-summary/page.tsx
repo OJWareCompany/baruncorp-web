@@ -1,5 +1,4 @@
 import PeriodSection from "./PeriodSection";
-import Test from "./Test";
 import InProgressTable from "./InProgressTable";
 import PageHeader from "@/components/PageHeader";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -16,7 +15,6 @@ export default function Page() {
         <InProgressTable />
       </CollapsibleSection>
       <PeriodSection />
-      <Test />
     </div>
   );
 }

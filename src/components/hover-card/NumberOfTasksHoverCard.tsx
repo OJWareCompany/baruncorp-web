@@ -5,6 +5,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "../ui/hover-card";
+import { Badge } from "../ui/badge";
 import useAssignedTasksSummaryDetailsQuery from "@/queries/useAssignedTasksSummaryDetailsQuery";
 import { AssignedTaskStatusEnum } from "@/lib/constants";
 
@@ -12,18 +13,26 @@ interface Props {
   count: number;
   status?: AssignedTaskStatusEnum;
   userId: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export default function NumberOfTasksHoverCard({
   count,
   status,
   userId,
+  fromDate,
+  toDate,
 }: Props) {
   const [open, setOpen] = useState(false);
   const { data, isLoading } = useAssignedTasksSummaryDetailsQuery({
-    params: { userId, status },
+    params: { userId, status, startedAt: fromDate, endedAt: toDate },
     enabled: open,
   });
+
+  if (count === 0) {
+    return count;
+  }
 
   return (
     <HoverCard
@@ -32,8 +41,8 @@ export default function NumberOfTasksHoverCard({
       open={open}
       onOpenChange={setOpen}
     >
-      <HoverCardTrigger className="underline cursor-pointer">
-        {count}
+      <HoverCardTrigger className="cursor-pointer">
+        <Badge variant={"outline"}>{count}</Badge>
       </HoverCardTrigger>
       <HoverCardContent
         className="w-[auto] max-h-[300px] overflow-y-auto cursor-default p-0"

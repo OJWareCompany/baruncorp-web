@@ -57,7 +57,6 @@ export default function PeriodSection() {
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindAssignedTaskSummaryDonePaginatedHttpControllerGetParams>();
-  console.log("period section");
 
   const userNameSearchParamName = `${TABLE_NAME}userName`;
   const orgNameSearchParamName = `${TABLE_NAME}orgName`;
@@ -180,31 +179,38 @@ export default function PeriodSection() {
               count={getValue()}
               userId={row.original.userId}
               status={"Completed"}
+              fromDate={fromDateSearchParam}
+              toDate={toDateSearchParam}
             />
           );
         },
       }),
       columnHelper.accessor("canceledAssignedTaskCount", {
         header: "# of Tasks Canceled",
-      }),
-      columnHelper.accessor("doneAssignedTaskCount", {
-        header: "# of Tasks",
         cell: ({ getValue, row }) => {
           return (
             <NumberOfTasksHoverCard
               count={getValue()}
               userId={row.original.userId}
+              status={"Canceled"}
+              fromDate={fromDateSearchParam}
+              toDate={toDateSearchParam}
             />
           );
         },
       }),
+      columnHelper.accessor("doneAssignedTaskCount", {
+        header: "# of Tasks",
+      }),
     ];
   }, [
+    fromDateSearchParam,
     orgNameSearchParamName,
     pageIndexSearchParamName,
     params.organizationName,
     params.userName,
     syncedParams,
+    toDateSearchParam,
     userNameSearchParamName,
   ]);
 

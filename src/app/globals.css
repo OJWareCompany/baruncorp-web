@@ -118,3 +118,7 @@
     @apply text-sm text-muted-foreground;
   }
 }
+
+.highcharts-credits {
+  display: none;
+}
