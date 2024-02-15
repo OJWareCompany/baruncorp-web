@@ -4,7 +4,7 @@ import useApi from "@/hook/useApi";
 import { FindUsersHttpControllerGetFindUsersParams } from "@/api/api-spec";
 import { UserStatusEnum } from "@/lib/constants";
 
-const useExcludeInactiveUsersQuery = (organizationId: string) => {
+const useExcludeInactiveUsersQuery = (organizationId?: string) => {
   const api = useApi();
 
   return useQueries({

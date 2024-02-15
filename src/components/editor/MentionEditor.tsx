@@ -5,15 +5,13 @@ import { Editor } from "../plate-ui/editor";
 import { MentionCombobox } from "../plate-ui/mention-combobox";
 import { Toolbar } from "../plate-ui/toolbar";
 import { ToolbarButtons } from "../plate-ui/toolbar-buttons";
-import useUsersQuery from "@/queries/useUsersQuery";
 import { mentionEditorPlugins } from "@/lib/plate/plugins";
+import useExcludeInactiveUsersQuery from "@/queries/useExcludeInactiveUsersQuery";
 
 interface Props extends Pick<PlateProps, "value" | "onChange" | "editorRef"> {}
 
 export default function MentionEditor(props: Props) {
-  const { data } = useUsersQuery({
-    limit: Number.MAX_SAFE_INTEGER,
-  });
+  const { data } = useExcludeInactiveUsersQuery();
 
   return (
     <div className="border rounded-md">
@@ -23,7 +21,7 @@ export default function MentionEditor(props: Props) {
         </Toolbar>
         <Editor focusRing={false} variant={"ghost"} />
         <MentionCombobox<{ email: string }>
-          items={data?.items.map((value) => ({
+          items={data?.map((value) => ({
             key: value.id,
             text: `${value.fullName}`,
             data: { email: value.email },
