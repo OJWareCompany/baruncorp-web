@@ -69,12 +69,12 @@ export default function PeriodSection() {
   const [syncedParams, setSyncedParams] =
     useState<FindAssignedTaskSummaryDonePaginatedHttpControllerGetParams>();
 
-  const userNameSearchParamName = `${TABLE_NAME}userName`;
-  const orgNameSearchParamName = `${TABLE_NAME}orgName`;
-  const fromDateSearchParamName = `${TABLE_NAME}fromDate`;
-  const toDateSearchParamName = `${TABLE_NAME}toDate`;
-  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+  const userNameSearchParamName = `${TABLE_NAME}UserName`;
+  const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
+  const fromDateSearchParamName = `${TABLE_NAME}FromDate`;
+  const toDateSearchParamName = `${TABLE_NAME}ToDate`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))

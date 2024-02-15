@@ -82,8 +82,8 @@ const columns = [
 export default function TrackingNumbersTable() {
   const searchParams = useSearchParams();
 
-  const pageIndexSearchParamName = "pageIndex";
-  const pageSizeSearchParamName = "pageSize";
+  const pageIndexSearchParamName = "PageIndex";
+  const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))

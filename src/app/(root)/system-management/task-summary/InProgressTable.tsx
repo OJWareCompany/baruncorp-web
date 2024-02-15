@@ -62,10 +62,10 @@ export default function InProgressTable() {
   const [syncedParams, setSyncedParams] =
     useState<FindAssignedTaskSummaryInProgressPaginatedHttpControllerGetParams>();
 
-  const userNameSearchParamName = `${TABLE_NAME}userName`;
-  const orgNameSearchParamName = `${TABLE_NAME}orgName`;
-  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+  const userNameSearchParamName = `${TABLE_NAME}UserName`;
+  const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))

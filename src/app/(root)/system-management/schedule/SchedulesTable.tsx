@@ -1,6 +1,6 @@
 "use client";
 import { Time, parseTime } from "@internationalized/date";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -41,6 +41,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import SearchHeader from "@/components/table/SearchHeader";
 
 const times = [
   "00:00",
@@ -72,76 +73,18 @@ const times = [
 const columnHelper =
   createColumnHelper<SchedulePaginatedResponseDto["items"][number]>();
 
-const columns = [
-  columnHelper.accessor("name", {
-    header: "Name",
-    cell: ({ getValue }) => (
-      <div className="line-clamp-2 w-[88px]">{getValue()}</div>
-    ),
-  }),
-  columnHelper.accessor("position", {
-    header: "Position",
-    cell: ({ getValue }) => (
-      <div className="line-clamp-2 w-[88px]">{getValue()}</div>
-    ),
-  }),
-  ...times.map((value, index) =>
-    columnHelper.display({
-      id: value,
-      header: () => <div className="flex px-4 border-l leading-6">{value}</div>,
-      cell: ({ row }) => {
-        const hour = index;
-        const hourTime = new Time(hour);
-        const isBetween =
-          row.original.schedules.findIndex(
-            (schedule) =>
-              hourTime.compare(
-                parseTime(schedule.start).set({
-                  minute: 0,
-                  second: 0,
-                  millisecond: 0,
-                })
-              ) >= 0 && hourTime.compare(parseTime(schedule.end)) <= 0
-          ) !== -1;
-
-        if (!isBetween) {
-          return <div className="flex w-[120px]"></div>;
-        }
-
-        return (
-          <div className="flex w-[120px]">
-            {Array.from({ length: 60 }, (_, index) => index).map((minute) => {
-              const time = new Time(hour, minute);
-              const isTarget =
-                row.original.schedules.findIndex(
-                  (schedule) =>
-                    time.compare(parseTime(schedule.start)) >= 0 &&
-                    time.compare(parseTime(schedule.end)) <= 0
-                ) !== -1;
-
-              return (
-                <div
-                  key={minute}
-                  className={cn("w-[2px] h-[72px]", isTarget && "bg-muted")}
-                ></div>
-              );
-            })}
-          </div>
-        );
-      },
-    })
-  ),
-];
-
 interface InternalTableProps {
   modifySchedule: (initialValue: ScheduleResponseDto) => void;
 }
 
 function InternalTable({ modifySchedule }: InternalTableProps) {
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindSchedulePaginatedHttpControllerGetParams>();
 
-  const pageIndexSearchParamName = "pageIndex";
-  const pageSizeSearchParamName = "pageSize";
+  const userNameSearchParamName = "UserName";
+  const pageIndexSearchParamName = "PageIndex";
+  const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
@@ -150,6 +93,8 @@ function InternalTable({ modifySchedule }: InternalTableProps) {
       ? Number(searchParams.get(pageSizeSearchParamName))
       : 5,
   };
+
+  const nameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -161,11 +106,103 @@ function InternalTable({ modifySchedule }: InternalTableProps) {
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
+      userName: nameSearchParam,
     }),
-    [pagination.pageIndex, pagination.pageSize]
+    [nameSearchParam, pagination.pageIndex, pagination.pageSize]
   );
 
-  const { data, isLoading } = useSchedulesQuery(params, true);
+  const { data, isLoading, isFetching } = useSchedulesQuery(params, true);
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("name", {
+        header: () => (
+          <div className="flex w-[88px]">
+            <SearchHeader
+              buttonText="Name"
+              searchParamName={userNameSearchParamName}
+              pageIndexSearchParamName={pageIndexSearchParamName}
+              isLoading={
+                syncedParams != null &&
+                params.userName !== syncedParams.userName
+              }
+            />
+          </div>
+        ),
+        cell: ({ getValue }) => (
+          <div className="line-clamp-2 w-[88px]">{getValue()}</div>
+        ),
+      }),
+      columnHelper.accessor("position", {
+        header: () => <div className="flex w-[88px]">Position</div>,
+        cell: ({ getValue }) => (
+          <div className="line-clamp-2 w-[88px]">{getValue()}</div>
+        ),
+      }),
+      ...times.map((value, index) =>
+        columnHelper.display({
+          id: value,
+          header: () => (
+            <div className="flex px-4 border-l leading-6 w-[120px]">
+              {value}
+            </div>
+          ),
+          cell: ({ row }) => {
+            const hour = index;
+            const hourTime = new Time(hour);
+            const isBetween =
+              row.original.schedules.findIndex(
+                (schedule) =>
+                  hourTime.compare(
+                    parseTime(schedule.start).set({
+                      minute: 0,
+                      second: 0,
+                      millisecond: 0,
+                    })
+                  ) >= 0 && hourTime.compare(parseTime(schedule.end)) <= 0
+              ) !== -1;
+
+            if (!isBetween) {
+              return <div className="flex w-[120px]"></div>;
+            }
+
+            return (
+              <div className="flex w-[120px]">
+                {Array.from({ length: 60 }, (_, index) => index).map(
+                  (minute) => {
+                    const time = new Time(hour, minute);
+                    const isTarget =
+                      row.original.schedules.findIndex(
+                        (schedule) =>
+                          time.compare(parseTime(schedule.start)) >= 0 &&
+                          time.compare(parseTime(schedule.end)) <= 0
+                      ) !== -1;
+
+                    return (
+                      <div
+                        key={minute}
+                        className={cn(
+                          "w-[2px] h-[72px]",
+                          isTarget && "bg-muted"
+                        )}
+                      ></div>
+                    );
+                  }
+                )}
+              </div>
+            );
+          },
+        })
+      ),
+    ],
+    [params.userName, syncedParams]
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],

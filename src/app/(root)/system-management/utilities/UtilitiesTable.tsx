@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -24,10 +24,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams,
-  OrganizationPaginatedResponseDto,
-} from "@/api/api-spec";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -35,30 +31,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
-import SearchHeader from "@/components/table/SearchHeader";
-import EnumHeader from "@/components/table/EnumHeader";
 import {
-  YesOrNoEnum,
-  transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
-} from "@/lib/constants";
+  FindJobPaginatedHttpControllerFindJobParams,
+  UtilityPaginatedResponseDto,
+} from "@/api/api-spec";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import useUtilitiesQuery from "@/queries/useUtilitiesQuery";
+import { STATES_KV_OBJ } from "@/lib/constants";
+import { Badge } from "@/components/ui/badge";
 
 const columnHelper =
-  createColumnHelper<OrganizationPaginatedResponseDto["items"][number]>();
+  createColumnHelper<UtilityPaginatedResponseDto["items"][number]>();
 
-export default function OrganizationsTable() {
+const columns = [
+  columnHelper.accessor("name", {
+    header: "Name",
+  }),
+  columnHelper.accessor("stateAbbreviations", {
+    header: "States",
+    cell: ({ getValue }) => (
+      <div className="flex flex-wrap gap-1">
+        {getValue().map((value) => (
+          <Badge variant={"outline"} key={value}>
+            {STATES_KV_OBJ[value]}
+          </Badge>
+        ))}
+      </div>
+    ),
+  }),
+];
+
+export default function UtilitiesTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [syncedParams, setSyncedParams] =
-    useState<FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams>();
 
-  const emailSearchParamName = "Email";
-  const orgNameSearchParamName = "OrgName";
-  const addressSearchParamName = "Address";
-  const phoneNumberSearchParamName = "PhoneNumber";
-  const vendorSearchParamName = "Vendor";
   const pageIndexSearchParamName = "PageIndex";
   const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
@@ -69,17 +75,6 @@ export default function OrganizationsTable() {
       ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
-  const addressSearchParam = searchParams.get(addressSearchParamName) ?? "";
-  const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
-  const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
-  const phoneNumberSearchParam =
-    searchParams.get(phoneNumberSearchParamName) ?? "";
-  const vendorSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get(vendorSearchParamName)
-  );
-  const vendorSearchParam = vendorSearchParamParseResult.success
-    ? vendorSearchParamParseResult.data
-    : "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -87,136 +82,15 @@ export default function OrganizationsTable() {
     pagination,
   });
 
-  const params: FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams =
-    useMemo(
-      () => ({
-        page: pagination.pageIndex + 1,
-        limit: pagination.pageSize,
-        fullAddress: addressSearchParam,
-        name: orgNameSearchParam,
-        phoneNumber: phoneNumberSearchParam,
-        email: emailSearchParam,
-        isVendor:
-          transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
-            vendorSearchParam
-          ),
-      }),
-      [
-        addressSearchParam,
-        emailSearchParam,
-        orgNameSearchParam,
-        pagination.pageIndex,
-        pagination.pageSize,
-        phoneNumberSearchParam,
-        vendorSearchParam,
-      ]
-    );
+  const params: FindJobPaginatedHttpControllerFindJobParams = useMemo(
+    () => ({
+      page: pagination.pageIndex + 1,
+      limit: pagination.pageSize,
+    }),
+    [pagination.pageIndex, pagination.pageSize]
+  );
 
-  const { data, isLoading, isFetching } = useOrganizationsQuery(params, true);
-
-  useEffect(() => {
-    if (!isFetching) {
-      setSyncedParams(params);
-    }
-  }, [isFetching, params]);
-
-  const columns = useMemo(() => {
-    return [
-      columnHelper.accessor("name", {
-        header: () => (
-          <SearchHeader
-            buttonText="Name"
-            searchParamName={orgNameSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null && params.name !== syncedParams.name
-            }
-          />
-        ),
-      }),
-      columnHelper.accessor("fullAddress", {
-        header: () => (
-          <SearchHeader
-            buttonText="Address"
-            searchParamName={addressSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null &&
-              params.fullAddress !== syncedParams.fullAddress
-            }
-          />
-        ),
-      }),
-      columnHelper.accessor("invoiceRecipientEmail", {
-        header: () => (
-          <SearchHeader
-            buttonText="Email Address to Receive Invoice"
-            searchParamName={emailSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null && params.email !== syncedParams.email
-            }
-          />
-        ),
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return value;
-        },
-      }),
-      columnHelper.accessor("phoneNumber", {
-        header: () => (
-          <SearchHeader
-            buttonText="Phone Number"
-            searchParamName={phoneNumberSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null &&
-              params.phoneNumber !== syncedParams.phoneNumber
-            }
-          />
-        ),
-        cell: ({ getValue }) => {
-          const value = getValue();
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return value;
-        },
-      }),
-      columnHelper.accessor("isVendor", {
-        header: () => (
-          <EnumHeader
-            buttonText="Vendor"
-            searchParamName={vendorSearchParam}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null && params.isVendor !== syncedParams.isVendor
-            }
-          />
-        ),
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
-      }),
-      columnHelper.accessor("isDelinquent", {
-        header: "Delinquent",
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
-      }),
-    ];
-  }, [
-    params.email,
-    params.fullAddress,
-    params.isVendor,
-    params.name,
-    params.phoneNumber,
-    syncedParams,
-    vendorSearchParam,
-  ]);
+  const { data, isLoading } = useUtilitiesQuery(params, true);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -275,7 +149,7 @@ export default function OrganizationsTable() {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
-                    router.push(`/system-management/organizations/${row.id}`);
+                    router.push(`/system-management/utilities/${row.id}`);
                   }}
                   className="cursor-pointer"
                 >

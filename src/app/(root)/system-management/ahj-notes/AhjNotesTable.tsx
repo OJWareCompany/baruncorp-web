@@ -49,10 +49,10 @@ export default function AhjNotesTable() {
   const [syncedParams, setSyncedParams] =
     useState<GeographyControllerGetFindNotesParams>();
 
-  const nameSearchParamName = "name";
-  const fullNameSearchParamName = "fullName";
-  const pageIndexSearchParamName = "pageIndex";
-  const pageSizeSearchParamName = "pageSize";
+  const nameSearchParamName = "Name";
+  const fullNameSearchParamName = "FullName";
+  const pageIndexSearchParamName = "PageIndex";
+  const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))

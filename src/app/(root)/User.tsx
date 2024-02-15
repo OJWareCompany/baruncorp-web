@@ -1,8 +1,10 @@
 "use client";
-import { Building, LogOut, Palmtree, User2 } from "lucide-react";
+import { Building, Clock, LogOut, Palmtree, User2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { formatInTimeZone } from "date-fns-tz";
 import { useToast } from "@/components/ui/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
 import {
@@ -22,12 +24,14 @@ import usePostUserHandsDownMutation from "@/mutations/usePostUserHandsDownMutati
 import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
 
 export default function User() {
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const { data: user, isSuccess: isProfileQuerySuccess } = useProfileQuery();
   const { data: handStatus } = useHandsStatusQuery();
   const { mutateAsync: postUserHandsDownMutateAsync } =
     usePostUserHandsDownMutation();
   const queryClient = useQueryClient();
+  const [date, setDate] = useState<Date>();
 
   const handleSignOutButtonClick = () => {
     if (handStatus != null && handStatus.status) {
@@ -43,12 +47,27 @@ export default function User() {
     toast({ title: "Sign-out success" });
   };
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setDate(new Date());
+    }, 1000);
+
+    return () => {
+      setDate(undefined);
+      clearInterval(timer);
+    };
+  }, [open]);
+
   if (!isProfileQuerySuccess) {
     return <div className="h-10 w-10 rounded-full bg-muted"></div>;
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant={"ghost"} className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
@@ -68,6 +87,17 @@ export default function User() {
               {user.email}
             </span>
           </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="font-normal flex items-center">
+          <Clock className="mr-2 h-4 w-4" />
+          {date == null ? (
+            <div className="h-[20px] w-[164px] animate-pulse bg-muted rounded-md" />
+          ) : (
+            <span>
+              {formatInTimeZone(date, "America/New_York", "MM-dd-yyyy, pp")}
+            </span>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

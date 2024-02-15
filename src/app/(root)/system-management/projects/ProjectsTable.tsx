@@ -54,13 +54,13 @@ export default function ProjectsTable() {
   const [syncedParams, setSyncedParams] =
     useState<FindProjectsHttpControllerFindUsersParams>();
 
-  const addressSearchParamName = "address";
-  const orgNameSearchParamName = "orgName";
-  const projectNumberSearchParamName = "projectNumber";
-  const propertyOwnerSearchParamName = "propertyOwner";
-  const propertyTypeSearchParamName = "propertyType";
-  const pageIndexSearchParamName = "pageIndex";
-  const pageSizeSearchParamName = "pageSize";
+  const addressSearchParamName = "Address";
+  const orgNameSearchParamName = "OrgName";
+  const projectNumberSearchParamName = "ProjectNumber";
+  const propertyOwnerSearchParamName = "PropertyOwner";
+  const propertyTypeSearchParamName = "PropertyType";
+  const pageIndexSearchParamName = "PageIndex";
+  const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))

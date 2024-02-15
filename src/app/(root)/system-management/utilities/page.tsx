@@ -1,4 +1,5 @@
 import NewUtilitySheet from "./NewUtilitySheet";
+import UtilitiesTable from "./UtilitiesTable";
 import PageHeader from "@/components/PageHeader";
 
 export default function Page() {
@@ -8,6 +9,7 @@ export default function Page() {
         items={[{ href: "/system-management/utilities", name: "Utilities" }]}
         action={<NewUtilitySheet />}
       />
+      <UtilitiesTable />
     </div>
   );
 }

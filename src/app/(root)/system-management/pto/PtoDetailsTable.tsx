@@ -65,9 +65,9 @@ export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindPtoDetailPaginatedHttpControllerGetParams>();
 
-  const userNameSearchParamName = `${TABLE_NAME}userName`;
-  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+  const userNameSearchParamName = `${TABLE_NAME}UserName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))

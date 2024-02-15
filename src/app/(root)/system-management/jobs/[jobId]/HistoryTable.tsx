@@ -107,8 +107,8 @@ interface Props {
 export default function HistoryTable({ job }: Props) {
   const searchParams = useSearchParams();
 
-  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)

@@ -39,8 +39,13 @@ import {
 import { Button } from "@/components/ui/button";
 import useUsersQuery from "@/queries/useUsersQuery";
 import SearchHeader from "@/components/table/SearchHeader";
-import { userStatuses } from "@/lib/constants";
+import {
+  UserStatusEnum,
+  transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum,
+  userStatuses,
+} from "@/lib/constants";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import EnumHeader from "@/components/table/EnumHeader";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -55,10 +60,11 @@ export default function UsersTable({ organization }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindUsersHttpControllerGetFindUsersParams>();
 
-  const emailSearchParamName = "email";
-  const userNameSearchParamName = "userName";
-  const pageIndexSearchParamName = "pageIndex";
-  const pageSizeSearchParamName = "pageSize";
+  const emailSearchParamName = "Email";
+  const userNameSearchParamName = "UserName";
+  const statusSearchParamName = "Status";
+  const pageIndexSearchParamName = "PageIndex";
+  const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
@@ -69,6 +75,12 @@ export default function UsersTable({ organization }: Props) {
   };
   const userNameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
   const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
+  const statusSearchParamParseResult = UserStatusEnum.safeParse(
+    searchParams.get(statusSearchParamName)
+  );
+  const statusSearchParam = statusSearchParamParseResult.success
+    ? statusSearchParamParseResult.data
+    : "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -83,13 +95,18 @@ export default function UsersTable({ organization }: Props) {
       organizationId: organization.id,
       userName: userNameSearchParam,
       email: emailSearchParam,
+      status:
+        transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum.parse(
+          statusSearchParam
+        ),
     }),
     [
-      emailSearchParam,
-      userNameSearchParam,
-      organization.id,
       pagination.pageIndex,
       pagination.pageSize,
+      organization.id,
+      userNameSearchParam,
+      emailSearchParam,
+      statusSearchParam,
     ]
   );
 
@@ -140,7 +157,17 @@ export default function UsersTable({ organization }: Props) {
         },
       }),
       columnHelper.accessor("status", {
-        header: "Status",
+        header: () => (
+          <EnumHeader
+            buttonText="Status"
+            searchParamName={statusSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={UserStatusEnum}
+            isLoading={
+              syncedParams != null && params.status !== syncedParams.status
+            }
+          />
+        ),
         cell: ({ getValue }) => {
           const value = getValue();
           const status = userStatuses[value];
@@ -165,7 +192,7 @@ export default function UsersTable({ organization }: Props) {
         },
       }),
     ],
-    [params.email, params.userName, syncedParams]
+    [params.email, params.status, params.userName, syncedParams]
   );
 
   const table = useReactTable({

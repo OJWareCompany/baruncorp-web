@@ -116,9 +116,9 @@ export default function PtoAnnualSection() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const targetYearSearchParamName = `${TABLE_NAME}targetYear`;
-  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+  const targetYearSearchParamName = `${TABLE_NAME}TargetYear`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))

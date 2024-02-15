@@ -68,13 +68,13 @@ export default function JobsTable({ type }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindMyJobPaginatedHttpControllerFindJobParams>();
 
-  const jobStatusSearchParamName = `${type}jobStatus`;
-  const jobNameSearchParamName = `${type}jobName`;
-  const propertyTypeSearchParamName = `${type}propertyType`;
-  const mountingTypeSearchParamName = `${type}mountingType`;
-  const expediteSearchParamName = `${type}expedite`;
-  const pageIndexSearchParamName = `${type}pageIndex`;
-  const pageSizeSearchParamName = `${type}pageSize`;
+  const jobStatusSearchParamName = `${type}JobStatus`;
+  const jobNameSearchParamName = `${type}JobName`;
+  const propertyTypeSearchParamName = `${type}PropertyType`;
+  const mountingTypeSearchParamName = `${type}MountingType`;
+  const expediteSearchParamName = `${type}Expedite`;
+  const pageIndexSearchParamName = `${type}PageIndex`;
+  const pageSizeSearchParamName = `${type}PageSize`;
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))

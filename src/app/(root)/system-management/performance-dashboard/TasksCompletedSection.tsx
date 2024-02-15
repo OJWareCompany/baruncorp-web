@@ -106,10 +106,10 @@ export default function TasksCompletedSection() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const pageIndexSearchParamName = `pageIndex`;
-  const pageSizeSearchParamName = `pageSize`;
-  const fromDateSearchParamName = `fromDate`;
-  const toDateSearchParamName = `toDate`;
+  const pageIndexSearchParamName = `PageIndex`;
+  const pageSizeSearchParamName = `PageSize`;
+  const fromDateSearchParamName = `FromDate`;
+  const toDateSearchParamName = `ToDate`;
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)

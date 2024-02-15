@@ -5,7 +5,9 @@ import { z } from "zod";
 import { Value } from "@udecode/plate-common";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Test from "./Test";
+import { AxiosError } from "axios";
+import { useQueryClient } from "@tanstack/react-query";
+import States from "@/components/States";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -26,18 +28,21 @@ import {
 import LoadingButton from "@/components/LoadingButton";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { Input } from "@/components/ui/input";
+import usePostUtilityMutation from "@/mutations/usePostUtilityMutation";
+import { getUtilitiesQueryKey } from "@/queries/useUtilitiesQuery";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
-  states: z.string().array(),
+  states: z.string().array().min(1, { message: "States is required" }),
   notes: z.custom<Value>(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
 
 export default function NewUtilitySheet() {
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -53,14 +58,36 @@ export default function NewUtilitySheet() {
     },
   });
 
+  const { mutateAsync } = usePostUtilityMutation();
+
   async function onSubmit(values: FieldValues) {
-    // if(isEmptyValue(values.information))
-    // const textContent = values.information;
-    // if (textContent === "") {
-    //   form.setError("information", { message: "Information is required" });
-    //   focusEditor(editorRef.current);
-    //   return;
-    // }
+    await mutateAsync({
+      name: values.name,
+      stateAbbreviations: values.states,
+      notes: JSON.stringify(values.notes),
+    })
+      .then(() => {
+        toast({ title: "Success" });
+        queryClient.invalidateQueries({
+          queryKey: getUtilitiesQueryKey({}),
+        });
+        setOpen(false);
+        form.reset();
+      })
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        // TODO: 이름 중복 예외 처리
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
   }
 
   return (
@@ -97,11 +124,11 @@ export default function NewUtilitySheet() {
                 <FormItem>
                   <FormLabel required>States</FormLabel>
                   <FormControl>
-                    <Test
+                    <States
                       abbreviations={field.value}
                       onAbbreviationsChange={field.onChange}
+                      ref={field.ref}
                     />
-                    {/* <Input {...field} /> */}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,11 +141,7 @@ export default function NewUtilitySheet() {
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <BasicEditor
-                      {...field}
-                      //
-                      // editorRef={editorRef}
-                    />
+                    <BasicEditor {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -57,9 +57,9 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindOverdueInvoicePaginatedHttpControllerGetParams>();
 
-  const orgNameSearchParamName = `${TABLE_NAME}orgName`;
-  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+  const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))

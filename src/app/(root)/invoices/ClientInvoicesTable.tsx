@@ -71,10 +71,10 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindInvoicePaginatedHttpControllerGetParams>();
 
-  const orgNameSearchParamName = `${TABLE_NAME}${type}orgName`;
-  const invoiceStatusSearchParamName = `${TABLE_NAME}${type}invoiceStatus`;
-  const pageIndexSearchParamName = `${TABLE_NAME}${type}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}${type}pageSize`;
+  const orgNameSearchParamName = `${TABLE_NAME}${type}OrgName`;
+  const invoiceStatusSearchParamName = `${TABLE_NAME}${type}InvoiceStatus`;
+  const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}${type}PageSize`;
 
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))

@@ -22,14 +22,6 @@ const systemManagementItems: {
   href: string;
 }[] = [
   {
-    title: "Organizations",
-    href: "/system-management/organizations",
-  },
-  {
-    title: "Users",
-    href: "/system-management/users",
-  },
-  {
     title: "Projects",
     href: "/system-management/projects",
   },
@@ -46,16 +38,12 @@ const systemManagementItems: {
     href: "/system-management/tasks",
   },
   {
-    title: "AHJ Notes",
-    href: "/system-management/ahj-notes",
+    title: "Organizations",
+    href: "/system-management/organizations",
   },
   {
-    title: "Client Invoices",
-    href: "/system-management/client-invoices",
-  },
-  {
-    title: "Vendor Invoices",
-    href: "/system-management/vendor-invoices",
+    title: "Users",
+    href: "/system-management/users",
   },
   {
     title: "Positions",
@@ -70,12 +58,24 @@ const systemManagementItems: {
     href: "/system-management/pto",
   },
   {
-    title: "Task Summary",
-    href: "/system-management/task-summary",
-  },
-  {
     title: "Schedule",
     href: "/system-management/schedule",
+  },
+  {
+    title: "AHJ Notes",
+    href: "/system-management/ahj-notes",
+  },
+  {
+    title: "Client Invoices",
+    href: "/system-management/client-invoices",
+  },
+  {
+    title: "Vendor Invoices",
+    href: "/system-management/vendor-invoices",
+  },
+  {
+    title: "Utilities",
+    href: "/system-management/utilities",
   },
   {
     title: "Couriers",
@@ -86,13 +86,13 @@ const systemManagementItems: {
     href: "/system-management/tracking-numbers",
   },
   {
+    title: "Task Summary",
+    href: "/system-management/task-summary",
+  },
+  {
     title: "Performance Dashboard",
     href: "/system-management/performance-dashboard",
   },
-  // {
-  //   title: "Utilities",
-  //   href: "/system-management/utilities",
-  // },
 ];
 
 const ListItem = React.forwardRef<

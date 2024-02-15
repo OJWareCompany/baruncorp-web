@@ -84,10 +84,10 @@ export default function PtosTable() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const userNameSearchParamName = `${TABLE_NAME}userName`;
-  const paidSearchParamName = `${TABLE_NAME}paid`;
-  const pageIndexSearchParamName = `${TABLE_NAME}pageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}pageSize`;
+  const userNameSearchParamName = `${TABLE_NAME}UserName`;
+  const paidSearchParamName = `${TABLE_NAME}Paid`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))

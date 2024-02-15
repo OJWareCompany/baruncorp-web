@@ -473,6 +473,11 @@ export const UserStatusEnum = z.enum([
   "Inactive",
   "Active",
 ]);
+// "Sign Up Not Completed" | "Invitation Sent" | "Inactive" | "Active" | ""
+export const UserStatusEnumWithEmptyString = UserStatusEnum.or(z.literal(""));
+// "Sign Up Not Completed" | "Invitation Sent" | "Inactive" | "Active" | "" => "Sign Up Not Completed" | "Invitation Sent" | "Inactive" | "Active" | null
+export const transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum =
+  UserStatusEnumWithEmptyString.transform((v) => (v === "" ? null : v));
 export type UserStatusEnum = z.infer<typeof UserStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
@@ -906,3 +911,60 @@ export const STATES = [
     abbreviation: "WY",
   },
 ];
+
+export const STATES_KV_OBJ: {
+  [index: string]: string;
+} = {
+  AL: "ALABAMA",
+  AK: "ALASKA",
+  AZ: "ARIZONA",
+  AR: "ARKANSAS",
+  CA: "CALIFORNIA",
+  CO: "COLORADO",
+  CT: "CONNECTICUT",
+  DE: "DELAWARE",
+  DC: "DISTRICT OF COLUMBIA",
+  FL: "FLORIDA",
+  GA: "GEORGIA",
+  HI: "HAWAII",
+  ID: "IDAHO",
+  IL: "ILLINOIS",
+  IN: "INDIANA",
+  IA: "IOWA",
+  KS: "KANSAS",
+  KY: "KENTUCKY",
+  LA: "LOUISIANA",
+  ME: "MAINE",
+  MD: "MARYLAND",
+  MA: "MASSACHUSETTS",
+  MI: "MICHIGAN",
+  MN: "MINNESOTA",
+  MS: "MISSISSIPPI",
+  MO: "MISSOURI",
+  MT: "MONTANA",
+  NE: "NEBRASKA",
+  NV: "NEVADA",
+  NH: "NEW HAMPSHIRE",
+  NJ: "NEW JERSEY",
+  NM: "NEW MEXICO",
+  NY: "NEW YORK",
+  NC: "NORTH CAROLINA",
+  ND: "NORTH DAKOTA",
+  OH: "OHIO",
+  OK: "OKLAHOMA",
+  OR: "OREGON",
+  PA: "PENNSYLVANIA",
+  PR: "PUERTO RICO",
+  RI: "RHODE ISLAND",
+  SC: "SOUTH CAROLINA",
+  SD: "SOUTH DAKOTA",
+  TN: "TENNESSEE",
+  TX: "TEXAS",
+  UT: "UTAH",
+  VT: "VERMONT",
+  VA: "VIRGINIA",
+  WA: "WASHINGTON",
+  WV: "WEST VIRGINIA",
+  WI: "WISCONSIN",
+  WY: "WYOMING",
+};

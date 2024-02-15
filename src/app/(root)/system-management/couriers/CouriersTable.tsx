@@ -74,8 +74,8 @@ interface InternalTableProps {
 function InternalTable({ modifyCourier, deleteCourier }: InternalTableProps) {
   const searchParams = useSearchParams();
 
-  const pageIndexSearchParamName = "pageIndex";
-  const pageSizeSearchParamName = "pageSize";
+  const pageIndexSearchParamName = "PageIndex";
+  const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))

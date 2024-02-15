@@ -39,7 +39,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import useUsersQuery from "@/queries/useUsersQuery";
 import {
   BARUNCORP_ORGANIZATION_ID,
+  UserStatusEnum,
   YesOrNoEnum,
+  transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
   userStatuses,
 } from "@/lib/constants";
@@ -57,12 +59,13 @@ export default function UsersTable() {
   const [syncedParams, setSyncedParams] =
     useState<FindUsersHttpControllerGetFindUsersParams>();
 
-  const emailSearchParamName = "email";
-  const userNameSearchParamName = "userName";
-  const orgNameSearchParamName = "orgName";
-  const contractorSearchParamName = "contractor";
-  const pageIndexSearchParamName = "pageIndex";
-  const pageSizeSearchParamName = "pageSize";
+  const emailSearchParamName = "Email";
+  const userNameSearchParamName = "UserName";
+  const orgNameSearchParamName = "OrgName";
+  const contractorSearchParamName = "Contractor";
+  const statusSearchParamName = "Status";
+  const pageIndexSearchParamName = "PageIndex";
+  const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
@@ -79,6 +82,12 @@ export default function UsersTable() {
   );
   const contractorSearchParam = contractorSearchParamParseResult.success
     ? contractorSearchParamParseResult.data
+    : "";
+  const statusSearchParamParseResult = UserStatusEnum.safeParse(
+    searchParams.get(statusSearchParamName)
+  );
+  const statusSearchParam = statusSearchParamParseResult.success
+    ? statusSearchParamParseResult.data
     : "";
 
   const onPaginationChange = useOnPaginationChange({
@@ -98,6 +107,10 @@ export default function UsersTable() {
           contractorSearchParam
         ),
       organizationName: orgNameSearchParam,
+      status:
+        transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum.parse(
+          statusSearchParam
+        ),
     }),
     [
       contractorSearchParam,
@@ -106,6 +119,7 @@ export default function UsersTable() {
       orgNameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
+      statusSearchParam,
     ]
   );
 
@@ -190,7 +204,17 @@ export default function UsersTable() {
         },
       }),
       columnHelper.accessor("status", {
-        header: "Status",
+        header: () => (
+          <EnumHeader
+            buttonText="Status"
+            searchParamName={statusSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={UserStatusEnum}
+            isLoading={
+              syncedParams != null && params.status !== syncedParams.status
+            }
+          />
+        ),
         cell: ({ getValue }) => {
           const value = getValue();
           const status = userStatuses[value];
