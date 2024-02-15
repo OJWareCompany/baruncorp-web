@@ -10,13 +10,13 @@ interface Variables extends UpdatePtoPayRequestDto {
 const usePatchPtoPayMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ ptoId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ ptoId, ...reqData }) => {
       return api.ptos
         .updatePtoPayHttpControllerPatch(ptoId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchPtoPayMutation;

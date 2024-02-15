@@ -9,10 +9,12 @@ const useDeleteTrackingNumberMutation = () => {
     void,
     AxiosError<ErrorResponseData>,
     { trackingNumberId: string }
-  >(({ trackingNumberId }) => {
-    return api.trackingNumbers
-      .deleteTrackingNumbersHttpControllerPatch(trackingNumberId)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: ({ trackingNumberId }) => {
+      return api.trackingNumbers
+        .deleteTrackingNumbersHttpControllerPatch(trackingNumberId)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

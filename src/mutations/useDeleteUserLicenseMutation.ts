@@ -10,10 +10,12 @@ const useDeleteUserLicenseMutation = () => {
     void,
     AxiosError<ErrorResponseData>,
     RevokeUserLicenseHttpControllerPostParams
-  >((reqData) => {
-    return api.licenses
-      .revokeUserLicenseHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.licenses
+        .revokeUserLicenseHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

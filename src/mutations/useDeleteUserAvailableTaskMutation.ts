@@ -9,10 +9,12 @@ const useDeleteUserAvailableTaskMutation = () => {
     void,
     AxiosError<ErrorResponseData>,
     { userId: string; taskId: string }
-  >((reqData) => {
-    return api.users
-      .deleteAvailableTaskHttpControllerDelete(reqData.userId, reqData.taskId)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.users
+        .deleteAvailableTaskHttpControllerDelete(reqData.userId, reqData.taskId)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

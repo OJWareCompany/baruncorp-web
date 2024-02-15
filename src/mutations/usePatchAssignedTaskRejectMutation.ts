@@ -10,10 +10,12 @@ const usePatchAssignedTaskRejectMutation = (assignedTaskId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     RejectAssignedTaskRequestDto
-  >((reqData) => {
-    return api.assignedTasks
-      .rejectAssignedTaskHttpControllerPatch(assignedTaskId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.assignedTasks
+        .rejectAssignedTaskHttpControllerPatch(assignedTaskId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

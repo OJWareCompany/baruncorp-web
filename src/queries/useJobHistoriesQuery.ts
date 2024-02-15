@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import {
@@ -12,7 +12,7 @@ export const getJobHistoriesQueryKey = (
 
 const useJobHistoriesQuery = (
   params: FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams,
-  keepPreviousData?: boolean
+  isKeepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -27,7 +27,7 @@ const useJobHistoriesQuery = (
           params
         )
         .then(({ data }) => data),
-    keepPreviousData,
+    placeholderData: isKeepPreviousData ? keepPreviousData : undefined,
   });
 };
 

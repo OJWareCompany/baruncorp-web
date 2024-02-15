@@ -176,7 +176,7 @@ export default function TasksCompletedSection() {
 
   const { data, isLoading } = useAssignedTasksSummaryTotalQuery({
     params,
-    keepPreviousData: true,
+    isKeepPreviousData: true,
   });
 
   const table = useReactTable({

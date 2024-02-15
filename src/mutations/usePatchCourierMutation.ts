@@ -10,13 +10,13 @@ interface Variables extends UpdateCouriersRequestDto {
 const usePatchCourierMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ courierId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ courierId, ...reqData }) => {
       return api.couriers
         .updateCouriersHttpControllerPatch(courierId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchCourierMutation;

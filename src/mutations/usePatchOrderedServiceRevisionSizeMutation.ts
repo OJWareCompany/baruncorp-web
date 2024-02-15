@@ -12,10 +12,12 @@ const usePatchOrderedServiceRevisionSizeMutation = (
     void,
     AxiosError<ErrorResponseData>,
     UpdateRevisionSizeRequestDto
-  >((reqData) => {
-    return api.orderedServices
-      .updateRevisionSizeHttpControllerPatch(orderedServiceId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.orderedServices
+        .updateRevisionSizeHttpControllerPatch(orderedServiceId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

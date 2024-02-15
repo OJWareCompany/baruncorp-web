@@ -10,10 +10,12 @@ const usePatchPtoPerTenureMutation = (ptoTenurePolicyId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdatePtoTenurePolicyRequestDto
-  >((reqData) => {
-    return api.ptoTenurePolicies
-      .updatePtoTenurePolicyHttpControllerPatch(ptoTenurePolicyId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.ptoTenurePolicies
+        .updatePtoTenurePolicyHttpControllerPatch(ptoTenurePolicyId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

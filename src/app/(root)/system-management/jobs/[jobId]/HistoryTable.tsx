@@ -72,10 +72,14 @@ const columns = [
   }),
   columnHelper.accessor("beforeValue", {
     header: "Before",
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
       const value = getValue();
       if (value == null) {
         return <p className="text-muted-foreground">-</p>;
+      }
+
+      if (row.original.isDateType) {
+        return formatInEST(value);
       }
 
       return value;
@@ -83,10 +87,14 @@ const columns = [
   }),
   columnHelper.accessor("afterValue", {
     header: "After",
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
       const value = getValue();
       if (value == null) {
         return <p className="text-muted-foreground">-</p>;
+      }
+
+      if (row.original.isDateType) {
+        return formatInEST(value);
       }
 
       return value;

@@ -10,10 +10,12 @@ const usePatchPositionMutation = (positionId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdatePositionRequestDto
-  >((reqData) => {
-    return api.positions
-      .updatePositionHttpControllerPatch(positionId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.positions
+        .updatePositionHttpControllerPatch(positionId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

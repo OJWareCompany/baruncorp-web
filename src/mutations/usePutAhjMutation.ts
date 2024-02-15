@@ -10,10 +10,12 @@ const usePutAhjMutation = (geoId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateAhjNoteRequestDto
-  >((reqData) => {
-    return api.geography
-      .geographyControllerPutUpdateNote(geoId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.geography
+        .geographyControllerPutUpdateNote(geoId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

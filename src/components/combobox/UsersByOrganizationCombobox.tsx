@@ -18,7 +18,7 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import useUsersQuery from "@/queries/useUsersQuery";
+import useExcludeInactiveUsersQuery from "@/queries/useExcludeInactiveUsersQuery";
 
 interface Props {
   organizationId: string;
@@ -36,14 +36,11 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [sheetOpen, setSheetOpen] = useState(false);
 
-    const { data: users, isLoading: isUsersQueryLoading } = useUsersQuery({
-      organizationId,
-      limit: Number.MAX_SAFE_INTEGER,
-    });
+    const { data, isPending } = useExcludeInactiveUsersQuery(organizationId);
 
     const placeholderText = "Select an user";
 
-    if (isUsersQueryLoading || users == null) {
+    if (data == null || isPending) {
       return (
         <Button
           variant="outline"
@@ -58,7 +55,7 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
     }
 
     const isSelected = userId !== "";
-    const isEmpty = users.items.length === 0;
+    const isEmpty = data.length === 0;
 
     return (
       <>
@@ -73,7 +70,7 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
               <span className="flex-1 text-start">
                 {!isSelected
                   ? placeholderText
-                  : users.items.find((item) => item.id === userId)?.fullName ??
+                  : data.find((item) => item.id === userId)?.fullName ??
                     placeholderText}
               </span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -129,7 +126,7 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
                   </CommandEmpty>
                   <CommandList>
                     <CommandGroup>
-                      {users.items.map((user) => (
+                      {data.map((user) => (
                         <CommandItem
                           key={user.id}
                           value={`${user.fullName} ${user.email}`}

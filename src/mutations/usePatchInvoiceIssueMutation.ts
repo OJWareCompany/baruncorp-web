@@ -10,10 +10,12 @@ const usePatchInvoiceIssueMutation = (invoiceId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     IssueInvoiceRequestDto
-  >((reqData) => {
-    return api.invoices
-      .issueInvoiceHttpControllerPatch(invoiceId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.invoices
+        .issueInvoiceHttpControllerPatch(invoiceId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

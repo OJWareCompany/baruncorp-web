@@ -166,27 +166,27 @@ export default function AlertDialogDataProvider({ children }: Props) {
   const { toast } = useToast();
   const {
     mutateAsync: patchJobStatusMutateAsync,
-    isLoading: isPatchJobStatusMutateLoading,
+    isPending: isPatchJobStatusMutateLoading,
   } = usePatchJobStatusMutation();
   const {
     mutateAsync: patchJobSendMutateAsync,
-    isLoading: isPatchJobSendMutateLoading,
+    isPending: isPatchJobSendMutateLoading,
   } = usePatchJobSendMutation();
   const {
     mutateAsync: patchOrderedServiceStatusMutateAsync,
-    isLoading: isPatchOrderedServiceStatusMutateLoading,
+    isPending: isPatchOrderedServiceStatusMutateLoading,
   } = usePatchOrderedServiceStatusMutation();
   const {
     mutateAsync: patchAssignMutateAsync,
-    isLoading: isPatchAssignMutateLoading,
+    isPending: isPatchAssignMutateLoading,
   } = usePatchAssignMutation();
   const {
     mutateAsync: patchAssignedTaskCompleteMutateAsync,
-    isLoading: isPatchAssignedTaskCompleteMutateLoading,
+    isPending: isPatchAssignedTaskCompleteMutateLoading,
   } = usePatchAssignedTaskCompleteMutation();
   const {
     mutateAsync: patchAssignedTaskUnassignMutateAsync,
-    isLoading: isPatchAssignedTaskUnassignMutateLoading,
+    isPending: isPatchAssignedTaskUnassignMutateLoading,
   } = usePatchAssignedTaskUnassignMutation();
 
   const isLoading =

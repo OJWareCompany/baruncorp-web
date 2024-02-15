@@ -131,7 +131,7 @@ export default function PtosTable() {
 
   const { data, isLoading, isFetching } = usePtosQuery({
     params,
-    keepPreviousData: true,
+    isKeepPreviousData: true,
   });
   const { mutateAsync } = usePatchPtoPayMutation();
 

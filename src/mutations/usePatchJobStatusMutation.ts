@@ -10,13 +10,13 @@ interface Variables extends UpdateJobStatusRequestDto {
 const usePatchJobStatusMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ jobId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ jobId, ...reqData }) => {
       return api.jobs
         .updateJobStatusHttpControllerUpdateJob(jobId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchJobStatusMutation;

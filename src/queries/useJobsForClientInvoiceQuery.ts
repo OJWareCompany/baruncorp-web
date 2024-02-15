@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import {
@@ -12,7 +12,7 @@ export const getJobsForClientInvoiceQueryKey = (
 
 const useJobsForClientInvoiceQuery = (
   params: FindJobToInvoiceHttpControllerFindJobParams,
-  keepPreviousData?: boolean
+  isKeepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -23,7 +23,7 @@ const useJobsForClientInvoiceQuery = (
         .findJobToInvoiceHttpControllerFindJob(params)
         .then(({ data }) => data),
     enabled: params.clientOrganizationId !== "" && params.serviceMonth !== "",
-    keepPreviousData,
+    placeholderData: isKeepPreviousData ? keepPreviousData : undefined,
   });
 };
 

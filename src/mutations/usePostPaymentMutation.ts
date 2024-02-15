@@ -10,11 +10,13 @@ const usePostPaymentMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreatePaymentRequestDto
-  >((reqData) =>
-    api.payments
-      .createPaymentHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData)
-  );
+  >({
+    mutationFn: (reqData) => {
+      return api.payments
+        .createPaymentHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
+  });
 };
 
 export default usePostPaymentMutation;

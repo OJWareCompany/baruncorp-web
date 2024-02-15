@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import {
@@ -12,7 +12,7 @@ export const getVendorInvoicesQueryKey = (
 
 const useVendorInvoicesQuery = (
   params: FindVendorInvoicePaginatedHttpControllerGetParams,
-  keepPreviousData?: boolean
+  isKeepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -25,7 +25,7 @@ const useVendorInvoicesQuery = (
       api.vendorInvoices
         .findVendorInvoicePaginatedHttpControllerGet(params)
         .then(({ data }) => data),
-    keepPreviousData,
+    placeholderData: isKeepPreviousData ? keepPreviousData : undefined,
   });
 };
 

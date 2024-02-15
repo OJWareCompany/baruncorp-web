@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { ClientNoteDetailResponseDto } from "@/api/api-spec";
@@ -11,7 +11,7 @@ export const getClientNoteQueryKey = (clientNoteId: string) => [
 
 const useClientNoteQuery = (
   clientNoteId: string,
-  keepPreviousData?: boolean
+  isKeepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -22,7 +22,7 @@ const useClientNoteQuery = (
         .findClientNoteHttpControllerGet(clientNoteId)
         .then(({ data }) => data),
     enabled: clientNoteId !== "",
-    keepPreviousData,
+    placeholderData: isKeepPreviousData ? keepPreviousData : undefined,
   });
 };
 

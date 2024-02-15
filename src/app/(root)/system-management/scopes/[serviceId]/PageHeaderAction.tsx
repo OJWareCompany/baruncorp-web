@@ -22,7 +22,7 @@ interface Props {
 export default function PageHeaderAction({ scopeId }: Props) {
   const [open, setOpen] = useState(false);
 
-  const { mutateAsync, isLoading } = useDeleteScopeMutation(scopeId);
+  const { mutateAsync, isPending } = useDeleteScopeMutation(scopeId);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -47,7 +47,7 @@ export default function PageHeaderAction({ scopeId }: Props) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <LoadingButton
-              isLoading={isLoading}
+              isLoading={isPending}
               onClick={() => {
                 mutateAsync()
                   .then(() => {

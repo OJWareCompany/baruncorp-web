@@ -10,10 +10,12 @@ const usePatchPtoTotalMutation = (ptoId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdatePtoTotalRequestDto
-  >((reqData) => {
-    return api.ptos
-      .updatePtoTotalHttpControllerPatch(ptoId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.ptos
+        .updatePtoTotalHttpControllerPatch(ptoId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

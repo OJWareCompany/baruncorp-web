@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import {
@@ -12,7 +12,7 @@ export const getAnnualPtosQueryKey = (
 
 const useAnnualPtosQuery = (
   params: FindPtoAnnualPaginatedHttpControllerGetParams,
-  keepPreviousData?: boolean
+  isKeepPreviousData?: boolean
 ) => {
   const api = useApi();
 
@@ -23,7 +23,7 @@ const useAnnualPtosQuery = (
         api.ptos
           .findPtoAnnualPaginatedHttpControllerGet(params)
           .then(({ data }) => data),
-      keepPreviousData,
+      placeholderData: isKeepPreviousData ? keepPreviousData : undefined,
     }
   );
 };

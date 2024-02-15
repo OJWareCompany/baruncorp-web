@@ -10,10 +10,12 @@ const usePostUserMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateUserRequestDto
-  >((reqData) => {
-    return api.users
-      .createUserHttpContollerCreateUnregisteredUser(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.users
+        .createUserHttpContollerCreateUnregisteredUser(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

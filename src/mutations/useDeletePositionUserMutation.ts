@@ -11,10 +11,12 @@ const useDeletePositionUserMutation = (positionId: string) => {
     {
       userId: string;
     }
-  >((reqData) => {
-    return api.positions
-      .deletePositionWorkerHttpControllerDelete(positionId, reqData.userId)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.positions
+        .deletePositionWorkerHttpControllerDelete(positionId, reqData.userId)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

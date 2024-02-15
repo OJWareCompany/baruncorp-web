@@ -10,10 +10,12 @@ const usePostProjectMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateProjectRequestDto
-  >((reqData) => {
-    return api.projects
-      .createProjectHttpControllerPostCreateProejct(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.projects
+        .createProjectHttpControllerPostCreateProejct(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

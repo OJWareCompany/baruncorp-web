@@ -10,10 +10,12 @@ const usePatchServiceMutation = (serviceId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateServiceRequestDto
-  >((reqData) => {
-    return api.services
-      .updateServiceHttpControllerPatch(serviceId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.services
+        .updateServiceHttpControllerPatch(serviceId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

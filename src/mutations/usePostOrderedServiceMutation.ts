@@ -10,10 +10,12 @@ const usePostOrderedServiceMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateOrderedServiceRequestDto
-  >((reqData) => {
-    return api.orderedServices
-      .createOrderedServiceHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.orderedServices
+        .createOrderedServiceHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

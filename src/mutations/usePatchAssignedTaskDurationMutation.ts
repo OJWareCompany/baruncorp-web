@@ -10,10 +10,12 @@ const usePatchAssignedTaskDurationMutation = (assignedTaskId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateTaskDurationRequestDto
-  >((reqData) => {
-    return api.assignedTasks
-      .updateTaskDurationHttpControllerPatch(assignedTaskId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.assignedTasks
+        .updateTaskDurationHttpControllerPatch(assignedTaskId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

@@ -7,10 +7,12 @@ const usePatchProfileByUserIdMutation = (userId: string) => {
   const api = useApi();
 
   return useMutation<void, AxiosError<ErrorResponseData>, UpdateUserRequestDto>(
-    (reqData) => {
-      return api.users
-        .usersControllerPatchUpdateUserByUserId(userId, reqData)
-        .then(({ data: resData }) => resData);
+    {
+      mutationFn: (reqData) => {
+        return api.users
+          .usersControllerPatchUpdateUserByUserId(userId, reqData)
+          .then(({ data: resData }) => resData);
+      },
     }
   );
 };

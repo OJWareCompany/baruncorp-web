@@ -10,15 +10,15 @@ interface Variables extends AddPositionWorkerRequestDto {
 const usePostUserPositionMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    (reqData) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: (reqData) => {
       return api.positions
         .addPositionWorkerHttpControllerPost(reqData.positionId, {
           userId: reqData.userId,
         })
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePostUserPositionMutation;

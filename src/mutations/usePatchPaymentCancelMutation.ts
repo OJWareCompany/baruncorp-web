@@ -11,10 +11,12 @@ const usePatchPaymentCancelMutation = () => {
     {
       paymentId: string;
     }
-  >((reqData) => {
-    return api.payments
-      .cancelPaymentHttpControllerPatch(reqData.paymentId)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.payments
+        .cancelPaymentHttpControllerPatch(reqData.paymentId)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

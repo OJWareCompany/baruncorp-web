@@ -10,10 +10,12 @@ const usePostPositionTaskMutation = (positionId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     AddPositionTaskRequestDto
-  >((reqData) => {
-    return api.positions
-      .addPositionTaskHttpControllerPost(positionId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.positions
+        .addPositionTaskHttpControllerPost(positionId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

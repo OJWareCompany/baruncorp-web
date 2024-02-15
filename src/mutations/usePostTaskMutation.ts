@@ -10,10 +10,12 @@ const usePostTaskMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateTaskRequestDto
-  >((reqData) => {
-    return api.tasks
-      .createTaskHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.tasks
+        .createTaskHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

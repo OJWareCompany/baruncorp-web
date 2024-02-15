@@ -10,10 +10,12 @@ const usePatchAssignedTaskManualCostMutation = (assignedTaskId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateTaskCostRequestDto
-  >((reqData) => {
-    return api.assignedTasks
-      .updateTaskCostHttpControllerPatch(assignedTaskId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.assignedTasks
+        .updateTaskCostHttpControllerPatch(assignedTaskId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

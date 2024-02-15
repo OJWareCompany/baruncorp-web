@@ -10,10 +10,12 @@ const usePostPrerequisiteTaskMutation = (taskId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     AddPrerequisiteTaskRequestDto
-  >((reqData) => {
-    return api.tasks
-      .addPrerequisiteTaskHttpControllerPost(taskId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.tasks
+        .addPrerequisiteTaskHttpControllerPost(taskId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

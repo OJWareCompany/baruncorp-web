@@ -10,10 +10,12 @@ const usePostPositionMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreatePositionRequestDto
-  >((reqData) => {
-    return api.positions
-      .createPositionHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.positions
+        .createPositionHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

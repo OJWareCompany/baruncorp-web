@@ -10,10 +10,12 @@ const usePatchUtilityNoteMutation = (utilityId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateUtilityRequestDto
-  >((reqData) => {
-    return api.utilities
-      .updateUtilityHttpControllerPatch(utilityId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.utilities
+        .updateUtilityHttpControllerPatch(utilityId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

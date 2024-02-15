@@ -9,10 +9,12 @@ const useDeleteCourierMutation = () => {
     void,
     AxiosError<ErrorResponseData>,
     { courierId: string }
-  >(({ courierId }) => {
-    return api.couriers
-      .deleteCouriersHttpControllerPatch(courierId)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: ({ courierId }) => {
+      return api.couriers
+        .deleteCouriersHttpControllerPatch(courierId)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

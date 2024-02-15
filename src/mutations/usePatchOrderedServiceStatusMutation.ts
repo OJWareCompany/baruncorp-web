@@ -10,13 +10,13 @@ interface Variables extends UpdateOrderedScopeStatusRequestDto {
 const usePatchOrderedServiceStatusMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ orderedServiceId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ orderedServiceId, ...reqData }) => {
       return api.orderedServices
         .updateOrderedScopeStatusHttpControllerPatch(orderedServiceId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchOrderedServiceStatusMutation;

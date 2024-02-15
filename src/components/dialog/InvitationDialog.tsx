@@ -28,7 +28,7 @@ export default function InvitationDialog({
 }: Props) {
   const {
     mutateAsync: postInvitationsMutateAsync,
-    isLoading: isPostInvitationMutationLoading,
+    isPending: isPostInvitationMutationLoading,
   } = usePostInvitationsMutation();
   const { toast } = useToast();
 

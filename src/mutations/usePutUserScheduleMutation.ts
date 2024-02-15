@@ -10,13 +10,13 @@ interface Variables extends PutScheduleRequestDto {
 const usePutUserScheduleMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ userId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ userId, ...reqData }) => {
       return api.users
         .putScheduleHttpControllerPut(userId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePutUserScheduleMutation;

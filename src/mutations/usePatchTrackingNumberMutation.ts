@@ -10,13 +10,13 @@ interface Variables extends UpdateTrackingNumbersRequestDto {
 const usePatchTrackingNumberMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ trackingNumberId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ trackingNumberId, ...reqData }) => {
       return api.trackingNumbers
         .updateTrackingNumbersHttpControllerPatch(trackingNumberId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchTrackingNumberMutation;

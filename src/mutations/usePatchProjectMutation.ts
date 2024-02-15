@@ -10,10 +10,12 @@ const usePatchProjectMutation = (projectId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateProjectRequestDto
-  >((reqData) => {
-    return api.projects
-      .updateProjectHttpControllerUpdate(projectId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.projects
+        .updateProjectHttpControllerUpdate(projectId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

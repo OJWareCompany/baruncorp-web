@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { useState } from "react";
 
-interface Varaibles {
+interface Variables {
   files: File[];
   jobNoteNumber: number; // 동근님이 데이터 타입 어떻게 만드는지 봐야함. 일단은 number로 정의
   jobNotesFolderId: string;
@@ -40,39 +40,41 @@ const useUploadJobNoteFilesMutation = () => {
   const mutationResult = useMutation<
     AxiosResponse<void> | void,
     AxiosError<FileServerErrorResponseData>,
-    Varaibles
-  >((varaibles: Varaibles) => {
-    const formData = new FormData();
-    for (const file of varaibles.files) {
-      formData.append("files", file);
-    }
-    formData.append("jobNoteNumber", String(varaibles.jobNoteNumber));
-    formData.append("jobNotesFolderId", varaibles.jobNotesFolderId);
-    formData.append("jobNoteId", varaibles.jobNoteId);
+    Variables
+  >({
+    mutationFn: (variables: Variables) => {
+      const formData = new FormData();
+      for (const file of variables.files) {
+        formData.append("files", file);
+      }
+      formData.append("jobNoteNumber", String(variables.jobNoteNumber));
+      formData.append("jobNotesFolderId", variables.jobNotesFolderId);
+      formData.append("jobNoteId", variables.jobNoteId);
 
-    const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobNoteFiles`;
-    return axios
-      .post<ResponseData>(url, formData, {
-        onUploadProgress: (axiosProgressEvent) => {
+      const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobNoteFiles`;
+      return axios
+        .post<ResponseData>(url, formData, {
+          onUploadProgress: (axiosProgressEvent) => {
+            console.log(
+              "Upload progress:",
+              (axiosProgressEvent?.progress ?? 0) * 100
+            );
+            setProgressState({
+              value: (axiosProgressEvent?.progress ?? 0) * 100,
+              error: false,
+            });
+          },
+        })
+        .then(() => {
           console.log(
-            "Upload progress:",
-            (axiosProgressEvent?.progress ?? 0) * 100
+            "upload JobNoteFiles to completed to file server. Upload to Google Drive still needs some time"
           );
-          setProgressState({
-            value: (axiosProgressEvent?.progress ?? 0) * 100,
-            error: false,
-          });
-        },
-      })
-      .then(() => {
-        console.log(
-          "upload JobNoteFiles to completed to file server. Upload to Google Drive still needs some time"
-        );
-      })
-      .catch((error) => {
-        setProgressState({ value: 100, error: true });
-        throw error;
-      });
+        })
+        .catch((error) => {
+          setProgressState({ value: 100, error: true });
+          throw error;
+        });
+    },
   });
 
   return { mutationResult, progressState };

@@ -10,10 +10,12 @@ const usePostTrackingNumberMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateTrackingNumbersRequestDto
-  >((reqData) => {
-    return api.trackingNumbers
-      .createTrackingNumbersHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.trackingNumbers
+        .createTrackingNumbersHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

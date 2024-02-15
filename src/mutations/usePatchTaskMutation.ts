@@ -7,10 +7,12 @@ const usePatchTaskMutation = (taskId: string) => {
   const api = useApi();
 
   return useMutation<void, AxiosError<ErrorResponseData>, UpdateTaskRequestDto>(
-    (reqData) => {
-      return api.tasks
-        .updateTaskHttpControllerPatch(taskId, reqData)
-        .then(({ data: resData }) => resData);
+    {
+      mutationFn: (reqData) => {
+        return api.tasks
+          .updateTaskHttpControllerPatch(taskId, reqData)
+          .then(({ data: resData }) => resData);
+      },
     }
   );
 };

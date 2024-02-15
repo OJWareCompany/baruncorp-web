@@ -10,8 +10,8 @@ interface Variables extends UpdatePositionTaskAutoAssignmentTypeRequestDto {
 const usePatchPositionTaskMutation = (positionId: string) => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    (reqData) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: (reqData) => {
       return api.positions
         .updatePositionTaskAutoAssignmentTypeHttpControllerPatch(
           positionId,
@@ -21,8 +21,8 @@ const usePatchPositionTaskMutation = (positionId: string) => {
           }
         )
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchPositionTaskMutation;

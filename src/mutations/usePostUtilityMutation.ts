@@ -10,11 +10,13 @@ const usePostUtilityMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateUtilityRequestDto
-  >((reqData) =>
-    api.utilities
-      .createUtilityHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData)
-  );
+  >({
+    mutationFn: (reqData) => {
+      return api.utilities
+        .createUtilityHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
+  });
 };
 
 export default usePostUtilityMutation;

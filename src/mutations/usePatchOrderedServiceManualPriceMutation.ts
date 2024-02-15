@@ -12,10 +12,12 @@ const usePatchOrderedServiceManualPriceMutation = (
     void,
     AxiosError<ErrorResponseData>,
     UpdateManualPriceRequestDto
-  >((reqData) => {
-    return api.orderedServices
-      .updateManualPriceHttpControllerPatch(orderedServiceId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.orderedServices
+        .updateManualPriceHttpControllerPatch(orderedServiceId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

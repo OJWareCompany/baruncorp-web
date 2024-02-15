@@ -9,13 +9,13 @@ interface Variables {
 const usePatchAssignedTaskUnassignMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ assignedTaskId }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ assignedTaskId }) => {
       return api.assignedTasks
         .unassignAssignedTaskHttpControllerPatch(assignedTaskId)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchAssignedTaskUnassignMutation;

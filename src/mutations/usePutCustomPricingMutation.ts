@@ -16,10 +16,16 @@ const usePutCustomPricingMutation = ({
     void,
     AxiosError<ErrorResponseData>,
     UpdateCustomPricingRequestDto
-  >((reqData) => {
-    return api.customPricings
-      .updateCustomPricingHttpControllerPut(organizationId, serviceId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.customPricings
+        .updateCustomPricingHttpControllerPut(
+          organizationId,
+          serviceId,
+          reqData
+        )
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

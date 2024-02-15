@@ -11,16 +11,18 @@ const useDeletePrerequisiteTaskMutation = (taskId: string) => {
     {
       prerequisiteTaskId: string;
     }
-  >((reqData) => {
-    return (
-      api.tasks
-        // TODO: 중복 제거
-        .deletePrerequisiteTaskHttpControllerDelete(
-          taskId,
-          reqData.prerequisiteTaskId
-        )
-        .then(({ data: resData }) => resData)
-    );
+  >({
+    mutationFn: (reqData) => {
+      return (
+        api.tasks
+          // TODO: 중복 제거
+          .deletePrerequisiteTaskHttpControllerDelete(
+            taskId,
+            reqData.prerequisiteTaskId
+          )
+          .then(({ data: resData }) => resData)
+      );
+    },
   });
 };
 

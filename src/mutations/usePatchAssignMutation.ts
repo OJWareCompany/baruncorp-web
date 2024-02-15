@@ -10,13 +10,13 @@ interface Variables extends AssignTaskRequestDto {
 const usePatchAssignMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ assignedTaskId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ assignedTaskId, ...reqData }) => {
       return api.assignedTasks
         .assignTaskHttpControllerPatch(assignedTaskId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchAssignMutation;

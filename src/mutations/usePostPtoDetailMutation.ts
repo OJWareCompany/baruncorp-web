@@ -10,11 +10,13 @@ const usePostPtoDetailMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreatePtoDetailRequestDto
-  >((reqData) =>
-    api.ptos
-      .createPtoDetailHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData)
-  );
+  >({
+    mutationFn: (reqData) => {
+      return api.ptos
+        .createPtoDetailHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
+  });
 };
 
 export default usePostPtoDetailMutation;

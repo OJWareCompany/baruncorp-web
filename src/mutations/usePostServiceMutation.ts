@@ -10,10 +10,12 @@ const usePostServiceMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateServiceRequestDto
-  >((reqData) => {
-    return api.services
-      .createServiceHttpControllerPostCreateService(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.services
+        .createServiceHttpControllerPostCreateService(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

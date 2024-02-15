@@ -10,10 +10,12 @@ const usePatchTaskPositionOrderMutation = (taskId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdatePositionOrderRequestDto
-  >((reqData) => {
-    return api.tasks
-      .updatePositionOrderHttpControllerPatch(taskId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.tasks
+        .updatePositionOrderHttpControllerPatch(taskId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

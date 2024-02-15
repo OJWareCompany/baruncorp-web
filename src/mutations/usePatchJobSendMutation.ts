@@ -9,13 +9,13 @@ interface Variables {
 const usePatchJobSendMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ jobId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ jobId, ...reqData }) => {
       return api.jobs
         .sendDeliverablesHttpControllerUpdateJob(jobId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchJobSendMutation;

@@ -10,10 +10,12 @@ const usePostJobMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateJobRequestDto
-  >((reqData) => {
-    return api.jobs
-      .createJobHttpControllerCreateJob(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.jobs
+        .createJobHttpControllerCreateJob(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

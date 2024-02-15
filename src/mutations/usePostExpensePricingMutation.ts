@@ -10,11 +10,13 @@ const usePostExpensePricingMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateExpensePricingRequestDto
-  >((reqData) =>
-    api.expensePricings
-      .createExpensePricingHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData)
-  );
+  >({
+    mutationFn: (reqData) => {
+      return api.expensePricings
+        .createExpensePricingHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
+  });
 };
 
 export default usePostExpensePricingMutation;

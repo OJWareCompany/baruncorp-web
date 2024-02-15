@@ -6,10 +6,12 @@ import { IdResponse } from "@/api/api-spec";
 const usePatchUserDeactivateMutation = (userId: string) => {
   const api = useApi();
 
-  return useMutation<IdResponse, AxiosError<ErrorResponseData>>(() => {
-    return api.users
-      .deactivateUserHttpControllerPost(userId)
-      .then(({ data: resData }) => resData);
+  return useMutation<IdResponse, AxiosError<ErrorResponseData>>({
+    mutationFn: () => {
+      return api.users
+        .deactivateUserHttpControllerPost(userId)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

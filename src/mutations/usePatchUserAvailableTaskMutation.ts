@@ -10,8 +10,8 @@ interface Variables extends ModifyAssignmentTypeOfAvailableTaskRequestDto {
 const usePatchUserAvailableTaskMutation = (userId: string) => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    (reqData) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: (reqData) => {
       return api.users
         .modifyAssignmentTypeOfAvailableTaskHttpControllerPatch(
           userId,
@@ -21,8 +21,8 @@ const usePatchUserAvailableTaskMutation = (userId: string) => {
           }
         )
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchUserAvailableTaskMutation;

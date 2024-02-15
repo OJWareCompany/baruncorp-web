@@ -10,10 +10,12 @@ const usePatchClientNoteMutation = (organizationId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateClientNoteRequestDto
-  >((reqData) => {
-    return api.clientNote
-      .updateClientNoteHttpControllerPatch(organizationId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.clientNote
+        .updateClientNoteHttpControllerPatch(organizationId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

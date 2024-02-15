@@ -16,10 +16,16 @@ const usePatchExpensePricingMutation = ({
     void,
     AxiosError<ErrorResponseData>,
     UpdateExpensePricingRequestDto
-  >((reqData) => {
-    return api.expensePricings
-      .updateExpensePricingHttpControllerPatch(taskId, organizationId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.expensePricings
+        .updateExpensePricingHttpControllerPatch(
+          taskId,
+          organizationId,
+          reqData
+        )
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

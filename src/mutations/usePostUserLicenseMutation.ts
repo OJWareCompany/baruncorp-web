@@ -10,13 +10,13 @@ interface Variables extends AppointUserLicenseRequestDto {
 const usePostUserLicenseMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    (reqData) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: (reqData) => {
       return api.licenses
         .appointUserLicenseHttpControllerPost(reqData.abbreviation, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePostUserLicenseMutation;

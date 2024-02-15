@@ -10,10 +10,12 @@ const usePostInformationMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateInformationRequestDto
-  >((reqData) => {
-    return api.informations
-      .createInformationHttpControllerPatch(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.informations
+        .createInformationHttpControllerPatch(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

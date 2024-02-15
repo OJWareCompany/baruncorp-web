@@ -10,10 +10,12 @@ const usePatchOrderedServiceMutation = (orderedServiceId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateOrderedServiceRequestDto
-  >((reqData) => {
-    return api.orderedServices
-      .updateOrderedServiceHttpControllerPatch(orderedServiceId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.orderedServices
+        .updateOrderedServiceHttpControllerPatch(orderedServiceId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

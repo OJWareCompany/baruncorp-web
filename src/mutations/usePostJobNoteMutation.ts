@@ -10,10 +10,12 @@ const usePostJobNoteMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateJobNoteRequestDto
-  >((reqData) => {
-    return api.orderedJobNotes
-      .createJobNoteHttpControllerCreate(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.orderedJobNotes
+        .createJobNoteHttpControllerCreate(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

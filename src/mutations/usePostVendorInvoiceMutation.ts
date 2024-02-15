@@ -10,11 +10,13 @@ const usePostVendorInvoiceMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateVendorInvoiceRequestDto
-  >((reqData) =>
-    api.vendorInvoices
-      .createVendorInvoiceHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData)
-  );
+  >({
+    mutationFn: (reqData) => {
+      return api.vendorInvoices
+        .createVendorInvoiceHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
+  });
 };
 
 export default usePostVendorInvoiceMutation;

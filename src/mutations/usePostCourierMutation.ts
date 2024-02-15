@@ -10,10 +10,12 @@ const usePostCourierMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateCouriersRequestDto
-  >((reqData) => {
-    return api.couriers
-      .createCouriersHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.couriers
+        .createCouriersHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

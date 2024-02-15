@@ -86,7 +86,7 @@ export default function TasksInProgressDetailSheet({
       limit: pageSize,
     },
     enabled: state.open,
-    keepPreviousData: true,
+    isKeepPreviousData: true,
   });
 
   const table = useReactTable({

@@ -10,10 +10,12 @@ const usePostUserAvailableTaskMutation = (userId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     AddAvailableTaskRequestDto
-  >((reqData) => {
-    return api.users
-      .addAvailableTaskHttpControllerPost(userId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.users
+        .addAvailableTaskHttpControllerPost(userId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

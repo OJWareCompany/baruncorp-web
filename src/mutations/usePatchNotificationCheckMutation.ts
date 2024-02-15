@@ -11,12 +11,14 @@ const usePatchNotificationCheckMutation = () => {
     {
       assigningTaskAlertId: string;
     }
-  >((reqData) => {
-    return api.assigningTaskAlerts
-      .checkOutAssigningTaskAlertHttpControllerCheckOut(
-        reqData.assigningTaskAlertId
-      )
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.assigningTaskAlerts
+        .checkOutAssigningTaskAlertHttpControllerCheckOut(
+          reqData.assigningTaskAlertId
+        )
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

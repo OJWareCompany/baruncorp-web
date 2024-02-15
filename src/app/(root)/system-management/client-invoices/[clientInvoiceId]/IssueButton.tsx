@@ -48,7 +48,7 @@ export default function IssueButton({
   const queryClient = useQueryClient();
   const {
     mutateAsync: patchInvoiceIssueMutateAsync,
-    isLoading: isPatchInvoiceIssueMutationLoading,
+    isPending: isPatchInvoiceIssueMutationLoading,
   } = usePatchInvoiceIssueMutation(clientInvoice.id);
 
   if (clientInvoice.status !== "Unissued") {

@@ -10,13 +10,13 @@ interface Variables extends UpdatePtoDetailRequestDto {
 const usePatchPtoDetailMutation = () => {
   const api = useApi();
 
-  return useMutation<void, AxiosError<ErrorResponseData>, Variables>(
-    ({ ptoId, ...reqData }) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ ptoId, ...reqData }) => {
       return api.ptos
         .updatePtoDetailHttpControllerPatch(ptoId, reqData)
         .then(({ data: resData }) => resData);
-    }
-  );
+    },
+  });
 };
 
 export default usePatchPtoDetailMutation;

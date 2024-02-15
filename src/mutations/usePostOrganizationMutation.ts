@@ -10,11 +10,13 @@ const usePostOrganizationMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateOrganizationRequestDto
-  >((reqData) =>
-    api.organizations
-      .createOrganizationHttpControllerPostCreateOrganization(reqData)
-      .then(({ data: resData }) => resData)
-  );
+  >({
+    mutationFn: (reqData) => {
+      return api.organizations
+        .createOrganizationHttpControllerPostCreateOrganization(reqData)
+        .then(({ data: resData }) => resData);
+    },
+  });
 };
 
 export default usePostOrganizationMutation;

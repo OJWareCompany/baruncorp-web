@@ -10,11 +10,13 @@ const usePostCustomPricingMutation = () => {
     IdResponse,
     AxiosError<ErrorResponseData>,
     CreateCustomPricingRequestDto
-  >((reqData) =>
-    api.customPricings
-      .createCustomPricingHttpControllerPost(reqData)
-      .then(({ data: resData }) => resData)
-  );
+  >({
+    mutationFn: (reqData) => {
+      return api.customPricings
+        .createCustomPricingHttpControllerPost(reqData)
+        .then(({ data: resData }) => resData);
+    },
+  });
 };
 
 export default usePostCustomPricingMutation;

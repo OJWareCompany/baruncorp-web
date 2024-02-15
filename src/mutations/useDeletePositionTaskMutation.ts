@@ -12,13 +12,15 @@ const useDeletePositionTaskMutation = () => {
       positionId: string;
       taskId: string;
     }
-  >((reqData) => {
-    return api.positions
-      .deletePositionTaskHttpControllerDelete(
-        reqData.positionId,
-        reqData.taskId
-      )
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.positions
+        .deletePositionTaskHttpControllerDelete(
+          reqData.positionId,
+          reqData.taskId
+        )
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

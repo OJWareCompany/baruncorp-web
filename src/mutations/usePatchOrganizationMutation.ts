@@ -10,10 +10,12 @@ const usePatchOrganizationMutation = (organizationId: string) => {
     void,
     AxiosError<ErrorResponseData>,
     UpdateOrganizationRequestDto
-  >((reqData) => {
-    return api.organizations
-      .updateOrganizationHttpControllerPatch(organizationId, reqData)
-      .then(({ data: resData }) => resData);
+  >({
+    mutationFn: (reqData) => {
+      return api.organizations
+        .updateOrganizationHttpControllerPatch(organizationId, reqData)
+        .then(({ data: resData }) => resData);
+    },
   });
 };
 

@@ -92,7 +92,7 @@ export default function TasksDoneDetailSheet({
       limit: pageSize,
     },
     enabled: state.open,
-    keepPreviousData: true,
+    isKeepPreviousData: true,
   });
 
   const table = useReactTable({

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import {
@@ -13,11 +13,11 @@ export const getAssignedTasksSummaryTotalQueryKey = (
 const useAssignedTasksSummaryTotalQuery = ({
   params,
   enabled,
-  keepPreviousData,
+  isKeepPreviousData,
 }: {
   params: FindAssignedTaskSummaryTotalPaginatedHttpControllerGetParams;
   enabled?: boolean;
-  keepPreviousData?: boolean;
+  isKeepPreviousData?: boolean;
 }) => {
   const api = useApi();
 
@@ -30,7 +30,8 @@ const useAssignedTasksSummaryTotalQuery = ({
       api.assignedTasks
         .findAssignedTaskSummaryTotalPaginatedHttpControllerGet(params)
         .then(({ data }) => data),
-    keepPreviousData,
+    placeholderData: isKeepPreviousData ? keepPreviousData : undefined,
+
     enabled,
   });
 };

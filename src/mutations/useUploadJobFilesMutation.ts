@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { useState } from "react";
 
-interface Varaibles {
+interface Variables {
   files: File[];
   jobFolderId: string;
 }
@@ -31,37 +31,39 @@ const useUploadJobFilesMutation = () => {
   const mutationResult = useMutation<
     AxiosResponse<void> | void,
     AxiosError<FileServerErrorResponseData>,
-    Varaibles
-  >((varaibles: Varaibles) => {
-    const formData = new FormData();
-    for (const file of varaibles.files) {
-      formData.append("files", file);
-    }
-    formData.append("jobFolderId", varaibles.jobFolderId);
+    Variables
+  >({
+    mutationFn: (variables: Variables) => {
+      const formData = new FormData();
+      for (const file of variables.files) {
+        formData.append("files", file);
+      }
+      formData.append("jobFolderId", variables.jobFolderId);
 
-    const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobFiles`;
-    return axios
-      .post<ResponseData>(url, formData, {
-        onUploadProgress: (axiosProgressEvent) => {
+      const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobFiles`;
+      return axios
+        .post<ResponseData>(url, formData, {
+          onUploadProgress: (axiosProgressEvent) => {
+            console.log(
+              "Upload progress:",
+              (axiosProgressEvent?.progress ?? 0) * 100
+            );
+            setProgressState({
+              value: (axiosProgressEvent?.progress ?? 0) * 100,
+              error: false,
+            });
+          },
+        })
+        .then(() => {
           console.log(
-            "Upload progress:",
-            (axiosProgressEvent?.progress ?? 0) * 100
+            "upload JobFiles to completed to file server. Upload to Google Drive still needs some time"
           );
-          setProgressState({
-            value: (axiosProgressEvent?.progress ?? 0) * 100,
-            error: false,
-          });
-        },
-      })
-      .then(() => {
-        console.log(
-          "upload JobFiles to completed to file server. Upload to Google Drive still needs some time"
-        );
-      })
-      .catch((error) => {
-        setProgressState({ value: 100, error: true });
-        throw error;
-      });
+        })
+        .catch((error) => {
+          setProgressState({ value: 100, error: true });
+          throw error;
+        });
+    },
   });
 
   return { mutationResult, progressState };
