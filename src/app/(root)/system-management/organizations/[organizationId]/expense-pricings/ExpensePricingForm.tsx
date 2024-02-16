@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
@@ -100,8 +100,7 @@ interface Props {
 export default function ExpensePricingForm({ onSuccess }: Props) {
   const { organizationId } = useParams() as { organizationId: string };
   const { toast } = useToast();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
-  const { mutateAsync } = usePostExpensePricingMutation();
+  const usePostExpensePricingMutationResult = usePostExpensePricingMutation();
   const queryClient = useQueryClient();
 
   const form = useForm<FieldValues>({
@@ -125,28 +124,34 @@ export default function ExpensePricingForm({ onSuccess }: Props) {
   const watchComRevExpenseType = form.watch("comRevExpenseType");
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostExpensePricingMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostExpensePricingMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await mutateAsync({
-      taskId: values.taskId,
-      organizationId: organizationId,
-      resiNewExpenseType: values.resiNewExpenseType,
-      resiNewValue: Number(values.resiNewValue),
-      resiRevExpenseType: values.resiRevExpenseType,
-      resiRevValue: Number(values.resiRevValue),
-      comNewExpenseType: values.comNewExpenseType,
-      comNewValue: Number(values.comNewValue),
-      comRevExpenseType: values.comRevExpenseType,
-      comRevValue: Number(values.comRevValue),
-    })
+    await usePostExpensePricingMutationResult
+      .mutateAsync({
+        taskId: values.taskId,
+        organizationId: organizationId,
+        resiNewExpenseType: values.resiNewExpenseType,
+        resiNewValue: Number(values.resiNewValue),
+        resiRevExpenseType: values.resiRevExpenseType,
+        resiRevValue: Number(values.resiRevValue),
+        comNewExpenseType: values.comNewExpenseType,
+        comNewValue: Number(values.comNewValue),
+        comRevExpenseType: values.comRevExpenseType,
+        comRevValue: Number(values.comRevValue),
+      })
       .then(() => {
         onSuccess?.();
-        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });

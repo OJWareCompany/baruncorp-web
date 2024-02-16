@@ -55,8 +55,6 @@ export default function NewPositionDialog({ task }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
-
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,19 +65,34 @@ export default function NewPositionDialog({ task }: Props) {
 
   const watchPositionId = form.watch("positionId");
 
-  const { mutateAsync } = usePostPositionTaskMutation(watchPositionId);
+  const usePostPositionTaskMutationResult =
+    usePostPositionTaskMutation(watchPositionId);
+
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostPositionTaskMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostPositionTaskMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      taskId,
-      autoAssignmentType: values.autoAssignmentPropertyType,
-    })
+    await usePostPositionTaskMutationResult
+      .mutateAsync({
+        taskId,
+        autoAssignmentType: values.autoAssignmentPropertyType,
+      })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getTaskQueryKey(taskId),
         });
         setOpen(false);
-        setIsSubmitSuccessful(true);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
@@ -109,13 +122,6 @@ export default function NewPositionDialog({ task }: Props) {
         }
       });
   }
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      form.reset();
-      setIsSubmitSuccessful(false);
-    }
-  }, [form, isSubmitSuccessful]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

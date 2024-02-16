@@ -77,7 +77,6 @@ type FieldValues = z.infer<typeof formSchema>;
 export default function NewClientInvoiceSheet() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -104,29 +103,35 @@ export default function NewClientInvoiceSheet() {
     },
     true
   );
-  const { mutateAsync } = usePostInvoiceMutation();
+  const usePostInvoiceMutationResult = usePostInvoiceMutation();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostInvoiceMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostInvoiceMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      clientOrganizationId: values.organizationId,
-      invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
-      notesToClient: transformStringIntoNullableString.parse(values.notes),
-      serviceMonth: format(
-        new Date(values.servicePeriodMonth.slice(0, 7)),
-        "yyyy-MM"
-      ),
-      terms: Number(values.terms) as 21 | 30,
-    })
+    await usePostInvoiceMutationResult
+      .mutateAsync({
+        clientOrganizationId: values.organizationId,
+        invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
+        notesToClient: transformStringIntoNullableString.parse(values.notes),
+        serviceMonth: format(
+          new Date(values.servicePeriodMonth.slice(0, 7)),
+          "yyyy-MM"
+        ),
+        terms: Number(values.terms) as 21 | 30,
+      })
       .then(() => {
-        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });

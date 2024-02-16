@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
@@ -87,8 +87,6 @@ interface Props {
 }
 
 export default function NewUserForm({ onSuccess, organizationId }: Props) {
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
-
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -107,7 +105,7 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
     control: form.control,
     name: "emailAddressesToReceiveDeliverables",
   });
-  const { mutateAsync } = usePostUserMutation();
+  const usePostUserMutationResult = usePostUserMutation();
   const { toast } = useToast();
 
   const watchTenure = form.watch("tenure");
@@ -118,11 +116,17 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
     });
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostUserMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostUserMutationResult.isSuccess,
+  ]);
 
   const watchOrganizationId = form.watch("organizationId");
 
@@ -134,28 +138,30 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
       (value) => value.tenure === Number(values.tenure)
     );
 
-    await mutateAsync({
-      deliverablesEmails: values.emailAddressesToReceiveDeliverables.map(
-        (value) => value.email
-      ),
-      email: values.emailAddress,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
-      organizationId: values.organizationId,
-      isVendor: isOrganizationBarunCorp ? false : values.isContractor,
-      dateOfJoining: isOrganizationBarunCorp
-        ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
-        : null,
-      tenure: isOrganizationBarunCorp ? Number(values.tenure) : 1,
-      totalPtoDays: isOrganizationBarunCorp
-        ? values.pto === ""
-          ? selectedPtoPerTenure?.total ?? 10
-          : Number(values.pto)
-        : 10,
-    })
+    await usePostUserMutationResult
+      .mutateAsync({
+        deliverablesEmails: values.emailAddressesToReceiveDeliverables.map(
+          (value) => value.email
+        ),
+        email: values.emailAddress,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phoneNumber: transformStringIntoNullableString.parse(
+          values.phoneNumber
+        ),
+        organizationId: values.organizationId,
+        isVendor: isOrganizationBarunCorp ? false : values.isContractor,
+        dateOfJoining: isOrganizationBarunCorp
+          ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+          : null,
+        tenure: isOrganizationBarunCorp ? Number(values.tenure) : 1,
+        totalPtoDays: isOrganizationBarunCorp
+          ? values.pto === ""
+            ? selectedPtoPerTenure?.total ?? 10
+            : Number(values.pto)
+          : 10,
+      })
       .then(({ id }) => {
-        setIsSubmitSuccessful(true);
         onSuccess?.({
           userId: id,
           organizationId: values.organizationId,

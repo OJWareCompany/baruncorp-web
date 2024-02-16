@@ -1239,7 +1239,7 @@ export interface InvoicePayments {
   paymentName: string;
   invoiceId: string;
   amount: number;
-  paymentMethod: "Credit" | "Direct";
+  paymentMethod: "Direct";
   notes: string | null;
   paymentDate: string;
   canceledAt: string | null;
@@ -1780,6 +1780,73 @@ export interface PtoTenurePolicyPaginatedResponseDto {
   items: PtoTenurePolicyResponseDto[];
 }
 
+export interface CreateCreditTransactionRequestDto {
+  amount: number;
+  /** @default "Reload" */
+  creditTransactionType: "Reload" | "Deduction";
+  relatedInvoiceId?: string | null;
+  clientOrganizationId: string;
+}
+
+export interface CreditTransactionResponseDto {
+  id: string;
+  clientOrganizationId: string;
+  createdBy: string;
+  createdByUserId: string;
+  amount: number;
+  /** @default "Reload" */
+  creditTransactionType: "Reload" | "Deduction";
+  relatedInvoiceId: string | null;
+  /** @format date-time */
+  transactionDate: string;
+  /** @format date-time */
+  canceledAt: string | null;
+}
+
+export interface CreditTransactionPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: CreditTransactionResponseDto[];
+}
+
+export interface CreatePaymentRequestDto {
+  invoiceId: string;
+  /** @default 100 */
+  amount: number;
+  paymentMethod: "Direct";
+  notes: string | null;
+}
+
+export interface PaymentResponseDto {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  paymentMethod: "Direct";
+  paymentDate: string;
+  notes: string | null;
+  canceledAt: string | null;
+  organizationName: string;
+  organizationId: string;
+}
+
+export interface PaymentPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: PaymentResponseDto[];
+}
+
 export interface CreateOrderedServiceRequestDto {
   /** @default "" */
   serviceId: string;
@@ -2145,38 +2212,6 @@ export interface UnregisteredUserForTaskPaginatedResponseDto {
   items: UnregisteredUserForTaskResponseDto[];
 }
 
-export interface CreatePaymentRequestDto {
-  invoiceId: string;
-  /** @default 100 */
-  amount: number;
-  paymentMethod: "Credit" | "Direct";
-  notes: string | null;
-}
-
-export interface PaymentResponseDto {
-  id: string;
-  invoiceId: string;
-  amount: number;
-  paymentMethod: "Credit" | "Direct";
-  paymentDate: string;
-  notes: string | null;
-  canceledAt: string | null;
-  organizationName: string;
-  organizationId: string;
-}
-
-export interface PaymentPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: PaymentResponseDto[];
-}
-
 export interface CreateVendorInvoiceRequestDto {
   /** @default "asda" */
   organizationId: string;
@@ -2195,11 +2230,6 @@ export interface CreateVendorInvoiceRequestDto {
   terms: 21 | 30;
   /** @default "" */
   note: string | null;
-}
-
-export interface UpdateVendorInvoiceRequestDto {
-  /** @default "" */
-  id: string;
 }
 
 export interface VendorInvoiceResponseDto {
@@ -2294,6 +2324,11 @@ export interface VendorInvoiceLineItemPaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: VendorInvoiceLineItemResponse[];
+}
+
+export interface UpdateVendorInvoicedTotalRequestDto {
+  /** @default 1000 */
+  total: number;
 }
 
 export interface CreateVendorPaymentRequestDto {
@@ -3405,6 +3440,38 @@ export interface FindPtoTenurePolicyPaginatedHttpControllerGetParams {
   page?: number;
 }
 
+export interface FindCreditTransactionPaginatedHttpControllerGetParams {
+  /** @default "" */
+  creditTransactionId: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindPaymentPaginatedHttpControllerGetParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
 export interface FindOrderedServicePaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
@@ -3528,21 +3595,6 @@ export interface FindUnregisteredUsersForTaskHttpControllerGetParams {
    */
   page?: number;
   taskId: string;
-}
-
-export interface FindPaymentPaginatedHttpControllerGetParams {
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
 }
 
 export interface FindVendorInvoicePaginatedHttpControllerGetParams {
@@ -6262,6 +6314,149 @@ export class Api<
         ...params,
       }),
   };
+  creditTransactions = {
+    /**
+     * No description
+     *
+     * @name CreateCreditTransactionHttpControllerPost
+     * @request POST:/credit-transactions
+     */
+    createCreditTransactionHttpControllerPost: (
+      data: CreateCreditTransactionRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/credit-transactions`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindCreditTransactionPaginatedHttpControllerGet
+     * @request GET:/credit-transactions
+     */
+    findCreditTransactionPaginatedHttpControllerGet: (
+      query: FindCreditTransactionPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<CreditTransactionPaginatedResponseDto, any>({
+        path: `/credit-transactions`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CancelCreditTransactionHttpControllerPatch
+     * @request PATCH:/credit-transactions/{creditTransactionId}/cancel
+     */
+    cancelCreditTransactionHttpControllerPatch: (
+      creditTransactionId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/credit-transactions/${creditTransactionId}/cancel`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindCreditTransactionHttpControllerGet
+     * @request GET:/credit-transactions/{creditTransactionId}
+     */
+    findCreditTransactionHttpControllerGet: (
+      creditTransactionId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<CreditTransactionResponseDto, any>({
+        path: `/credit-transactions/${creditTransactionId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  payments = {
+    /**
+     * No description
+     *
+     * @name CreatePaymentHttpControllerPost
+     * @summary 크레딧 결제는 POST /credit-transactions API를 사용합니다.
+     * @request POST:/payments
+     */
+    createPaymentHttpControllerPost: (
+      data: CreatePaymentRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/payments`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPaymentPaginatedHttpControllerGet
+     * @request GET:/payments
+     */
+    findPaymentPaginatedHttpControllerGet: (
+      query: FindPaymentPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<PaymentPaginatedResponseDto, any>({
+        path: `/payments`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CancelPaymentHttpControllerPatch
+     * @request PATCH:/payments/{paymentId}
+     */
+    cancelPaymentHttpControllerPatch: (
+      paymentId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/payments/${paymentId}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindPaymentHttpControllerGet
+     * @request GET:/payments/{paymentId}
+     */
+    findPaymentHttpControllerGet: (
+      paymentId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<PaymentResponseDto, any>({
+        path: `/payments/${paymentId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
   orderedServices = {
     /**
      * No description
@@ -6736,77 +6931,6 @@ export class Api<
         ...params,
       }),
   };
-  payments = {
-    /**
-     * No description
-     *
-     * @name CreatePaymentHttpControllerPost
-     * @request POST:/payments
-     */
-    createPaymentHttpControllerPost: (
-      data: CreatePaymentRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<IdResponse, any>({
-        path: `/payments`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindPaymentPaginatedHttpControllerGet
-     * @request GET:/payments
-     */
-    findPaymentPaginatedHttpControllerGet: (
-      query: FindPaymentPaginatedHttpControllerGetParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<PaymentPaginatedResponseDto, any>({
-        path: `/payments`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CancelPaymentHttpControllerPatch
-     * @request PATCH:/payments/{paymentId}
-     */
-    cancelPaymentHttpControllerPatch: (
-      paymentId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/payments/${paymentId}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindPaymentHttpControllerGet
-     * @request GET:/payments/{paymentId}
-     */
-    findPaymentHttpControllerGet: (
-      paymentId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<PaymentResponseDto, any>({
-        path: `/payments/${paymentId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-  };
   vendorInvoices = {
     /**
      * No description
@@ -6848,25 +6972,6 @@ export class Api<
     /**
      * No description
      *
-     * @name UpdateVendorInvoiceHttpControllerPatch
-     * @request PATCH:/vendor-invoices/{vendorInvoiceId}
-     */
-    updateVendorInvoiceHttpControllerPatch: (
-      vendorInvoiceId: string,
-      data: UpdateVendorInvoiceRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/vendor-invoices/${vendorInvoiceId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name DeleteVendorInvoiceHttpControllerDelete
      * @request DELETE:/vendor-invoices/{vendorInvoiceId}
      */
@@ -6894,6 +6999,25 @@ export class Api<
         path: `/vendor-invoices/${vendorInvoiceId}`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateVendorInvoicedTotalHttpControllerPatch
+     * @request PATCH:/vendor-invoices/{vendorInvoiceId}
+     */
+    updateVendorInvoicedTotalHttpControllerPatch: (
+      vendorInvoiceId: string,
+      data: UpdateVendorInvoicedTotalRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/vendor-invoices/${vendorInvoiceId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

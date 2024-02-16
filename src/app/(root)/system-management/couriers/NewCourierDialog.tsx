@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
@@ -53,13 +53,18 @@ export default function NewCourierDialog() {
     },
   });
 
+  useEffect(() => {
+    if (form.formState.isSubmitSuccessful) {
+      form.reset();
+    }
+  }, [form, form.formState.isSubmitSuccessful]);
+
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
       name: values.name,
       urlParam: values.trackingNumberUrlPermalink,
     })
       .then(() => {
-        form.reset();
         queryClient.invalidateQueries({
           queryKey: getCouriersQueryKey({}),
         });

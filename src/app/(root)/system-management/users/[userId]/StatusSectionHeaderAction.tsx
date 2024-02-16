@@ -9,7 +9,6 @@ import usePostInvitationsMutation from "@/mutations/usePostInvitationsMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import usePatchUserDeactivateMutation from "@/mutations/usePatchUserDeactivateMutation";
 import usePatchUserReactivateMutation from "@/mutations/usePatchUserReactivateMutation";
+import LoadingButton from "@/components/LoadingButton";
 
 interface Props {
   user: UserResponseDto;
@@ -26,17 +26,31 @@ interface Props {
 export default function StatusSectionHeaderAction({ user }: Props) {
   const [state, setState] = useState<
     | { alertDialogOpen: false }
-    | { alertDialogOpen: true; type: "Reactivate" | "Inactivate" }
+    | {
+        alertDialogOpen: true;
+        type: "Reactivate" | "Inactivate" | "Send Invitation";
+      }
   >({ alertDialogOpen: false });
   const { status, email, organizationId } = user;
-  const { mutateAsync: postInvitationsMutateAsync } =
-    usePostInvitationsMutation();
-  const { mutateAsync: patchUserDeactivateMutateAsync } =
-    usePatchUserDeactivateMutation(user.id);
-  const { mutateAsync: patchUserReactivateMutateAsync } =
-    usePatchUserReactivateMutation(user.id);
+  const {
+    mutateAsync: postInvitationsMutateAsync,
+    isPending: isPostInvitationsMutationPending,
+  } = usePostInvitationsMutation();
+  const {
+    mutateAsync: patchUserDeactivateMutateAsync,
+    isPending: isPatchUserDeactivateMutationPending,
+  } = usePatchUserDeactivateMutation(user.id);
+  const {
+    mutateAsync: patchUserReactivateMutateAsync,
+    isPending: isPatchUserReactivateMutationPending,
+  } = usePatchUserReactivateMutation(user.id);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const isPending =
+    isPostInvitationsMutationPending ||
+    isPatchUserDeactivateMutationPending ||
+    isPatchUserReactivateMutationPending;
 
   return (
     <div className="flex gap-2">
@@ -72,29 +86,7 @@ export default function StatusSectionHeaderAction({ user }: Props) {
           variant={"outline"}
           className="h-[28px] text-xs px-2"
           onClick={() => {
-            postInvitationsMutateAsync({
-              email,
-              organizationId,
-            })
-              .then(() => {
-                queryClient.invalidateQueries({
-                  queryKey: getUserQueryKey(user.id),
-                });
-                toast({ title: "Success" });
-              })
-              .catch((error: AxiosError<ErrorResponseData>) => {
-                if (
-                  error.response &&
-                  error.response.data.errorCode.filter((value) => value != null)
-                    .length !== 0
-                ) {
-                  toast({
-                    title: error.response.data.message,
-                    variant: "destructive",
-                  });
-                  return;
-                }
-              });
+            setState({ alertDialogOpen: true, type: "Send Invitation" });
           }}
         >
           <Mail className="mr-2 h-4 w-4" />
@@ -118,7 +110,8 @@ export default function StatusSectionHeaderAction({ user }: Props) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <LoadingButton
+              isLoading={isPending}
               onClick={() => {
                 if (!state.alertDialogOpen) {
                   return;
@@ -131,6 +124,7 @@ export default function StatusSectionHeaderAction({ user }: Props) {
                         queryKey: getUserQueryKey(user.id),
                       });
                       toast({ title: "Success" });
+                      setState({ alertDialogOpen: false });
                     })
                     .catch((error: AxiosError<ErrorResponseData>) => {
                       if (
@@ -156,6 +150,36 @@ export default function StatusSectionHeaderAction({ user }: Props) {
                         queryKey: getUserQueryKey(user.id),
                       });
                       toast({ title: "Success" });
+                      setState({ alertDialogOpen: false });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                  return;
+                }
+
+                if (state.type === "Send Invitation") {
+                  postInvitationsMutateAsync({
+                    email,
+                    organizationId,
+                  })
+                    .then(() => {
+                      queryClient.invalidateQueries({
+                        queryKey: getUserQueryKey(user.id),
+                      });
+                      toast({ title: "Success" });
+                      setState({ alertDialogOpen: false });
                     })
                     .catch((error: AxiosError<ErrorResponseData>) => {
                       if (
@@ -176,7 +200,7 @@ export default function StatusSectionHeaderAction({ user }: Props) {
               }}
             >
               Continue
-            </AlertDialogAction>
+            </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

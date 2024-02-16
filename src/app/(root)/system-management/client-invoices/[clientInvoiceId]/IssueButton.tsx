@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { ArrowUp, Loader2 } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import InvoiceDocument from "./InvoiceDocument";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -22,6 +21,7 @@ import {
   OrganizationResponseDto,
   ServicePaginatedResponseDto,
 } from "@/api/api-spec";
+import LoadingButton from "@/components/LoadingButton";
 
 interface Props {
   clientInvoice: InvoiceResponseDto;
@@ -48,31 +48,24 @@ export default function IssueButton({
   const queryClient = useQueryClient();
   const {
     mutateAsync: patchInvoiceIssueMutateAsync,
-    isPending: isPatchInvoiceIssueMutationLoading,
+    isPending: isPatchInvoiceIssueMutationPending,
   } = usePatchInvoiceIssueMutation(clientInvoice.id);
-
-  if (clientInvoice.status !== "Unissued") {
-    return;
-  }
 
   return (
     <>
-      <Button
-        onClick={() => {
-          setOpen(true);
-        }}
-        disabled={isPatchInvoiceIssueMutationLoading}
-        variant={"outline"}
-        size={"sm"}
-        className="h-[28px] text-xs px-2"
-      >
-        {isPatchInvoiceIssueMutationLoading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
+      {clientInvoice.status === "Unissued" && (
+        <Button
+          onClick={() => {
+            setOpen(true);
+          }}
+          variant={"outline"}
+          size={"sm"}
+          className="h-[28px] text-xs px-2"
+        >
           <ArrowUp className="mr-2 h-4 w-4" />
-        )}
-        Issue
-      </Button>
+          Issue
+        </Button>
+      )}
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -80,7 +73,8 @@ export default function IssueButton({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <LoadingButton
+              isLoading={isPatchInvoiceIssueMutationPending}
               onClick={() => {
                 const { blob } = instance;
                 if (blob == null) {
@@ -107,6 +101,7 @@ export default function IssueButton({
                       toast({
                         title: "Success",
                       });
+                      setOpen(false);
                     })
                     .catch((error: AxiosError<ErrorResponseData>) => {
                       if (
@@ -126,7 +121,7 @@ export default function IssueButton({
               }}
             >
               Continue
-            </AlertDialogAction>
+            </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

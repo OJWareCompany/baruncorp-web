@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -36,6 +35,7 @@ import PtoCalendar from "@/components/PtoCalendar";
 import { cn } from "@/lib/utils";
 import useProfileQuery from "@/queries/useProfileQuery";
 import { useToast } from "@/components/ui/use-toast";
+import LoadingButton from "@/components/LoadingButton";
 
 interface CustomDayContentProps extends DayContentProps {
   deletePto: (ptoId: string) => void;
@@ -149,8 +149,10 @@ export default function PtoDetails({ userId }: Props) {
   });
   const { toast } = useToast();
 
-  const { mutateAsync: deletePtoDetailMutateAsync } =
-    useDeletePtoDetailMutation();
+  const {
+    mutateAsync: deletePtoDetailMutateAsync,
+    isPending: isDeletePtoDetailMutationPending,
+  } = useDeletePtoDetailMutation();
   const queryClient = useQueryClient();
 
   const {
@@ -263,7 +265,8 @@ export default function PtoDetails({ userId }: Props) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <LoadingButton
+              isLoading={isDeletePtoDetailMutationPending}
               onClick={() => {
                 if (!alertDialogState.open) {
                   return;
@@ -284,6 +287,8 @@ export default function PtoDetails({ userId }: Props) {
                         limit: Number.MAX_SAFE_INTEGER,
                       }),
                     });
+                    setAlertDialogState({ open: false });
+                    toast({ title: "Success" });
                   })
                   .catch((error: AxiosError<ErrorResponseData>) => {
                     switch (error.response?.status) {
@@ -313,7 +318,7 @@ export default function PtoDetails({ userId }: Props) {
               }}
             >
               Continue
-            </AlertDialogAction>
+            </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

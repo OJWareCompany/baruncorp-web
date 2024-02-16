@@ -14,7 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { STATES } from "@/lib/constants";
+import { STATES, STATES_KV_OBJ } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -96,10 +96,7 @@ const States = forwardRef<HTMLButtonElement, Props>(
               );
             }}
           >
-            {
-              STATES.find((value) => value.abbreviation === abbreviation)
-                ?.stateName
-            }
+            {STATES_KV_OBJ[abbreviation]}
             <X className="w-4 h-4 ml-2" />
           </Button>
         ))}

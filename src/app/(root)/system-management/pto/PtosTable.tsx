@@ -57,7 +57,6 @@ import {
 import usePatchPtoPayMutation from "@/mutations/usePatchPtoPayMutation";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -66,6 +65,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import LoadingButton from "@/components/LoadingButton";
 
 const columnHelper =
   createColumnHelper<PtoPaginatedResponseDto["items"][number]>();
@@ -133,7 +133,7 @@ export default function PtosTable() {
     params,
     isKeepPreviousData: true,
   });
-  const { mutateAsync } = usePatchPtoPayMutation();
+  const { mutateAsync, isPending } = usePatchPtoPayMutation();
 
   useEffect(() => {
     if (!isFetching) {
@@ -413,7 +413,8 @@ export default function PtosTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <LoadingButton
+              isLoading={isPending}
               onClick={() => {
                 if (!alertDialogState.open) {
                   return;
@@ -424,9 +425,11 @@ export default function PtosTable() {
                   ptoId: alertDialogState.ptoId,
                 })
                   .then(() => {
+                    toast({ title: "Success" });
                     queryClient.invalidateQueries({
                       queryKey: getPtosQueryKey({}),
                     });
+                    setAlertDialogState({ open: false });
                   })
                   .catch((error: AxiosError<ErrorResponseData>) => {
                     if (
@@ -445,7 +448,7 @@ export default function PtosTable() {
               }}
             >
               Continue
-            </AlertDialogAction>
+            </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

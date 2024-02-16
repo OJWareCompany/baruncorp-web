@@ -6,7 +6,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useParams, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -22,18 +22,17 @@ import { UserResponseDto } from "@/api/api-spec";
 import { formatInEST } from "@/lib/utils";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import useDeleteUserLicenseMutation from "@/mutations/useDeleteUserLicenseMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import { useToast } from "@/components/ui/use-toast";
+import LoadingButton from "@/components/LoadingButton";
 
 const columnHelper = createColumnHelper<UserResponseDto["licenses"][number]>();
 
@@ -44,10 +43,14 @@ interface Props {
 export default function LicensesTable({ licenses }: Props) {
   const router = useRouter();
   const { userId } = useParams() as { userId: string };
+  const [alertDialogState, setAlertDialogState] = useState<
+    | { open: false }
+    | { open: true; abbreviation: string; type: "Structural" | "Electrical" }
+  >({ open: false });
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { mutateAsync } = useDeleteUserLicenseMutation();
+  const { mutateAsync, isPending } = useDeleteUserLicenseMutation();
 
   const columns = useMemo(
     () => [
@@ -80,58 +83,27 @@ export default function LicensesTable({ licenses }: Props) {
                   event.stopPropagation();
                 }}
               >
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          mutateAsync({
-                            abbreviation: row.original.abbreviation,
-                            type: row.original.type,
-                            userId,
-                          })
-                            .then(() => {
-                              queryClient.invalidateQueries({
-                                queryKey: getUserQueryKey(userId),
-                              });
-                            })
-                            .catch((error: AxiosError<ErrorResponseData>) => {
-                              if (
-                                error.response &&
-                                error.response.data.errorCode.filter(
-                                  (value) => value != null
-                                ).length !== 0
-                              ) {
-                                toast({
-                                  title: error.response.data.message,
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                            });
-                        }}
-                      >
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="h-9 w-9"
+                  onClick={() => {
+                    setAlertDialogState({
+                      open: true,
+                      abbreviation: row.original.abbreviation,
+                      type: row.original.type,
+                    });
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           );
         },
       }),
     ],
-    [mutateAsync, queryClient, toast, userId]
+    []
   );
 
   const table = useReactTable({
@@ -142,61 +114,119 @@ export default function LicensesTable({ licenses }: Props) {
   });
 
   return (
-    <div className="space-y-2">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(
-                      `/system-management/licenses/${row.original.type}/${row.original.abbreviation}`
-                    );
-                  }}
-                  className="cursor-pointer"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+    <>
+      <div className="space-y-2">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => {
+                      router.push(
+                        `/system-management/licenses/${row.original.type}/${row.original.abbreviation}`
+                      );
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-    </div>
+      <AlertDialog
+        open={alertDialogState.open}
+        onOpenChange={(newOpen) => {
+          if (newOpen) {
+            return;
+          }
+
+          setAlertDialogState({ open: newOpen });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <LoadingButton
+              isLoading={isPending}
+              onClick={() => {
+                if (!alertDialogState.open) {
+                  return;
+                }
+
+                mutateAsync({
+                  abbreviation: alertDialogState.abbreviation,
+                  type: alertDialogState.type,
+                  userId,
+                })
+                  .then(() => {
+                    toast({ title: "Success" });
+                    queryClient.invalidateQueries({
+                      queryKey: getUserQueryKey(userId),
+                    });
+                    setAlertDialogState({ open: false });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                  });
+              }}
+            >
+              Continue
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

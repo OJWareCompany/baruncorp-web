@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useParams } from "next/navigation";
@@ -74,23 +74,37 @@ export default function PaymentDialog() {
       paymentMethod: "Direct",
     },
   });
-  const { mutateAsync } = usePostPaymentMutation();
+  const usePostPaymentMutationResult = usePostPaymentMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostPaymentMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostPaymentMutationResult.isSuccess,
+  ]);
+
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      amount: Number(values.amount),
-      notes: transformStringIntoNullableString.parse(values.notes),
-      paymentMethod: values.paymentMethod,
-      invoiceId: clientInvoiceId,
-    })
-      .then((value) => {
+    await usePostPaymentMutationResult
+      .mutateAsync({
+        amount: Number(values.amount),
+        notes: transformStringIntoNullableString.parse(values.notes),
+        paymentMethod: values.paymentMethod,
+        invoiceId: clientInvoiceId,
+      })
+      .then(() => {
         setOpen(false);
         queryClient.invalidateQueries({
           queryKey: getClientInvoiceQueryKey(clientInvoiceId),
         });
-        form.reset();
+        toast({ title: "Success" });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {

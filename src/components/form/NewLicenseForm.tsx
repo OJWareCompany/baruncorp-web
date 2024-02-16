@@ -74,6 +74,7 @@ export default function NewLicenseForm({
         : null,
     })
       .then(() => {
+        toast({ title: "Success" });
         onSuccess?.();
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

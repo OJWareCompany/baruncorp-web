@@ -16,9 +16,8 @@ import {
   Loader2,
   MoreHorizontal,
 } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import EditTrackingNumberDialog from "./EditTrackingNumberDialog";
+import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import {
   Table,
   TableBody,
@@ -43,9 +42,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import useTrackingNumbersQuery, {
-  getTrackingNumbersQueryKey,
-} from "@/queries/useTrackingNumbersQuery";
+import useTrackingNumbersQuery from "@/queries/useTrackingNumbersQuery";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,17 +50,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/components/ui/use-toast";
-import useDeleteTrackingNumberMutation from "@/mutations/useDeleteTrackingNumberMutation";
 
 const columnHelper =
   createColumnHelper<TrackingNumbersPaginatedResponseDto["items"][number]>();
@@ -331,17 +317,10 @@ interface Props {
 }
 
 export default function TrackingNumbersTable({ job }: Props) {
-  const [alertDialogState, setAlertDialogState] = useState<
-    { open: false } | { open: true; trackingNumberId: string }
-  >({ open: false });
   const [editDialogState, setEditDialogState] = useState<EditDialogState>({
     open: false,
   });
-
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const { mutateAsync: deleteTrackingNumberMutateAsync } =
-    useDeleteTrackingNumberMutation();
+  const dispatch = useAlertDialogDataDispatch();
 
   return (
     <>
@@ -351,7 +330,11 @@ export default function TrackingNumbersTable({ job }: Props) {
           setEditDialogState({ open: true, initialValue });
         }}
         deleteTrackingNumber={(trackingNumberId) => {
-          setAlertDialogState({ open: true, trackingNumberId });
+          dispatch({
+            type: "DELETE_TRACKING_NUMBER",
+            jobId: job.id,
+            trackingNumberId,
+          });
         }}
       />
       <EditTrackingNumberDialog
@@ -364,58 +347,6 @@ export default function TrackingNumbersTable({ job }: Props) {
           setEditDialogState({ open: newOpen });
         }}
       />
-      <AlertDialog
-        open={alertDialogState.open}
-        onOpenChange={(newOpen) => {
-          if (newOpen) {
-            return;
-          }
-
-          setAlertDialogState({ open: newOpen });
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (!alertDialogState.open) {
-                  return;
-                }
-
-                deleteTrackingNumberMutateAsync({
-                  trackingNumberId: alertDialogState.trackingNumberId,
-                })
-                  .then(() => {
-                    toast({ title: "Success" });
-                    queryClient.invalidateQueries({
-                      queryKey: getTrackingNumbersQueryKey({ jobId: job.id }),
-                    });
-                  })
-                  .catch((error: AxiosError<ErrorResponseData>) => {
-                    if (
-                      error.response &&
-                      error.response.data.errorCode.filter(
-                        (value) => value != null
-                      ).length !== 0
-                    ) {
-                      toast({
-                        title: error.response.data.message,
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                  });
-              }}
-            >
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

@@ -66,10 +66,7 @@ export default function Page({ params: { taskId } }: Props) {
           title="Positions"
           action={<NewPositionDialog task={task} />}
         >
-          <PositionsTable
-            task={task}
-            key={JSON.stringify(task.taskPositions)}
-          />
+          <PositionsTable task={task} />
         </CollapsibleSection>
         <CollapsibleSection title="Workers">
           <WorkersTable task={task} />

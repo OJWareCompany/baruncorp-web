@@ -4,7 +4,7 @@ import { z } from "zod";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,8 @@ interface Props {
 
 export default function NewTaskDialog({ position }: Props) {
   const { positionId } = useParams() as { positionId: string };
-  const { mutateAsync } = usePostPositionTaskMutation(positionId);
+  const usePostPositionTaskMutationResult =
+    usePostPositionTaskMutation(positionId);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -64,11 +65,25 @@ export default function NewTaskDialog({ position }: Props) {
     },
   });
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostPositionTaskMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostPositionTaskMutationResult.isSuccess,
+  ]);
+
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      taskId: values.taskId,
-      autoAssignmentType: values.autoAssignmentPropertyType,
-    })
+    await usePostPositionTaskMutationResult
+      .mutateAsync({
+        taskId: values.taskId,
+        autoAssignmentType: values.autoAssignmentPropertyType,
+      })
       .then(() => {
         queryClient.invalidateQueries({
           queryKey: getPositionQueryKey(positionId),

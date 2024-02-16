@@ -1,6 +1,6 @@
 "use client";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Value } from "@udecode/plate-common";
 import { useForm } from "react-hook-form";
@@ -44,6 +44,8 @@ export default function NewUtilitySheet() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const usePostUtilityMutationResult = usePostUtilityMutation();
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,21 +60,32 @@ export default function NewUtilitySheet() {
     },
   });
 
-  const { mutateAsync } = usePostUtilityMutation();
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostUtilityMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostUtilityMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      name: values.name,
-      stateAbbreviations: values.states,
-      notes: JSON.stringify(values.notes),
-    })
+    await usePostUtilityMutationResult
+      .mutateAsync({
+        name: values.name,
+        stateAbbreviations: values.states,
+        notes: JSON.stringify(values.notes),
+      })
       .then(() => {
         toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getUtilitiesQueryKey({}),
         });
         setOpen(false);
-        form.reset();
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         // TODO: 이름 중복 예외 처리

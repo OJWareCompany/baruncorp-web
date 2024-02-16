@@ -61,13 +61,12 @@ export default function CustomPricingForm({
   serviceIdForm,
 }: Props) {
   const { toast } = useToast();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [standardSectionExisting, setStandardSectionExisting] = useState({
     isResiNewPriceExist: false,
     isResiRevPriceExist: false,
     isComNewPriceExist: false,
   });
-  const { mutateAsync } = usePostCustomPricingMutation();
+  const usePostCustomPricingMutationResult = usePostCustomPricingMutation();
   const queryClient = useQueryClient();
 
   const formSchema = useMemo(
@@ -311,60 +310,72 @@ export default function CustomPricingForm({
   );
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostCustomPricingMutationResult.isSuccess
+    ) {
       serviceIdForm.reset();
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful, serviceIdForm]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    serviceIdForm,
+    usePostCustomPricingMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await mutateAsync({
-      customPricingType:
-        service.pricingType === "Standard" ? "Custom Standard" : "Custom Fixed",
-      fixedPrice: transformStringIntoNullableNumber.parse(values.fixedPrice),
-      commercialNewServiceTiers:
-        values.standardPricing.commercialNewServiceTiers.map((value) => ({
-          startingPoint: Number(value.startingPoint),
-          finishingPoint: Number(value.finishingPoint),
-          price: Number(value.price),
-          gmPrice: Number(value.gmPrice),
-        })),
-      organizationId: organization.id,
-      serviceId: service.id,
-      residentialRevisionGmPrice: transformStringIntoNullableNumber.parse(
-        values.standardPricing.residentialRevisionGmPrice
-      ),
-      residentialRevisionPrice: transformStringIntoNullableNumber.parse(
-        values.standardPricing.residentialRevisionPrice
-      ),
-      residentialNewServiceTiers:
-        values.standardPricing.residentialNewServiceTiers.map<Tier>(
-          (value, index) => ({
+    await usePostCustomPricingMutationResult
+      .mutateAsync({
+        customPricingType:
+          service.pricingType === "Standard"
+            ? "Custom Standard"
+            : "Custom Fixed",
+        fixedPrice: transformStringIntoNullableNumber.parse(values.fixedPrice),
+        commercialNewServiceTiers:
+          values.standardPricing.commercialNewServiceTiers.map((value) => ({
             startingPoint: Number(value.startingPoint),
-            finishingPoint:
-              index ===
-              values.standardPricing.residentialNewServiceTiers.length - 1
-                ? null
-                : transformStringIntoNullableNumber.parse(value.finishingPoint),
+            finishingPoint: Number(value.finishingPoint),
             price: Number(value.price),
             gmPrice: Number(value.gmPrice),
-          })
+          })),
+        organizationId: organization.id,
+        serviceId: service.id,
+        residentialRevisionGmPrice: transformStringIntoNullableNumber.parse(
+          values.standardPricing.residentialRevisionGmPrice
         ),
-      residentialNewServicePricingType:
-        transformResidentialNewPriceChargeTypeEnumWithEmptyStringIntoNullableResidentialNewPriceChargeTypeEnum.parse(
-          values.standardPricing.residentialNewServicePricingType
+        residentialRevisionPrice: transformStringIntoNullableNumber.parse(
+          values.standardPricing.residentialRevisionPrice
         ),
-      residentialNewServiceFlatGmPrice: transformStringIntoNullableNumber.parse(
-        values.standardPricing.residentialNewServiceFlatGmPrice
-      ),
-      residentialNewServiceFlatPrice: transformStringIntoNullableNumber.parse(
-        values.standardPricing.residentialNewServiceFlatPrice
-      ),
-    })
+        residentialNewServiceTiers:
+          values.standardPricing.residentialNewServiceTiers.map<Tier>(
+            (value, index) => ({
+              startingPoint: Number(value.startingPoint),
+              finishingPoint:
+                index ===
+                values.standardPricing.residentialNewServiceTiers.length - 1
+                  ? null
+                  : transformStringIntoNullableNumber.parse(
+                      value.finishingPoint
+                    ),
+              price: Number(value.price),
+              gmPrice: Number(value.gmPrice),
+            })
+          ),
+        residentialNewServicePricingType:
+          transformResidentialNewPriceChargeTypeEnumWithEmptyStringIntoNullableResidentialNewPriceChargeTypeEnum.parse(
+            values.standardPricing.residentialNewServicePricingType
+          ),
+        residentialNewServiceFlatGmPrice:
+          transformStringIntoNullableNumber.parse(
+            values.standardPricing.residentialNewServiceFlatGmPrice
+          ),
+        residentialNewServiceFlatPrice: transformStringIntoNullableNumber.parse(
+          values.standardPricing.residentialNewServiceFlatPrice
+        ),
+      })
       .then(() => {
         onSuccess?.();
-        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });

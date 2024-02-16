@@ -52,12 +52,6 @@ export default function PageHeaderAction({ scopeId }: Props) {
                 mutateAsync()
                   .then(() => {
                     toast({ title: "Success" });
-                    // queryClient.invalidateQueries({
-                    //   queryKey: getJobQueryKey(jobId),
-                    // });
-                    // queryClient.invalidateQueries({
-                    //   queryKey: getProjectQueryKey(projectId),
-                    // });
                     router.push("/system-management/scopes");
                     setOpen(false);
                   })

@@ -53,7 +53,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -62,6 +61,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import useDeleteCourierMutation from "@/mutations/useDeleteCourierMutation";
+import LoadingButton from "@/components/LoadingButton";
 
 const columnHelper =
   createColumnHelper<CouriersPaginatedResponseDto["items"][number]>();
@@ -308,7 +308,10 @@ export default function CouriersTable() {
 
   const { toast } = useToast();
 
-  const { mutateAsync: deleteCourierMutateAsync } = useDeleteCourierMutation();
+  const {
+    mutateAsync: deleteCourierMutateAsync,
+    isPending: isDeleteCourierMutationPending,
+  } = useDeleteCourierMutation();
   const queryClient = useQueryClient();
 
   return (
@@ -347,7 +350,8 @@ export default function CouriersTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <LoadingButton
+              isLoading={isDeleteCourierMutationPending}
               onClick={() => {
                 if (!alertDialogState.open) {
                   return;
@@ -361,6 +365,7 @@ export default function CouriersTable() {
                     queryClient.invalidateQueries({
                       queryKey: getCouriersQueryKey({}),
                     });
+                    setAlertDialogState({ open: false });
                   })
                   .catch((error: AxiosError<ErrorResponseData>) => {
                     if (
@@ -379,7 +384,7 @@ export default function CouriersTable() {
               }}
             >
               Continue
-            </AlertDialogAction>
+            </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

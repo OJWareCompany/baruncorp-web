@@ -106,7 +106,6 @@ type FieldValues = z.infer<typeof formSchema>;
 
 export default function NewOrganizationSheet() {
   const { toast } = useToast();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [open, setOpen] = useState(false);
 
   const form = useForm<FieldValues>({
@@ -133,50 +132,58 @@ export default function NewOrganizationSheet() {
     },
   });
 
-  const { mutateAsync } = usePostOrganizationMutation();
+  const usePostOrganizationMutationResult = usePostOrganizationMutation();
   const queryClient = useQueryClient();
 
   const watchIsSpecialRevisionPricing = form.watch("isSpecialRevisionPricing");
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostOrganizationMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostOrganizationMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      address: {
-        ...values.address,
-        country: transformStringIntoNullableString.parse(
-          values.address.country
+    await usePostOrganizationMutationResult
+      .mutateAsync({
+        address: {
+          ...values.address,
+          country: transformStringIntoNullableString.parse(
+            values.address.country
+          ),
+          street2: transformStringIntoNullableString.parse(
+            values.address.street2
+          ),
+        },
+        invoiceRecipientEmail: transformStringIntoNullableString.parse(
+          values.emailAddressToReceiveInvoice
         ),
-        street2: transformStringIntoNullableString.parse(
-          values.address.street2
+        name: values.name.trim(),
+        projectPropertyTypeDefaultValue:
+          transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum.parse(
+            values.defaultPropertyType
+          ),
+        mountingTypeDefaultValue:
+          transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum.parse(
+            values.defaultMountingType
+          ),
+        phoneNumber: transformStringIntoNullableString.parse(
+          values.phoneNumber
         ),
-      },
-      invoiceRecipientEmail: transformStringIntoNullableString.parse(
-        values.emailAddressToReceiveInvoice
-      ),
-      name: values.name.trim(),
-      projectPropertyTypeDefaultValue:
-        transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum.parse(
-          values.defaultPropertyType
-        ),
-      mountingTypeDefaultValue:
-        transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum.parse(
-          values.defaultMountingType
-        ),
-      phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
-      isSpecialRevisionPricing: values.isSpecialRevisionPricing,
-      numberOfFreeRevisionCount: values.isSpecialRevisionPricing
-        ? Number(values.numberOfFreeRevisionCount)
-        : null,
-      isVendor: values.isVendor,
-    })
+        isSpecialRevisionPricing: values.isSpecialRevisionPricing,
+        numberOfFreeRevisionCount: values.isSpecialRevisionPricing
+          ? Number(values.numberOfFreeRevisionCount)
+          : null,
+        isVendor: values.isVendor,
+      })
       .then(() => {
-        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });

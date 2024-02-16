@@ -16,7 +16,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { STATES } from "@/lib/constants";
+import { STATES, STATES_KV_OBJ } from "@/lib/constants";
 
 interface Props {
   abbreviation: string;
@@ -48,8 +48,7 @@ const StatesCombobox = forwardRef<HTMLButtonElement, Props>(
             <span className="flex-1 text-start">
               {!isSelected
                 ? placeholderText
-                : STATES.find((value) => value.abbreviation === abbreviation)
-                    ?.stateName ?? placeholderText}
+                : STATES_KV_OBJ[abbreviation] ?? placeholderText}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>

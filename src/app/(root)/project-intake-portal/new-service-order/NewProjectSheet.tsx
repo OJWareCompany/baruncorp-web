@@ -102,7 +102,7 @@ export default function NewProjectSheet({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
-  const { mutateAsync } = usePostProjectMutation();
+  const usePostProjectMutationResult = usePostProjectMutation();
   const queryClient = useQueryClient();
   const { data: organization } = useOrganizationQuery(organizationId);
 
@@ -121,31 +121,44 @@ export default function NewProjectSheet({
     form.reset();
   }, [form, organizationId]);
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostProjectMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostProjectMutationResult.isSuccess,
+  ]);
+
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      clientOrganizationId: organizationId,
-      projectPropertyOwner: transformStringIntoNullableString.parse(
-        values.propertyOwner
-      ),
-      projectNumber: transformStringIntoNullableString.parse(
-        values.projectNumber
-      ),
-      projectPropertyType: values.propertyType,
-      projectPropertyAddress: {
-        ...values.address,
-        country: transformStringIntoNullableString.parse(
-          values.address.country
+    await usePostProjectMutationResult
+      .mutateAsync({
+        clientOrganizationId: organizationId,
+        projectPropertyOwner: transformStringIntoNullableString.parse(
+          values.propertyOwner
         ),
-        state: values.address.state,
-        street2: transformStringIntoNullableString.parse(
-          values.address.street2
+        projectNumber: transformStringIntoNullableString.parse(
+          values.projectNumber
         ),
-      },
-    })
+        projectPropertyType: values.propertyType,
+        projectPropertyAddress: {
+          ...values.address,
+          country: transformStringIntoNullableString.parse(
+            values.address.country
+          ),
+          state: values.address.state,
+          street2: transformStringIntoNullableString.parse(
+            values.address.street2
+          ),
+        },
+      })
       .then(async ({ id }) => {
         dialogProps.onOpenChange?.(false);
         onProjectIdChange(id);
-        form.reset();
         queryClient.invalidateQueries({
           queryKey: getProjectsQueryKey({
             organizationId: organizationId,

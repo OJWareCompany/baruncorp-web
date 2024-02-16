@@ -9,7 +9,6 @@ import PtoDetailsTable from "./PtoDetailsTable";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -47,6 +46,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useToast } from "@/components/ui/use-toast";
+import LoadingButton from "@/components/LoadingButton";
 
 interface CustomDayContentProps extends DayContentProps {
   deletePto: (ptoId: string) => void;
@@ -207,8 +207,10 @@ export default function PtoDetails() {
   });
   const { toast } = useToast();
 
-  const { mutateAsync: deletePtoDetailMutateAsync } =
-    useDeletePtoDetailMutation();
+  const {
+    mutateAsync: deletePtoDetailMutateAsync,
+    isPending: isDeletePtoDetailMutationPending,
+  } = useDeletePtoDetailMutation();
   const queryClient = useQueryClient();
 
   const {
@@ -317,7 +319,8 @@ export default function PtoDetails() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <LoadingButton
+              isLoading={isDeletePtoDetailMutationPending}
               onClick={() => {
                 if (!alertDialogState.open) {
                   return;
@@ -327,12 +330,14 @@ export default function PtoDetails() {
                   ptoId: alertDialogState.ptoId,
                 })
                   .then(() => {
+                    toast({ title: "Success" });
                     queryClient.invalidateQueries({
                       queryKey: getPtoDetailsQueryKey({}),
                     });
                     queryClient.invalidateQueries({
                       queryKey: getPtosQueryKey({}),
                     });
+                    setAlertDialogState({ open: false });
                   })
                   .catch((error: AxiosError<ErrorResponseData>) => {
                     switch (error.response?.status) {
@@ -362,7 +367,7 @@ export default function PtoDetails() {
               }}
             >
               Continue
-            </AlertDialogAction>
+            </LoadingButton>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

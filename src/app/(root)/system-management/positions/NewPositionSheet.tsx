@@ -59,8 +59,7 @@ export default function NewPositionSheet() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
-  const { mutateAsync } = usePostPositionMutation();
+  const usePostPositionMutationResult = usePostPositionMutation();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -74,28 +73,43 @@ export default function NewPositionSheet() {
 
   const watchLicenseType = form.watch("licenseType");
 
+  /**
+   * https://react-hook-form.com/docs/useform/reset
+   * It's recommended to reset inside useEffect after submission.
+   * then의 callback 함수에서 form.reset()을 하면, form.formState의 isSubmitted 등 일부 상태가 reset 되지 않는다.
+   * 공식 문서의 추천을 따라 useEffect에서 처리한다.
+   * request가 실패해도 onSubmit에서 error를 catch하기 때문에 submit은 성공한 걸로 간주된다. 그래서, request에 대한 성공 여부인 isSuccess를 추가했다.
+   */
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostPositionMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostPositionMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      name: values.name,
-      maxAssignedTasksLimit: transformStringIntoNullableNumber.parse(
-        values.maxAssignedTasksLimit
-      ),
-      description: transformStringIntoNullableString.parse(values.description),
-      licenseType:
-        transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum.parse(
-          values.licenseType
+    await usePostPositionMutationResult
+      .mutateAsync({
+        name: values.name,
+        maxAssignedTasksLimit: transformStringIntoNullableNumber.parse(
+          values.maxAssignedTasksLimit
         ),
-    })
+        description: transformStringIntoNullableString.parse(
+          values.description
+        ),
+        licenseType:
+          transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum.parse(
+            values.licenseType
+          ),
+      })
       .then(() => {
         setOpen(false);
-        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });
@@ -106,6 +120,32 @@ export default function NewPositionSheet() {
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 409:
+            if (error.response?.data.errorCode.includes("20203")) {
+              form.setError(
+                "name",
+                {
+                  message: `${values.name} already exists`,
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+          case 400:
+            if (error.response?.data.errorCode.includes("20202")) {
+              form.setError(
+                "maxAssignedTasksLimit",
+                {
+                  message:
+                    "Maximum Number of Tasks Held should be less than 256",
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+        }
+
         if (
           error.response &&
           error.response.data.errorCode.filter((value) => value != null)

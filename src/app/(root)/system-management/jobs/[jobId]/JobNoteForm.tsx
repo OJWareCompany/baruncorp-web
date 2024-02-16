@@ -45,24 +45,29 @@ interface Props {
 
 export default function JobNoteForm({ job }: Props) {
   const [files, setFiles] = useState<File[]>([]);
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       content: INITIAL_EDITOR_VALUE,
     },
   });
-  const { mutateAsync } = usePostJobNoteMutation();
+  const usePostJobNoteMutationResult = usePostJobNoteMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const editorRef = useRef<PlateEditor<Value>>(null);
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostJobNoteMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostJobNoteMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
     const trimmedContent = trimValue(values.content);
@@ -79,16 +84,16 @@ export default function JobNoteForm({ job }: Props) {
         .join("<br />");
     }
 
-    await mutateAsync({
-      jobId: job.id,
-      content: JSON.stringify(trimmedContent),
-      type: hasMention ? "RFI" : "JobNote",
-      receiverEmails: hasMention ? emails : ["yunwoo@oj.vision"],
-      emailBody,
-      files,
-    })
+    await usePostJobNoteMutationResult
+      .mutateAsync({
+        jobId: job.id,
+        content: JSON.stringify(trimmedContent),
+        type: hasMention ? "RFI" : "JobNote",
+        receiverEmails: hasMention ? emails : ["yunwoo@oj.vision"],
+        emailBody,
+        files,
+      })
       .then(() => {
-        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });
@@ -125,7 +130,10 @@ export default function JobNoteForm({ job }: Props) {
                 <MentionEditor
                   {...field}
                   editorRef={editorRef}
-                  key={String(isSubmitSuccessful)}
+                  key={String(
+                    form.formState.isSubmitSuccessful &&
+                      usePostJobNoteMutationResult.isSuccess
+                  )}
                 />
               </FormControl>
               <FormMessage />

@@ -55,10 +55,9 @@ type FieldValues = z.infer<typeof formSchema>;
 export default function NewTaskSheet() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const queryClient = useQueryClient();
 
-  const { mutateAsync } = usePostTaskMutation();
+  const usePostTaskMutationResult = usePostTaskMutation();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -69,21 +68,34 @@ export default function NewTaskSheet() {
     },
   });
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostTaskMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostTaskMutationResult.isSuccess,
+  ]);
+
   const watchLicenseType = form.watch("licenseType");
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      name: values.name,
-      licenseType:
-        transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum.parse(
-          values.licenseType
-        ),
-      serviceId: values.serviceId,
-    })
+    await usePostTaskMutationResult
+      .mutateAsync({
+        name: values.name,
+        licenseType:
+          transformLicenseTypeEnumWithEmptyStringIntoNullableLicenseTypeEnum.parse(
+            values.licenseType
+          ),
+        serviceId: values.serviceId,
+      })
       .then(() => {
         toast({ title: "Success" });
         setOpen(false);
-        setIsSubmitSuccessful(true);
         queryClient.invalidateQueries({
           queryKey: getTasksQueryKey({
             limit: Number.MAX_SAFE_INTEGER,
@@ -104,13 +116,6 @@ export default function NewTaskSheet() {
         }
       });
   }
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      form.reset();
-      setIsSubmitSuccessful(false);
-    }
-  }, [form, isSubmitSuccessful]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

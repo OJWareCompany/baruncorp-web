@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import {
@@ -22,13 +22,11 @@ import { UserResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import useDeleteUserAvailableTaskMutation from "@/mutations/useDeleteUserAvailableTaskMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
@@ -46,6 +44,7 @@ import {
   BARUNCORP_ORGANIZATION_ID,
 } from "@/lib/constants";
 import usePatchUserAvailableTaskMutation from "@/mutations/usePatchUserAvailableTaskMutation";
+import LoadingButton from "@/components/LoadingButton";
 
 const columnHelper =
   createColumnHelper<UserResponseDto["availableTasks"][number]>();
@@ -57,11 +56,16 @@ interface Props {
 export default function AvailableTasksTable({ user }: Props) {
   const { toast } = useToast();
   const router = useRouter();
-  const { mutateAsync: deleteUserAvailableTaskMutateAsync } =
-    useDeleteUserAvailableTaskMutation();
+  const {
+    mutateAsync: deleteUserAvailableTaskMutateAsync,
+    isPending: isDeleteUserAvailableTaskMutationPending,
+  } = useDeleteUserAvailableTaskMutation();
   const { mutateAsync: patchUserAvailableTaskMutateAsync } =
     usePatchUserAvailableTaskMutation(user.id);
   const queryClient = useQueryClient();
+  const [alertDialogState, setAlertDialogState] = useState<
+    { open: false } | { open: true; taskId: string }
+  >({ open: false });
 
   const columns = useMemo(
     () => [
@@ -147,63 +151,23 @@ export default function AvailableTasksTable({ user }: Props) {
                   event.stopPropagation();
                 }}
               >
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          deleteUserAvailableTaskMutateAsync({
-                            userId: user.id,
-                            taskId: row.original.id,
-                          })
-                            .then(() => {
-                              queryClient.invalidateQueries({
-                                queryKey: getUserQueryKey(user.id),
-                              });
-                            })
-                            .catch((error: AxiosError<ErrorResponseData>) => {
-                              if (
-                                error.response &&
-                                error.response.data.errorCode.filter(
-                                  (value) => value != null
-                                ).length !== 0
-                              ) {
-                                toast({
-                                  title: error.response.data.message,
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                            });
-                        }}
-                      >
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="h-9 w-9"
+                  onClick={() => {
+                    setAlertDialogState({ open: true, taskId: row.id });
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           );
         },
       }),
     ],
-    [
-      deleteUserAvailableTaskMutateAsync,
-      patchUserAvailableTaskMutateAsync,
-      queryClient,
-      toast,
-      user.id,
-    ]
+    [patchUserAvailableTaskMutateAsync, queryClient, toast, user.id]
   );
 
   const table = useReactTable({
@@ -219,59 +183,116 @@ export default function AvailableTasksTable({ user }: Props) {
   });
 
   return (
-    <div className="space-y-2">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/tasks/${row.id}`);
-                  }}
-                  className="cursor-pointer"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+    <>
+      <div className="space-y-2">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => {
+                      router.push(`/system-management/tasks/${row.id}`);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-    </div>
+      <AlertDialog
+        open={alertDialogState.open}
+        onOpenChange={(newOpen) => {
+          if (newOpen) {
+            return;
+          }
+
+          setAlertDialogState({ open: newOpen });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <LoadingButton
+              isLoading={isDeleteUserAvailableTaskMutationPending}
+              onClick={() => {
+                if (!alertDialogState.open) {
+                  return;
+                }
+
+                deleteUserAvailableTaskMutateAsync({
+                  userId: user.id,
+                  taskId: alertDialogState.taskId,
+                })
+                  .then(() => {
+                    toast({ title: "Success" });
+                    queryClient.invalidateQueries({
+                      queryKey: getUserQueryKey(user.id),
+                    });
+                    setAlertDialogState({ open: false });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                  });
+              }}
+            >
+              Continue
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

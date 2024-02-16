@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -47,7 +47,7 @@ export default function NewTrackingNumberDialog({ job }: Props) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { mutateAsync } = usePostTrackingNumberMutation();
+  const usePostTrackingNumberMutationResult = usePostTrackingNumberMutation();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -57,14 +57,27 @@ export default function NewTrackingNumberDialog({ job }: Props) {
     },
   });
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostTrackingNumberMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostTrackingNumberMutationResult.isSuccess,
+  ]);
+
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      jobId: job.id,
-      courierId: values.courierId,
-      trackingNumber: values.trackingNumber,
-    })
+    await usePostTrackingNumberMutationResult
+      .mutateAsync({
+        jobId: job.id,
+        courierId: values.courierId,
+        trackingNumber: values.trackingNumber,
+      })
       .then(() => {
-        form.reset();
         queryClient.invalidateQueries({
           queryKey: getTrackingNumbersQueryKey({ jobId: job.id }),
         });

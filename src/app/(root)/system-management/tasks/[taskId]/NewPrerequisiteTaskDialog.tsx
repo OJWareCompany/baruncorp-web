@@ -41,11 +41,11 @@ interface Props {
 
 export default function NewPrerequisiteTaskDialog({ task }: Props) {
   const { taskId } = useParams() as { taskId: string };
-  const { mutateAsync } = usePostPrerequisiteTaskMutation(taskId);
+  const usePostPrerequisiteTaskMutationResult =
+    usePostPrerequisiteTaskMutation(taskId);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -54,16 +54,30 @@ export default function NewPrerequisiteTaskDialog({ task }: Props) {
     },
   });
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostPrerequisiteTaskMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostPrerequisiteTaskMutationResult.isSuccess,
+  ]);
+
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      prerequisiteTaskId: values.taskId,
-    })
+    await usePostPrerequisiteTaskMutationResult
+      .mutateAsync({
+        prerequisiteTaskId: values.taskId,
+      })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getTaskQueryKey(taskId),
         });
         setOpen(false);
-        setIsSubmitSuccessful(true);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
@@ -93,13 +107,6 @@ export default function NewPrerequisiteTaskDialog({ task }: Props) {
         }
       });
   }
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      form.reset();
-      setIsSubmitSuccessful(false);
-    }
-  }, [form, isSubmitSuccessful]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

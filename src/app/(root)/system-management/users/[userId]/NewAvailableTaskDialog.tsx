@@ -54,12 +54,11 @@ interface Props {
 
 export default function NewAvailableTaskDialog({ user }: Props) {
   const { userId } = useParams() as { userId: string };
-  const { mutateAsync } = usePostUserAvailableTaskMutation(userId);
+  const usePostUserAvailableTaskMutationResult =
+    usePostUserAvailableTaskMutation(userId);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -69,13 +68,27 @@ export default function NewAvailableTaskDialog({ user }: Props) {
     },
   });
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostUserAvailableTaskMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostUserAvailableTaskMutationResult.isSuccess,
+  ]);
+
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      taskId: values.taskId,
-      autoAssignmentType: values.autoAssignmentPropertyType,
-    })
+    await usePostUserAvailableTaskMutationResult
+      .mutateAsync({
+        taskId: values.taskId,
+        autoAssignmentType: values.autoAssignmentPropertyType,
+      })
       .then(() => {
-        setIsSubmitSuccessful(true);
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getUserQueryKey(userId),
         });
@@ -95,13 +108,6 @@ export default function NewAvailableTaskDialog({ user }: Props) {
         }
       });
   }
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      form.reset();
-      setIsSubmitSuccessful(false);
-    }
-  }, [form, isSubmitSuccessful]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

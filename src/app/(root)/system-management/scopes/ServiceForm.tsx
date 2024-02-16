@@ -44,7 +44,6 @@ interface Props {
 }
 
 export default function ServiceForm({ onSuccess }: Props) {
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [standardSectionExisting, setStandardSectionExisting] = useState({
     isResiNewPriceExist: false,
     isResiRevPriceExist: false,
@@ -215,7 +214,7 @@ export default function ServiceForm({ onSuccess }: Props) {
     [standardSectionExisting]
   );
 
-  const { mutateAsync } = usePostServiceMutation();
+  const usePostServiceMutationResult = usePostServiceMutation();
 
   type FieldValues = z.infer<typeof formSchema>;
 
@@ -241,61 +240,75 @@ export default function ServiceForm({ onSuccess }: Props) {
     },
   });
 
+  useEffect(() => {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostServiceMutationResult.isSuccess
+    ) {
+      form.reset();
+    }
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostServiceMutationResult.isSuccess,
+  ]);
+
   const watchPricingType = form.watch("pricingType");
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      name: values.name,
-      billingCode: values.billingCode,
-      pricingType: values.pricingType,
-      fixedPrice: transformStringIntoNullableNumber.parse(values.fixedPrice),
-      standardPricing: {
-        commercialNewServiceTiers:
-          values.standardPricing.commercialNewServiceTiers.map((value) => ({
-            startingPoint: Number(value.startingPoint),
-            finishingPoint: Number(value.finishingPoint),
-            price: Number(value.price),
-            gmPrice: Number(value.gmPrice),
-          })),
-        commercialRevisionCostPerUnit: transformStringIntoNullableNumber.parse(
-          values.standardPricing.commercialRevisionCostPerUnit
-        ),
-        commercialRevisionMinutesPerUnit:
-          transformStringIntoNullableNumber.parse(
-            values.standardPricing.commercialRevisionMinutesPerUnit
+    await usePostServiceMutationResult
+      .mutateAsync({
+        name: values.name,
+        billingCode: values.billingCode,
+        pricingType: values.pricingType,
+        fixedPrice: transformStringIntoNullableNumber.parse(values.fixedPrice),
+        standardPricing: {
+          commercialNewServiceTiers:
+            values.standardPricing.commercialNewServiceTiers.map((value) => ({
+              startingPoint: Number(value.startingPoint),
+              finishingPoint: Number(value.finishingPoint),
+              price: Number(value.price),
+              gmPrice: Number(value.gmPrice),
+            })),
+          commercialRevisionCostPerUnit:
+            transformStringIntoNullableNumber.parse(
+              values.standardPricing.commercialRevisionCostPerUnit
+            ),
+          commercialRevisionMinutesPerUnit:
+            transformStringIntoNullableNumber.parse(
+              values.standardPricing.commercialRevisionMinutesPerUnit
+            ),
+          residentialGmPrice: transformStringIntoNullableNumber.parse(
+            values.standardPricing.residentialGmPrice
           ),
-        residentialGmPrice: transformStringIntoNullableNumber.parse(
-          values.standardPricing.residentialGmPrice
-        ),
-        residentialPrice: transformStringIntoNullableNumber.parse(
-          values.standardPricing.residentialPrice
-        ),
-        residentialRevisionGmPrice: transformStringIntoNullableNumber.parse(
-          values.standardPricing.residentialRevisionGmPrice
-        ),
-        residentialRevisionPrice: transformStringIntoNullableNumber.parse(
-          values.standardPricing.residentialRevisionPrice
-        ),
-      },
-      commercialNewEstimatedTaskDuration:
-        transformStringIntoNullableNumber.parse(
-          values.commercialNewEstimatedTaskDuration
-        ),
-      commercialRevisionEstimatedTaskDuration:
-        transformStringIntoNullableNumber.parse(
-          values.commercialRevisionEstimatedTaskDuration
-        ),
-      residentialNewEstimatedTaskDuration:
-        transformStringIntoNullableNumber.parse(
-          values.residentialNewEstimatedTaskDuration
-        ),
-      residentialRevisionEstimatedTaskDuration:
-        transformStringIntoNullableNumber.parse(
-          values.residentialRevisionEstimatedTaskDuration
-        ),
-    })
+          residentialPrice: transformStringIntoNullableNumber.parse(
+            values.standardPricing.residentialPrice
+          ),
+          residentialRevisionGmPrice: transformStringIntoNullableNumber.parse(
+            values.standardPricing.residentialRevisionGmPrice
+          ),
+          residentialRevisionPrice: transformStringIntoNullableNumber.parse(
+            values.standardPricing.residentialRevisionPrice
+          ),
+        },
+        commercialNewEstimatedTaskDuration:
+          transformStringIntoNullableNumber.parse(
+            values.commercialNewEstimatedTaskDuration
+          ),
+        commercialRevisionEstimatedTaskDuration:
+          transformStringIntoNullableNumber.parse(
+            values.commercialRevisionEstimatedTaskDuration
+          ),
+        residentialNewEstimatedTaskDuration:
+          transformStringIntoNullableNumber.parse(
+            values.residentialNewEstimatedTaskDuration
+          ),
+        residentialRevisionEstimatedTaskDuration:
+          transformStringIntoNullableNumber.parse(
+            values.residentialRevisionEstimatedTaskDuration
+          ),
+      })
       .then(() => {
-        setIsSubmitSuccessful(true);
         queryClient.invalidateQueries({
           queryKey: getServicesQueryKey({
             limit: Number.MAX_SAFE_INTEGER,
@@ -352,13 +365,6 @@ export default function ServiceForm({ onSuccess }: Props) {
     control: form.control,
     name: "standardPricing.commercialNewServiceTiers",
   });
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      form.reset();
-      setIsSubmitSuccessful(false);
-    }
-  }, [form, isSubmitSuccessful]);
 
   const common = (
     <>

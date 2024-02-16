@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,7 +60,6 @@ export default function NewScopeForm({
   onSuccessWithWetStamp,
   onSuccessWithoutWetStamp,
 }: Props) {
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,24 +70,32 @@ export default function NewScopeForm({
   const watchScopeId = form.watch("scopeId");
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { mutateAsync } = usePostOrderedServiceMutation();
+  const usePostOrderedServiceMutationResult = usePostOrderedServiceMutation();
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostOrderedServiceMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostOrderedServiceMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
     const { scopeId } = values;
-    await mutateAsync({
-      jobId: job.id,
-      serviceId: scopeId,
-      description: transformStringIntoNullableString.parse(values.description),
-    })
+    await usePostOrderedServiceMutationResult
+      .mutateAsync({
+        jobId: job.id,
+        serviceId: scopeId,
+        description: transformStringIntoNullableString.parse(
+          values.description
+        ),
+      })
       .then(() => {
-        setIsSubmitSuccessful(true);
         queryClient.invalidateQueries({ queryKey: getJobQueryKey(job.id) });
         queryClient.invalidateQueries({
           queryKey: getProjectQueryKey(job.projectId),

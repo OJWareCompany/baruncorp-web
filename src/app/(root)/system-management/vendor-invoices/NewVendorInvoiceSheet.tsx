@@ -76,7 +76,6 @@ type FieldValues = z.infer<typeof formSchema>;
 export default function NewClientInvoiceSheet() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -104,30 +103,36 @@ export default function NewClientInvoiceSheet() {
     },
     true
   );
-  const { mutateAsync } = usePostVendorInvoiceMutation();
+  const usePostVendorInvoiceMutationResult = usePostVendorInvoiceMutation();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (
+      form.formState.isSubmitSuccessful &&
+      usePostVendorInvoiceMutationResult.isSuccess
+    ) {
       form.reset();
-      setIsSubmitSuccessful(false);
     }
-  }, [form, isSubmitSuccessful]);
+  }, [
+    form,
+    form.formState.isSubmitSuccessful,
+    usePostVendorInvoiceMutationResult.isSuccess,
+  ]);
 
   async function onSubmit(values: FieldValues) {
-    await mutateAsync({
-      organizationId: values.vendorId,
-      note: transformStringIntoNullableString.parse(values.notes),
-      terms: Number(values.terms) as 21 | 30,
-      serviceMonth: format(
-        new Date(values.servicePeriodMonth.slice(0, 7)),
-        "yyyy-MM"
-      ),
-      invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
-      invoiceNumber: values.invoiceNumber,
-    })
+    await usePostVendorInvoiceMutationResult
+      .mutateAsync({
+        organizationId: values.vendorId,
+        note: transformStringIntoNullableString.parse(values.notes),
+        terms: Number(values.terms) as 21 | 30,
+        serviceMonth: format(
+          new Date(values.servicePeriodMonth.slice(0, 7)),
+          "yyyy-MM"
+        ),
+        invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
+        invoiceNumber: values.invoiceNumber,
+      })
       .then(() => {
-        setIsSubmitSuccessful(true);
         toast({
           title: "Success",
         });

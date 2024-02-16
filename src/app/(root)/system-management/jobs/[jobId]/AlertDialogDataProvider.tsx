@@ -21,6 +21,8 @@ import usePatchAssignedTaskCompleteMutation from "@/mutations/usePatchAssignedTa
 import usePatchAssignedTaskUnassignMutation from "@/mutations/usePatchAssignedTaskUnassignMutation";
 import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 import LoadingButton from "@/components/LoadingButton";
+import useDeleteTrackingNumberMutation from "@/mutations/useDeleteTrackingNumberMutation";
+import { getTrackingNumbersQueryKey } from "@/queries/useTrackingNumbersQuery";
 
 type AlertDialogData =
   | {
@@ -62,6 +64,12 @@ type AlertDialogData =
       assignedTaskId: string;
       jobId: string;
       projectId: string;
+    }
+  | {
+      open: true;
+      type: "DELETE_TRACKING_NUMBER";
+      trackingNumberId: string;
+      jobId: string;
     };
 
 type Action =
@@ -96,6 +104,11 @@ type Action =
       assignedTaskId: string;
       jobId: string;
       projectId: string;
+    }
+  | {
+      type: "DELETE_TRACKING_NUMBER";
+      trackingNumberId: string;
+      jobId: string;
     }
   | {
       type: "CLOSE";
@@ -136,6 +149,12 @@ function alertDialogDataReducer(
         ...action,
       };
     }
+    case "DELETE_TRACKING_NUMBER": {
+      return {
+        open: true,
+        ...action,
+      };
+    }
     case "CLOSE": {
       return {
         open: false,
@@ -166,36 +185,41 @@ export default function AlertDialogDataProvider({ children }: Props) {
   const { toast } = useToast();
   const {
     mutateAsync: patchJobStatusMutateAsync,
-    isPending: isPatchJobStatusMutateLoading,
+    isPending: isPatchJobStatusMutationPending,
   } = usePatchJobStatusMutation();
   const {
     mutateAsync: patchJobSendMutateAsync,
-    isPending: isPatchJobSendMutateLoading,
+    isPending: isPatchJobSendMutationPending,
   } = usePatchJobSendMutation();
   const {
     mutateAsync: patchOrderedServiceStatusMutateAsync,
-    isPending: isPatchOrderedServiceStatusMutateLoading,
+    isPending: isPatchOrderedServiceStatusMutationPending,
   } = usePatchOrderedServiceStatusMutation();
   const {
     mutateAsync: patchAssignMutateAsync,
-    isPending: isPatchAssignMutateLoading,
+    isPending: isPatchAssignMutationPending,
   } = usePatchAssignMutation();
   const {
     mutateAsync: patchAssignedTaskCompleteMutateAsync,
-    isPending: isPatchAssignedTaskCompleteMutateLoading,
+    isPending: isPatchAssignedTaskCompleteMutationPending,
   } = usePatchAssignedTaskCompleteMutation();
   const {
     mutateAsync: patchAssignedTaskUnassignMutateAsync,
-    isPending: isPatchAssignedTaskUnassignMutateLoading,
+    isPending: isPatchAssignedTaskUnassignMutationPending,
   } = usePatchAssignedTaskUnassignMutation();
+  const {
+    mutateAsync: deleteTrackingNumberMutateAsync,
+    isPending: isDeleteTrackingNumberMutationPending,
+  } = useDeleteTrackingNumberMutation();
 
-  const isLoading =
-    isPatchJobStatusMutateLoading ||
-    isPatchJobSendMutateLoading ||
-    isPatchOrderedServiceStatusMutateLoading ||
-    isPatchAssignMutateLoading ||
-    isPatchAssignedTaskCompleteMutateLoading ||
-    isPatchAssignedTaskUnassignMutateLoading;
+  const isPending =
+    isPatchJobStatusMutationPending ||
+    isPatchJobSendMutationPending ||
+    isPatchOrderedServiceStatusMutationPending ||
+    isPatchAssignMutationPending ||
+    isPatchAssignedTaskCompleteMutationPending ||
+    isPatchAssignedTaskUnassignMutationPending ||
+    isDeleteTrackingNumberMutationPending;
 
   return (
     <>
@@ -219,7 +243,7 @@ export default function AlertDialogDataProvider({ children }: Props) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <LoadingButton
-              isLoading={isLoading}
+              isLoading={isPending}
               onClick={() => {
                 if (!alertDialogData.open) {
                   return;
@@ -439,6 +463,35 @@ export default function AlertDialogDataProvider({ children }: Props) {
                       });
                       queryClient.invalidateQueries({
                         queryKey: getProjectQueryKey(projectId),
+                      });
+                      dispatch({ type: "CLOSE" });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }
+
+                if (alertDialogData.type === "DELETE_TRACKING_NUMBER") {
+                  const { jobId, trackingNumberId } = alertDialogData;
+
+                  deleteTrackingNumberMutateAsync({
+                    trackingNumberId,
+                  })
+                    .then(() => {
+                      toast({ title: "Success" });
+                      queryClient.invalidateQueries({
+                        queryKey: getTrackingNumbersQueryKey({ jobId }),
                       });
                       dispatch({ type: "CLOSE" });
                     })

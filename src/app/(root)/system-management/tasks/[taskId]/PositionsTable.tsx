@@ -2,7 +2,7 @@ import { useListData } from "react-stately";
 import { GridList, GridListItem, useDragAndDrop } from "react-aria-components";
 import { AlignJustify, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
@@ -18,24 +18,24 @@ import {
 import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import useDeletePositionTaskMutation from "@/mutations/useDeletePositionTaskMutation";
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import usePatchTaskPositionOrderMutation from "@/mutations/usePatchTaskPositionOrderMutation";
 import { useToast } from "@/components/ui/use-toast";
+import LoadingButton from "@/components/LoadingButton";
 
-interface Props {
+interface InternalTableProps {
   task: TaskResponseDto;
+  deletePosition: (positionId: string) => void;
 }
 
-export default function PositionsTable({ task }: Props) {
+function InternalTable({ task, deletePosition }: InternalTableProps) {
   const session = useSession();
   const list = useListData({
     initialItems: task.taskPositions.sort((a, b) => a.order - b.order),
@@ -46,8 +46,6 @@ export default function PositionsTable({ task }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { mutateAsync: deletePositionTaskMutateAsync } =
-    useDeletePositionTaskMutation();
   const { mutateAsync: patchTaskPositionOrderMutateAsync } =
     usePatchTaskPositionOrderMutation(task.id);
 
@@ -82,6 +80,7 @@ export default function PositionsTable({ task }: Props) {
       })),
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getTaskQueryKey(task.id),
         });
@@ -160,55 +159,109 @@ export default function PositionsTable({ task }: Props) {
                 </Select>
               </div>
               <div className="p-4">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          deletePositionTaskMutateAsync({
-                            positionId: item.positionId,
-                            taskId: task.id,
-                          })
-                            .then(() => {
-                              queryClient.invalidateQueries({
-                                queryKey: getTaskQueryKey(task.id),
-                              });
-                            })
-                            .catch((error: AxiosError<ErrorResponseData>) => {
-                              if (
-                                error.response &&
-                                error.response.data.errorCode.filter(
-                                  (value) => value != null
-                                ).length !== 0
-                              ) {
-                                toast({
-                                  title: error.response.data.message,
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                            });
-                        }}
-                      >
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="h-9 w-9"
+                  onClick={() => {
+                    deletePosition(item.positionId);
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </GridListItem>
           )}
         </GridList>
       )}
     </div>
+  );
+}
+
+interface Props {
+  task: TaskResponseDto;
+}
+
+export default function PositionsTable({ task }: Props) {
+  const [alertDialogState, setAlertDialogState] = useState<
+    { open: false } | { open: true; positionId: string }
+  >({ open: false });
+
+  const {
+    mutateAsync: deletePositionTaskMutateAsync,
+    isPending: isDeletePositionTaskMutationPending,
+  } = useDeletePositionTaskMutation();
+
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return (
+    <>
+      <InternalTable
+        task={task}
+        deletePosition={(positionId) => {
+          setAlertDialogState({
+            open: true,
+            positionId,
+          });
+        }}
+        key={JSON.stringify(task.taskPositions)} // 재렌더링을 안시켜주면 GridList가 업데이트가 안되어서 작성함
+      />
+      <AlertDialog
+        open={alertDialogState.open}
+        onOpenChange={(newOpen) => {
+          if (newOpen) {
+            return;
+          }
+
+          setAlertDialogState({ open: newOpen });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <LoadingButton
+              isLoading={isDeletePositionTaskMutationPending}
+              onClick={() => {
+                if (!alertDialogState.open) {
+                  return;
+                }
+
+                deletePositionTaskMutateAsync({
+                  positionId: alertDialogState.positionId,
+                  taskId: task.id,
+                })
+                  .then(() => {
+                    toast({ title: "Success" });
+                    queryClient.invalidateQueries({
+                      queryKey: getTaskQueryKey(task.id),
+                    });
+                    setAlertDialogState({ open: false });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                  });
+              }}
+            >
+              Continue
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

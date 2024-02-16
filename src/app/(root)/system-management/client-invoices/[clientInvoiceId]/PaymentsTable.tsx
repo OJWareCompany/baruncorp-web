@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-table";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, X } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AxiosError } from "axios";
 import { InvoiceResponseDto } from "@/api/api-spec";
 import { AffixInput } from "@/components/AffixInput";
@@ -25,13 +25,11 @@ import usePatchPaymentCancelMutation from "@/mutations/usePatchPaymentCancelMuta
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import {
@@ -40,6 +38,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import LoadingButton from "@/components/LoadingButton";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["payments"][number]>();
@@ -49,9 +48,12 @@ interface Props {
 }
 
 export default function PaymentsTable({ clientInvoice }: Props) {
-  const { mutateAsync } = usePatchPaymentCancelMutation();
+  const { mutateAsync, isPending } = usePatchPaymentCancelMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [alertDialogState, setAlertDialogState] = useState<
+    { open: false } | { open: true; paymentId: string }
+  >({ open: false });
 
   const columns = useMemo(
     () => [
@@ -117,56 +119,23 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                   event.stopPropagation();
                 }}
               >
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          mutateAsync({ paymentId: row.id })
-                            .then(() => {
-                              queryClient.invalidateQueries({
-                                queryKey: getClientInvoiceQueryKey(
-                                  clientInvoice.id
-                                ),
-                              });
-                            })
-                            .catch((error: AxiosError<ErrorResponseData>) => {
-                              if (
-                                error.response &&
-                                error.response.data.errorCode.filter(
-                                  (value) => value != null
-                                ).length !== 0
-                              ) {
-                                toast({
-                                  title: error.response.data.message,
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                            });
-                        }}
-                      >
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="h-9 w-9"
+                  onClick={() => {
+                    setAlertDialogState({ open: true, paymentId: row.id });
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           );
         },
       }),
     ],
-    [clientInvoice.id, mutateAsync, queryClient, toast]
+    []
   );
 
   const table = useReactTable({
@@ -234,6 +203,58 @@ export default function PaymentsTable({ clientInvoice }: Props) {
           </TableBody>
         </Table>
       </div>
+      <AlertDialog
+        open={alertDialogState.open}
+        onOpenChange={(newOpen) => {
+          if (newOpen) {
+            return;
+          }
+
+          setAlertDialogState({ open: newOpen });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <LoadingButton
+              isLoading={isPending}
+              onClick={() => {
+                if (!alertDialogState.open) {
+                  return;
+                }
+
+                mutateAsync({ paymentId: alertDialogState.paymentId })
+                  .then(() => {
+                    queryClient.invalidateQueries({
+                      queryKey: getClientInvoiceQueryKey(clientInvoice.id),
+                    });
+                    setAlertDialogState({ open: false });
+                    toast({ title: "Success" });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                  });
+              }}
+            >
+              Continue
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
