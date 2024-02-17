@@ -16,7 +16,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { STATES, STATES_KV_OBJ } from "@/lib/constants";
+import { Abbreviation, abbreviationStateNameMap } from "@/lib/constants";
 
 interface Props {
   abbreviation: string;
@@ -48,7 +48,8 @@ const StatesCombobox = forwardRef<HTMLButtonElement, Props>(
             <span className="flex-1 text-start">
               {!isSelected
                 ? placeholderText
-                : STATES_KV_OBJ[abbreviation] ?? placeholderText}
+                : abbreviationStateNameMap[abbreviation as Abbreviation] ??
+                  placeholderText}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -59,26 +60,26 @@ const StatesCombobox = forwardRef<HTMLButtonElement, Props>(
             <CommandEmpty>No state found.</CommandEmpty>
             <CommandList>
               <CommandGroup>
-                {STATES.map((value) => (
-                  <CommandItem
-                    key={value.abbreviation}
-                    value={value.stateName}
-                    onSelect={() => {
-                      onAbbreviationChange(value.abbreviation);
-                      setPopoverOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        abbreviation === value.abbreviation
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                    {value.stateName}
-                  </CommandItem>
-                ))}
+                {Object.entries(abbreviationStateNameMap).map(
+                  ([abbr, stateName]) => (
+                    <CommandItem
+                      key={abbr}
+                      value={stateName}
+                      onSelect={() => {
+                        onAbbreviationChange(abbr);
+                        setPopoverOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          abbreviation === abbr ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {stateName}
+                    </CommandItem>
+                  )
+                )}
               </CommandGroup>
             </CommandList>
           </Command>

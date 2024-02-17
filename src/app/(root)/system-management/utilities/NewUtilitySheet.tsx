@@ -88,7 +88,20 @@ export default function NewUtilitySheet() {
         setOpen(false);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // TODO: 이름 중복 예외 처리
+        switch (error.response?.status) {
+          case 404:
+            if (error.response?.data.errorCode.includes("21503")) {
+              form.setError(
+                "name",
+                {
+                  message: `${values.name} already exists`,
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+        }
+
         if (
           error.response &&
           error.response.data.errorCode.filter((value) => value != null)

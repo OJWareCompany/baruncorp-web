@@ -40,8 +40,10 @@ export default function PageHeaderAction({ project }: Props) {
               <span>Client Notes</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild disabled>
-            <Link href="#">
+          <DropdownMenuItem asChild disabled={project.utilityId == null}>
+            <Link
+              href={`/system-management/projects/${project.projectId}/utility-notes`}
+            >
               <span>Utility Notes</span>
             </Link>
           </DropdownMenuItem>

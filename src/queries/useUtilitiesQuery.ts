@@ -10,10 +10,15 @@ export const getUtilitiesQueryKey = (
   params: FindUtilityPaginatedHttpControllerGetParams
 ) => ["utilities", "list", params];
 
-const useUtilitiesQuery = (
-  params: FindUtilityPaginatedHttpControllerGetParams,
-  isKeepPreviousData?: boolean
-) => {
+const useUtilitiesQuery = ({
+  params,
+  enabled,
+  isKeepPreviousData,
+}: {
+  params: FindUtilityPaginatedHttpControllerGetParams;
+  isKeepPreviousData?: boolean;
+  enabled?: boolean;
+}) => {
   const api = useApi();
 
   return useQuery<UtilityPaginatedResponseDto, AxiosError<ErrorResponseData>>({
@@ -23,6 +28,7 @@ const useUtilitiesQuery = (
         .findUtilityPaginatedHttpControllerGet(params)
         .then(({ data }) => data),
     placeholderData: isKeepPreviousData ? keepPreviousData : undefined,
+    enabled,
   });
 };
 

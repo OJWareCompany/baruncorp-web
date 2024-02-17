@@ -15,6 +15,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
@@ -102,38 +103,43 @@ export default function EnumHeader<T extends EnumValues>({
         <Command>
           <CommandInput />
           <CommandEmpty>No {buttonText} found.</CommandEmpty>
-          <CommandGroup>
-            {zodEnum.options.map((value) => (
-              <CommandItem
-                key={value}
-                value={value}
-                onSelect={() => {
-                  const newSearchParams = new URLSearchParams(
-                    searchParams.toString()
-                  );
-                  newSearchParams.set(
-                    encodeURIComponent(searchParamName),
-                    value
-                  );
-                  newSearchParams.set(
-                    encodeURIComponent(pageIndexSearchParamName),
-                    "0"
-                  );
-                  router.replace(`${pathname}?${newSearchParams.toString()}`, {
-                    scroll: false,
-                  });
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === data ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {value}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandList>
+            <CommandGroup>
+              {zodEnum.options.map((value) => (
+                <CommandItem
+                  key={value}
+                  value={value}
+                  onSelect={() => {
+                    const newSearchParams = new URLSearchParams(
+                      searchParams.toString()
+                    );
+                    newSearchParams.set(
+                      encodeURIComponent(searchParamName),
+                      value
+                    );
+                    newSearchParams.set(
+                      encodeURIComponent(pageIndexSearchParamName),
+                      "0"
+                    );
+                    router.replace(
+                      `${pathname}?${newSearchParams.toString()}`,
+                      {
+                        scroll: false,
+                      }
+                    );
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === data ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {value}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
           <FilterButton
             isFiltered={isFiltered}
             onResetButtonClick={() => {

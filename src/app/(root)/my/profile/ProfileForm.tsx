@@ -119,6 +119,7 @@ export default function ProfileForm({ profile }: Props) {
           : null,
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({ queryKey: getProfileQueryKey() });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

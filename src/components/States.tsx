@@ -14,7 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { STATES, STATES_KV_OBJ } from "@/lib/constants";
+import { Abbreviation, abbreviationStateNameMap } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -45,41 +45,41 @@ const States = forwardRef<HTMLButtonElement, Props>(
               <CommandEmpty>No state found.</CommandEmpty>
               <CommandList>
                 <CommandGroup>
-                  {STATES.map((value) => {
-                    const isIncluded = abbreviations.includes(
-                      value.abbreviation
-                    );
+                  {Object.entries(abbreviationStateNameMap).map(
+                    ([abbreviation, stateName]) => {
+                      const isIncluded = abbreviations.includes(abbreviation);
 
-                    return (
-                      <CommandItem
-                        key={value.abbreviation}
-                        value={value.stateName}
-                        onSelect={() => {
-                          if (isIncluded) {
-                            onAbbreviationsChange(
-                              abbreviations.filter(
-                                (abbr) => abbr !== value.abbreviation
-                              )
-                            );
-                            return;
-                          }
+                      return (
+                        <CommandItem
+                          key={abbreviation}
+                          value={stateName}
+                          onSelect={() => {
+                            if (isIncluded) {
+                              onAbbreviationsChange(
+                                abbreviations.filter(
+                                  (abbr) => abbr !== abbreviation
+                                )
+                              );
+                              return;
+                            }
 
-                          onAbbreviationsChange([
-                            ...abbreviations,
-                            value.abbreviation,
-                          ]);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            isIncluded ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {value.stateName}
-                      </CommandItem>
-                    );
-                  })}
+                            onAbbreviationsChange([
+                              ...abbreviations,
+                              abbreviation,
+                            ]);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              isIncluded ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {stateName}
+                        </CommandItem>
+                      );
+                    }
+                  )}
                 </CommandGroup>
               </CommandList>
             </Command>
@@ -96,7 +96,7 @@ const States = forwardRef<HTMLButtonElement, Props>(
               );
             }}
           >
-            {STATES_KV_OBJ[abbreviation]}
+            {abbreviationStateNameMap[abbreviation as Abbreviation]}
             <X className="w-4 h-4 ml-2" />
           </Button>
         ))}

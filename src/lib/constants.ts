@@ -701,220 +701,126 @@ export const INITIAL_EDITOR_VALUE = [{ type: "p", children: [{ text: "" }] }];
 
 /* -------------------------------------------------------------------------- */
 
-export const STATES = [
-  {
-    stateName: "ALABAMA",
-    abbreviation: "AL",
-  },
-  {
-    stateName: "ALASKA",
-    abbreviation: "AK",
-  },
-  {
-    stateName: "ARIZONA",
-    abbreviation: "AZ",
-  },
-  {
-    stateName: "ARKANSAS",
-    abbreviation: "AR",
-  },
-  {
-    stateName: "CALIFORNIA",
-    abbreviation: "CA",
-  },
-  {
-    stateName: "COLORADO",
-    abbreviation: "CO",
-  },
-  {
-    stateName: "CONNECTICUT",
-    abbreviation: "CT",
-  },
-  {
-    stateName: "DELAWARE",
-    abbreviation: "DE",
-  },
-  {
-    stateName: "DISTRICT OF COLUMBIA",
-    abbreviation: "DC",
-  },
-  {
-    stateName: "FLORIDA",
-    abbreviation: "FL",
-  },
-  {
-    stateName: "GEORGIA",
-    abbreviation: "GA",
-  },
-  {
-    stateName: "HAWAII",
-    abbreviation: "HI",
-  },
-  {
-    stateName: "IDAHO",
-    abbreviation: "ID",
-  },
-  {
-    stateName: "ILLINOIS",
-    abbreviation: "IL",
-  },
-  {
-    stateName: "INDIANA",
-    abbreviation: "IN",
-  },
-  {
-    stateName: "IOWA",
-    abbreviation: "IA",
-  },
-  {
-    stateName: "KANSAS",
-    abbreviation: "KS",
-  },
-  {
-    stateName: "KENTUCKY",
-    abbreviation: "KY",
-  },
-  {
-    stateName: "LOUISIANA",
-    abbreviation: "LA",
-  },
-  {
-    stateName: "MAINE",
-    abbreviation: "ME",
-  },
-  {
-    stateName: "MARYLAND",
-    abbreviation: "MD",
-  },
-  {
-    stateName: "MASSACHUSETTS",
-    abbreviation: "MA",
-  },
-  {
-    stateName: "MICHIGAN",
-    abbreviation: "MI",
-  },
-  {
-    stateName: "MINNESOTA",
-    abbreviation: "MN",
-  },
-  {
-    stateName: "MISSISSIPPI",
-    abbreviation: "MS",
-  },
-  {
-    stateName: "MISSOURI",
-    abbreviation: "MO",
-  },
-  {
-    stateName: "MONTANA",
-    abbreviation: "MT",
-  },
-  {
-    stateName: "NEBRASKA",
-    abbreviation: "NE",
-  },
-  {
-    stateName: "NEVADA",
-    abbreviation: "NV",
-  },
-  {
-    stateName: "NEW HAMPSHIRE",
-    abbreviation: "NH",
-  },
-  {
-    stateName: "NEW JERSEY",
-    abbreviation: "NJ",
-  },
-  {
-    stateName: "NEW MEXICO",
-    abbreviation: "NM",
-  },
-  {
-    stateName: "NEW YORK",
-    abbreviation: "NY",
-  },
-  {
-    stateName: "NORTH CAROLINA",
-    abbreviation: "NC",
-  },
-  {
-    stateName: "NORTH DAKOTA",
-    abbreviation: "ND",
-  },
-  {
-    stateName: "OHIO",
-    abbreviation: "OH",
-  },
-  {
-    stateName: "OKLAHOMA",
-    abbreviation: "OK",
-  },
-  {
-    stateName: "OREGON",
-    abbreviation: "OR",
-  },
-  {
-    stateName: "PENNSYLVANIA",
-    abbreviation: "PA",
-  },
-  {
-    stateName: "PUERTO RICO",
-    abbreviation: "PR",
-  },
-  {
-    stateName: "RHODE ISLAND",
-    abbreviation: "RI",
-  },
-  {
-    stateName: "SOUTH CAROLINA",
-    abbreviation: "SC",
-  },
-  {
-    stateName: "SOUTH DAKOTA",
-    abbreviation: "SD",
-  },
-  {
-    stateName: "TENNESSEE",
-    abbreviation: "TN",
-  },
-  {
-    stateName: "TEXAS",
-    abbreviation: "TX",
-  },
-  {
-    stateName: "UTAH",
-    abbreviation: "UT",
-  },
-  {
-    stateName: "VERMONT",
-    abbreviation: "VT",
-  },
-  {
-    stateName: "VIRGINIA",
-    abbreviation: "VA",
-  },
-  {
-    stateName: "WASHINGTON",
-    abbreviation: "WA",
-  },
-  {
-    stateName: "WEST VIRGINIA",
-    abbreviation: "WV",
-  },
-  {
-    stateName: "WISCONSIN",
-    abbreviation: "WI",
-  },
-  {
-    stateName: "WYOMING",
-    abbreviation: "WY",
-  },
-];
+const Abbreviations = [
+  "AL",
+  "AK",
+  "AZ",
+  "AR",
+  "CA",
+  "CO",
+  "CT",
+  "DE",
+  "DC",
+  "FL",
+  "GA",
+  "HI",
+  "ID",
+  "IL",
+  "IN",
+  "IA",
+  "KS",
+  "KY",
+  "LA",
+  "ME",
+  "MD",
+  "MA",
+  "MI",
+  "MN",
+  "MS",
+  "MO",
+  "MT",
+  "NE",
+  "NV",
+  "NH",
+  "NJ",
+  "NM",
+  "NY",
+  "NC",
+  "ND",
+  "OH",
+  "OK",
+  "OR",
+  "PA",
+  "PR",
+  "RI",
+  "SC",
+  "SD",
+  "TN",
+  "TX",
+  "UT",
+  "VT",
+  "VA",
+  "WA",
+  "WV",
+  "WI",
+  "WY",
+] as const;
 
-export const STATES_KV_OBJ: {
-  [index: string]: string;
-} = {
+const StateNames = [
+  "ALABAMA",
+  "ALASKA",
+  "ARIZONA",
+  "ARKANSAS",
+  "CALIFORNIA",
+  "COLORADO",
+  "CONNECTICUT",
+  "DELAWARE",
+  "DISTRICT OF COLUMBIA",
+  "FLORIDA",
+  "GEORGIA",
+  "HAWAII",
+  "IDAHO",
+  "ILLINOIS",
+  "INDIANA",
+  "IOWA",
+  "KANSAS",
+  "KENTUCKY",
+  "LOUISIANA",
+  "MAINE",
+  "MARYLAND",
+  "MASSACHUSETTS",
+  "MICHIGAN",
+  "MINNESOTA",
+  "MISSISSIPPI",
+  "MISSOURI",
+  "MONTANA",
+  "NEBRASKA",
+  "NEVADA",
+  "NEW HAMPSHIRE",
+  "NEW JERSEY",
+  "NEW MEXICO",
+  "NEW YORK",
+  "NORTH CAROLINA",
+  "NORTH DAKOTA",
+  "OHIO",
+  "OKLAHOMA",
+  "OREGON",
+  "PENNSYLVANIA",
+  "PUERTO RICO",
+  "RHODE ISLAND",
+  "SOUTH CAROLINA",
+  "SOUTH DAKOTA",
+  "TENNESSEE",
+  "TEXAS",
+  "UTAH",
+  "VERMONT",
+  "VIRGINIA",
+  "WASHINGTON",
+  "WEST VIRGINIA",
+  "WISCONSIN",
+  "WYOMING",
+] as const;
+
+export type Abbreviation = (typeof Abbreviations)[number];
+export type StateName = (typeof StateNames)[number];
+
+export const StateNameEnum = z.enum(StateNames);
+
+type AbbreviationStateNameMap = {
+  [key in Abbreviation]: StateName;
+};
+
+export const abbreviationStateNameMap: AbbreviationStateNameMap = {
   AL: "ALABAMA",
   AK: "ALASKA",
   AZ: "ARIZONA",
@@ -967,4 +873,63 @@ export const STATES_KV_OBJ: {
   WV: "WEST VIRGINIA",
   WI: "WISCONSIN",
   WY: "WYOMING",
+};
+
+type StateNameAbbreviationMap = {
+  [key in StateName]: Abbreviation;
+};
+
+export const stateNameAbbreviationMap: StateNameAbbreviationMap = {
+  ALABAMA: "AL",
+  ALASKA: "AK",
+  ARIZONA: "AZ",
+  ARKANSAS: "AR",
+  CALIFORNIA: "CA",
+  COLORADO: "CO",
+  CONNECTICUT: "CT",
+  DELAWARE: "DE",
+  "DISTRICT OF COLUMBIA": "DC",
+  FLORIDA: "FL",
+  GEORGIA: "GA",
+  HAWAII: "HI",
+  IDAHO: "ID",
+  ILLINOIS: "IL",
+  INDIANA: "IN",
+  IOWA: "IA",
+  KANSAS: "KS",
+  KENTUCKY: "KY",
+  LOUISIANA: "LA",
+  MAINE: "ME",
+  MARYLAND: "MD",
+  MASSACHUSETTS: "MA",
+  MICHIGAN: "MI",
+  MINNESOTA: "MN",
+  MISSISSIPPI: "MS",
+  MISSOURI: "MO",
+  MONTANA: "MT",
+  NEBRASKA: "NE",
+  NEVADA: "NV",
+  "NEW HAMPSHIRE": "NH",
+  "NEW JERSEY": "NJ",
+  "NEW MEXICO": "NM",
+  "NEW YORK": "NY",
+  "NORTH CAROLINA": "NC",
+  "NORTH DAKOTA": "ND",
+  OHIO: "OH",
+  OKLAHOMA: "OK",
+  OREGON: "OR",
+  PENNSYLVANIA: "PA",
+  "PUERTO RICO": "PR",
+  "RHODE ISLAND": "RI",
+  "SOUTH CAROLINA": "SC",
+  "SOUTH DAKOTA": "SD",
+  TENNESSEE: "TN",
+  TEXAS: "TX",
+  UTAH: "UT",
+  VERMONT: "VT",
+  VIRGINIA: "VA",
+  WASHINGTON: "WA",
+  "WEST VIRGINIA": "WV",
+  WISCONSIN: "WI",
+  WYOMING: "WY",
 };

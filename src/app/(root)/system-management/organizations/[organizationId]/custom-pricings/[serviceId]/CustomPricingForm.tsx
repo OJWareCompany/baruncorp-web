@@ -403,6 +403,7 @@ export default function CustomPricingForm({
         ),
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getCustomPricingQueryKey(
             organization.id,

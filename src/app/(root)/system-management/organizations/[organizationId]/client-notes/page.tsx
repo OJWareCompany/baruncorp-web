@@ -4,7 +4,7 @@ import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
-import useClientNotesQuery from "@/queries/useClientNotesQuery";
+import useClientNoteHistoriesQuery from "@/queries/useClientNoteHistoriesQuery";
 import useClientNoteQuery from "@/queries/useClientNoteQuery";
 import ClientNoteHistories from "@/components/client-notes/ClientNoteHistories";
 import ClientNotesForm from "@/components/client-notes/ClientNotesForm";
@@ -23,24 +23,24 @@ export default function Page({ params: { organizationId } }: Props) {
     error: organizationQueryError,
   } = useOrganizationQuery(organizationId);
   const {
-    data: clientNotes,
-    isLoading: isClientNotesQueryLoading,
-    error: clientNotesQueryError,
-  } = useClientNotesQuery({ organizationId });
+    data: clientNoteHistories,
+    isLoading: isClientNoteHistoriesQueryLoading,
+    error: clientNoteHistoriesQueryError,
+  } = useClientNoteHistoriesQuery({ organizationId });
   const {
     data: clientNote,
     isLoading: isClientNoteQueryLoading,
     error: clientNoteQueryError,
-  } = useClientNoteQuery(clientNotes?.items[0].id ?? "", true);
+  } = useClientNoteQuery(clientNoteHistories?.items[0].id ?? "", true);
   useNotFound(organizationQueryError);
-  useNotFound(clientNotesQueryError);
+  useNotFound(clientNoteHistoriesQueryError);
   useNotFound(clientNoteQueryError);
 
   if (
     isOrganizationQueryLoading ||
     organization == null ||
-    isClientNotesQueryLoading ||
-    clientNotes == null ||
+    isClientNoteHistoriesQueryLoading ||
+    clientNoteHistories == null ||
     isClientNoteQueryLoading ||
     clientNote == null
   ) {

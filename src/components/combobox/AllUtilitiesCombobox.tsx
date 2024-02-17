@@ -1,7 +1,6 @@
 "use client";
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { Button } from "../ui/button";
 import {
   Popover,
   PopoverContent,
@@ -16,30 +15,48 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
+import useUtilitiesQuery from "@/queries/useUtilitiesQuery";
+import { Button } from "@/components/ui/button";
+import { StateName, stateNameAbbreviationMap } from "@/lib/constants";
+import { UtilityResponseDto } from "@/api/api-spec";
 
 interface Props {
-  organizationId: string;
-  onOrganizationIdChange: (newOrganizationId: string) => void;
+  state: string;
+  utilityId: string;
+  onUtilityChange: (newUtility: UtilityResponseDto) => void;
   disabled?: boolean;
   modal?: boolean;
 }
 
-const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
+const AllUtilitiesCombobox = forwardRef<HTMLButtonElement, Props>(
   (
-    { organizationId, onOrganizationIdChange, disabled = false, modal = false },
+    { state, utilityId, onUtilityChange, disabled = false, modal = false },
     ref
   ) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
-    const { data: organizations, isLoading: isOrganizationsQueryLoading } =
-      useOrganizationsQuery({
-        limit: Number.MAX_SAFE_INTEGER,
+    const { data: utilities, isLoading: isUtilitiesQueryLoading } =
+      useUtilitiesQuery({
+        params: {
+          limit: Number.MAX_SAFE_INTEGER,
+        },
       });
 
-    const placeholderText = "Select an organization";
+    const placeholderText = `Select an utility from existing`;
 
-    if (isOrganizationsQueryLoading || organizations == null) {
+    const items = useMemo(() => {
+      if (utilities == null) {
+        return [];
+      }
+
+      const abbr = stateNameAbbreviationMap[state.toUpperCase() as StateName];
+
+      return utilities.items.filter(
+        (value) => !value.stateAbbreviations.includes(abbr)
+      );
+    }, [state, utilities]);
+
+    if (isUtilitiesQueryLoading || utilities == null) {
       return (
         <Button
           variant="outline"
@@ -53,8 +70,8 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
       );
     }
 
-    const isSelected = organizationId !== "";
-    const isEmpty = organizations.items.length === 0;
+    const isSelected = utilityId !== "";
+    const isEmpty = items.length === 0;
 
     return (
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen} modal={modal}>
@@ -68,9 +85,8 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
             <span className="flex-1 text-start">
               {!isSelected
                 ? placeholderText
-                : organizations.items.find(
-                    (value) => value.id === organizationId
-                  )?.name ?? placeholderText}
+                : items.find((value) => value.id === utilityId)?.name ??
+                  placeholderText}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -79,32 +95,30 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
           <Command>
             <CommandInput placeholder="Search" />
             {isEmpty ? (
-              <div className="py-6 text-center text-sm">
-                No organization found.
-              </div>
+              <div className="py-6 text-center text-sm">No utility found.</div>
             ) : (
               <>
-                <CommandEmpty>No organization found.</CommandEmpty>
+                <CommandEmpty>No utility found.</CommandEmpty>
                 <CommandList>
                   <CommandGroup>
-                    {organizations.items.map((organization) => (
+                    {items.map((utility) => (
                       <CommandItem
-                        key={organization.id}
-                        value={organization.name}
+                        key={utility.id}
+                        value={utility.name}
                         onSelect={() => {
-                          onOrganizationIdChange(organization.id);
+                          onUtilityChange(utility);
                           setPopoverOpen(false);
                         }}
                       >
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            organizationId === organization.id
+                            utilityId === utility.id
                               ? "opacity-100"
                               : "opacity-0"
                           )}
                         />
-                        {organization.name}
+                        {utility.name}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -117,6 +131,6 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
     );
   }
 );
-OrganizationsCombobox.displayName = "OrganizationsCombobox";
+AllUtilitiesCombobox.displayName = "AllUtilitiesCombobox";
 
-export default OrganizationsCombobox;
+export default AllUtilitiesCombobox;

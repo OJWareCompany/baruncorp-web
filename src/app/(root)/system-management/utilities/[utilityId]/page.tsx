@@ -4,6 +4,8 @@ import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
 import UtilityNotesForm from "@/components/utility-notes/UtilityNotesForm";
 import useUtilityQuery from "@/queries/useUtilityQuery";
+import CollapsibleSection from "@/components/CollapsibleSection";
+import UtilityNoteHistories from "@/components/utility-notes/UtilityNoteHistories";
 
 interface Props {
   params: {
@@ -38,9 +40,9 @@ export default function Page({ params: { utilityId } }: Props) {
         <section>
           <UtilityNotesForm utility={utility} />
         </section>
-        {/* <CollapsibleSection title="History">
-          <UtilityNoteHistories organizationId={organizationId} />
-        </CollapsibleSection> */}
+        <CollapsibleSection title="History">
+          <UtilityNoteHistories utilityId={utilityId} />
+        </CollapsibleSection>
       </div>
     </div>
   );

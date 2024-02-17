@@ -22,6 +22,7 @@ import { getEditorValue } from "@/lib/plate-utils";
 import { Input } from "@/components/ui/input";
 import usePatchUtilityNoteMutation from "@/mutations/usePatchUtilityNoteMutation";
 import { getUtilityQueryKey } from "@/queries/useUtilityQuery";
+import { getUtilityNoteHistoriesQueryKey } from "@/queries/useUtilityNoteHistoriesQuery";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -52,7 +53,7 @@ export default function UtilityNotesForm({ utility }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { mutateAsync } = usePatchUtilityNoteMutation(utility.id);
+  const { mutateAsync } = usePatchUtilityNoteMutation();
 
   useEffect(() => {
     form.reset(getFieldValues(utility));
@@ -60,16 +61,35 @@ export default function UtilityNotesForm({ utility }: Props) {
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
+      utilityId: utility.id,
       name: values.name,
       stateAbbreviations: values.states,
       notes: JSON.stringify(values.notes),
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getUtilityQueryKey(utility.id),
         });
+        queryClient.invalidateQueries({
+          queryKey: getUtilityNoteHistoriesQueryKey({ utilityId: utility.id }),
+        });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
+        switch (error.response?.status) {
+          case 404:
+            if (error.response?.data.errorCode.includes("21503")) {
+              form.setError(
+                "name",
+                {
+                  message: `${values.name} already exists`,
+                },
+                { shouldFocus: true }
+              );
+              return;
+            }
+        }
+
         if (
           error.response &&
           error.response.data.errorCode.filter((value) => value != null)

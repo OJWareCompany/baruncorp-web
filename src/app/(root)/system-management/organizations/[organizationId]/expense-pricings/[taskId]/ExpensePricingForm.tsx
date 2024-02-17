@@ -154,6 +154,9 @@ export default function ExpensePricingForm({
       comRevValue: Number(values.comRevValue),
     })
       .then(() => {
+        toast({
+          title: "Success",
+        });
         queryClient.invalidateQueries({
           queryKey: getExpensePricingQueryKey(
             organization.id,

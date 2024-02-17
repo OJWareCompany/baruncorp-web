@@ -1,8 +1,7 @@
 "use client";
 import { forwardRef, useState } from "react";
 import { Check, ChevronsUpDown, Loader2, Plus } from "lucide-react";
-import { Button } from "../ui/button";
-import NewUserByOrganizationSheetForCombobox from "./NewUserByOrganizationSheetForCombobox";
+import NewUtilityDialogForCombobox from "./NewUtilityDialogForCombobox";
 import {
   Popover,
   PopoverContent,
@@ -18,29 +17,42 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import useExcludeInactiveUsersQuery from "@/queries/useExcludeInactiveUsersQuery";
+import useUtilitiesQuery from "@/queries/useUtilitiesQuery";
+import { Button } from "@/components/ui/button";
+import { StateName, stateNameAbbreviationMap } from "@/lib/constants";
 
 interface Props {
-  organizationId: string;
-  userId: string;
-  onUserIdChange: (newUserId: string) => void;
+  utilityId: string;
+  onUtilityIdChange: (newUtilityId: string) => void;
+  state: string;
   disabled?: boolean;
   modal?: boolean;
 }
 
-const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
+const UtilitiesCombobox = forwardRef<HTMLButtonElement, Props>(
   (
-    { organizationId, userId, onUserIdChange, disabled = false, modal = false },
+    { utilityId, onUtilityIdChange, state, disabled = false, modal = false },
     ref
   ) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const [sheetOpen, setSheetOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
-    const { data, isPending } = useExcludeInactiveUsersQuery(organizationId);
+    const { data: utilities, isLoading: isUtilitiesQueryLoading } =
+      useUtilitiesQuery({
+        params: {
+          limit: Number.MAX_SAFE_INTEGER,
+          stateAbbreviation:
+            state !== ""
+              ? stateNameAbbreviationMap[state.toUpperCase() as StateName]
+              : undefined,
+        },
+        enabled: state !== "",
+      });
 
-    const placeholderText = "Select an user";
+    const placeholderText =
+      state === "" ? `Select an utility` : `Select an utility in ${state}`;
 
-    if (data == null || isPending) {
+    if (isUtilitiesQueryLoading || utilities == null) {
       return (
         <Button
           variant="outline"
@@ -49,13 +61,15 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
           disabled
         >
           <span className="flex-1 text-start">{placeholderText}</span>
-          <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
+          {state !== "" && (
+            <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
+          )}
         </Button>
       );
     }
 
-    const isSelected = userId !== "";
-    const isEmpty = data.length === 0;
+    const isSelected = utilityId !== "";
+    const isEmpty = utilities.items.length === 0;
 
     return (
       <>
@@ -70,31 +84,19 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
               <span className="flex-1 text-start">
                 {!isSelected
                   ? placeholderText
-                  : data.find((item) => item.id === userId)?.fullName ??
-                    placeholderText}
+                  : utilities.items.find((value) => value.id === utilityId)
+                      ?.name ?? placeholderText}
               </span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="p-0" align="start">
-            <Command
-              filter={(value, search) => {
-                if (value === "-1") {
-                  return 0;
-                }
-
-                if (value.includes(search)) {
-                  return 1;
-                }
-
-                return 0;
-              }}
-            >
+            <Command>
               <CommandInput placeholder="Search" />
               {isEmpty ? (
                 <div className="flex flex-col">
                   <div className="border-b py-6 text-center">
-                    <span className="text-sm">No user found.</span>
+                    <span className="text-sm">No utility found.</span>
                   </div>
                   <div className="p-1 w-full">
                     <Button
@@ -103,11 +105,11 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
                       size={"sm"}
                       onClick={() => {
                         setPopoverOpen(false);
-                        setSheetOpen(true);
+                        setDialogOpen(true);
                       }}
                     >
                       <Plus className="mr-2 h-4 w-4" />
-                      <span>New User</span>
+                      <span>New Utility</span>
                     </Button>
                   </div>
                 </div>
@@ -115,7 +117,7 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
                 <>
                   <CommandEmpty className="flex flex-col">
                     <div className="border-b py-6 text-center">
-                      <span className="text-sm">No user found.</span>
+                      <span className="text-sm">No utility found.</span>
                     </div>
                     <div className="p-1 w-full">
                       <Button
@@ -124,37 +126,34 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
                         size={"sm"}
                         onClick={() => {
                           setPopoverOpen(false);
-                          setSheetOpen(true);
+                          setDialogOpen(true);
                         }}
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        <span>New User</span>
+                        <span>New Utility</span>
                       </Button>
                     </div>
                   </CommandEmpty>
                   <CommandList>
                     <CommandGroup>
-                      {data.map((user) => (
+                      {utilities.items.map((utility) => (
                         <CommandItem
-                          key={user.id}
-                          value={`${user.fullName} ${user.email}`}
+                          key={utility.id}
+                          value={utility.name}
                           onSelect={() => {
-                            onUserIdChange(user.id);
+                            onUtilityIdChange(utility.id);
                             setPopoverOpen(false);
                           }}
                         >
                           <Check
                             className={cn(
                               "mr-2 h-4 w-4",
-                              userId === user.id ? "opacity-100" : "opacity-0"
+                              utilityId === utility.id
+                                ? "opacity-100"
+                                : "opacity-0"
                             )}
                           />
-                          <div>
-                            <p className="font-medium">{user.fullName}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {user.email}
-                            </p>
-                          </div>
+                          {utility.name}
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -165,11 +164,11 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
                       value="-1"
                       onSelect={() => {
                         setPopoverOpen(false);
-                        setSheetOpen(true);
+                        setDialogOpen(true);
                       }}
                     >
                       <Plus className="mr-2 h-4 w-4" />
-                      <span>New User</span>
+                      <span>New Utility</span>
                     </CommandItem>
                   </CommandGroup>
                 </>
@@ -177,16 +176,16 @@ const UsersByOrganizationCombobox = forwardRef<HTMLButtonElement, Props>(
             </Command>
           </PopoverContent>
         </Popover>
-        <NewUserByOrganizationSheetForCombobox
-          open={sheetOpen}
-          onOpenChange={setSheetOpen}
-          organizationId={organizationId}
-          onUserIdChange={onUserIdChange}
+        <NewUtilityDialogForCombobox
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          state={state}
+          onUtilityIdChange={onUtilityIdChange}
         />
       </>
     );
   }
 );
-UsersByOrganizationCombobox.displayName = "UsersByOrganizationCombobox";
+UtilitiesCombobox.displayName = "UtilitiesCombobox";
 
-export default UsersByOrganizationCombobox;
+export default UtilitiesCombobox;

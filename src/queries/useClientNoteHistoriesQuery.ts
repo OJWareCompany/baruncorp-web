@@ -6,11 +6,11 @@ import {
   FindClientNotePaginatedHttpControllerGetParams,
 } from "@/api/api-spec";
 
-export const getClientNotesQueryKey = (
+export const getClientNoteHistoriesQueryKey = (
   params: FindClientNotePaginatedHttpControllerGetParams
-) => ["client-notes", "list", params];
+) => ["client-note-histories", "list", params];
 
-const useClientNotesQuery = (
+const useClientNoteHistoriesQuery = (
   params: FindClientNotePaginatedHttpControllerGetParams,
   isKeepPreviousData?: boolean
 ) => {
@@ -20,7 +20,7 @@ const useClientNotesQuery = (
     ClientNotePaginatedResponseDto,
     AxiosError<ErrorResponseData>
   >({
-    queryKey: getClientNotesQueryKey(params),
+    queryKey: getClientNoteHistoriesQueryKey(params),
     queryFn: () =>
       api.clientNote
         .findClientNotePaginatedHttpControllerGet(params)
@@ -30,4 +30,4 @@ const useClientNotesQuery = (
   });
 };
 
-export default useClientNotesQuery;
+export default useClientNoteHistoriesQuery;

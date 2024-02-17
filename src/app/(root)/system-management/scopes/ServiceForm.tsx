@@ -309,6 +309,7 @@ export default function ServiceForm({ onSuccess }: Props) {
           ),
       })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getServicesQueryKey({
             limit: Number.MAX_SAFE_INTEGER,

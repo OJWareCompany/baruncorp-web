@@ -239,6 +239,7 @@ export default function JobForm({ project, job }: Props) {
       dueDate: null, // TODO
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getJobQueryKey(job.id),
         });

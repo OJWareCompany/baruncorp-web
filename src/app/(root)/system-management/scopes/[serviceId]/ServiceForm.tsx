@@ -367,6 +367,7 @@ export default function ServiceForm({ service }: Props) {
         ),
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getServiceQueryKey(serviceId),
         });

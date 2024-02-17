@@ -51,7 +51,7 @@ import { formatInEST } from "@/lib/utils";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEditorValue } from "@/lib/plate-utils";
-import useClientNotesQuery from "@/queries/useClientNotesQuery";
+import useClientNoteHistoriesQuery from "@/queries/useClientNoteHistoriesQuery";
 import useClientNoteQuery from "@/queries/useClientNoteQuery";
 
 const columnHelper =
@@ -92,7 +92,7 @@ function ClientNoteHistoriesTable({
       : 10,
   };
 
-  const { data, isLoading } = useClientNotesQuery(
+  const { data, isLoading } = useClientNoteHistoriesQuery(
     {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,

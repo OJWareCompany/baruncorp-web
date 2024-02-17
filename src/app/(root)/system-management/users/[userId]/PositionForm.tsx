@@ -61,12 +61,27 @@ export default function PositionForm({ positionId }: Props) {
                   onPositionChange={({ id, name }) => {
                     mutateAsync({ positionId: id, userId })
                       .then(() => {
-                        postUserPositionResetMutateAsync().then(() => {
-                          toast({ title: "Success" });
-                          queryClient.invalidateQueries({
-                            queryKey: getUserQueryKey(userId),
+                        postUserPositionResetMutateAsync()
+                          .then(() => {
+                            toast({ title: "Success" });
+                            queryClient.invalidateQueries({
+                              queryKey: getUserQueryKey(userId),
+                            });
+                          })
+                          .catch((error: AxiosError<ErrorResponseData>) => {
+                            if (
+                              error.response &&
+                              error.response.data.errorCode.filter(
+                                (value) => value != null
+                              ).length !== 0
+                            ) {
+                              toast({
+                                title: error.response.data.message,
+                                variant: "destructive",
+                              });
+                              return;
+                            }
                           });
-                        });
                       })
                       .catch((error: AxiosError<ErrorResponseData>) => {
                         switch (error.response?.status) {

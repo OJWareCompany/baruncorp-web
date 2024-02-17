@@ -96,7 +96,7 @@ export default function PaymentDialog() {
       .mutateAsync({
         amount: Number(values.amount),
         notes: transformStringIntoNullableString.parse(values.notes),
-        paymentMethod: values.paymentMethod,
+        paymentMethod: "Direct", // TODO
         invoiceId: clientInvoiceId,
       })
       .then(() => {

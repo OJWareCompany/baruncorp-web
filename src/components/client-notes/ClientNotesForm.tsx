@@ -25,7 +25,7 @@ import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import usePatchClientNoteMutation from "@/mutations/usePatchClientNoteMutation";
-import { getClientNotesQueryKey } from "@/queries/useClientNotesQuery";
+import { getClientNoteHistoriesQueryKey } from "@/queries/useClientNoteHistoriesQuery";
 
 const formSchema = z.object({
   designNotes: z.custom<Value>(),
@@ -76,8 +76,9 @@ export default function ClientNotesForm({ clientNote, organizationId }: Props) {
         "",
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
-          queryKey: getClientNotesQueryKey({ organizationId }),
+          queryKey: getClientNoteHistoriesQueryKey({ organizationId }),
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

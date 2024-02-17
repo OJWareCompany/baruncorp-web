@@ -16,6 +16,7 @@ import useProjectQuery from "@/queries/useProjectQuery";
 import PageLoading from "@/components/PageLoading";
 import { Input } from "@/components/ui/input";
 import Minimap from "@/components/Minimap";
+import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
 
 export default function ProjectSection() {
   const [newProjectSheetOpen, setNewProjectSheetOpen] = useState(false);
@@ -81,6 +82,19 @@ export default function ProjectSection() {
                   <Item>
                     <Label>Project Number</Label>
                     <Input value={project.projectNumber ?? "-"} disabled />
+                  </Item>
+                  <Item>
+                    <Label>Utility</Label>
+                    {project.utilityId == null ? (
+                      <Input value="-" disabled />
+                    ) : (
+                      <UtilitiesCombobox
+                        utilityId={project.utilityId}
+                        onUtilityIdChange={() => {}}
+                        state={project.propertyAddress.state}
+                        disabled
+                      />
+                    )}
                   </Item>
                 </ItemsContainer>
                 <div className="col-span-2">

@@ -3,7 +3,7 @@ import useJobQuery from "@/queries/useJobQuery";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
-import useClientNotesQuery from "@/queries/useClientNotesQuery";
+import useClientNoteHistoriesQuery from "@/queries/useClientNoteHistoriesQuery";
 import useClientNoteQuery from "@/queries/useClientNoteQuery";
 import ClientNotesForm from "@/components/client-notes/ClientNotesForm";
 import ClientNoteHistories from "@/components/client-notes/ClientNoteHistories";
@@ -22,26 +22,26 @@ export default function Page({ params: { jobId } }: Props) {
     error: jobQueryError,
   } = useJobQuery(jobId);
   const {
-    data: clientNotes,
-    isLoading: isClientNotesQueryLoading,
-    error: clientNotesQueryError,
-  } = useClientNotesQuery({
+    data: clientNoteHistories,
+    isLoading: isClientNoteHistoriesQueryLoading,
+    error: clientNoteHistoriesQueryError,
+  } = useClientNoteHistoriesQuery({
     organizationId: job?.clientInfo.clientOrganizationId,
   });
   const {
     data: clientNote,
     isLoading: isClientNoteQueryLoading,
     error: clientNoteQueryError,
-  } = useClientNoteQuery(clientNotes?.items[0].id ?? "", true);
+  } = useClientNoteQuery(clientNoteHistories?.items[0].id ?? "", true);
   useNotFound(jobQueryError);
-  useNotFound(clientNotesQueryError);
+  useNotFound(clientNoteHistoriesQueryError);
   useNotFound(clientNoteQueryError);
 
   if (
     isJobQueryLoading ||
     job == null ||
-    isClientNotesQueryLoading ||
-    clientNotes == null ||
+    isClientNoteHistoriesQueryLoading ||
+    clientNoteHistories == null ||
     isClientNoteQueryLoading ||
     clientNote == null
   ) {

@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { forwardRef } from "react";
 import { Button, ButtonProps } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface Props extends ButtonProps {
   isLoading?: boolean;
@@ -24,7 +25,12 @@ const LoadingButton = forwardRef<HTMLButtonElement, Props>(
       >
         {isLoading ? (
           <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2
+              className={cn(
+                "h-4 w-4 animate-spin",
+                buttonProps.size !== "icon" && "mr-2"
+              )}
+            />
             {children}
           </>
         ) : (

@@ -75,6 +75,7 @@ export default function PositionForm({ position }: Props) {
       description: transformStringIntoNullableString.parse(values.description),
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getPositionQueryKey(positionId),
         });

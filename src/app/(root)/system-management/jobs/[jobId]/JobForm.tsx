@@ -241,6 +241,7 @@ export default function JobForm({ project, job }: Props) {
       dueDate: values.dueDate == null ? null : values.dueDate.toISOString(),
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getJobQueryKey(job.id),
         });

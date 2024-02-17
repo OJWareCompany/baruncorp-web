@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import CollapsibleSection from "@/components/CollapsibleSection";
 import { Button } from "@/components/ui/button";
+import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
 
 interface Props {
   project: ProjectResponseDto;
@@ -93,6 +94,19 @@ export default function ProjectSection({ project }: Props) {
             />
           </div>
         </div>
+        <Item>
+          <Label>Utility</Label>
+          {project.utilityId == null ? (
+            <Input value="-" disabled />
+          ) : (
+            <UtilitiesCombobox
+              utilityId={project.utilityId}
+              onUtilityIdChange={() => {}}
+              state={project.propertyAddress.state}
+              disabled
+            />
+          )}
+        </Item>
       </ItemsContainer>
     </CollapsibleSection>
   );

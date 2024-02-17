@@ -107,6 +107,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
       terms: Number(values.terms) as 21 | 30,
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getClientInvoiceQueryKey(clientInvoice.id),
         });

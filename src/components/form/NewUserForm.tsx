@@ -162,6 +162,7 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
           : 10,
       })
       .then(({ id }) => {
+        toast({ title: "Success" });
         onSuccess?.({
           userId: id,
           organizationId: values.organizationId,

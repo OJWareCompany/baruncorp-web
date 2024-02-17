@@ -147,6 +147,7 @@ export default function UserForm({ user }: Props) {
           : null,
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getUserQueryKey(userId),
         });

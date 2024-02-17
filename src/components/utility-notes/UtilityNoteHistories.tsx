@@ -1,4 +1,4 @@
-"use client";
+"use utility";
 import {
   PaginationState,
   createColumnHelper,
@@ -27,10 +27,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ClientNoteDetail,
-  ClientNotePaginatedResponseDto,
-} from "@/api/api-spec";
+// import {
+//   UtilityNoteDetail,
+//   UtilityNotePaginatedResponseDto,
+// } from "@/api/api-spec";
 import {
   Select,
   SelectContent,
@@ -51,11 +51,17 @@ import { formatInEST } from "@/lib/utils";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEditorValue } from "@/lib/plate-utils";
-import useClientNotesQuery from "@/queries/useClientNotesQuery";
-import useClientNoteQuery from "@/queries/useClientNoteQuery";
+import useUtilityNoteHistoriesQuery from "@/queries/useUtilityNoteHistoriesQuery";
+import {
+  UtilityHistoryDetail,
+  UtilityHistoryPaginatedResponseDto,
+} from "@/api/api-spec";
+import useUtilityNoteHistoryQuery from "@/queries/useUtilityNoteHistoryQuery";
+import { Abbreviation, abbreviationStateNameMap } from "@/lib/constants";
+// import useUtilityNoteQuery from "@/queries/useUtilityNoteQuery";
 
 const columnHelper =
-  createColumnHelper<ClientNotePaginatedResponseDto["items"][number]>();
+  createColumnHelper<UtilityHistoryPaginatedResponseDto["items"][number]>();
 
 const columns = [
   columnHelper.accessor("userName", {
@@ -70,15 +76,15 @@ const columns = [
   }),
 ];
 
-interface ClientNoteHistoriesTableProps {
-  organizationId: string;
+interface UtilityNoteHistoriesTableProps {
+  utilityId: string;
   onRowClick: (id: string) => void;
 }
 
-function ClientNoteHistoriesTable({
-  organizationId,
+function UtilityNoteHistoriesTable({
+  utilityId,
   onRowClick,
-}: ClientNoteHistoriesTableProps) {
+}: UtilityNoteHistoriesTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -92,11 +98,11 @@ function ClientNoteHistoriesTable({
       : 10,
   };
 
-  const { data, isLoading } = useClientNotesQuery(
+  const { data, isLoading } = useUtilityNoteHistoriesQuery(
     {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      organizationId,
+      utilityId,
     },
     true
   );
@@ -262,38 +268,30 @@ function ClientNoteHistoriesTable({
   );
 }
 
-interface ClientNoteHistoryFormProps {
-  organizationName: string;
-  data: ClientNoteDetail;
+interface UtilityNoteHistoryFormProps {
+  data: UtilityHistoryDetail;
 }
 
-function ClientNoteHistoryForm({
-  organizationName,
-  data,
-}: ClientNoteHistoryFormProps) {
+function UtilityNoteHistoryForm({ data }: UtilityNoteHistoryFormProps) {
   return (
     <section className="space-y-4">
       <Item>
-        <Label>Organization</Label>
-        <Input value={organizationName} disabled />
+        <Label>Name</Label>
+        <Input value={data.name} disabled />
       </Item>
       <Item>
-        <Label>Design Notes</Label>
-        <BasicEditor value={getEditorValue(data.designNotes)} disabled />
+        <Label>States</Label>
+        <div className="flex gap-2 flex-wrap">
+          {data.stateAbbreviations.map((abbreviation) => (
+            <Button key={abbreviation} variant={"outline"} size={"sm"} disabled>
+              {abbreviationStateNameMap[abbreviation as Abbreviation]}
+            </Button>
+          ))}
+        </div>
       </Item>
       <Item>
-        <Label>Electrical Engineering Notes</Label>
-        <BasicEditor
-          value={getEditorValue(data.electricalEngineeringNotes)}
-          disabled
-        />
-      </Item>
-      <Item>
-        <Label>Structural Engineering Notes</Label>
-        <BasicEditor
-          value={getEditorValue(data.structuralEngineeringNotes)}
-          disabled
-        />
+        <Label>Notes</Label>
+        <BasicEditor value={getEditorValue(data.notes)} disabled />
       </Item>
     </section>
   );
@@ -304,7 +302,7 @@ interface ContentProps {
 }
 
 function Content({ id }: ContentProps) {
-  const { data, isLoading } = useClientNoteQuery(id);
+  const { data, isLoading } = useUtilityNoteHistoryQuery(id);
 
   if (isLoading || data == null) {
     return <PageLoading isPageHeaderPlaceholder={false} />;
@@ -340,18 +338,12 @@ function Content({ id }: ContentProps) {
           </TabsList>
           <TabsContent value="before" className="mt-4">
             <div className="space-y-6">
-              <ClientNoteHistoryForm
-                data={data.beforeModificationDetail}
-                organizationName={data.organizationName}
-              />
+              <UtilityNoteHistoryForm data={data.beforeModificationDetail} />
             </div>
           </TabsContent>
           <TabsContent value="after" className="mt-4">
             <div className="space-y-6">
-              <ClientNoteHistoryForm
-                data={data.afterModificationDetail}
-                organizationName={data.organizationName}
-              />
+              <UtilityNoteHistoryForm data={data.afterModificationDetail} />
             </div>
           </TabsContent>
         </Tabs>
@@ -362,22 +354,19 @@ function Content({ id }: ContentProps) {
   return (
     <div className="space-y-4">
       {metaData}
-      <ClientNoteHistoryForm
-        data={data.afterModificationDetail}
-        organizationName={data.organizationName}
-      />
+      <UtilityNoteHistoryForm data={data.afterModificationDetail} />
     </div>
   );
 }
 
-interface ClientNoteHistorySheetProps extends DialogProps {
+interface UtilityNoteHistorySheetProps extends DialogProps {
   id: string;
 }
 
-function ClientNoteHistorySheet({
+function UtilityNoteHistorySheet({
   id,
   ...dialogProps
-}: ClientNoteHistorySheetProps) {
+}: UtilityNoteHistorySheetProps) {
   return (
     <Sheet {...dialogProps}>
       <SheetContent className="w-full max-w-[1400px] sm:max-w-[1400px]">
@@ -391,10 +380,10 @@ function ClientNoteHistorySheet({
 }
 
 interface Props {
-  organizationId: string;
+  utilityId: string;
 }
 
-export default function ClientNoteHistories({ organizationId }: Props) {
+export default function UtilityNoteHistories({ utilityId }: Props) {
   const [sheetState, setSheetState] = useState<{
     open: boolean;
     id: string;
@@ -402,13 +391,13 @@ export default function ClientNoteHistories({ organizationId }: Props) {
 
   return (
     <>
-      <ClientNoteHistoriesTable
-        organizationId={organizationId}
+      <UtilityNoteHistoriesTable
+        utilityId={utilityId}
         onRowClick={(id) => {
           setSheetState({ open: true, id });
         }}
       />
-      <ClientNoteHistorySheet
+      <UtilityNoteHistorySheet
         {...sheetState}
         onOpenChange={(open) => {
           if (!open) {

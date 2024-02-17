@@ -17,6 +17,7 @@ import useNotificationsQuery, {
 import { formatInEST } from "@/lib/utils";
 import usePatchNotificationCheckMutation from "@/mutations/usePatchNotificationCheckMutation";
 import { useToast } from "@/components/ui/use-toast";
+import LoadingButton from "@/components/LoadingButton";
 
 export default function Notification() {
   const { toast } = useToast();
@@ -28,7 +29,8 @@ export default function Notification() {
     limit: Number.MAX_SAFE_INTEGER,
   });
   const router = useRouter();
-  const { mutateAsync } = usePatchNotificationCheckMutation();
+  const usePatchNotificationCheckMutationResult =
+    usePatchNotificationCheckMutation();
 
   useEffect(() => {
     if (socket == null) {
@@ -106,13 +108,15 @@ export default function Notification() {
                     {formatInEST(value.createdAt)}
                   </span>
                 </div>
-                <Button
+                <LoadingButton
+                  isLoading={usePatchNotificationCheckMutationResult.isPending}
                   variant="ghost"
                   size={"icon"}
                   onClick={(event) => {
                     event.stopPropagation();
 
-                    mutateAsync({ assigningTaskAlertId: value.id })
+                    usePatchNotificationCheckMutationResult
+                      .mutateAsync({ assigningTaskAlertId: value.id })
                       .then(() => {
                         queryClient.invalidateQueries({
                           queryKey: getNotificationsQueryKey({
@@ -136,8 +140,10 @@ export default function Notification() {
                       });
                   }}
                 >
-                  <X className="h-4 w-4" />
-                </Button>
+                  {!usePatchNotificationCheckMutationResult.isPending && (
+                    <X className="h-4 w-4" />
+                  )}
+                </LoadingButton>
               </div>
             ))}
           </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { formatInTimeZone } from "date-fns-tz";
+import { AxiosError } from "axios";
 import { useToast } from "@/components/ui/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
 import {
@@ -35,11 +36,25 @@ export default function User() {
 
   const handleSignOutButtonClick = () => {
     if (handStatus != null && handStatus.status) {
-      postUserHandsDownMutateAsync().then(() => {
-        queryClient.invalidateQueries({
-          queryKey: getHandsStatusQueryKey(),
+      postUserHandsDownMutateAsync()
+        .then(() => {
+          queryClient.invalidateQueries({
+            queryKey: getHandsStatusQueryKey(),
+          });
+        })
+        .catch((error: AxiosError<ErrorResponseData>) => {
+          if (
+            error.response &&
+            error.response.data.errorCode.filter((value) => value != null)
+              .length !== 0
+          ) {
+            toast({
+              title: error.response.data.message,
+              variant: "destructive",
+            });
+            return;
+          }
         });
-      });
     }
 
     queryClient.clear(); // 로그아웃시킬 때 cache를 지워서 다음 로그인 때 cache가 남아있지 않게 하기 위함
@@ -51,6 +66,8 @@ export default function User() {
     if (!open) {
       return;
     }
+
+    setDate(new Date());
 
     const timer = setInterval(() => {
       setDate(new Date());

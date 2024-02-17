@@ -191,6 +191,7 @@ export default function OrganizationForm({ organization }: Props) {
       isDelinquent: values.isDelinquent,
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getOrganizationQueryKey(organizationId),
         });

@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -32,39 +32,30 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
-  FindJobPaginatedHttpControllerFindJobParams,
+  FindUtilityPaginatedHttpControllerGetParams,
   UtilityPaginatedResponseDto,
 } from "@/api/api-spec";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import useUtilitiesQuery from "@/queries/useUtilitiesQuery";
-import { STATES_KV_OBJ } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
+import EnumHeader from "@/components/table/EnumHeader";
+import {
+  Abbreviation,
+  StateNameEnum,
+  abbreviationStateNameMap,
+  stateNameAbbreviationMap,
+} from "@/lib/constants";
 
 const columnHelper =
   createColumnHelper<UtilityPaginatedResponseDto["items"][number]>();
 
-const columns = [
-  columnHelper.accessor("name", {
-    header: "Name",
-  }),
-  columnHelper.accessor("stateAbbreviations", {
-    header: "States",
-    cell: ({ getValue }) => (
-      <div className="flex flex-wrap gap-1">
-        {getValue().map((value) => (
-          <Badge variant={"outline"} key={value}>
-            {STATES_KV_OBJ[value]}
-          </Badge>
-        ))}
-      </div>
-    ),
-  }),
-];
-
 export default function UtilitiesTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindUtilityPaginatedHttpControllerGetParams>();
 
+  const stateNameSearchParamName = "StateName";
   const pageIndexSearchParamName = "PageIndex";
   const pageSizeSearchParamName = "PageSize";
   const pagination: PaginationState = {
@@ -75,6 +66,12 @@ export default function UtilitiesTable() {
       ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
+  const stateNameSearchParamParseResult = StateNameEnum.safeParse(
+    searchParams.get(stateNameSearchParamName)
+  );
+  const stateNameSearchParam = stateNameSearchParamParseResult.success
+    ? stateNameSearchParamParseResult.data
+    : "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -82,15 +79,60 @@ export default function UtilitiesTable() {
     pagination,
   });
 
-  const params: FindJobPaginatedHttpControllerFindJobParams = useMemo(
+  const params: FindUtilityPaginatedHttpControllerGetParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
+      stateAbbreviation:
+        stateNameSearchParam === ""
+          ? undefined
+          : stateNameAbbreviationMap[stateNameSearchParam],
     }),
-    [pagination.pageIndex, pagination.pageSize]
+    [pagination.pageIndex, pagination.pageSize, stateNameSearchParam]
   );
 
-  const { data, isLoading } = useUtilitiesQuery(params, true);
+  const { data, isLoading, isFetching } = useUtilitiesQuery({
+    params,
+    isKeepPreviousData: true,
+  });
+
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("name", {
+        header: "Name",
+      }),
+      columnHelper.accessor("stateAbbreviations", {
+        header: () => (
+          <EnumHeader
+            buttonText="States"
+            searchParamName={stateNameSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={StateNameEnum}
+            isLoading={
+              syncedParams != null &&
+              params.stateAbbreviation !== syncedParams.stateAbbreviation
+            }
+          />
+        ),
+        cell: ({ getValue }) => (
+          <div className="flex flex-wrap gap-1">
+            {getValue().map((value) => (
+              <Badge variant={"outline"} key={value}>
+                {abbreviationStateNameMap[value as Abbreviation]}
+              </Badge>
+            ))}
+          </div>
+        ),
+      }),
+    ],
+    [params.stateAbbreviation, syncedParams]
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],

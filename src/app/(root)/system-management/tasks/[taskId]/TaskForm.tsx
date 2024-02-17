@@ -90,6 +90,7 @@ export default function TaskForm({ task, service }: Props) {
         ),
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getTaskQueryKey(taskId),
         });

@@ -1,5 +1,4 @@
 "use client";
-import ProjectForm from "./ProjectForm";
 import PageHeaderAction from "./PageHeaderAction";
 import JobsTable from "./JobsTable";
 import useProjectQuery from "@/queries/useProjectQuery";
@@ -39,9 +38,7 @@ export default function Page({ params: { projectId } }: Props) {
         action={<PageHeaderAction project={project} />}
       />
       <div className="space-y-6">
-        <section>
-          <ProjectForm project={project} />
-        </section>
+        <section>{/* <ProjectForm project={project} /> */}</section>
         <CollapsibleSection title="Jobs Related to Project">
           <JobsTable project={project} />
         </CollapsibleSection>

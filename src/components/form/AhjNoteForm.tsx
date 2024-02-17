@@ -2,9 +2,11 @@ import { useEffect } from "react";
 import { DefaultValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import InputEditor from "../editor/InputEditor";
 import BasicEditor from "../editor/BasicEditor";
 import CollapsibleSection from "../CollapsibleSection";
+import { useToast } from "../ui/use-toast";
 import {
   Form,
   FormControl,
@@ -53,6 +55,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
       ahjNote
     ) as DefaultValues<FieldValues>, // editor value의 deep partial 문제로 typescript가 error를 발생시키나, 실제로는 문제 없음
   });
+  const { toast } = useToast();
 
   const queryClient = useQueryClient();
   const { mutateAsync } = usePutAhjMutation(geoId);
@@ -66,6 +69,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
   async function onSubmit(values: FieldValues) {
     await mutateAsync(getUpdateAhjNoteRequestDtoFromFieldValues(values))
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getAhjNoteQueryKey(geoId),
         });
@@ -73,7 +77,19 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
           queryKey: getAhjNoteHistoriesQueryKey({ geoId }),
         });
       })
-      .catch(() => {});
+      .catch((error: AxiosError<ErrorResponseData>) => {
+        if (
+          error.response &&
+          error.response.data.errorCode.filter((value) => value != null)
+            .length !== 0
+        ) {
+          toast({
+            title: error.response.data.message,
+            variant: "destructive",
+          });
+          return;
+        }
+      });
   }
 
   return (

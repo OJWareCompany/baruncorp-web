@@ -41,6 +41,7 @@ import LoadingButton from "@/components/LoadingButton";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import { useToast } from "@/components/ui/use-toast";
 import { getProjectsQueryKey } from "@/queries/useProjectsQuery";
+import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
 
 const formSchema = z.object({
   propertyType: PropertyTypeEnum,
@@ -65,6 +66,7 @@ const formSchema = z.object({
         });
       }
     }),
+  utilityId: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -83,6 +85,7 @@ const defaultValues: DefaultValues<FieldValues> = {
     fullAddress: "",
     coordinates: [],
   },
+  utilityId: "",
 };
 
 interface Props extends DialogProps {
@@ -91,7 +94,6 @@ interface Props extends DialogProps {
 }
 
 // TODO: 주소 수정은 언제 가능해야 하는지? 주소는 중요한 키라서 수정하도록 하는 것은 영향이 끼칠 수 있다. draggable?
-// TODO: default property type을 org마다 설정할 수 있도록 해서, 그 값이 new project의 기본값으로 들어갈 수 있게
 export default function NewProjectSheet({
   organizationId,
   onProjectIdChange,
@@ -105,6 +107,8 @@ export default function NewProjectSheet({
   const usePostProjectMutationResult = usePostProjectMutation();
   const queryClient = useQueryClient();
   const { data: organization } = useOrganizationQuery(organizationId);
+
+  const watchState = form.watch("address.state");
 
   useEffect(() => {
     if (organization && organization.projectPropertyTypeDefaultValue) {
@@ -155,6 +159,7 @@ export default function NewProjectSheet({
             values.address.street2
           ),
         },
+        utilityId: values.utilityId === "" ? undefined : values.utilityId,
       })
       .then(async ({ id }) => {
         dialogProps.onOpenChange?.(false);
@@ -284,6 +289,12 @@ export default function NewProjectSheet({
                           ref={field.ref}
                           format="us"
                           onSelect={(value) => {
+                            if (
+                              value.state !== form.getValues("address.state")
+                            ) {
+                              form.setValue("utilityId", "");
+                            }
+
                             form.setValue(
                               "address",
                               {
@@ -340,6 +351,25 @@ export default function NewProjectSheet({
                   </div>
                   <FormMessage className="mt-2" />
                 </div>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="utilityId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Utility</FormLabel>
+                  <FormControl>
+                    <UtilitiesCombobox
+                      utilityId={field.value}
+                      onUtilityIdChange={field.onChange}
+                      state={watchState}
+                      ref={field.ref}
+                      modal
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
             <LoadingButton

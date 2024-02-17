@@ -35,6 +35,7 @@ import {
 } from "@/lib/constants";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
+import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
 
 const formSchema = z.object({
   organization: z
@@ -54,6 +55,7 @@ const formSchema = z.object({
     fullAddress: z.string().trim(),
     coordinates: z.array(z.number()),
   }),
+  utilityId: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -69,6 +71,7 @@ function getFieldValues(project: ProjectResponseDto): FieldValues {
       street2: project.propertyAddress.street2 ?? "",
       country: project.propertyAddress.country ?? "",
     },
+    utilityId: project.utilityId ?? "",
   };
 }
 
@@ -82,6 +85,9 @@ export default function ProjectForm({ project }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(project),
   });
+
+  const watchState = form.watch("address.state");
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -106,8 +112,10 @@ export default function ProjectForm({ project }: Props) {
           values.address.street2
         ),
       },
+      utilityId: values.utilityId === "" ? undefined : values.utilityId,
     })
       .then(() => {
+        toast({ title: "Success" });
         queryClient.invalidateQueries({
           queryKey: getProjectQueryKey(projectId),
         });
@@ -297,6 +305,25 @@ export default function ProjectForm({ project }: Props) {
               </div>
               <FormMessage className="mt-2" />
             </div>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="utilityId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Utility</FormLabel>
+              <FormControl>
+                <UtilitiesCombobox
+                  utilityId={field.value}
+                  onUtilityIdChange={field.onChange}
+                  state={watchState}
+                  ref={field.ref}
+                  modal
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
         <LoadingButton

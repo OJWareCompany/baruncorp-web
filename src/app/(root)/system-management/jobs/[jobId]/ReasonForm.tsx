@@ -40,6 +40,7 @@ export default function ReasonForm({ assignedTaskId, onSuccess }: Props) {
   async function onSubmit(values: FieldValues) {
     await patchAssignedTaskRejectMutateAsync({ reason: values.reason })
       .then(() => {
+        toast({ title: "Success" });
         onSuccess?.();
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
