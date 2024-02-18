@@ -29,6 +29,7 @@ import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import usePatchTaskPositionOrderMutation from "@/mutations/usePatchTaskPositionOrderMutation";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
+import usePatchPositionTaskMutation from "@/mutations/usePatchPositionTaskMutation";
 
 interface InternalTableProps {
   task: TaskResponseDto;
@@ -48,6 +49,8 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
 
   const { mutateAsync: patchTaskPositionOrderMutateAsync } =
     usePatchTaskPositionOrderMutation(task.id);
+  const { mutateAsync: patchPositionTaskMutateAsync } =
+    usePatchPositionTaskMutation();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: (keys) =>
@@ -143,7 +146,39 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
               </div>
               <div className="p-4 flex-1">{item.positionName}</div>
               <div className="p-4 flex-1">
-                <Select value={item.autoAssignmentType}>
+                <Select
+                  value={item.autoAssignmentType}
+                  onValueChange={(newValue) => {
+                    patchPositionTaskMutateAsync({
+                      positionId: item.positionId,
+                      taskId: task.id,
+                      autoAssignmentType:
+                        newValue as AutoAssignmentPropertyTypeEnum,
+                    })
+                      .then(() => {
+                        toast({
+                          title: "Success",
+                        });
+                        queryClient.invalidateQueries({
+                          queryKey: getTaskQueryKey(task.id),
+                        });
+                      })
+                      .catch((error: AxiosError<ErrorResponseData>) => {
+                        if (
+                          error.response &&
+                          error.response.data.errorCode.filter(
+                            (value) => value != null
+                          ).length !== 0
+                        ) {
+                          toast({
+                            title: error.response.data.message,
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                      });
+                  }}
+                >
                   <SelectTrigger className="-ml-[13px]">
                     <SelectValue placeholder="Select a property type" />
                   </SelectTrigger>

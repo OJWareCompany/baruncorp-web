@@ -61,7 +61,7 @@ export default function TasksTable({ position }: Props) {
     isPending: isDeletePositionTaskMutationPending,
   } = useDeletePositionTaskMutation();
   const { mutateAsync: patchPositionTaskMutateAsync } =
-    usePatchPositionTaskMutation(position.id);
+    usePatchPositionTaskMutation();
 
   const columns = useMemo(
     () => [
@@ -76,6 +76,7 @@ export default function TasksTable({ position }: Props) {
               value={getValue()}
               onValueChange={(newValue) => {
                 patchPositionTaskMutateAsync({
+                  positionId: position.id,
                   taskId: row.original.taskId,
                   autoAssignmentType:
                     newValue as AutoAssignmentPropertyTypeEnum,

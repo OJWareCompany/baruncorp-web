@@ -1,9 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { CreateJobNoteRequestDto, IdResponse } from "@/api/api-spec";
+import {
+  CreateJobNoteRequestDto,
+  IdResponse,
+  RequestParams,
+} from "@/api/api-spec";
 
-const usePostJobNoteMutation = () => {
+const usePostJobNoteMutation = (reqParams?: RequestParams) => {
   const api = useApi();
 
   return useMutation<
@@ -13,7 +17,7 @@ const usePostJobNoteMutation = () => {
   >({
     mutationFn: (reqData) => {
       return api.orderedJobNotes
-        .createJobNoteHttpControllerCreate(reqData)
+        .createJobNoteHttpControllerCreate(reqData, reqParams)
         .then(({ data: resData }) => resData);
     },
   });

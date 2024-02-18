@@ -11,3 +11,5 @@ interface FileServerErrorResponseData {
   statusCode: number;
   errorCode: string;
 }
+
+type PageType = "HOME" | "WORKSPACE" | "SYSTEM_MANAGEMENT";

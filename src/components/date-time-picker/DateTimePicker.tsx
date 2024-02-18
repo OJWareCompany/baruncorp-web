@@ -20,10 +20,11 @@ import { formatInEST, getDiffHoursFromLocalToEST } from "@/lib/utils";
 interface Props {
   value: Date | null | undefined;
   onChange: (value: Date | null | undefined) => void;
+  disabled?: boolean;
 }
 
 const DateTimePicker = forwardRef<HTMLButtonElement, Props>(
-  ({ value, onChange }, ref) => {
+  ({ value, onChange, disabled }, ref) => {
     const state = useDatePickerState({
       value: value == null ? null : fromDate(value, "America/New_York"),
       onChange: (newValue) => {
@@ -46,6 +47,7 @@ const DateTimePicker = forwardRef<HTMLButtonElement, Props>(
             variant={"outline"}
             className="pl-3 text-left font-normal"
             ref={ref}
+            disabled={disabled}
           >
             {value ? formatInEST(value) : "Pick a date"}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />

@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { SuperRefinement, z } from "zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -43,6 +43,20 @@ import usePatchServiceMutation from "@/mutations/usePatchServiceMutation";
 import { getServiceQueryKey } from "@/queries/useServiceQuery";
 import { useToast } from "@/components/ui/use-toast";
 import CollapsibleSection from "@/components/CollapsibleSection";
+
+const estimatedDaysRefinement: SuperRefinement<string> = (value, ctx) => {
+  if (value === "") {
+    return;
+  }
+
+  const valueAsNumber = Number(value);
+  if (valueAsNumber >= 10) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Estimated Days should be less than 10",
+    });
+  }
+};
 
 interface Props {
   service: ServiceResponseDto;
@@ -122,10 +136,22 @@ export default function ServiceForm({ service }: Props) {
             ),
           }),
           fixedPrice: z.string(),
-          commercialNewEstimatedTaskDuration: z.string().trim(),
-          commercialRevisionEstimatedTaskDuration: z.string().trim(),
-          residentialNewEstimatedTaskDuration: z.string().trim(),
-          residentialRevisionEstimatedTaskDuration: z.string().trim(),
+          commercialNewEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
+          commercialRevisionEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
+          residentialNewEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
+          residentialRevisionEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
         })
         .superRefine((values, ctx) => {
           if (values.pricingType === "Standard") {
@@ -373,7 +399,6 @@ export default function ServiceForm({ service }: Props) {
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // TODO: estimated days에 10이상 담았을 때에 대한 에러 핸들링
         if (
           error.response &&
           error.response.data.errorCode.filter((value) => value != null)

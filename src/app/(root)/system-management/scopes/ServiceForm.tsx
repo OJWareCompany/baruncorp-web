@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
+import { SuperRefinement, z } from "zod";
 import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -38,6 +38,20 @@ import usePostServiceMutation from "@/mutations/usePostServiceMutation";
 import { getServicesQueryKey } from "@/queries/useServicesQuery";
 import { useToast } from "@/components/ui/use-toast";
 import CollapsibleSection from "@/components/CollapsibleSection";
+
+const estimatedDaysRefinement: SuperRefinement<string> = (value, ctx) => {
+  if (value === "") {
+    return;
+  }
+
+  const valueAsNumber = Number(value);
+  if (valueAsNumber >= 10) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Estimated Days should be less than 10",
+    });
+  }
+};
 
 interface Props {
   onSuccess?: () => void;
@@ -92,10 +106,22 @@ export default function ServiceForm({ onSuccess }: Props) {
             ),
           }),
           fixedPrice: z.string().trim(),
-          commercialNewEstimatedTaskDuration: z.string().trim(),
-          commercialRevisionEstimatedTaskDuration: z.string().trim(),
-          residentialNewEstimatedTaskDuration: z.string().trim(),
-          residentialRevisionEstimatedTaskDuration: z.string().trim(),
+          commercialNewEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
+          commercialRevisionEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
+          residentialNewEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
+          residentialRevisionEstimatedTaskDuration: z
+            .string()
+            .trim()
+            .superRefine(estimatedDaysRefinement),
         })
         .superRefine((values, ctx) => {
           if (values.pricingType === "Standard") {
@@ -318,7 +344,6 @@ export default function ServiceForm({ onSuccess }: Props) {
         onSuccess?.();
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        // TODO: estimated days에 10이상 담았을 때에 대한 에러 핸들링
         switch (error.response?.status) {
           case 409:
             if (error.response?.data.errorCode.includes("40100")) {

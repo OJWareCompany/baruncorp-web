@@ -4,21 +4,20 @@ import useApi from "@/hook/useApi";
 import { UpdatePositionTaskAutoAssignmentTypeRequestDto } from "@/api/api-spec";
 
 interface Variables extends UpdatePositionTaskAutoAssignmentTypeRequestDto {
+  positionId: string;
   taskId: string;
 }
 
-const usePatchPositionTaskMutation = (positionId: string) => {
+const usePatchPositionTaskMutation = () => {
   const api = useApi();
 
   return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
-    mutationFn: (reqData) => {
+    mutationFn: ({ positionId, taskId, ...reqData }) => {
       return api.positions
         .updatePositionTaskAutoAssignmentTypeHttpControllerPatch(
           positionId,
-          reqData.taskId,
-          {
-            autoAssignmentType: reqData.autoAssignmentType,
-          }
+          taskId,
+          reqData
         )
         .then(({ data: resData }) => resData);
     },

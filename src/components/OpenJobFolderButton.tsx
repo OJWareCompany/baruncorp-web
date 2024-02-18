@@ -10,6 +10,8 @@ interface Props {
 }
 
 export default function OpenJobFolderButton({ job, project }: Props) {
+  // TODO: 일반 client가 눌렀을 때는 구글 드라이브 웹으로 이동시켜야 한다.
+
   return (
     <Button
       size={"sm"}

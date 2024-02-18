@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
+import PageLoading from "@/components/PageLoading";
 
 interface Props {
   children: React.ReactNode;
@@ -50,6 +51,10 @@ export default function Authenticate({ children }: Props) {
       router.push("/signin");
     }
   }, [router, status]);
+
+  if (status === "unauthenticated") {
+    return <PageLoading isPageHeaderPlaceholder={false} />;
+  }
 
   return children;
 }
