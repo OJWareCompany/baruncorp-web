@@ -77,9 +77,10 @@ function getFieldValues(project: ProjectResponseDto): FieldValues {
 
 interface Props {
   project: ProjectResponseDto;
+  disabled?: boolean;
 }
 
-export default function ProjectForm({ project }: Props) {
+export default function ProjectForm({ project, disabled = false }: Props) {
   const { projectId } = useParams() as { projectId: string };
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -190,7 +191,11 @@ export default function ProjectForm({ project }: Props) {
               <FormItem>
                 <FormLabel required>Property Type</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={disabled}
+                  >
                     <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder="Select a property type" />
                     </SelectTrigger>
@@ -216,7 +221,7 @@ export default function ProjectForm({ project }: Props) {
               <FormItem>
                 <FormLabel>Property Owner</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -229,7 +234,7 @@ export default function ProjectForm({ project }: Props) {
               <FormItem>
                 <FormLabel>Project Number</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={disabled} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -245,20 +250,22 @@ export default function ProjectForm({ project }: Props) {
                 <div className="flex flex-col gap-2">
                   <FormItem>
                     <FormLabel required>Address</FormLabel>
-                    <AddressSearchButton
-                      ref={field.ref}
-                      format="us"
-                      onSelect={(value) => {
-                        form.setValue(
-                          "address",
-                          {
-                            ...value,
-                            street2: "",
-                          },
-                          { shouldValidate: true, shouldDirty: true }
-                        );
-                      }}
-                    />
+                    {!disabled && (
+                      <AddressSearchButton
+                        ref={field.ref}
+                        format="us"
+                        onSelect={(value) => {
+                          form.setValue(
+                            "address",
+                            {
+                              ...value,
+                              street2: "",
+                            },
+                            { shouldValidate: true, shouldDirty: true }
+                          );
+                        }}
+                      />
+                    )}
                     <Input
                       value={field.value.street1}
                       disabled
@@ -273,6 +280,7 @@ export default function ProjectForm({ project }: Props) {
                         });
                       }}
                       placeholder="Street 2"
+                      disabled={disabled}
                     />
                     <Input
                       value={field.value.city}
@@ -320,6 +328,7 @@ export default function ProjectForm({ project }: Props) {
                   state={watchState}
                   ref={field.ref}
                   modal
+                  disabled={disabled}
                 />
               </FormControl>
               <FormMessage />

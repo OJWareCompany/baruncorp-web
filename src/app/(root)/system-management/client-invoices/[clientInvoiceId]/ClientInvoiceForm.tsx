@@ -104,7 +104,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
       notesToClient: transformStringIntoNullableString.parse(
         values.notesToClient
       ),
-      terms: Number(values.terms) as 21 | 30,
+      terms: Number(values.terms) as 21 | 30 | 60,
     })
       .then(() => {
         toast({ title: "Success" });

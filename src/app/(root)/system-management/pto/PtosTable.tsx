@@ -197,7 +197,11 @@ export default function PtosTable() {
             }
           />
         ),
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
       }),
       columnHelper.display({
         id: "action",

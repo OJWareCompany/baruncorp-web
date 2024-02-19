@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import ProjectForm from "./ProjectForm";
 import PageHeaderAction from "./PageHeaderAction";
 import JobsTable from "./JobsTable";
@@ -71,6 +72,10 @@ export default function ProjectDetailPage({ projectId, pageType }: Props) {
     error: projectQueryError,
   } = useProjectQuery(projectId);
   useNotFound(projectQueryError);
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
 
   if (isProjectQueryLoading || project == null) {
     return <PageLoading />;
@@ -81,7 +86,10 @@ export default function ProjectDetailPage({ projectId, pageType }: Props) {
       {getPageHeader({ pageType, project })}
       <div className="space-y-6">
         <section>
-          <ProjectForm project={project} />
+          <ProjectForm
+            project={project}
+            disabled={!isBarunCorpMember && isHome}
+          />
         </section>
         <CollapsibleSection title="Jobs Related to Project">
           <JobsTable project={project} pageType={pageType} />

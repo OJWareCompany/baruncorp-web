@@ -37,10 +37,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import usePostPaymentMutation from "@/mutations/usePostPaymentMutation";
+import usePostDirectPaymentMutation from "@/mutations/usePostDirectPaymentMutation";
 import { AffixInput } from "@/components/AffixInput";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
+import usePostCreditPaymentMutation from "@/mutations/usePostCreditPaymentMutation";
 
 const formSchema = z
   .object({
@@ -63,7 +64,11 @@ const formSchema = z
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function PaymentDialog() {
+interface Props {
+  organizationId: string;
+}
+
+export default function PaymentDialog({ organizationId }: Props) {
   const { clientInvoiceId } = useParams() as { clientInvoiceId: string };
   const [open, setOpen] = useState(false);
   const form = useForm<FieldValues>({
@@ -74,76 +79,167 @@ export default function PaymentDialog() {
       paymentMethod: "Direct",
     },
   });
-  const usePostPaymentMutationResult = usePostPaymentMutation();
+  const usePostDirectPaymentMutationResult = usePostDirectPaymentMutation();
+  const usePostCreditPaymentMutationResult = usePostCreditPaymentMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
-      usePostPaymentMutationResult.isSuccess
+      (usePostDirectPaymentMutationResult.isSuccess ||
+        usePostCreditPaymentMutationResult.isSuccess)
     ) {
       form.reset();
     }
   }, [
     form,
     form.formState.isSubmitSuccessful,
-    usePostPaymentMutationResult.isSuccess,
+    usePostCreditPaymentMutationResult.isSuccess,
+    usePostDirectPaymentMutationResult.isSuccess,
+  ]);
+
+  useEffect(() => {
+    // dialog를 닫을 때, 각 request에 대한 mutation의 state를 초기화한다.
+    // 일반적으로는 이 useEffect가 필요하지 않다. form을 submit할 때 하나의 request로 처리를 하기 때문에 그 mutation의 isSuccess state는 계속 업데이트될 것이기 때문에 위의 useEffect가 잘 동작한다.
+    // 그런데 이 form을 submit할 때는 경우에 따라 두 개의 request로 처리를 하기 때문에 state를 초기화해주지 않으면 원하지 않는 상황에서 위의 useEffect가 동작하게 된다.
+    if (!open) {
+      usePostDirectPaymentMutationResult.reset();
+      usePostCreditPaymentMutationResult.reset();
+    }
+  }, [
+    open,
+    usePostCreditPaymentMutationResult,
+    usePostDirectPaymentMutationResult,
   ]);
 
   async function onSubmit(values: FieldValues) {
-    await usePostPaymentMutationResult
-      .mutateAsync({
-        amount: Number(values.amount),
-        notes: transformStringIntoNullableString.parse(values.notes),
-        paymentMethod: "Direct", // TODO
-        invoiceId: clientInvoiceId,
-      })
-      .then(() => {
-        setOpen(false);
-        queryClient.invalidateQueries({
-          queryKey: getClientInvoiceQueryKey(clientInvoiceId),
-        });
-        toast({ title: "Success" });
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        switch (error.response?.status) {
-          case 400:
-            if (error.response?.data.errorCode.includes("70200")) {
-              form.setError(
-                "amount",
-                {
-                  message: `Amount exceeded the total amount`,
-                },
-                { shouldFocus: true }
-              );
-              return;
-            }
-
-            if (error.response?.data.errorCode.includes("70203")) {
-              form.setError(
-                "amount",
-                {
-                  message: `Amount should be greater than 0`,
-                },
-                { shouldFocus: true }
-              );
-              return;
-            }
-        }
-
-        if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
-        ) {
-          toast({
-            title: error.response.data.message,
-            variant: "destructive",
+    if (values.paymentMethod === "Credit") {
+      await usePostCreditPaymentMutationResult
+        .mutateAsync({
+          amount: Number(values.amount),
+          creditTransactionType: "Deduction",
+          clientOrganizationId: organizationId,
+          relatedInvoiceId: clientInvoiceId,
+          note: transformStringIntoNullableString.parse(values.notes),
+        })
+        .then(() => {
+          setOpen(false);
+          queryClient.invalidateQueries({
+            queryKey: getClientInvoiceQueryKey(clientInvoiceId),
           });
-          return;
-        }
-      });
+          toast({ title: "Success" });
+        })
+        .catch((error: AxiosError<ErrorResponseData>) => {
+          switch (error.response?.status) {
+            case 400:
+              if (error.response?.data.errorCode.includes("70200")) {
+                form.setError(
+                  "amount",
+                  {
+                    message: `Amount exceeded the total amount`,
+                  },
+                  { shouldFocus: true }
+                );
+                return;
+              }
+
+              if (error.response?.data.errorCode.includes("70203")) {
+                form.setError(
+                  "amount",
+                  {
+                    message: `Amount should be greater than 0`,
+                  },
+                  { shouldFocus: true }
+                );
+                return;
+              }
+            case 422:
+              if (error.response?.data.errorCode.includes("50402")) {
+                const requiredCreditAmount = error.response.data.message
+                  .split("(")[1]
+                  .slice(0, -1);
+                const currentCreditAmount =
+                  Number(values.amount) - Number(requiredCreditAmount);
+                toast({
+                  title: `Not enough credit`,
+                  description: `Current credit amount: ${currentCreditAmount}`,
+                  variant: "destructive",
+                });
+                return;
+              }
+          }
+
+          if (
+            error.response &&
+            error.response.data.errorCode.filter((value) => value != null)
+              .length !== 0
+          ) {
+            toast({
+              title: error.response.data.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        });
+      return;
+    }
+
+    if (values.paymentMethod === "Direct") {
+      await usePostDirectPaymentMutationResult
+        .mutateAsync({
+          amount: Number(values.amount),
+          notes: transformStringIntoNullableString.parse(values.notes),
+          paymentMethod: "Direct",
+          invoiceId: clientInvoiceId,
+        })
+        .then(() => {
+          setOpen(false);
+          queryClient.invalidateQueries({
+            queryKey: getClientInvoiceQueryKey(clientInvoiceId),
+          });
+          toast({ title: "Success" });
+        })
+        .catch((error: AxiosError<ErrorResponseData>) => {
+          switch (error.response?.status) {
+            case 400:
+              if (error.response?.data.errorCode.includes("70200")) {
+                form.setError(
+                  "amount",
+                  {
+                    message: `Amount exceeded the total amount`,
+                  },
+                  { shouldFocus: true }
+                );
+                return;
+              }
+
+              if (error.response?.data.errorCode.includes("70203")) {
+                form.setError(
+                  "amount",
+                  {
+                    message: `Amount should be greater than 0`,
+                  },
+                  { shouldFocus: true }
+                );
+                return;
+              }
+          }
+
+          if (
+            error.response &&
+            error.response.data.errorCode.filter((value) => value != null)
+              .length !== 0
+          ) {
+            toast({
+              title: error.response.data.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        });
+      return;
+    }
   }
 
   return (
@@ -177,15 +273,11 @@ export default function PaymentDialog() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectItem value={"Direct"}>Direct</SelectItem>
-                          <SelectItem value={"Credit"} disabled>
-                            Credit
-                          </SelectItem>
-                          {/* {PaymentMethodEnum.options.map((option) => (
+                          {PaymentMethodEnum.options.map((option) => (
                             <SelectItem key={option} value={option}>
                               {option}
                             </SelectItem>
-                          ))} */}
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>

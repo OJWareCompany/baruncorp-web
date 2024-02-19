@@ -42,6 +42,7 @@ import {
   MountingTypeEnum,
   PropertyTypeEnum,
   YesOrNoEnum,
+  jobPriorities,
   jobStatuses,
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
@@ -54,6 +55,8 @@ import SearchHeader from "@/components/table/SearchHeader";
 import EnumHeader from "@/components/table/EnumHeader";
 import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import { Badge } from "@/components/ui/badge";
+import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -110,6 +113,7 @@ export default function JobsTable() {
     pageSizeSearchParamName,
     pagination,
   });
+  const columnVisibility = useJobsColumnVisibility();
 
   const params: FindJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -167,7 +171,28 @@ export default function JobsTable() {
             }
           />
         ),
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
+      }),
+      columnHelper.accessor("inReview", {
+        header: "In Review",
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
+      }),
+      columnHelper.accessor("priority", {
+        header: "Priority",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = jobPriorities[value];
+
+          return <Badge className={`${status.color}`}>{status.value}</Badge>;
+        },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
         header: "Organization",
@@ -274,7 +299,14 @@ export default function JobsTable() {
         },
       }),
     ];
-  }, [params, syncedParams]);
+  }, [
+    params.isExpedited,
+    params.jobName,
+    params.jobStatus,
+    params.mountingType,
+    params.projectPropertyType,
+    syncedParams,
+  ]);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -286,6 +318,7 @@ export default function JobsTable() {
     manualPagination: true,
     state: {
       pagination,
+      columnVisibility,
     },
   });
 

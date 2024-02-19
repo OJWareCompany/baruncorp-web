@@ -46,6 +46,7 @@ import {
 import EnumHeader from "@/components/table/EnumHeader";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import NotesToClientHoverCard from "@/components/hover-card/NotesToClientHoverCard";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -176,6 +177,14 @@ export default function ClientInvoicesTable({ type }: Props) {
       }),
       columnHelper.accessor("notesToClient", {
         header: "Notes to Client",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <NotesToClientHoverCard value={value} />;
+        },
       }),
       columnHelper.accessor((row) => `$${row.subtotal}`, {
         header: "Subtotal",

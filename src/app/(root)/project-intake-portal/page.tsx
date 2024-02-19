@@ -25,6 +25,8 @@ export default function Page() {
   useNotFound(informationsQueryError);
   const { data: session } = useSession();
 
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+
   if (isInformationsQueryLoading || informations == null) {
     return <PageLoading />;
   }
@@ -54,7 +56,7 @@ export default function Page() {
             </Plate>
           </AlertDescription>
         </Alert>
-        {session && session.isBarunCorpMember && (
+        {isBarunCorpMember && (
           <div className="absolute top-[17px] right-[17px]">
             <EditDialog information={information} />
           </div>

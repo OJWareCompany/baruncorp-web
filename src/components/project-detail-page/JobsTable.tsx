@@ -6,6 +6,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
+import { Badge } from "../ui/badge";
 import {
   Table,
   TableBody,
@@ -18,15 +19,37 @@ import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
 import TasksBadge from "@/components/badge/TasksBadge";
 import { formatInEST } from "@/lib/utils";
-import { jobStatuses } from "@/lib/constants";
+import { jobPriorities, jobStatuses } from "@/lib/constants";
 import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
+import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 
 const columnHelper = createColumnHelper<JobResponseDto>();
 
 const columns = [
   columnHelper.accessor("isExpedited", {
     header: "Expedite",
-    cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
+  }),
+  columnHelper.accessor("inReview", {
+    header: "In Review",
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
+  }),
+  columnHelper.accessor("priority", {
+    header: "Priority",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      const status = jobPriorities[value];
+
+      return <Badge className={`${status.color}`}>{status.value}</Badge>;
+    },
   }),
   columnHelper.accessor("clientInfo.clientOrganizationName", {
     header: "Organization",
@@ -114,12 +137,16 @@ interface Props {
 
 export default function JobsTable({ project, pageType }: Props) {
   const router = useRouter();
+  const columnVisibility = useJobsColumnVisibility();
 
   const table = useReactTable({
     data: project.jobs,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
+    state: {
+      columnVisibility,
+    },
   });
 
   return (

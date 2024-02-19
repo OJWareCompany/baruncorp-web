@@ -46,7 +46,11 @@ const columns = [
   }),
   columnHelper.accessor("isPaid", {
     header: "Paid",
-    cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
   }),
 ];
 

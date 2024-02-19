@@ -69,10 +69,10 @@ const systemManagementItems: {
     title: "Client Invoices",
     href: "/system-management/client-invoices",
   },
-  {
-    title: "Vendor Invoices",
-    href: "/system-management/vendor-invoices",
-  },
+  // {
+  //   title: "Vendor Invoices",
+  //   href: "/system-management/vendor-invoices",
+  // },
   {
     title: "Utilities",
     href: "/system-management/utilities",
@@ -122,8 +122,8 @@ export default function Header() {
   const { data: session } = useSession();
   const { data: profile } = useProfileQuery();
 
-  const isWorker =
-    (session && session.isBarunCorpMember) || (profile && profile.isVendor);
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isContractor = profile?.isVendor ?? false;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white">
@@ -136,7 +136,7 @@ export default function Header() {
             <nav className="animate-in fade-in">
               <NavigationMenu delayDuration={0}>
                 <NavigationMenuList>
-                  {session.isBarunCorpMember && (
+                  {isBarunCorpMember && (
                     <NavigationMenuItem>
                       <NavigationMenuTrigger>
                         System Management
@@ -157,7 +157,7 @@ export default function Header() {
                       </NavigationMenuContent>
                     </NavigationMenuItem>
                   )}
-                  {isWorker && (
+                  {(isBarunCorpMember || isContractor) && (
                     <NavigationMenuItem>
                       <Link href="/workspace" legacyBehavior passHref>
                         <NavigationMenuLink
@@ -193,7 +193,7 @@ export default function Header() {
         </div>
         {session && profile && (
           <div className="flex gap-2 animate-in fade-in">
-            {session.isBarunCorpMember && <HandToggle />}
+            {isBarunCorpMember && <HandToggle />}
             <Notification />
             <User />
           </div>

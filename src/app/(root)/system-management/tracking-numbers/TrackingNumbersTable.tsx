@@ -51,9 +51,10 @@ const columns = [
     header: "Tracking Number",
     cell: ({ row, getValue }) => (
       <a
+        className="underline"
         href={row.original.trackingNumberUri}
         target="_blank"
-        className="underline"
+        rel="noopener noreferrer"
       >
         {getValue()}
       </a>

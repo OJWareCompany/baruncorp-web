@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import {
   CreateJobNoteRequestDto,
-  IdResponse,
+  CreateJobNoteResponseDto,
   RequestParams,
 } from "@/api/api-spec";
 
@@ -11,7 +11,7 @@ const usePostJobNoteMutation = (reqParams?: RequestParams) => {
   const api = useApi();
 
   return useMutation<
-    IdResponse,
+    CreateJobNoteResponseDto,
     AxiosError<ErrorResponseData>,
     CreateJobNoteRequestDto
   >({

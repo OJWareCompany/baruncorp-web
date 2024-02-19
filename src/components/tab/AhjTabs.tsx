@@ -27,7 +27,11 @@ function AhjTabsContent({ geoId, value }: AhjTabsContentProps) {
 
   return (
     <TabsContent value={value} className="mt-2">
-      <OpenAhjFolderButton className="w-full mb-2" ahjNote={ahjNote} />
+      <OpenAhjFolderButton
+        className="w-full mb-2"
+        geoId={geoId}
+        ahjNote={ahjNote}
+      />
       <div className="space-y-6">
         <section>
           <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />

@@ -29,6 +29,7 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
     isLoading: isClientInvoiceQueryLoading,
     error: clientInvoiceQueryError,
   } = useClientInvoiceQuery(clientInvoiceId);
+  console.log("🚀 ~ Page ~ clientInvoice:", clientInvoice);
   const {
     data: organization,
     isLoading: isOrganizationQueryLoading,
@@ -97,7 +98,10 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
           <ClientInvoiceStatus clientInvoice={clientInvoice} />
         </CollapsibleSection>
         {clientInvoice.status !== "Unissued" && (
-          <CollapsibleSection title="Payments" action={<PaymentDialog />}>
+          <CollapsibleSection
+            title="Payments"
+            action={<PaymentDialog organizationId={organization.id} />}
+          >
             <PaymentsTable clientInvoice={clientInvoice} />
           </CollapsibleSection>
         )}

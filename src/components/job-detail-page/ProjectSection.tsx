@@ -31,12 +31,14 @@ function getProjectDetailUrl({ pageType, project }: Props) {
 export default function ProjectSection({ pageType, project }: Props) {
   const { data: session } = useSession();
 
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
   return (
     <CollapsibleSection
       title="Project"
       action={
-        // 바른코프 멤버이거나 Home이 아니면 보인다. 클라이언트인데, Home이라면 안 보인다.
-        ((session && session.isBarunCorpMember) || pageType !== "HOME") && (
+        (isBarunCorpMember || !isHome) && (
           <Link href={getProjectDetailUrl({ pageType, project })}>
             <Button
               variant={"outline"}

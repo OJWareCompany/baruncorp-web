@@ -42,6 +42,7 @@ import {
   MountingTypeEnum,
   PropertyTypeEnum,
   YesOrNoEnum,
+  jobPriorities,
   jobStatuses,
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
@@ -54,6 +55,8 @@ import { formatInEST } from "@/lib/utils";
 import EnumHeader from "@/components/table/EnumHeader";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
+import { Badge } from "@/components/ui/badge";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -118,6 +121,7 @@ export default function JobsTable({ type }: Props) {
     pageSizeSearchParamName,
     pagination,
   });
+  const columnVisibility = useJobsColumnVisibility();
 
   const params: FindMyJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -175,7 +179,28 @@ export default function JobsTable({ type }: Props) {
             }
           />
         ),
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
+      }),
+      columnHelper.accessor("inReview", {
+        header: "In Review",
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
+      }),
+      columnHelper.accessor("priority", {
+        header: "Priority",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = jobPriorities[value];
+
+          return <Badge className={`${status.color}`}>{status.value}</Badge>;
+        },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
         header: "Organization",
@@ -306,6 +331,7 @@ export default function JobsTable({ type }: Props) {
     manualPagination: true,
     state: {
       pagination,
+      columnVisibility,
     },
   });
 

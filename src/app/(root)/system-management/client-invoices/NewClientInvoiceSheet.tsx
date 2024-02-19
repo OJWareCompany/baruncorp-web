@@ -129,7 +129,7 @@ export default function NewClientInvoiceSheet() {
           new Date(values.servicePeriodMonth.slice(0, 7)),
           "yyyy-MM"
         ),
-        terms: Number(values.terms) as 21 | 30,
+        terms: Number(values.terms) as 21 | 30 | 60,
       })
       .then(() => {
         toast({

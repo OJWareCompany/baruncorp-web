@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
 import {
   Table,
   TableBody,
@@ -41,6 +42,7 @@ import {
   MountingTypeEnum,
   PropertyTypeEnum,
   YesOrNoEnum,
+  jobPriorities,
   jobStatuses,
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
@@ -54,6 +56,8 @@ import TasksBadge from "@/components/badge/TasksBadge";
 import { formatInEST } from "@/lib/utils";
 import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import { Badge } from "@/components/ui/badge";
+import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -63,6 +67,7 @@ interface Props {
 }
 
 export default function JobsTable({ type }: Props) {
+  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
@@ -117,6 +122,7 @@ export default function JobsTable({ type }: Props) {
     pageSizeSearchParamName,
     pagination,
   });
+  const columnVisibility = useJobsColumnVisibility();
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -174,7 +180,28 @@ export default function JobsTable({ type }: Props) {
             }
           />
         ),
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
+      }),
+      columnHelper.accessor("inReview", {
+        header: "In Review",
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
+      }),
+      columnHelper.accessor("priority", {
+        header: "Priority",
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = jobPriorities[value];
+
+          return <Badge className={`${status.color}`}>{status.value}</Badge>;
+        },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
         header: "Organization",
@@ -304,6 +331,7 @@ export default function JobsTable({ type }: Props) {
     manualPagination: true,
     state: {
       pagination,
+      columnVisibility,
     },
   });
 

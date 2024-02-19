@@ -1,6 +1,6 @@
 import React from "react";
 import { FolderOpen } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { ProjectResponseDto } from "@/api/api-spec";
 import { openProjectFolder } from "@/lib/deeplink";
 

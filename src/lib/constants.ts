@@ -239,6 +239,31 @@ export const ptoTypes: Record<
   },
 };
 
+export const jobPriorities: Record<
+  JobPriorityEnum,
+  {
+    value: JobPriorityEnum;
+    color: string;
+  }
+> = {
+  Low: {
+    value: "Low",
+    color: "bg-green-500 hover:bg-green-500/80",
+  },
+  Medium: {
+    value: "Medium",
+    color: "bg-yellow-500 hover:bg-yellow-500/80",
+  },
+  High: {
+    value: "High",
+    color: "bg-orange-500 hover:bg-orange-500/80",
+  },
+  Immediate: {
+    value: "Immediate",
+    color: "bg-red-500 hover:bg-red-500/80",
+  },
+};
+
 /**
  * Transformer
  */
@@ -495,6 +520,12 @@ export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
+// "Immediate" | "High" | "Medium" | "Low"
+export const JobPriorityEnum = z.enum(["Immediate", "High", "Medium", "Low"]);
+export type JobPriorityEnum = z.infer<typeof JobPriorityEnum>;
+
+/* -------------------------------------------------------------------------- */
+
 // "Vacation" | "Half" | "Sick" | "Maternity" | "Casual" | "Unpaid"
 export const PtoTypeEnum = z.enum([
   "Vacation",
@@ -509,7 +540,7 @@ export type PtoTypeEnum = z.infer<typeof PtoTypeEnum>;
 /* -------------------------------------------------------------------------- */
 
 // "21" | "30"
-export const TermsEnum = z.enum(["21", "30"], {
+export const TermsEnum = z.enum(["21", "30", "60"], {
   errorMap: () => ({ message: "Terms is required" }),
 });
 

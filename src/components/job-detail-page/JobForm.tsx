@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { AxiosError } from "axios";
 import { Value } from "@udecode/plate-common";
+import RowItemsContainer from "../RowItemsContainer";
 import {
   Form,
   FormControl,
@@ -30,6 +31,7 @@ import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizati
 import {
   ELECTRICAL_WET_STAMP_SERVICE_ID,
   INITIAL_EDITOR_VALUE,
+  JobPriorityEnum,
   MountingTypeEnum,
   STRUCTURAL_WET_STAMP_SERVICE_ID,
   digitRegExp,
@@ -42,6 +44,14 @@ import { useToast } from "@/components/ui/use-toast";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { getEditorValue, isEditorValueEmpty } from "@/lib/plate-utils";
 import DateTimePicker from "@/components/date-time-picker/DateTimePicker";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
   project: ProjectResponseDto;
@@ -84,6 +94,8 @@ export default function JobForm({ project, job, disabled = false }: Props) {
           mountingType: MountingTypeEnum,
           dueDate: z.date().nullable(),
           isExpedited: z.boolean(),
+          inReview: z.boolean(),
+          priority: JobPriorityEnum,
           systemSize: z.string().trim(),
           numberOfWetStamp: z.string().trim(),
           mailingAddress: z.object({
@@ -164,6 +176,8 @@ export default function JobForm({ project, job, disabled = false }: Props) {
       mountingType: job.mountingType as z.infer<typeof MountingTypeEnum>,
       dueDate: job.dueDate == null ? null : new Date(job.dueDate),
       isExpedited: job.isExpedited,
+      inReview: job.inReview,
+      priority: job.priority,
       systemSize: job.systemSize == null ? "" : String(job.systemSize),
       numberOfWetStamp:
         job.numberOfWetStamp == null ? "" : String(job.numberOfWetStamp),
@@ -239,6 +253,8 @@ export default function JobForm({ project, job, disabled = false }: Props) {
       numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
       mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
       isExpedited: values.isExpedited,
+      inReview: values.inReview,
+      priority: values.priority,
       dueDate: values.dueDate == null ? null : values.dueDate.toISOString(),
     })
       .then(() => {
@@ -565,28 +581,63 @@ export default function JobForm({ project, job, disabled = false }: Props) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="dueDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date Due (EST)</FormLabel>
-                <FormControl>
-                  <DateTimePicker
-                    value={field.value}
-                    onChange={(...args) => {
-                      const newValue = args[0];
-                      // https://react-hook-form.com/docs/usecontroller/controller
-                      // field.onChange에 undefined를 담을 수 없음
-                      field.onChange(newValue === undefined ? null : newValue);
-                    }}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <RowItemsContainer>
+            <FormField
+              control={form.control}
+              name="dueDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date Due (EST)</FormLabel>
+                  <FormControl>
+                    <DateTimePicker
+                      value={field.value}
+                      onChange={(...args) => {
+                        const newValue = args[0];
+                        // https://react-hook-form.com/docs/usecontroller/controller
+                        // field.onChange에 undefined를 담을 수 없음
+                        field.onChange(
+                          newValue === undefined ? null : newValue
+                        );
+                      }}
+                      disabled={disabled}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {!disabled && (
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue placeholder="Select a priority" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {JobPriorityEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+          </RowItemsContainer>
           <FormField
             control={form.control}
             name="isExpedited"
@@ -607,6 +658,27 @@ export default function JobForm({ project, job, disabled = false }: Props) {
               </FormItem>
             )}
           />
+          {!disabled && (
+            <FormField
+              control={form.control}
+              name="inReview"
+              render={({ field }) => (
+                <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                  <FormLabel>In Review</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      ref={field.ref}
+                      checked={field.value}
+                      onCheckedChange={(newChecked) => {
+                        field.onChange(newChecked);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           {!disabled && (
             <LoadingButton
               type="submit"

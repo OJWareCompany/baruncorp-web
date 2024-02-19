@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { CreatePaymentRequestDto, IdResponse } from "@/api/api-spec";
 
-const usePostPaymentMutation = () => {
+const usePostDirectPaymentMutation = () => {
   const api = useApi();
 
   return useMutation<
@@ -19,4 +19,4 @@ const usePostPaymentMutation = () => {
   });
 };
 
-export default usePostPaymentMutation;
+export default usePostDirectPaymentMutation;

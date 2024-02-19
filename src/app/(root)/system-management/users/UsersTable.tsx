@@ -230,7 +230,11 @@ export default function UsersTable() {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return <Checkbox checked={getValue()} />;
+          return (
+            <div className="flex">
+              <Checkbox checked={getValue()} />
+            </div>
+          );
         },
       }),
       columnHelper.accessor("status", {

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ScrollText } from "lucide-react";
+import { useSession } from "next-auth/react";
+import OpenProjectFolderButton from "./OpenProjectFolderButton";
 import { Button } from "@/components/ui/button";
 import { ProjectResponseDto } from "@/api/api-spec";
-import OpenProjectFolderButton from "@/components/OpenProjectFolderButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,52 +36,59 @@ interface Props {
 }
 
 export default function PageHeaderAction({ project, pageType }: Props) {
-  return (
-    <div className="flex gap-2">
-      <OpenProjectFolderButton project={project} />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size={"sm"} variant={"outline"}>
-            <ScrollText className="mr-2 h-4 w-4" />
-            View Notes
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link
-              href={getNotesUrl({
-                projectId: project.projectId,
-                pageType,
-                noteType: "ahj-notes",
-              })}
-            >
-              <span>AHJ Notes</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link
-              href={getNotesUrl({
-                projectId: project.projectId,
-                pageType,
-                noteType: "client-notes",
-              })}
-            >
-              <span>Client Notes</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild disabled={project.utilityId == null}>
-            <Link
-              href={getNotesUrl({
-                projectId: project.projectId,
-                pageType,
-                noteType: "utility-notes",
-              })}
-            >
-              <span>Utility Notes</span>
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
+  if (isBarunCorpMember || !isHome) {
+    return (
+      <div className="flex gap-2">
+        <OpenProjectFolderButton project={project} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size={"sm"} variant={"outline"}>
+              <ScrollText className="mr-2 h-4 w-4" />
+              View Notes
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link
+                href={getNotesUrl({
+                  projectId: project.projectId,
+                  pageType,
+                  noteType: "ahj-notes",
+                })}
+              >
+                <span>AHJ Notes</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                href={getNotesUrl({
+                  projectId: project.projectId,
+                  pageType,
+                  noteType: "client-notes",
+                })}
+              >
+                <span>Client Notes</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild disabled={project.utilityId == null}>
+              <Link
+                href={getNotesUrl({
+                  projectId: project.projectId,
+                  pageType,
+                  noteType: "utility-notes",
+                })}
+              >
+                <span>Utility Notes</span>
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  }
 }

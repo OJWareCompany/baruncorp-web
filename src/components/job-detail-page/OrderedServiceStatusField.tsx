@@ -29,6 +29,7 @@ interface Props {
   orderedServiceId: string;
   jobId: string;
   projectId: string;
+  disabled?: boolean;
 }
 
 export default function OrderedServiceStatusField({
@@ -36,6 +37,7 @@ export default function OrderedServiceStatusField({
   orderedServiceId,
   jobId,
   projectId,
+  disabled = false,
 }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const currentStatus = orderedServiceStatuses[status];
@@ -44,7 +46,11 @@ export default function OrderedServiceStatusField({
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="px-3 font-normal -ml-[13px]">
+        <Button
+          variant="outline"
+          className="px-3 font-normal -ml-[13px]"
+          disabled={disabled}
+        >
           <div className="flex gap-2 items-center">
             <currentStatus.Icon className={`w-4 h-4 ${currentStatus.color}`} />
             <span className="whitespace-nowrap">{currentStatus.value}</span>

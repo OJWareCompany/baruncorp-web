@@ -122,19 +122,30 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
     );
   }, [job]);
 
-  const processedJobNotes = useMemo<JobNoteDetailResponseDto[]>(() => {
+  const isBarunCorpMember = useMemo(
+    () => session?.isBarunCorpMember ?? false,
+    [session?.isBarunCorpMember]
+  );
+  const isHome = useMemo(() => pageType === "HOME", [pageType]);
+
+  const processedJobNotesData = useMemo<JobNoteDetailResponseDto[]>(() => {
     if (jobNotes == null) {
       return [];
     }
 
-    // 바른코프 멤버이거나 Home이 아니면 필터링 ❌
-    if ((session && session.isBarunCorpMember) || pageType !== "HOME") {
+    // 바른코프 멤버이면 필터링 X
+    if (isBarunCorpMember) {
       return jobNotes.data;
     }
 
-    // 클라이언트인데, Home이라면 RFI만 필터링
-    return jobNotes.data.filter((value) => value.type === "RFI");
-  }, [jobNotes, pageType, session]);
+    // 바른코프 멤버 아닌데, 홈이면 필터링
+    if (isHome) {
+      return jobNotes.data.filter((value) => value.type === "RFI");
+    }
+
+    // 홈 아니면 필터링 X
+    return jobNotes.data;
+  }, [isBarunCorpMember, isHome, jobNotes]);
 
   if (
     isJobQueryLoading ||
@@ -160,46 +171,49 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
             <JobForm
               job={job}
               project={project}
-              disabled={
-                // 바른코프 멤버이거나 Home이 아니면 enabled. 클라이언트인데, Home이라면 disabled.
-                !((session && session.isBarunCorpMember) || pageType !== "HOME")
-              }
+              disabled={!isBarunCorpMember && isHome}
             />
           </CollapsibleSection>
           <CollapsibleSection title="Job Note">
             <ItemsContainer>
-              <JobNotesTable jobNotes={processedJobNotes} />
-              {/* 바른코프 멤버이거나 Home이 아니면 보인다. 클라이언트인데, Home이라면 안 보인다. */}
-              {((session && session.isBarunCorpMember) ||
-                pageType !== "HOME") && <JobNoteForm job={job} />}
+              <JobNotesTable
+                jobNotes={{
+                  ...jobNotes,
+                  data: processedJobNotesData,
+                }}
+                pageType={pageType}
+              />
+              {(isBarunCorpMember || !isHome) && <JobNoteForm job={job} />}
             </ItemsContainer>
           </CollapsibleSection>
           <CollapsibleSection title="Status">
-            <JobStatus
-              job={job}
-              disabled={
-                // 바른코프 멤버이거나 Home이 아니면 enabled. 클라이언트인데, Home이라면 disabled.
-                !((session && session.isBarunCorpMember) || pageType !== "HOME")
-              }
-            />
+            <JobStatus job={job} disabled={!isBarunCorpMember && isHome} />
           </CollapsibleSection>
           <CollapsibleSection
             title="Scopes"
-            action={<NewScopeSheet job={job} />}
+            action={
+              (isBarunCorpMember || !isHome) && <NewScopeSheet job={job} />
+            }
           >
             <ScopesTable job={job} project={project} />
           </CollapsibleSection>
           {hasWetStamp && (
             <CollapsibleSection
               title="Tracking Numbers"
-              action={<NewTrackingNumberDialog job={job} />}
+              action={
+                (isBarunCorpMember || !isHome) && (
+                  <NewTrackingNumberDialog job={job} />
+                )
+              }
             >
               <TrackingNumbersTable job={job} />
             </CollapsibleSection>
           )}
-          <CollapsibleSection title="History">
-            <HistoryTable job={job} />
-          </CollapsibleSection>
+          {(isBarunCorpMember || !isHome) && (
+            <CollapsibleSection title="History">
+              <HistoryTable job={job} />
+            </CollapsibleSection>
+          )}
         </div>
       </div>
     </AlertDialogDataProvider>

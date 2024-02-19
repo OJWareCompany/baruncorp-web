@@ -382,6 +382,9 @@ export interface UpdateJobRequestDto {
    * @default null
    */
   dueDate: string | null;
+  inReview: boolean;
+  /** @default "Medium" */
+  priority: "Immediate" | "High" | "Medium" | "Low";
 }
 
 export interface UpdateJobStatusRequestDto {
@@ -537,6 +540,10 @@ export interface JobResponseDto {
   receivedAt: string;
   /** @example true */
   isExpedited: boolean;
+  /** @example true */
+  inReview: boolean;
+  /** @example "High" */
+  priority: "Immediate" | "High" | "Medium" | "Low";
   jobName: string;
   isCurrentJob?: boolean;
   /** @format date-time */
@@ -547,8 +554,12 @@ export interface JobResponseDto {
   state: string;
   /** @format date-time */
   dueDate: string | null;
+  /** @format date-time */
+  completedCancelledDate: string | null;
   /** @example "GnpyEmUZfZ1k7e6Jsvy_fcG8r-PWCQswP" */
   jobFolderId: string | null;
+  /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
+  shareLink: string | null;
 }
 
 export interface JobPaginatedResponseDto {
@@ -830,6 +841,10 @@ export interface ProjectResponseDto {
   utilityId: string | null;
   /** @example [] */
   jobs: JobResponseDto[];
+  /** @example "GnpyEmUZfZ1k7e6Jsvy_fcG8r-PWCQswP" */
+  projectFolderId: string | null;
+  /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
+  shareLink: string | null;
 }
 
 export interface ProjectsCountResponseDto {
@@ -1212,7 +1227,7 @@ export interface CreateInvoiceRequestDto {
    * @default "2023-10-01T05:14:33.599Z"
    */
   invoiceDate: string;
-  terms: 21 | 30;
+  terms: 21 | 30 | 60;
   notesToClient: string | null;
   clientOrganizationId: string;
   /**
@@ -1225,7 +1240,7 @@ export interface CreateInvoiceRequestDto {
 export interface UpdateInvoiceRequestDto {
   /** @format date-time */
   invoiceDate: string;
-  terms: 21 | 30;
+  terms: 21 | 30 | 60;
   notesToClient: string | null;
 }
 
@@ -1239,7 +1254,7 @@ export interface InvoicePayments {
   paymentName: string;
   invoiceId: string;
   amount: number;
-  paymentMethod: "Direct";
+  paymentMethod: "Direct" | "Deduction";
   notes: string | null;
   paymentDate: string;
   canceledAt: string | null;
@@ -1249,7 +1264,7 @@ export interface InvoiceResponseDto {
   id: string;
   status: "Unissued" | "Issued" | "Paid";
   invoiceDate: string;
-  terms: 21 | 30;
+  terms: 21 | 30 | 60;
   dueDate: string;
   notesToClient: string | null;
   createdAt: string;
@@ -1262,6 +1277,8 @@ export interface InvoiceResponseDto {
   lineItems: JobResponseDto[];
   payments: InvoicePayments[];
   totalOfPayment: number;
+  /** @format date-time */
+  issuedAt: string | null;
 }
 
 export interface InvoicePaginatedResponseDto {
@@ -1786,6 +1803,7 @@ export interface CreateCreditTransactionRequestDto {
   creditTransactionType: "Reload" | "Deduction";
   relatedInvoiceId?: string | null;
   clientOrganizationId: string;
+  note: string | null;
 }
 
 export interface CreditTransactionResponseDto {
@@ -2227,7 +2245,7 @@ export interface CreateVendorInvoiceRequestDto {
   serviceMonth: string;
   /** @default "" */
   invoiceNumber: string;
-  terms: 21 | 30;
+  terms: 21 | 30 | 60;
   /** @default "" */
   note: string | null;
 }

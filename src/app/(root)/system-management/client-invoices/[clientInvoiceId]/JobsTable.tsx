@@ -20,69 +20,98 @@ import RowItemsContainer from "@/components/RowItemsContainer";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
 import { AffixInput } from "@/components/AffixInput";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { formatInEST } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["lineItems"][number]>();
 
 const columns = [
-  columnHelper.accessor("clientInfo.clientOrganizationName", {
-    header: "Organization",
+  columnHelper.display({
+    header: "#",
+    id: "#",
+    cell: ({ row }) => row.index + 1,
   }),
-  // columnHelper.accessor("description", {
-  //   header: "Description",
-  // }),
-  // columnHelper.accessor("propertyType", {
-  //   header: "Property Type",
-  // }),
-  // columnHelper.accessor("mountingType", {
-  //   header: "Mounting Type",
-  // }),
-  // columnHelper.accessor("billingCodes", {
-  //   header: "Billing Codes",
-  //   cell: ({ getValue, column }) => {
-  //     return (
-  //       <div className="flex flex-wrap gap-1">
-  //         {getValue().map((value) => (
-  //           <Badge key={value} variant={"outline"}>
-  //             {value}
-  //           </Badge>
-  //         ))}
-  //       </div>
-  //     );
-  //   },
-  // }),
-  // columnHelper.accessor("isContainsRevisionTask", {
-  //   header: "Has Revision Task",
-  //   cell: ({ getValue, column }) => (
-  //     <div className="flex">
-  //       <Checkbox checked={getValue()} />
-  //     </div>
-  //   ),
-  // }),
-  // columnHelper.accessor("taskSizeForRevision", {
-  //   header: "Major / Minor",
-  //   cell: ({ getValue, column }) => {
+  columnHelper.accessor("jobName", {
+    header: "Description",
+  }),
+  columnHelper.accessor("projectPropertyType", {
+    header: "Property Type",
+  }),
+  columnHelper.accessor("billingCodes", {
+    header: "Billing Codes",
+    cell: ({ getValue }) => {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {getValue().map((value) => (
+            <Badge key={value} variant={"outline"}>
+              {value}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+  }),
+  columnHelper.accessor("isContainsRevisionTask", {
+    header: "Contains Revision Task",
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
+  }),
+  columnHelper.accessor((row) => `$${row.price}`, {
+    header: "Price",
+  }),
+  columnHelper.accessor((row) => `$${row.taskSubtotal}`, {
+    header: "Task Subtotal",
+  }),
+  columnHelper.accessor("completedCancelledDate", {
+    header: "Date Completed/Canceled (EST)",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return formatInEST(value);
+    },
+  }),
+  // columnHelper.accessor("dateSentToClient", {
+  //   header: "Date Sent to Client (EST)",
+  //   cell: ({ getValue }) => {
   //     const value = getValue();
 
   //     if (value == null) {
   //       return <p className="text-muted-foreground">-</p>;
   //     }
 
-  //     return value;
+  //     return formatInEST(value);
   //   },
   // }),
-  // columnHelper.accessor((row) => `$${row.price}`, {
-  //   header: "Price",
+  // columnHelper.accessor("clientInfo.clientOrganizationName", {
+  //   header: "Organization",
+  // }),
+  // columnHelper.accessor("mountingType", {
+  //   header: "Mounting Type",
+  // }),
+  // columnHelper.accessor("taskSizeForRevision", {
+  //   header: "Major / Minor",
+  //   cell: ({ getValue, column }) => {
+  //     const value = getValue();
+  //     if (value == null) {
+  //       return <p className="text-muted-foreground">-</p>;
+  //     }
+  //     return value;
+  //   },
   // }),
   // columnHelper.accessor("pricingType", {
   //   header: "Pricing Type",
   // }),
   // columnHelper.accessor("state", {
   //   header: "State",
-  // }),
-  // columnHelper.accessor("dateSentToClient", {
-  //   header: "Date Sent to Client (EST)",
-  //   cell: ({ getValue }) => formatInEST(getValue()),
   // }),
   // columnHelper.accessor("taskSubtotal", {
   //   header: "Subtotal",

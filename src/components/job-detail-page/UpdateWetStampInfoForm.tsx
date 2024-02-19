@@ -102,6 +102,9 @@ export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
       mailingAddressForWetStamp: values.mailingAddress,
       isExpedited: job.isExpedited,
       dueDate: job.dueDate,
+      inReview: job.inReview,
+      priority: job.priority,
+      loadCalcOrigin: job.loadCalcOrigin,
     })
       .then(() => {
         onSuccess();

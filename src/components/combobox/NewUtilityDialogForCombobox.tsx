@@ -113,6 +113,20 @@ export default function NewUtilityDialogForCombobox({
     usePostUtilityMutationResult.isSuccess,
   ]);
 
+  useEffect(() => {
+    // dialog를 닫을 때, 각 request에 대한 mutation의 state를 초기화한다.
+    // 일반적으로는 이 useEffect가 필요하지 않다. form을 submit할 때 하나의 request로 처리를 하기 때문에 그 mutation의 isSuccess state는 계속 업데이트될 것이기 때문에 위의 useEffect가 잘 동작한다.
+    // 그런데 이 form을 submit할 때는 경우에 따라 두 개의 request로 처리를 하기 때문에 state를 초기화해주지 않으면 원하지 않는 상황에서 위의 useEffect가 동작하게 된다.
+    if (!dialogProps.open) {
+      usePatchUtilityNoteMutationResult.reset();
+      usePostUtilityMutationResult.reset();
+    }
+  }, [
+    dialogProps.open,
+    usePatchUtilityNoteMutationResult,
+    usePostUtilityMutationResult,
+  ]);
+
   const newAbbr = stateNameAbbreviationMap[state.toUpperCase() as StateName];
 
   async function onSubmit(values: FieldValues) {

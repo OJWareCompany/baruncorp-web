@@ -16,17 +16,40 @@ import {
 } from "@/components/ui/table";
 import { JobResponseDto } from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
-import { jobStatuses } from "@/lib/constants";
+import { jobPriorities, jobStatuses } from "@/lib/constants";
 import TasksBadge from "@/components/badge/TasksBadge";
 import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 import { formatInEST } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 
 const columnHelper = createColumnHelper<JobResponseDto>();
 
 const columns = [
   columnHelper.accessor("isExpedited", {
     header: "Expedite",
-    cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
+  }),
+  columnHelper.accessor("inReview", {
+    header: "In Review",
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
+  }),
+  columnHelper.accessor("priority", {
+    header: "Priority",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      const status = jobPriorities[value];
+
+      return <Badge className={`${status.color}`}>{status.value}</Badge>;
+    },
   }),
   columnHelper.accessor("clientInfo.clientOrganizationName", {
     header: "Organization",
@@ -95,11 +118,16 @@ interface Props {
 }
 
 export default function JobsTable({ data }: Props) {
+  const columnVisibility = useJobsColumnVisibility();
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
+    state: {
+      columnVisibility,
+    },
   });
 
   return (

@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { PlateEditor, Value, createPlateEditor } from "@udecode/plate-common";
 import { serializeHtml } from "@udecode/plate-serializer-html";
+import JobNoteResultDialog from "./JobNoteResultDialog";
 import {
   Form,
   FormControl,
@@ -57,16 +58,16 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-// export type DialogState =
-//   | { open: false }
-//   | { open: true; requestData: CreateJobNoteRequestDto };
+export type DialogState =
+  | { open: false }
+  | { open: true; requestData: CreateJobNoteRequestDto };
 
 interface Props {
   job: JobResponseDto;
 }
 
 export default function JobNoteForm({ job }: Props) {
-  // const [dialogState, setDialogState] = useState<DialogState>({ open: false });
+  const [dialogState, setDialogState] = useState<DialogState>({ open: false });
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -75,7 +76,6 @@ export default function JobNoteForm({ job }: Props) {
     },
   });
   const usePostJobNoteMutationResult = usePostJobNoteMutation();
-  // const { mutationResult: useTestResult, progressState } = useTest();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const editorRef = useRef<PlateEditor<Value>>(null);
@@ -110,38 +110,41 @@ export default function JobNoteForm({ job }: Props) {
       jobId: job.id,
       content: JSON.stringify(trimmedContent),
       type: hasMention ? "RFI" : "JobNote",
-      receiverEmails: hasMention ? emails : ["yunwoo@oj.vision"],
+      receiverEmails: hasMention ? emails : [],
       emailBody,
       files: values.files,
     };
 
-    // if (files.length !== 0) {
-    //   setDialogState({ open: true, requestData });
-    //   return;
-    // }
-    await usePostJobNoteMutationResult
-      .mutateAsync(requestData)
-      .then(() => {
-        toast({
-          title: "Success",
-        });
-        queryClient.invalidateQueries({
-          queryKey: getJobNotesQueryKey(job.id),
-        });
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
-        ) {
+    if (values.files.length !== 0) {
+      // file 있는 경우
+      setDialogState({ open: true, requestData });
+      return;
+    } else {
+      // file 없는 경우
+      await usePostJobNoteMutationResult
+        .mutateAsync(requestData)
+        .then(() => {
           toast({
-            title: error.response.data.message,
-            variant: "destructive",
+            title: "Success",
           });
-          return;
-        }
-      });
+          queryClient.invalidateQueries({
+            queryKey: getJobNotesQueryKey(job.id),
+          });
+        })
+        .catch((error: AxiosError<ErrorResponseData>) => {
+          if (
+            error.response &&
+            error.response.data.errorCode.filter((value) => value != null)
+              .length !== 0
+          ) {
+            toast({
+              title: error.response.data.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        });
+    }
   }
 
   return (
@@ -192,7 +195,7 @@ export default function JobNoteForm({ job }: Props) {
           </LoadingButton>
         </form>
       </Form>
-      {/* <JobNoteResultDialog
+      <JobNoteResultDialog
         state={dialogState}
         onOpenChange={(newOpen) => {
           if (newOpen) {
@@ -201,7 +204,7 @@ export default function JobNoteForm({ job }: Props) {
 
           setDialogState({ open: newOpen });
         }}
-      /> */}
+      />
     </>
   );
 }

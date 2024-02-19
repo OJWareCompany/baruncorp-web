@@ -3,7 +3,7 @@ import { ScrollText } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
-import OpenJobFolderButton from "@/components/OpenJobFolderButton";
+import OpenJobFolderButton from "@/components/job-detail-page/OpenJobFolderButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,11 +39,13 @@ interface Props {
 export default function PageHeaderAction({ job, project, pageType }: Props) {
   const { data: session } = useSession();
 
-  return (
-    <div className="flex gap-2">
-      <OpenJobFolderButton job={job} project={project} />
-      {/* 바른코프 멤버이거나 Home이 아니면 보인다. 클라이언트인데, Home이라면 안 보인다. */}
-      {((session && session.isBarunCorpMember) || pageType !== "HOME") && (
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
+  if (isBarunCorpMember || !isHome) {
+    return (
+      <div className="flex gap-2">
+        <OpenJobFolderButton job={job} project={project} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size={"sm"} variant={"outline"}>
@@ -87,7 +89,7 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
 }

@@ -105,7 +105,7 @@ export default function InvoiceDocument({
             ))}
           </View>
         </View>
-        <View style={{ fontSize: 10, marginBottom: 32 }}>
+        <View style={{ fontSize: 8, marginBottom: 32 }}>
           <View
             style={[styles.tableRow, styles.bold, { borderColor: "#020817" }]}
           >
@@ -119,27 +119,34 @@ export default function InvoiceDocument({
             </Text>
             <Text style={[styles.tableCell, { flexBasis: 40 }]}>Price</Text>
             <Text style={[styles.tableCell, { flexBasis: 60 }]}>
-              Date{"  "} Completed
+              Date{"         "} Completed {"  "} /Canceled
             </Text>
           </View>
           {clientInvoice.lineItems.map((value, index) => (
             <View key={index} style={styles.tableRow}>
-              <Text style={[styles.tableCell, { flexBasis: 20 }]}>{index}</Text>
-              {/* <Text style={[styles.tableCell, { flex: 1 }]}>
-                {value.description}
+              <Text style={[styles.tableCell, { flexBasis: 20 }]}>
+                {index + 1}
+              </Text>
+              <Text style={[styles.tableCell, { flex: 1 }]}>
+                {value.jobName}
               </Text>
               <Text style={[styles.tableCell, { flexBasis: 65 }]}>
-                {value.propertyType}
-              </Text> */}
+                {value.projectPropertyType}
+              </Text>
               <Text style={[styles.tableCell, { flexBasis: 70 }]}>
                 {value.billingCodes.map((value) => `(${value})`).join(" ")}
               </Text>
               <Text style={[styles.tableCell, { flexBasis: 40 }]}>
                 ${value.price}
               </Text>
-              {/* <Text style={[styles.tableCell, { flexBasis: 60 }]}>
-                {format(new Date(value.dateSentToClient), "MM-dd-yyyy")}
-              </Text> */}
+              <Text style={[styles.tableCell, { flexBasis: 60 }]}>
+                {value.completedCancelledDate == null
+                  ? "-"
+                  : format(
+                      new Date(value.completedCancelledDate),
+                      "MM-dd-yyyy"
+                    )}
+              </Text>
             </View>
           ))}
         </View>

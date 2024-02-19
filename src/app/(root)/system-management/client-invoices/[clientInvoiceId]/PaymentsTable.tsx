@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import usePatchPaymentCancelMutation from "@/mutations/usePatchPaymentCancelMutation";
+import usePatchPaymentDirectCancelMutation from "@/mutations/usePatchPaymentDirectCancelMutation";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
+import usePatchPaymentCreditCancelMutation from "@/mutations/usePatchPaymentCreditCancelMutation";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["payments"][number]>();
@@ -48,12 +49,24 @@ interface Props {
 }
 
 export default function PaymentsTable({ clientInvoice }: Props) {
-  const { mutateAsync, isPending } = usePatchPaymentCancelMutation();
+  const {
+    mutateAsync: patchPaymentDirectCancelMutateAsync,
+    isPending: isPatchPaymentDirectCancelMutationPending,
+  } = usePatchPaymentDirectCancelMutation();
+  const {
+    mutateAsync: patchPaymentCreditCancelMutateAsync,
+    isPending: isPatchPaymentCreditCancelMutationPending,
+  } = usePatchPaymentCreditCancelMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [alertDialogState, setAlertDialogState] = useState<
-    { open: false } | { open: true; paymentId: string }
+    | { open: false }
+    | { open: true; paymentMethod: "Direct" | "Deduction"; id: string }
   >({ open: false });
+
+  const isPending =
+    isPatchPaymentDirectCancelMutationPending ||
+    isPatchPaymentCreditCancelMutationPending;
 
   const columns = useMemo(
     () => [
@@ -124,7 +137,11 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                   size={"icon"}
                   className="h-9 w-9"
                   onClick={() => {
-                    setAlertDialogState({ open: true, paymentId: row.id });
+                    setAlertDialogState({
+                      open: true,
+                      paymentMethod: row.original.paymentMethod,
+                      id: row.id,
+                    });
                   }}
                 >
                   <X className="w-4 h-4" />
@@ -226,28 +243,59 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                   return;
                 }
 
-                mutateAsync({ paymentId: alertDialogState.paymentId })
-                  .then(() => {
-                    queryClient.invalidateQueries({
-                      queryKey: getClientInvoiceQueryKey(clientInvoice.id),
-                    });
-                    setAlertDialogState({ open: false });
-                    toast({ title: "Success" });
+                if (alertDialogState.paymentMethod === "Direct") {
+                  patchPaymentDirectCancelMutateAsync({
+                    paymentId: alertDialogState.id,
                   })
-                  .catch((error: AxiosError<ErrorResponseData>) => {
-                    if (
-                      error.response &&
-                      error.response.data.errorCode.filter(
-                        (value) => value != null
-                      ).length !== 0
-                    ) {
-                      toast({
-                        title: error.response.data.message,
-                        variant: "destructive",
+                    .then(() => {
+                      queryClient.invalidateQueries({
+                        queryKey: getClientInvoiceQueryKey(clientInvoice.id),
                       });
-                      return;
-                    }
-                  });
+                      setAlertDialogState({ open: false });
+                      toast({ title: "Success" });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }
+
+                if (alertDialogState.paymentMethod === "Deduction") {
+                  patchPaymentCreditCancelMutateAsync({
+                    creditTransactionId: alertDialogState.id,
+                  })
+                    .then(() => {
+                      queryClient.invalidateQueries({
+                        queryKey: getClientInvoiceQueryKey(clientInvoice.id),
+                      });
+                      setAlertDialogState({ open: false });
+                      toast({ title: "Success" });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }
               }}
             >
               Continue

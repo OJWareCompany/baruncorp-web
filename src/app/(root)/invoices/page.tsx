@@ -8,7 +8,7 @@ import PageHeader from "@/components/PageHeader";
 import CollapsibleSection from "@/components/CollapsibleSection";
 import PageLoading from "@/components/PageLoading";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TypeEnum = z.enum(["Client", "Vendor"]);
 type TypeEnum = z.infer<typeof TypeEnum>;
@@ -56,46 +56,46 @@ export default function Page() {
     </>
   );
 
-  const vendorInvoices = <>🚧 Work In Progress 🚧</>;
+  // const vendorInvoices = <>🚧 Work In Progress 🚧</>;
 
-  if (organization.isVendor) {
-    const typeSearchParamParseResult = TypeEnum.safeParse(
-      searchParams.get("type")
-    );
-    const typeSearchParam = typeSearchParamParseResult.success
-      ? typeSearchParamParseResult.data
-      : TypeEnum.Values.Client;
+  // if (organization.isVendor) {
+  //   const typeSearchParamParseResult = TypeEnum.safeParse(
+  //     searchParams.get("type")
+  //   );
+  //   const typeSearchParam = typeSearchParamParseResult.success
+  //     ? typeSearchParamParseResult.data
+  //     : TypeEnum.Values.Client;
 
-    return (
-      <div className="flex flex-col">
-        {pageHeader}
-        <Tabs
-          value={typeSearchParam}
-          onValueChange={(value) => {
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.set("type", value);
-            router.replace(`${pathname}?${newSearchParams.toString()}`, {
-              scroll: false,
-            });
-          }}
-        >
-          <TabsList>
-            {TypeEnum.options.map((value) => (
-              <TabsTrigger key={value} value={value}>
-                {value}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent value={TypeEnum.Values.Client}>
-            <div className="mt-4">{clientInvoices}</div>
-          </TabsContent>
-          <TabsContent value={TypeEnum.Values.Vendor}>
-            <div className="mt-4">{vendorInvoices}</div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    );
-  }
+  //   return (
+  //     <div className="flex flex-col">
+  //       {pageHeader}
+  //       <Tabs
+  //         value={typeSearchParam}
+  //         onValueChange={(value) => {
+  //           const newSearchParams = new URLSearchParams(searchParams);
+  //           newSearchParams.set("type", value);
+  //           router.replace(`${pathname}?${newSearchParams.toString()}`, {
+  //             scroll: false,
+  //           });
+  //         }}
+  //       >
+  //         <TabsList>
+  //           {TypeEnum.options.map((value) => (
+  //             <TabsTrigger key={value} value={value}>
+  //               {value}
+  //             </TabsTrigger>
+  //           ))}
+  //         </TabsList>
+  //         <TabsContent value={TypeEnum.Values.Client}>
+  //           <div className="mt-4">{clientInvoices}</div>
+  //         </TabsContent>
+  //         <TabsContent value={TypeEnum.Values.Vendor}>
+  //           <div className="mt-4">{vendorInvoices}</div>
+  //         </TabsContent>
+  //       </Tabs>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="space-y-4">

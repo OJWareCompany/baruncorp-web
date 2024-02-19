@@ -221,7 +221,11 @@ export default function UsersTable({ organization }: Props) {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return <Checkbox checked={getValue()} />;
+          return (
+            <div className="flex">
+              <Checkbox checked={getValue()} />
+            </div>
+          );
         },
       }),
       columnHelper.accessor("status", {

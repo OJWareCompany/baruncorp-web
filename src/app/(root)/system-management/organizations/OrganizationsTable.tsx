@@ -201,11 +201,19 @@ export default function OrganizationsTable() {
             }
           />
         ),
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
       }),
       columnHelper.accessor("isDelinquent", {
         header: "Delinquent",
-        cell: ({ getValue }) => <Checkbox checked={getValue()} />,
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
       }),
     ];
   }, [
