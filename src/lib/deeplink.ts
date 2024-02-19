@@ -90,11 +90,17 @@ export function openJobNoteFolder({
   window.location.href = url;
 }
 
-export function openAhjFolder({ fullAhjName }: { fullAhjName: string }) {
+export function openAhjFolder({
+  geoId,
+  fullAhjName,
+}: {
+  geoId: string;
+  fullAhjName: string;
+}) {
   checkBarunFinderApp();
 
   const url = `barun://open-ahj?payload=${encodeURIComponent(
-    JSON.stringify({ fullAhjName })
+    JSON.stringify({ geoId, fullAhjName })
   )}`;
   window.location.href = url;
 }

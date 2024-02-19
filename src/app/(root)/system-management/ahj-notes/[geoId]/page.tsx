@@ -36,7 +36,7 @@ export default function Page({ params: { geoId } }: Props) {
             name: ahjNote.general.name,
           },
         ]}
-        action={<OpenAhjFolderButton ahjNote={ahjNote} />}
+        action={<OpenAhjFolderButton geoId={geoId} ahjNote={ahjNote} />}
       />
       <div className="space-y-6">
         <section>
