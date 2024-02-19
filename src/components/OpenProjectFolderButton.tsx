@@ -18,6 +18,8 @@ export default function OpenProjectFolderButton({ project }: Props) {
           organization: project.clientOrganization,
           type: project.propertyType,
           project: project.propertyAddress.fullAddress,
+          folderId: project.projectFolderId,
+          shareLink: project.shareLink,
         });
       }}
     >
