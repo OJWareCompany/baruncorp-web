@@ -22,6 +22,8 @@ export default function OpenJobFolderButton({ job, project }: Props) {
           type: project.propertyType,
           project: job.propertyFullAddress,
           job: `Job ${job.jobRequestNumber}`,
+          folderId: job.jobFolderId,
+          shareLink: job.shareLink,
         });
       }}
     >

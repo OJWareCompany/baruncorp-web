@@ -27,15 +27,19 @@ export function openProjectFolder({
   organization,
   type,
   project,
+  folderId,
+  shareLink,
 }: {
   organization: string;
   type: string;
   project: string;
+  folderId: string | null;
+  shareLink: string | null;
 }) {
   checkBarunFinderApp();
 
   const url = `barun://open-project?payload=${encodeURIComponent(
-    JSON.stringify({ organization, type, project })
+    JSON.stringify({ organization, type, project, folderId, shareLink })
   )}`;
   window.location.href = url;
 }
@@ -45,16 +49,20 @@ export function openJobFolder({
   type,
   project,
   job,
+  folderId,
+  shareLink,
 }: {
   organization: string;
   type: string;
   project: string;
   job: string;
+  folderId: string | null;
+  shareLink: string | null;
 }) {
   checkBarunFinderApp();
 
   const url = `barun://open-job?payload=${encodeURIComponent(
-    JSON.stringify({ organization, type, project, job })
+    JSON.stringify({ organization, type, project, job, folderId, shareLink })
   )}`;
   window.location.href = url;
 }
