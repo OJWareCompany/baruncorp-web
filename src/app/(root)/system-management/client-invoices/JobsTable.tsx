@@ -15,75 +15,125 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { JobToInvoiceResponseDto } from "@/api/api-spec";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { formatInEST } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<JobToInvoiceResponseDto["items"][number]>();
 
 const columns = [
-  columnHelper.accessor("clientInfo.clientOrganizationName", {
-    header: "Organization",
+  columnHelper.display({
+    header: "#",
+    id: "#",
+    cell: ({ row }) => row.index + 1,
   }),
-  // columnHelper.accessor("", {
-  //   header: "Description",
-  // }),
-  // columnHelper.accessor("propertyType", {
-  //   header: "Property Type",
-  // }),
-  // columnHelper.accessor("mountingType", {
-  //   header: "Mounting Type",
-  // }),
-  // columnHelper.accessor("billingCodes", {
-  //   header: "Billing Codes",
-  //   cell: ({ getValue }) => {
-  //     return (
-  //       <div className="flex flex-wrap gap-1">
-  //         {getValue().map((value) => (
-  //           <Badge key={value} variant={"outline"}>
-  //             {value}
-  //           </Badge>
-  //         ))}
-  //       </div>
-  //     );
-  //   },
-  // }),
-  // columnHelper.accessor("isContainsRevisionTask", {
-  //   header: "Has Revision Task",
-  //   cell: ({ getValue }) => (
-  //     <div className="flex">
-  //       <Checkbox checked={getValue()} />
-  //     </div>
-  //   ),
-  // }),
-  // columnHelper.accessor("taskSizeForRevision", {
-  //   header: "Major / Minor",
-  //   cell: ({ getValue, column }) => {
-  //     const value = getValue();
+  columnHelper.accessor("jobName", {
+    header: "Description",
+  }),
+  columnHelper.accessor("projectPropertyType", {
+    header: "Property Type",
+  }),
+  columnHelper.accessor("billingCodes", {
+    header: "Billing Codes",
+    cell: ({ getValue }) => {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {getValue().map((value) => (
+            <Badge key={value} variant={"outline"}>
+              {value}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+  }),
+  columnHelper.accessor("isContainsRevisionTask", {
+    header: "Contains Revision Task",
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
+  }),
+  columnHelper.accessor((row) => `$${row.price}`, {
+    header: "Price",
+  }),
+  columnHelper.accessor((row) => `$${row.taskSubtotal}`, {
+    header: "Task Subtotal",
+  }),
+  columnHelper.accessor("pricingType", {
+    header: "Pricing Type",
+    cell: ({ getValue }) => {
+      const value = getValue();
 
-  //     if (value == null) {
-  //       return <p className="text-muted-foreground">-</p>;
-  //     }
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
 
-  //     return value;
-  //   },
-  // }),
-  // columnHelper.accessor((row) => `$${row.price}`, {
-  //   header: "Price",
-  // }),
-  // columnHelper.accessor("pricingType", {
-  //   header: "Pricing Type",
-  // }),
-  // columnHelper.accessor("state", {
-  //   header: "State",
-  // }),
-  // columnHelper.accessor("dateSentToClient", {
-  //   header: "Date Sent to Client (EST)",
-  //   cell: ({ getValue }) => {
+      return value;
+    },
+  }),
+  columnHelper.accessor("revisionSize", {
+    header: "Revision Size",
+    cell: ({ getValue }) => {
+      const value = getValue();
 
-  //   },
-  // }),
-  // columnHelper.accessor("taskSubtotal", {
-  //   header: "Subtotal",
-  // }),
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return value;
+    },
+  }),
+  columnHelper.accessor("eeChangeScope", {
+    header: "EE Change Scope",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return value;
+    },
+  }),
+  columnHelper.accessor("structuralRevisionScope", {
+    header: "Structural Revision Scope",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return value;
+    },
+  }),
+  columnHelper.accessor("designRevisionScope", {
+    header: "Design Revision Scope",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return value;
+    },
+  }),
+  columnHelper.accessor("completedCancelledDate", {
+    header: "Date Completed/Canceled (EST)",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return formatInEST(value);
+    },
+  }),
 ];
 
 interface Props {
