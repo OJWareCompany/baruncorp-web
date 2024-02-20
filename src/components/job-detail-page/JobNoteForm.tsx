@@ -10,6 +10,7 @@ import JobNoteResultDialog from "./JobNoteResultDialog";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -190,6 +191,11 @@ export default function JobNoteForm({ job }: Props) {
                     onFilesChange={field.onChange}
                   />
                 </FormControl>
+                <FormDescription>
+                  When sending mail, the maximum file size is currently set to 1
+                  MB, but we plan to modify this to allow up to 10 files with a
+                  maximum size of 25 MB
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
