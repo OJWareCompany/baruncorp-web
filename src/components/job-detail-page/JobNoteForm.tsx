@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -79,6 +79,7 @@ export default function JobNoteForm({ job }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const editorRef = useRef<PlateEditor<Value>>(null);
+  const [isResultDialogSuccess, setIsResultDialogSuccess] = useState(false);
 
   useEffect(() => {
     if (
@@ -118,6 +119,7 @@ export default function JobNoteForm({ job }: Props) {
     if (values.files.length !== 0) {
       // file 있는 경우
       setDialogState({ open: true, requestData });
+      setIsResultDialogSuccess(false);
       return;
     } else {
       // file 없는 경우
@@ -147,6 +149,11 @@ export default function JobNoteForm({ job }: Props) {
     }
   }
 
+  const handleResultDialogSuccess = useCallback(() => {
+    form.reset();
+    setIsResultDialogSuccess(true);
+  }, [form]);
+
   return (
     <>
       <Form {...form}>
@@ -162,8 +169,9 @@ export default function JobNoteForm({ job }: Props) {
                     {...field}
                     editorRef={editorRef}
                     key={String(
-                      form.formState.isSubmitSuccessful &&
-                        usePostJobNoteMutationResult.isSuccess
+                      (form.formState.isSubmitSuccessful &&
+                        usePostJobNoteMutationResult.isSuccess) ||
+                        isResultDialogSuccess
                     )}
                   />
                 </FormControl>
@@ -204,6 +212,7 @@ export default function JobNoteForm({ job }: Props) {
 
           setDialogState({ open: newOpen });
         }}
+        onSuccess={handleResultDialogSuccess}
       />
     </>
   );

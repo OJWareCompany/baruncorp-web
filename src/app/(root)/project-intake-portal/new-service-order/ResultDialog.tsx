@@ -67,8 +67,8 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
         <DialogHeader>
           <DialogTitle>Order Completed</DialogTitle>
           <DialogDescription>
-            You can place more orders or go to the details page for your order
-            details.
+            It may take some time for files to appear in Google Drive after
+            uploading.
           </DialogDescription>
         </DialogHeader>
         {files.length !== 0 && (
@@ -81,10 +81,10 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
               )}
             >
               {progressState.value !== 100
-                ? "Please wait for upload..."
+                ? "Please wait for the file to upload..."
                 : progressState.error
-                ? "Upload failed"
-                : "Upload completed"}
+                ? "Failed to upload file"
+                : "Completed to upload file"}
             </p>
           </div>
         )}
