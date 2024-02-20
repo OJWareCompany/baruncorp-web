@@ -55,21 +55,13 @@ const useUploadJobNoteFilesMutation = () => {
       return axios
         .post<ResponseData>(url, formData, {
           onUploadProgress: (axiosProgressEvent) => {
-            console.log(
-              "Upload progress:",
-              (axiosProgressEvent?.progress ?? 0) * 100
-            );
             setProgressState({
               value: (axiosProgressEvent?.progress ?? 0) * 100,
               error: false,
             });
           },
         })
-        .then(() => {
-          console.log(
-            "upload JobNoteFiles to completed to file server. Upload to Google Drive still needs some time"
-          );
-        })
+        .then(() => {})
         .catch((error) => {
           setProgressState({ value: 100, error: true });
           throw error;

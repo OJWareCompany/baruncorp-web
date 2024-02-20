@@ -39,7 +39,7 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
       isLoading: isAvailableWorkersQueryLoading,
     } = useAvailableWorkersQuery(assignedTaskId);
 
-    const placeholderText = "Select an assignee";
+    const placeholderText = disabled ? "-" : "Select an assignee";
 
     if (isAvailableWorkersQueryLoading || availableWorkers == null) {
       return (

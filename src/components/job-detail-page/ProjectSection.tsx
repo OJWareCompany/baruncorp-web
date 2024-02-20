@@ -34,11 +34,18 @@ export default function ProjectSection({ pageType, project }: Props) {
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
   const isHome = pageType === "HOME";
 
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const notForClient = isBarunCorpMember || !isHome;
+
   return (
     <CollapsibleSection
       title="Project"
       action={
-        (isBarunCorpMember || !isHome) && (
+        notForClient && (
           <Link href={getProjectDetailUrl({ pageType, project })}>
             <Button
               variant={"outline"}

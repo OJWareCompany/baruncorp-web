@@ -14,6 +14,7 @@ import {
   ChevronsDown,
   CornerDownRight,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import AssigneeField from "./AssigneeField";
 import OrderedServiceStatusField from "./OrderedServiceStatusField";
 import PriceField from "@/components/field/PriceField";
@@ -69,10 +70,28 @@ const columnHelper = createColumnHelper<Data>();
 interface Props {
   job: JobResponseDto;
   project: ProjectResponseDto;
+  pageType: PageType;
 }
 
-export default function ScopesTable({ job, project }: Props) {
+export default function ScopesTable({ job, project, pageType }: Props) {
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = useMemo(
+    () => session?.isBarunCorpMember ?? false,
+    [session?.isBarunCorpMember]
+  );
+  const isHome = useMemo(() => pageType === "HOME", [pageType]);
+
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const notForClient = useMemo(
+    () => isBarunCorpMember || !isHome,
+    [isBarunCorpMember, isHome]
+  );
 
   const data = useMemo(
     () =>
@@ -328,8 +347,11 @@ export default function ScopesTable({ job, project }: Props) {
           return (
             <PriceField
               disabled={
+                // residential revision인데, size for revision이 선택 안되었거나, minor로 선택된 경우에 disabled
+                project.propertyType === "Residential" &&
                 row.original.isRevision &&
-                row.original.sizeForRevision === "Minor"
+                (row.original.sizeForRevision == null ||
+                  row.original.sizeForRevision === "Minor")
               }
               orderedServiceId={row.id}
               price={getValue()}
@@ -354,10 +376,6 @@ export default function ScopesTable({ job, project }: Props) {
 
           return (
             <CostField
-              // disabled={
-              //   row.original.isRevision &&
-              //   row.original.sizeForRevision === "Minor"
-              // }
               assignedTaskId={row.id}
               cost={getValue()}
               jobId={job.id}
@@ -370,14 +388,26 @@ export default function ScopesTable({ job, project }: Props) {
         cell: ({ getValue, row }) => {
           const value = getValue();
 
-          if (row.depth === 0) {
+          if (notForClient) {
+            if (row.depth === 0) {
+              return (
+                <OrderedServiceStatusField
+                  status={value as OrderedServiceStatusEnum}
+                  orderedServiceId={row.id}
+                  jobId={job.id}
+                  projectId={project.projectId}
+                />
+              );
+            }
+
+            const status =
+              assignedTaskStatuses[value as AssignedTaskStatusEnum];
+
             return (
-              <OrderedServiceStatusField
-                status={value as OrderedServiceStatusEnum}
-                orderedServiceId={row.id}
-                jobId={job.id}
-                projectId={project.projectId}
-              />
+              <div className="flex items-center">
+                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+                <span className="whitespace-nowrap">{status.value}</span>
+              </div>
             );
           }
 
@@ -394,6 +424,8 @@ export default function ScopesTable({ job, project }: Props) {
       columnHelper.accessor("assigneeId", {
         header: "Assignee",
         cell: ({ row, getValue }) => {
+          const value = getValue();
+
           if (row.depth === 0) {
             return;
           }
@@ -401,34 +433,23 @@ export default function ScopesTable({ job, project }: Props) {
           return (
             <AssigneeField
               assignedTaskId={row.id}
-              userId={getValue() ?? ""}
+              userId={value ?? ""}
               status={row.original.status as JobStatusEnum}
               jobId={job.id}
               projectId={job.projectId}
+              disabled={!notForClient}
             />
           );
         },
       }),
-      // columnHelper.display({
-      //   id: "action",
-      //   cell: ({ row }) => {
-      //     if (row.depth === 0) {
-      //       return;
-      //     }
-
-      //     return (
-      //       <AssignedTaskActionField
-      //         assignedTaskId={row.id}
-      //         status={row.original.status as JobStatusEnum}
-      //         jobId={job.id}
-      //         projectId={job.projectId}
-      //         page="SYSTEM_MANAGEMENT"
-      //       />
-      //     );
-      //   },
-      // }),
     ],
-    [job.id, job.projectId, project.projectId, project.propertyType]
+    [
+      job.id,
+      job.projectId,
+      notForClient,
+      project.projectId,
+      project.propertyType,
+    ]
   );
 
   const table = useReactTable({
@@ -436,6 +457,12 @@ export default function ScopesTable({ job, project }: Props) {
     columns,
     state: {
       expanded,
+      columnVisibility: {
+        sizeForRevision: isBarunCorpMember,
+        price: isBarunCorpMember,
+        cost: isBarunCorpMember,
+        duration: isBarunCorpMember,
+      },
     },
     onExpandedChange: setExpanded,
     getCoreRowModel: getCoreRowModel(),

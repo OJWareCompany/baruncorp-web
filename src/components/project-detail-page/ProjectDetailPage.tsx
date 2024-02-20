@@ -77,6 +77,13 @@ export default function ProjectDetailPage({ projectId, pageType }: Props) {
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
   const isHome = pageType === "HOME";
 
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const notForClient = isBarunCorpMember || !isHome;
+
   if (isProjectQueryLoading || project == null) {
     return <PageLoading />;
   }
@@ -86,10 +93,7 @@ export default function ProjectDetailPage({ projectId, pageType }: Props) {
       {getPageHeader({ pageType, project })}
       <div className="space-y-6">
         <section>
-          <ProjectForm
-            project={project}
-            disabled={!isBarunCorpMember && isHome}
-          />
+          <ProjectForm project={project} disabled={!notForClient} />
         </section>
         <CollapsibleSection title="Jobs Related to Project">
           <JobsTable project={project} pageType={pageType} />

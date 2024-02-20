@@ -11,7 +11,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { toast } = useToast();
   const { data: profile } = useProfileQuery();
-  console.log("🚀 ~ Layout ~ profile:", profile);
 
   const isValid =
     (status === "authenticated" && session.isBarunCorpMember) ||

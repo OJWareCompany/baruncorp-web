@@ -23,6 +23,7 @@ import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 import LoadingButton from "@/components/LoadingButton";
 import useDeleteTrackingNumberMutation from "@/mutations/useDeleteTrackingNumberMutation";
 import { getTrackingNumbersQueryKey } from "@/queries/useTrackingNumbersQuery";
+import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 
 type AlertDialogData =
   | {
@@ -262,22 +263,12 @@ export default function AlertDialogDataProvider({ children }: Props) {
                         queryClient.invalidateQueries({
                           queryKey: getProjectQueryKey(projectId),
                         });
+                        queryClient.invalidateQueries({
+                          queryKey: getJobHistoriesQueryKey({ jobId }),
+                        });
                         dispatch({ type: "CLOSE" });
                       })
                       .catch((error: AxiosError<ErrorResponseData>) => {
-                        // switch (error.response?.status) {
-                        //   case 422:
-                        //     if (
-                        //       error.response?.data.errorCode.includes("40013")
-                        //     ) {
-                        //       toast({
-                        //         title: "",
-                        //         variant: "destructive",
-                        //       });
-                        //       return;
-                        //     }
-                        // }
-
                         if (
                           error.response &&
                           error.response.data.errorCode.filter(
@@ -305,6 +296,9 @@ export default function AlertDialogDataProvider({ children }: Props) {
                       });
                       queryClient.invalidateQueries({
                         queryKey: getProjectQueryKey(projectId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
                       });
                       dispatch({ type: "CLOSE" });
                     })
@@ -356,6 +350,9 @@ export default function AlertDialogDataProvider({ children }: Props) {
                       queryClient.invalidateQueries({
                         queryKey: getProjectQueryKey(projectId),
                       });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
+                      });
                       dispatch({ type: "CLOSE" });
                     })
                     .catch((error: AxiosError<ErrorResponseData>) => {
@@ -404,6 +401,9 @@ export default function AlertDialogDataProvider({ children }: Props) {
                       queryClient.invalidateQueries({
                         queryKey: getProjectQueryKey(projectId),
                       });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
+                      });
                       dispatch({ type: "CLOSE" });
                     })
                     .catch((error: AxiosError<ErrorResponseData>) => {
@@ -434,6 +434,9 @@ export default function AlertDialogDataProvider({ children }: Props) {
                       queryClient.invalidateQueries({
                         queryKey: getProjectQueryKey(projectId),
                       });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
+                      });
                       dispatch({ type: "CLOSE" });
                     })
                     .catch((error: AxiosError<ErrorResponseData>) => {
@@ -463,6 +466,9 @@ export default function AlertDialogDataProvider({ children }: Props) {
                       });
                       queryClient.invalidateQueries({
                         queryKey: getProjectQueryKey(projectId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
                       });
                       dispatch({ type: "CLOSE" });
                     })

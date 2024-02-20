@@ -15,6 +15,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
+import { Plate, PlateContent } from "@udecode/plate-common";
 import {
   Table,
   TableBody,
@@ -39,6 +40,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import { basicEditorPlugins } from "@/lib/plate/plugins";
+import { getEditorValue } from "@/lib/plate-utils";
 
 const columnHelper =
   createColumnHelper<
@@ -82,6 +85,18 @@ const columns = [
         return formatInEST(value);
       }
 
+      if (row.original.attribute === "Additional Information From Client") {
+        return (
+          <Plate
+            plugins={basicEditorPlugins}
+            readOnly
+            value={getEditorValue(value)}
+          >
+            <PlateContent />
+          </Plate>
+        );
+      }
+
       return value;
     },
   }),
@@ -95,6 +110,18 @@ const columns = [
 
       if (row.original.isDateType) {
         return formatInEST(value);
+      }
+
+      if (row.original.attribute === "Additional Information From Client") {
+        return (
+          <Plate
+            plugins={basicEditorPlugins}
+            readOnly
+            value={getEditorValue(value)}
+          >
+            <PlateContent />
+          </Plate>
+        );
       }
 
       return value;

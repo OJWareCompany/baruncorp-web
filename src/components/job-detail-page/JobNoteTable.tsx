@@ -38,6 +38,13 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
   const isHome = pageType === "HOME";
 
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const notForClient = isBarunCorpMember || !isHome;
+
   const columns = useMemo(
     () => [
       columnHelper.accessor("jobNoteNumber", {
@@ -107,7 +114,7 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                 variant={"ghost"}
                 className="h-9 w-9"
                 onClick={() => {
-                  if (isBarunCorpMember || !isHome) {
+                  if (notForClient) {
                     openJobNoteFolder({
                       organization: jobNotes.clientOrganizationName,
                       type: jobNotes.projectType,
@@ -129,12 +136,11 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
       }),
     ],
     [
-      isBarunCorpMember,
-      isHome,
       jobNotes.clientOrganizationName,
       jobNotes.jobRequestNumber,
       jobNotes.projectType,
       jobNotes.propertyAddress,
+      notForClient,
     ]
   );
 

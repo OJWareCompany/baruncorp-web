@@ -29,7 +29,6 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
     isLoading: isClientInvoiceQueryLoading,
     error: clientInvoiceQueryError,
   } = useClientInvoiceQuery(clientInvoiceId);
-  console.log("🚀 ~ Page ~ clientInvoice:", clientInvoice);
   const {
     data: organization,
     isLoading: isOrganizationQueryLoading,

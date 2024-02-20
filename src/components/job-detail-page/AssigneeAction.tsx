@@ -39,6 +39,13 @@ export default function AssigneeAction({
   const { data: session } = useSession();
   const queryClient = useQueryClient();
 
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isMine = session?.id === userId;
+
+  if (!isMine && !isBarunCorpMember) {
+    return null;
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -48,33 +55,39 @@ export default function AssigneeAction({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => {
-              dispatch({
-                type: "UPDATE_TASK_TO_COMPLETE",
-                assignedTaskId,
-                jobId,
-                projectId,
-              });
-            }}
-          >
-            Complete
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              dispatch({
-                type: "UNASSIGN",
-                assignedTaskId,
-                jobId,
-                projectId,
-              });
-            }}
-            className="text-destructive focus:text-destructive"
-          >
-            Unassign
-          </DropdownMenuItem>
-          {session && session.id === userId && (
+          {(isMine || isBarunCorpMember) && (
+            <DropdownMenuItem
+              onClick={() => {
+                dispatch({
+                  type: "UPDATE_TASK_TO_COMPLETE",
+                  assignedTaskId,
+                  jobId,
+                  projectId,
+                });
+              }}
+            >
+              Complete
+            </DropdownMenuItem>
+          )}
+          {isBarunCorpMember && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  dispatch({
+                    type: "UNASSIGN",
+                    assignedTaskId,
+                    jobId,
+                    projectId,
+                  });
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                Unassign
+              </DropdownMenuItem>
+            </>
+          )}
+          {isMine && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem

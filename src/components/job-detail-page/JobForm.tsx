@@ -52,6 +52,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 
 interface Props {
   project: ProjectResponseDto;
@@ -264,6 +265,9 @@ export default function JobForm({ project, job, disabled = false }: Props) {
         });
         queryClient.invalidateQueries({
           queryKey: getProjectQueryKey(project.projectId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: getJobHistoriesQueryKey({ jobId: job.id }),
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {

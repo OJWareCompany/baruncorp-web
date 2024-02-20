@@ -31,7 +31,6 @@ export default function JobNoteResultDialog({ state, ...dialogProps }: Props) {
   });
   const { mutateAsync: postJobNoteMutateAsync } = usePostJobNoteMutation({
     onUploadProgress: (axiosProgressEvent) => {
-      console.log("🚀 ~ JobNoteResultDialog ~ api server:", axiosProgressEvent);
       setPostJobNoteProgress({
         value: (axiosProgressEvent?.progress ?? 0) * 100,
         error: false,
@@ -41,10 +40,6 @@ export default function JobNoteResultDialog({ state, ...dialogProps }: Props) {
   const { mutateAsync: postJobNoteFilesMutateAsync } =
     usePostJobNoteFilesMutation({
       onUploadProgress: (axiosProgressEvent) => {
-        console.log(
-          "🚀 ~ JobNoteResultDialog ~ file server:",
-          axiosProgressEvent
-        );
         setUploadJobNoteFilesProgress({
           value: (axiosProgressEvent?.progress ?? 0) * 100,
           error: false,

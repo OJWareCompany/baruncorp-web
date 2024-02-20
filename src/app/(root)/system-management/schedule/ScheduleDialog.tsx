@@ -86,7 +86,6 @@ const formSchema = z.object({
 
         for (let j = 0; j < i; j++) {
           const end = values[j].end;
-          console.log("🚀 ~ .superRefine ~ end:", end);
           if (end == null) {
             continue;
           }

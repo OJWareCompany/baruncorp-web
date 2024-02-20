@@ -193,7 +193,7 @@ export default function OrganizationsTable() {
         header: () => (
           <EnumHeader
             buttonText="Vendor"
-            searchParamName={vendorSearchParam}
+            searchParamName={vendorSearchParamName}
             pageIndexSearchParamName={pageIndexSearchParamName}
             zodEnum={YesOrNoEnum}
             isLoading={
@@ -223,7 +223,6 @@ export default function OrganizationsTable() {
     params.name,
     params.phoneNumber,
     syncedParams,
-    vendorSearchParam,
   ]);
 
   const table = useReactTable({

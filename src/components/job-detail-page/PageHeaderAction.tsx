@@ -42,7 +42,14 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
   const isHome = pageType === "HOME";
 
-  if (isBarunCorpMember || !isHome) {
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const notForClient = isBarunCorpMember || !isHome;
+
+  if (notForClient) {
     return (
       <div className="flex gap-2">
         <OpenJobFolderButton job={job} project={project} />

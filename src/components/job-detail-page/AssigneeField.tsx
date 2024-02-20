@@ -1,3 +1,4 @@
+import { useSession } from "next-auth/react";
 import AssigneeAction from "./AssigneeAction";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import AssigneeCombobox from "@/components/combobox/AssigneeCombobox";
@@ -9,6 +10,7 @@ interface Props {
   status: JobStatusEnum;
   jobId: string;
   projectId: string;
+  disabled?: boolean;
 }
 
 export default function AssigneeField({
@@ -17,8 +19,12 @@ export default function AssigneeField({
   status,
   jobId,
   projectId,
+  disabled = false,
 }: Props) {
   const dispatch = useAlertDialogDataDispatch();
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
 
   return (
     <div className="flex gap-2 -ml-[13px]">
@@ -37,11 +43,14 @@ export default function AssigneeField({
         disabled={
           status === "Completed" ||
           status === "Canceled" ||
-          status === "On Hold"
+          status === "On Hold" ||
+          disabled ||
+          !isBarunCorpMember
         }
       />
       {/* TODO: Completed 인 경우 Reset 시키는 액션 */}
-      {userId !== "" &&
+      {!disabled &&
+        userId !== "" &&
         status !== "Completed" &&
         status !== "Canceled" &&
         status !== "On Hold" && (

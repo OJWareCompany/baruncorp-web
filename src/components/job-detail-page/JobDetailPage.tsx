@@ -138,13 +138,13 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
       return jobNotes.data;
     }
 
-    // 바른코프 멤버 아닌데, 홈이면 필터링
     if (isHome) {
+      // 바른코프 멤버 아닌데, 홈이면 필터링
       return jobNotes.data.filter((value) => value.type === "RFI");
+    } else {
+      // 홈 아니면 필터링 X
+      return jobNotes.data;
     }
-
-    // 홈 아니면 필터링 X
-    return jobNotes.data;
   }, [isBarunCorpMember, isHome, jobNotes]);
 
   if (
@@ -158,6 +158,13 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
     return <PageLoading />;
   }
 
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const notForClient = isBarunCorpMember || !isHome;
+
   return (
     <AlertDialogDataProvider>
       <div className="flex flex-col gap-4">
@@ -168,11 +175,7 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
             <JobsTable project={project} pageType={pageType} />
           </CollapsibleSection>
           <CollapsibleSection title="Job">
-            <JobForm
-              job={job}
-              project={project}
-              disabled={!isBarunCorpMember && isHome}
-            />
+            <JobForm job={job} project={project} disabled={!notForClient} />
           </CollapsibleSection>
           <CollapsibleSection title="Job Note">
             <ItemsContainer>
@@ -183,33 +186,27 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
                 }}
                 pageType={pageType}
               />
-              {(isBarunCorpMember || !isHome) && <JobNoteForm job={job} />}
+              {notForClient && <JobNoteForm job={job} />}
             </ItemsContainer>
           </CollapsibleSection>
           <CollapsibleSection title="Status">
-            <JobStatus job={job} disabled={!isBarunCorpMember && isHome} />
+            <JobStatus job={job} disabled={!notForClient} />
           </CollapsibleSection>
           <CollapsibleSection
             title="Scopes"
-            action={
-              (isBarunCorpMember || !isHome) && <NewScopeSheet job={job} />
-            }
+            action={notForClient && <NewScopeSheet job={job} />}
           >
-            <ScopesTable job={job} project={project} />
+            <ScopesTable job={job} project={project} pageType={pageType} />
           </CollapsibleSection>
           {hasWetStamp && (
             <CollapsibleSection
               title="Tracking Numbers"
-              action={
-                (isBarunCorpMember || !isHome) && (
-                  <NewTrackingNumberDialog job={job} />
-                )
-              }
+              action={notForClient && <NewTrackingNumberDialog job={job} />}
             >
               <TrackingNumbersTable job={job} />
             </CollapsibleSection>
           )}
-          {(isBarunCorpMember || !isHome) && (
+          {notForClient && (
             <CollapsibleSection title="History">
               <HistoryTable job={job} />
             </CollapsibleSection>
