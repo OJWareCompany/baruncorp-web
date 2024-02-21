@@ -2,9 +2,11 @@
 import Link from "next/link";
 import React from "react";
 import { useSession } from "next-auth/react";
+import { ToggleState } from "react-stately";
 import User from "./User";
 import HandToggle from "./HandToggle";
 import Notification from "./Notification";
+import ExpandToggle from "./ExpandToggle";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -118,7 +120,11 @@ const ListItem = React.forwardRef<
 });
 ListItem.displayName = "ListItem";
 
-export default function Header() {
+interface Props {
+  toggleState: ToggleState;
+}
+
+export default function Header({ toggleState }: Props) {
   const { data: session } = useSession();
   const { data: profile } = useProfileQuery();
 
@@ -127,7 +133,12 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white">
-      <div className="container px-6 flex h-16 items-center justify-between">
+      <div
+        className={cn(
+          "container px-6 flex h-16 items-center justify-between",
+          toggleState.isSelected && "max-w-[1920px]"
+        )}
+      >
         <div className="flex gap-8 items-center">
           <Link href="/">
             <h1 className="h3 pointer-events-none">Barun Corp</h1>
@@ -193,6 +204,7 @@ export default function Header() {
         </div>
         {session && profile && (
           <div className="flex gap-2 animate-in fade-in">
+            <ExpandToggle toggleState={toggleState} />
             {isBarunCorpMember && <HandToggle />}
             <Notification />
             <User />

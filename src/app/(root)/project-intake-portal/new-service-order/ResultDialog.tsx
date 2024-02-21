@@ -67,8 +67,9 @@ export default function ResultDialog({ files, jobId, ...dialogProps }: Props) {
         <DialogHeader>
           <DialogTitle>Order Completed</DialogTitle>
           <DialogDescription>
-            It may take some time for files to appear in Google Drive after
-            uploading.
+            {files.length !== 0
+              ? "It may take some time for files to appear in Google Drive after uploading."
+              : "You can place more orders or go to the details page for your order details."}
           </DialogDescription>
         </DialogHeader>
         {files.length !== 0 && (
