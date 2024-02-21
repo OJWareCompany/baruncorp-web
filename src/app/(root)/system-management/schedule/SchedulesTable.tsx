@@ -189,7 +189,7 @@ function InternalTable({ modifySchedule }: InternalTableProps) {
                         key={minute}
                         className={cn(
                           "w-[2px] h-[72px]",
-                          isTarget && "bg-muted"
+                          isTarget && "bg-green-400"
                         )}
                       ></div>
                     );

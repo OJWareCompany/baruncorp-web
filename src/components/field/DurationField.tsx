@@ -11,7 +11,7 @@ import { AffixInput } from "@/components/AffixInput";
 import usePatchAssignedTaskDurationMutation from "@/mutations/usePatchAssignedTaskDurationMutation";
 import { useToast } from "@/components/ui/use-toast";
 import { getJobQueryKey } from "@/queries/useJobQuery";
-import { digitRegExp } from "@/lib/constants";
+import { toTwoDecimalRegExp } from "@/lib/constants";
 
 const formSchema = z.object({
   duration: z.string().trim(),
@@ -54,7 +54,7 @@ export default function DurationField({
   if (disabled) {
     return (
       <AffixInput
-        suffixElement={<span className="text-muted-foreground">min</span>}
+        suffixElement={<span className="text-muted-foreground">hour</span>}
         value={duration ? String(duration) : ""}
         className="h-9 w-[150px] -ml-[13px]"
         disabled
@@ -130,12 +130,12 @@ export default function DurationField({
               <FormControl>
                 <AffixInput
                   suffixElement={
-                    <span className="text-muted-foreground">min</span>
+                    <span className="text-muted-foreground">hour</span>
                   }
                   {...field}
                   onChange={(event) => {
                     const { value } = event.target;
-                    if (value === "" || digitRegExp.test(value)) {
+                    if (value === "" || toTwoDecimalRegExp.test(value)) {
                       field.onChange(event);
                     }
                   }}

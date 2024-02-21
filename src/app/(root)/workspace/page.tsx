@@ -9,9 +9,6 @@ export default function Page() {
       <div className="space-y-4">
         <PageHeader items={[{ href: "/workspace", name: "Workspace" }]} />
         <div className="space-y-6">
-          <CollapsibleSection title="All">
-            <JobsTable type="All" />
-          </CollapsibleSection>
           <CollapsibleSection title="In Progress">
             <JobsTable type="In Progress" />
           </CollapsibleSection>
@@ -23,6 +20,9 @@ export default function Page() {
           </CollapsibleSection>
           <CollapsibleSection title="Canceled">
             <JobsTable type="Canceled" />
+          </CollapsibleSection>
+          <CollapsibleSection title="All">
+            <JobsTable type="All" />
           </CollapsibleSection>
         </div>
       </div>

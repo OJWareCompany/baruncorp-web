@@ -18,9 +18,6 @@ export default function Page() {
         action={<NewClientInvoiceSheet />}
       />
       <div className="space-y-6">
-        <CollapsibleSection title="All">
-          <ClientInvoicesTable type="All" />
-        </CollapsibleSection>
         <CollapsibleSection title="Unissued">
           <ClientInvoicesTable type="Unissued" />
         </CollapsibleSection>
@@ -32,6 +29,9 @@ export default function Page() {
         </CollapsibleSection>
         <CollapsibleSection title="Paid">
           <ClientInvoicesTable type="Paid" />
+        </CollapsibleSection>
+        <CollapsibleSection title="All">
+          <ClientInvoicesTable type="All" />
         </CollapsibleSection>
         <CollapsibleSection title="Clients With Outstanding Balances">
           <ClientsWithOutstandingBalancesTable />

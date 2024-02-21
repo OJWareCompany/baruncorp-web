@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useSession } from "next-auth/react";
 import {
   Table,
   TableBody,
@@ -67,7 +66,6 @@ interface Props {
 }
 
 export default function JobsTable({ type }: Props) {
-  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =

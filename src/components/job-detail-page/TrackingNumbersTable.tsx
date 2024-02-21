@@ -16,6 +16,7 @@ import {
   Loader2,
   MoreHorizontal,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import EditTrackingNumberDialog from "./EditTrackingNumberDialog";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import {
@@ -58,12 +59,14 @@ const TABLE_NAME = "TrackingNumbers";
 
 interface InternalTableProps {
   job: JobResponseDto;
+  pageType: PageType;
   modifyTrackingNumber: (initialValue: TrackingNumbersResponseDto) => void;
   deleteTrackingNumber: (trackingNumberId: string) => void;
 }
 
 function InternalTable({
   job,
+  pageType,
   modifyTrackingNumber,
   deleteTrackingNumber,
 }: InternalTableProps) {
@@ -161,6 +164,17 @@ function InternalTable({
     ],
     [deleteTrackingNumber, modifyTrackingNumber]
   );
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const notForClient = isBarunCorpMember || !isHome;
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -172,6 +186,9 @@ function InternalTable({
     manualPagination: true,
     state: {
       pagination,
+      columnVisibility: {
+        action: notForClient,
+      },
     },
   });
 
@@ -315,9 +332,10 @@ export type EditDialogState =
 
 interface Props {
   job: JobResponseDto;
+  pageType: PageType;
 }
 
-export default function TrackingNumbersTable({ job }: Props) {
+export default function TrackingNumbersTable({ job, pageType }: Props) {
   const [editDialogState, setEditDialogState] = useState<EditDialogState>({
     open: false,
   });
@@ -337,6 +355,7 @@ export default function TrackingNumbersTable({ job }: Props) {
             trackingNumberId,
           });
         }}
+        pageType={pageType}
       />
       <EditTrackingNumberDialog
         state={editDialogState}

@@ -14,6 +14,7 @@ import NewScopeSheet from "./NewScopeSheet";
 import AlertDialogDataProvider from "./AlertDialogDataProvider";
 import TrackingNumbersTable from "./TrackingNumbersTable";
 import NewTrackingNumberDialog from "./NewTrackingNumberDialog";
+import TotalJobPrice from "./TotalJobPrice";
 import useProjectQuery from "@/queries/useProjectQuery";
 import useJobQuery from "@/queries/useJobQuery";
 import PageHeader from "@/components/PageHeader";
@@ -197,13 +198,14 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
             action={notForClient && <NewScopeSheet job={job} />}
           >
             <ScopesTable job={job} project={project} pageType={pageType} />
+            <TotalJobPrice job={job} />
           </CollapsibleSection>
           {hasWetStamp && (
             <CollapsibleSection
               title="Tracking Numbers"
               action={notForClient && <NewTrackingNumberDialog job={job} />}
             >
-              <TrackingNumbersTable job={job} />
+              <TrackingNumbersTable job={job} pageType={pageType} />
             </CollapsibleSection>
           )}
           {notForClient && (

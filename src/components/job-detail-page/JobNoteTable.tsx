@@ -47,9 +47,6 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("jobNoteNumber", {
-        header: "#",
-      }),
       columnHelper.accessor("creatorName", {
         header: "Created By",
       }),
