@@ -118,6 +118,7 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                       project: jobNotes.propertyAddress,
                       job: `Job ${jobNotes.jobRequestNumber}`,
                       jobNote: `#${row.original.jobNoteNumber} message`,
+                      shareLink: row.original.fileShareLink,
                     });
                     return;
                   }
