@@ -75,6 +75,7 @@ export function openJobFolder({
  *   project: "Warren City Ctr, Warrenton, Missouri 63383, United States",
  *   job: `Job 5`,
  *   jobNote: `#3232 message`,
+ *   shareLink: `https://googleDrive/...`
  * });
  */
 export function openJobNoteFolder({
@@ -83,17 +84,19 @@ export function openJobNoteFolder({
   project,
   job,
   jobNote,
+  shareLink,
 }: {
   organization: string;
   type: string;
   project: string;
   job: string;
   jobNote: string;
+  shareLink: string | null;
 }) {
   checkBarunFinderApp();
 
   const url = `barun://open-job-note?payload=${encodeURIComponent(
-    JSON.stringify({ organization, type, project, job, jobNote })
+    JSON.stringify({ organization, type, project, job, jobNote, shareLink })
   )}`;
   window.location.href = url;
 }
