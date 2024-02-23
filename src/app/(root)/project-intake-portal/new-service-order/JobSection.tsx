@@ -360,19 +360,19 @@ function JobSectionWithData({
       });
     }
 
-    form.resetField("systemSize", {
-      defaultValue: systemSize == null ? "" : String(systemSize),
-    });
-    form.resetField("mountingType", {
-      defaultValue:
+    form.reset({
+      clientUser: {
+        id: isBarunCorpMember ? "" : session.id,
+        emailAddressesToReceiveDeliverables: [],
+      },
+      systemSize: systemSize == null ? "" : String(systemSize),
+      mountingType:
         organization.mountingTypeDefaultValue == null
           ? "Roof Mount"
           : (organization.mountingTypeDefaultValue as z.infer<
               typeof MountingTypeEnum
             >),
-    });
-    form.resetField("services", {
-      defaultValue: recentJob
+      services: recentJob
         ? recentJob.orderedServices
             .filter(
               (value) =>
@@ -381,9 +381,7 @@ function JobSectionWithData({
             )
             .map((value) => ({ id: value.serviceId, description: null }))
         : [],
-    });
-    form.resetField("descriptionForOtherServices", {
-      defaultValue: recentJob
+      descriptionForOtherServices: recentJob
         ? recentJob.orderedServices.findIndex(
             (value) => value.serviceId === OTHER_SERVICE_ID
           ) === -1
@@ -392,15 +390,8 @@ function JobSectionWithData({
               .filter((value) => value.serviceId === OTHER_SERVICE_ID)
               .map((value) => ({ description: value.description ?? "" }))
         : [{ description: "" }],
-    });
-    form.resetField("typeOfWetStamp", {
-      defaultValue: typeOfWetStamp,
-    });
-    form.resetField("numberOfWetStamp", {
-      defaultValue: "",
-    });
-    form.resetField("mailingAddress", {
-      defaultValue: {
+      numberOfWetStamp: "",
+      mailingAddress: {
         city: mailingAddressForWetStamp?.city ?? "",
         coordinates: mailingAddressForWetStamp?.coordinates ?? [],
         country: mailingAddressForWetStamp?.country ?? "",
@@ -410,11 +401,11 @@ function JobSectionWithData({
         street1: mailingAddressForWetStamp?.street1 ?? "",
         street2: mailingAddressForWetStamp?.street2 ?? "",
       },
+      typeOfWetStamp,
+      additionalInformation: INITIAL_EDITOR_VALUE,
+      dueDate: null,
+      isExpedited: false,
     });
-    form.resetField("additionalInformation", {
-      defaultValue: INITIAL_EDITOR_VALUE,
-    });
-    form.resetField("isExpedited", { defaultValue: false });
   }, [
     form,
     isBarunCorpMember,

@@ -19,6 +19,10 @@ export default function OrganizationSection() {
         <OrganizationsCombobox
           organizationId={organizationId}
           onOrganizationIdChange={(newOrganizationId) => {
+            if (organizationId === newOrganizationId) {
+              return;
+            }
+
             dispatch({
               type: "SET_ORGANIZATION_ID",
               organizationId: newOrganizationId,
