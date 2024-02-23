@@ -2,11 +2,11 @@
 import Link from "next/link";
 import React from "react";
 import { useSession } from "next-auth/react";
-import { ToggleState } from "react-stately";
 import User from "./User";
 import HandToggle from "./HandToggle";
 import Notification from "./Notification";
 import ExpandToggle from "./ExpandToggle";
+import { useExpandContext } from "./ExpandProvider";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -97,13 +97,10 @@ const systemManagementItems: {
   },
 ];
 
-interface Props {
-  toggleState: ToggleState;
-}
-
-export default function Header({ toggleState }: Props) {
+export default function Header() {
   const { data: session } = useSession();
   const { data: profile } = useProfileQuery();
+  const { isSelected: isExpanded } = useExpandContext();
 
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
   const isContractor = profile?.isVendor ?? false;
@@ -113,7 +110,7 @@ export default function Header({ toggleState }: Props) {
       <div
         className={cn(
           "container px-6 flex h-16 items-center justify-between",
-          toggleState.isSelected && "max-w-[1920px]"
+          isExpanded && "max-w-[1920px]"
         )}
       >
         <div className="flex gap-8 items-center">
@@ -181,7 +178,7 @@ export default function Header({ toggleState }: Props) {
         </div>
         {session && profile && (
           <div className="flex gap-2 animate-in fade-in">
-            <ExpandToggle toggleState={toggleState} />
+            <ExpandToggle />
             {isBarunCorpMember && <HandToggle />}
             <Notification />
             <User />

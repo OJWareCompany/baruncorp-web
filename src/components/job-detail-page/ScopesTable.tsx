@@ -88,7 +88,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
    * 바른코프 멤버아닌데, 홈 ❌
    * 바른코프 멤버아닌데, 워크스페이스 ✅
    */
-  const notForClient = useMemo(
+  const isWorker = useMemo(
     () => isBarunCorpMember || !isHome,
     [isBarunCorpMember, isHome]
   );
@@ -388,7 +388,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
         cell: ({ getValue, row }) => {
           const value = getValue();
 
-          if (notForClient) {
+          if (isWorker) {
             if (row.depth === 0) {
               return (
                 <OrderedServiceStatusField
@@ -437,7 +437,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               status={row.original.status as JobStatusEnum}
               jobId={job.id}
               projectId={job.projectId}
-              disabled={!notForClient}
+              pageType={pageType}
             />
           );
         },
@@ -446,7 +446,8 @@ export default function ScopesTable({ job, project, pageType }: Props) {
     [
       job.id,
       job.projectId,
-      notForClient,
+      isWorker,
+      pageType,
       project.projectId,
       project.propertyType,
     ]

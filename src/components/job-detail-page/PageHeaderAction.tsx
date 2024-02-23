@@ -47,9 +47,9 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
    * 바른코프 멤버아닌데, 홈 ❌
    * 바른코프 멤버아닌데, 워크스페이스 ✅
    */
-  const notForClient = isBarunCorpMember || !isHome;
+  const isWorker = isBarunCorpMember || !isHome;
 
-  if (notForClient) {
+  if (isWorker) {
     return (
       <div className="flex gap-2">
         <OpenJobFolderButton job={job} project={project} />

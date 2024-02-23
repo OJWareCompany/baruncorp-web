@@ -174,7 +174,7 @@ function InternalTable({
    * 바른코프 멤버아닌데, 홈 ❌
    * 바른코프 멤버아닌데, 워크스페이스 ✅
    */
-  const notForClient = isBarunCorpMember || !isHome;
+  const isWorker = isBarunCorpMember || !isHome;
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -187,7 +187,7 @@ function InternalTable({
     state: {
       pagination,
       columnVisibility: {
-        action: notForClient,
+        action: isWorker,
       },
     },
   });

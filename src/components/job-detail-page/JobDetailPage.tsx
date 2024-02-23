@@ -1,13 +1,13 @@
 "use client";
 import { useMemo } from "react";
 import { useSession } from "next-auth/react";
+import ProjectForm from "../common/ProjectForm";
+import JobsRelatedToProjectTable from "../common/JobsRelatedToProjectTable";
 import PageHeaderAction from "./PageHeaderAction";
-import ProjectSection from "./ProjectSection";
 import JobForm from "./JobForm";
 import JobNotesTable from "./JobNoteTable";
 import JobNoteForm from "./JobNoteForm";
 import ScopesTable from "./ScopesTable";
-import JobsTable from "./JobsTable";
 import HistoryTable from "./HistoryTable";
 import JobStatus from "./JobStatus";
 import NewScopeSheet from "./NewScopeSheet";
@@ -164,19 +164,21 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
    * 바른코프 멤버아닌데, 홈 ❌
    * 바른코프 멤버아닌데, 워크스페이스 ✅
    */
-  const notForClient = isBarunCorpMember || !isHome;
+  const isWorker = isBarunCorpMember || !isHome;
 
   return (
     <AlertDialogDataProvider>
       <div className="flex flex-col gap-4">
         {getPageHeader({ pageType, project, job })}
         <div className="space-y-6">
-          <ProjectSection project={project} pageType={pageType} />
+          <CollapsibleSection title="Project">
+            <ProjectForm project={project} pageType={pageType} />
+          </CollapsibleSection>
           <CollapsibleSection title="Jobs Related to Project">
-            <JobsTable project={project} pageType={pageType} />
+            <JobsRelatedToProjectTable project={project} pageType={pageType} />
           </CollapsibleSection>
           <CollapsibleSection title="Job">
-            <JobForm job={job} project={project} disabled={!notForClient} />
+            <JobForm job={job} project={project} pageType={pageType} />
           </CollapsibleSection>
           <CollapsibleSection title="Job Note">
             <ItemsContainer>
@@ -187,15 +189,15 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
                 }}
                 pageType={pageType}
               />
-              {notForClient && <JobNoteForm job={job} />}
+              {isWorker && <JobNoteForm job={job} />}
             </ItemsContainer>
           </CollapsibleSection>
           <CollapsibleSection title="Status">
-            <JobStatus job={job} disabled={!notForClient} />
+            <JobStatus job={job} pageType={pageType} />
           </CollapsibleSection>
           <CollapsibleSection
             title="Scopes"
-            action={notForClient && <NewScopeSheet job={job} />}
+            action={isWorker && <NewScopeSheet job={job} />}
           >
             {isBarunCorpMember && <TotalJobPrice job={job} />}
             <ScopesTable job={job} project={project} pageType={pageType} />
@@ -203,12 +205,12 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
           {hasWetStamp && (
             <CollapsibleSection
               title="Tracking Numbers"
-              action={notForClient && <NewTrackingNumberDialog job={job} />}
+              action={isWorker && <NewTrackingNumberDialog job={job} />}
             >
               <TrackingNumbersTable job={job} pageType={pageType} />
             </CollapsibleSection>
           )}
-          {notForClient && (
+          {isWorker && (
             <CollapsibleSection title="History">
               <HistoryTable job={job} />
             </CollapsibleSection>

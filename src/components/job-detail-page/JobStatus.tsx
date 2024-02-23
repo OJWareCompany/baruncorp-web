@@ -2,6 +2,7 @@
 import React from "react";
 import { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import { JobResponseDto } from "@/api/api-spec";
 import {
@@ -23,13 +24,33 @@ import { JobStatusEnum, jobStatuses } from "@/lib/constants";
 
 interface Props {
   job: JobResponseDto;
-  disabled?: boolean;
+  pageType: PageType;
 }
 
-export default function JobStatus({ job, disabled = false }: Props) {
+export default function JobStatus({ job, pageType }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const currentStatus = jobStatuses[job.jobStatus];
   const dispatch = useAlertDialogDataDispatch();
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const isWorker = isBarunCorpMember || !isHome;
+
+  if (!isWorker) {
+    return (
+      <div className="flex items-center gap-2 h-10 px-3 py-2 rounded-md text-sm border border-input bg-background">
+        <currentStatus.Icon className={`w-4 h-4 ${currentStatus.color}`} />
+        <span>{currentStatus.value}</span>
+      </div>
+    );
+  }
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -37,7 +58,6 @@ export default function JobStatus({ job, disabled = false }: Props) {
         <Button
           variant="outline"
           className="px-3 font-normal gap-2 justify-between w-full"
-          disabled={disabled}
         >
           <div className="flex gap-2 items-center">
             <currentStatus.Icon className={`w-4 h-4 ${currentStatus.color}`} />

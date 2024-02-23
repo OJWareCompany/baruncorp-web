@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { AxiosError } from "axios";
 import { Value } from "@udecode/plate-common";
+import { useSession } from "next-auth/react";
 import RowItemsContainer from "../RowItemsContainer";
 import {
   Form,
@@ -57,10 +58,22 @@ import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 interface Props {
   project: ProjectResponseDto;
   job: JobResponseDto;
-  disabled?: boolean;
+  pageType: PageType;
 }
 
-export default function JobForm({ project, job, disabled = false }: Props) {
+export default function JobForm({ project, job, pageType }: Props) {
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const isWorker = isBarunCorpMember || !isHome;
+
   const { toast } = useToast();
   const hasWetStamp = useMemo(
     () =>
@@ -342,7 +355,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                     userId={field.value}
                     onUserIdChange={field.onChange}
                     ref={field.ref}
-                    disabled={disabled}
+                    disabled={!isWorker}
                   />
                 </FormControl>
                 <FormMessage />
@@ -368,9 +381,9 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                           <FormItem>
                             <div className="flex flex-row gap-2">
                               <FormControl>
-                                <Input {...field} disabled={disabled} />
+                                <Input {...field} disabled={!isWorker} />
                               </FormControl>
-                              {!disabled && index !== 0 && (
+                              {isWorker && index !== 0 && (
                                 <Button
                                   variant={"outline"}
                                   size={"icon"}
@@ -391,7 +404,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                       />
                     )
                   )}
-                  {!disabled && (
+                  {isWorker && (
                     <Button
                       variant={"outline"}
                       className="w-full"
@@ -428,7 +441,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                             field.onChange(event);
                           }
                         }}
-                        disabled={disabled}
+                        disabled={!isWorker}
                       />
                     </FormControl>
                     <FormMessage />
@@ -448,7 +461,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                     ref={field.ref}
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={disabled}
+                    disabled={!isWorker}
                   >
                     {MountingTypeEnum.options.map((value) => (
                       <FormItem
@@ -485,7 +498,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                               field.onChange(event);
                             }
                           }}
-                          disabled={disabled}
+                          disabled={!isWorker}
                         />
                       </FormControl>
                       <FormMessage />
@@ -502,7 +515,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                       <div className="flex flex-col gap-2">
                         <FormItem>
                           <FormLabel required>Mailing Address</FormLabel>
-                          {!disabled && (
+                          {isWorker && (
                             <AddressSearchButton
                               ref={field.ref}
                               format="us"
@@ -535,7 +548,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                               });
                             }}
                             placeholder="Street 2"
-                            disabled={disabled}
+                            disabled={!isWorker}
                           />
                           <Input
                             value={field.value.city}
@@ -579,7 +592,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
               <FormItem>
                 <FormLabel>Additional Information</FormLabel>
                 <FormControl>
-                  <BasicEditor {...field} disabled={disabled} />
+                  <BasicEditor {...field} disabled={!isWorker} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -603,14 +616,14 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                           newValue === undefined ? null : newValue
                         );
                       }}
-                      disabled={disabled}
+                      disabled={!isWorker}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {!disabled && (
+            {isWorker && (
               <FormField
                 control={form.control}
                 name="priority"
@@ -655,14 +668,14 @@ export default function JobForm({ project, job, disabled = false }: Props) {
                     onCheckedChange={(newChecked) => {
                       field.onChange(newChecked);
                     }}
-                    disabled={disabled}
+                    disabled={!isWorker}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {!disabled && (
+          {isWorker && (
             <FormField
               control={form.control}
               name="inReview"
@@ -683,7 +696,7 @@ export default function JobForm({ project, job, disabled = false }: Props) {
               )}
             />
           )}
-          {!disabled && (
+          {isWorker && (
             <LoadingButton
               type="submit"
               disabled={!form.formState.isDirty}

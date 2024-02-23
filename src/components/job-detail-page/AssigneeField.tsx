@@ -10,7 +10,7 @@ interface Props {
   status: JobStatusEnum;
   jobId: string;
   projectId: string;
-  disabled?: boolean;
+  pageType: PageType;
 }
 
 export default function AssigneeField({
@@ -19,12 +19,20 @@ export default function AssigneeField({
   status,
   jobId,
   projectId,
-  disabled = false,
+  pageType,
 }: Props) {
   const dispatch = useAlertDialogDataDispatch();
   const { data: session } = useSession();
 
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const isWorker = isBarunCorpMember || !isHome;
 
   return (
     <div className="flex gap-2 -ml-[13px]">
@@ -44,12 +52,10 @@ export default function AssigneeField({
           status === "Completed" ||
           status === "Canceled" ||
           status === "On Hold" ||
-          disabled ||
           !isBarunCorpMember
         }
       />
-      {/* TODO: Completed 인 경우 Reset 시키는 액션 */}
-      {!disabled &&
+      {isWorker &&
         userId !== "" &&
         status !== "Completed" &&
         status !== "Canceled" &&

@@ -1,8 +1,8 @@
 "use client";
 import { useSession } from "next-auth/react";
-import ProjectForm from "./ProjectForm";
+import ProjectForm from "../common/ProjectForm";
+import JobsRelatedToProjectTable from "../common/JobsRelatedToProjectTable";
 import PageHeaderAction from "./PageHeaderAction";
-import JobsTable from "./JobsTable";
 import useProjectQuery from "@/queries/useProjectQuery";
 import PageHeader from "@/components/PageHeader";
 import PageLoading from "@/components/PageLoading";
@@ -82,7 +82,7 @@ export default function ProjectDetailPage({ projectId, pageType }: Props) {
    * 바른코프 멤버아닌데, 홈 ❌
    * 바른코프 멤버아닌데, 워크스페이스 ✅
    */
-  const notForClient = isBarunCorpMember || !isHome;
+  const isWorker = isBarunCorpMember || !isHome;
 
   if (isProjectQueryLoading || project == null) {
     return <PageLoading />;
@@ -93,10 +93,10 @@ export default function ProjectDetailPage({ projectId, pageType }: Props) {
       {getPageHeader({ pageType, project })}
       <div className="space-y-6">
         <section>
-          <ProjectForm project={project} disabled={!notForClient} />
+          <ProjectForm project={project} pageType={pageType} />
         </section>
         <CollapsibleSection title="Jobs Related to Project">
-          <JobsTable project={project} pageType={pageType} />
+          <JobsRelatedToProjectTable project={project} pageType={pageType} />
         </CollapsibleSection>
       </div>
     </div>

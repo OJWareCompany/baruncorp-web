@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useParams } from "next/navigation";
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { ProjectResponseDto } from "@/api/api-spec";
 import {
   Form,
@@ -77,11 +77,22 @@ function getFieldValues(project: ProjectResponseDto): FieldValues {
 
 interface Props {
   project: ProjectResponseDto;
-  disabled?: boolean;
+  pageType: PageType;
 }
 
-export default function ProjectForm({ project, disabled = false }: Props) {
-  const { projectId } = useParams() as { projectId: string };
+export default function ProjectForm({ project, pageType }: Props) {
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const isHome = pageType === "HOME";
+
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const isWorker = isBarunCorpMember || !isHome;
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(project),
@@ -92,7 +103,7 @@ export default function ProjectForm({ project, disabled = false }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { mutateAsync } = usePatchProjectMutation(projectId);
+  const { mutateAsync } = usePatchProjectMutation(project.projectId);
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
@@ -118,7 +129,7 @@ export default function ProjectForm({ project, disabled = false }: Props) {
       .then(() => {
         toast({ title: "Success" });
         queryClient.invalidateQueries({
-          queryKey: getProjectQueryKey(projectId),
+          queryKey: getProjectQueryKey(project.projectId),
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
@@ -194,7 +205,7 @@ export default function ProjectForm({ project, disabled = false }: Props) {
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={disabled}
+                    disabled={!isWorker}
                   >
                     <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder="Select a property type" />
@@ -221,7 +232,7 @@ export default function ProjectForm({ project, disabled = false }: Props) {
               <FormItem>
                 <FormLabel>Property Owner</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={disabled} />
+                  <Input {...field} disabled={!isWorker} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -234,7 +245,7 @@ export default function ProjectForm({ project, disabled = false }: Props) {
               <FormItem>
                 <FormLabel>Project Number</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={disabled} />
+                  <Input {...field} disabled={!isWorker} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -250,7 +261,7 @@ export default function ProjectForm({ project, disabled = false }: Props) {
                 <div className="flex flex-col gap-2">
                   <FormItem>
                     <FormLabel required>Address</FormLabel>
-                    {!disabled && (
+                    {isWorker && (
                       <AddressSearchButton
                         ref={field.ref}
                         format="us"
@@ -280,7 +291,7 @@ export default function ProjectForm({ project, disabled = false }: Props) {
                         });
                       }}
                       placeholder="Street 2"
-                      disabled={disabled}
+                      disabled={!isWorker}
                     />
                     <Input
                       value={field.value.city}
@@ -328,21 +339,23 @@ export default function ProjectForm({ project, disabled = false }: Props) {
                   state={watchState}
                   ref={field.ref}
                   modal
-                  disabled={disabled}
+                  disabled={!isWorker}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <LoadingButton
-          type="submit"
-          className="w-full"
-          isLoading={form.formState.isSubmitting}
-          disabled={!form.formState.isDirty}
-        >
-          Edit
-        </LoadingButton>
+        {isWorker && (
+          <LoadingButton
+            type="submit"
+            className="w-full"
+            isLoading={form.formState.isSubmitting}
+            disabled={!form.formState.isDirty}
+          >
+            Edit
+          </LoadingButton>
+        )}
       </form>
     </Form>
   );

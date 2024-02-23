@@ -135,7 +135,10 @@ interface Props {
   pageType: PageType;
 }
 
-export default function JobsTable({ project, pageType }: Props) {
+export default function JobsRelatedToProjectTable({
+  project,
+  pageType,
+}: Props) {
   const router = useRouter();
   const columnVisibility = useJobsColumnVisibility();
 
