@@ -46,7 +46,7 @@ import {
 import EnumHeader from "@/components/table/EnumHeader";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import NotesToClientHoverCard from "@/components/hover-card/NotesToClientHoverCard";
+import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -175,17 +175,6 @@ export default function ClientInvoicesTable({ type }: Props) {
         header: "Due Date (EST)",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
-      columnHelper.accessor("notesToClient", {
-        header: "Notes to Client",
-        cell: ({ getValue }) => {
-          const value = getValue();
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return <NotesToClientHoverCard value={value} />;
-        },
-      }),
       columnHelper.accessor((row) => `$${row.subtotal}`, {
         header: "Subtotal",
       }),
@@ -194,6 +183,18 @@ export default function ClientInvoicesTable({ type }: Props) {
       }),
       columnHelper.accessor((row) => `$${row.total}`, {
         header: "Total",
+      }),
+      columnHelper.accessor("notesToClient", {
+        header: "Notes",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <InvoiceNotesHoverCard value={value} />;
+        },
       }),
       columnHelper.accessor("createdAt", {
         header: "Date Created (EST)",

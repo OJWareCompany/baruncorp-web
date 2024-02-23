@@ -9,7 +9,7 @@ interface Props {
   value: string;
 }
 
-export default function NotesToClientHoverCard({ value }: Props) {
+export default function InvoiceNotesHoverCard({ value }: Props) {
   return (
     <HoverCard openDelay={0} closeDelay={100}>
       <HoverCardTrigger className="underline">View Detail</HoverCardTrigger>

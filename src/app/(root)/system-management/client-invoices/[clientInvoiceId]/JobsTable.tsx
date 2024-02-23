@@ -201,7 +201,7 @@ export default function JobsTable({ clientInvoice }: Props) {
           <AffixInput
             prefixElement={<span className="text-muted-foreground">$</span>}
             value={String(clientInvoice.subtotal)}
-            disabled
+            readOnly
           />
         </Item>
         <Item>
@@ -211,7 +211,7 @@ export default function JobsTable({ clientInvoice }: Props) {
             value={
               clientInvoice.discount ? String(clientInvoice.discount) : "-"
             }
-            disabled
+            readOnly
           />
         </Item>
         <Item>
@@ -219,7 +219,7 @@ export default function JobsTable({ clientInvoice }: Props) {
           <AffixInput
             prefixElement={<span className="text-muted-foreground">$</span>}
             value={String(clientInvoice.total)}
-            disabled
+            readOnly
           />
         </Item>
       </RowItemsContainer>

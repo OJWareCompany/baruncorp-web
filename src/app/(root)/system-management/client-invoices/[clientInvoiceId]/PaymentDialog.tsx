@@ -79,24 +79,31 @@ export default function PaymentDialog({ organizationId }: Props) {
       paymentMethod: "Direct",
     },
   });
-  const usePostDirectPaymentMutationResult = usePostDirectPaymentMutation();
-  const usePostCreditPaymentMutationResult = usePostCreditPaymentMutation();
+  const {
+    isSuccess: isPostDirectPaymentMutationSuccess,
+    mutateAsync: postDirectPaymentMutateAsync,
+    reset: resetPostDirectPaymentMutation,
+  } = usePostDirectPaymentMutation();
+  const {
+    isSuccess: isPostCreditPaymentMutationSuccess,
+    mutateAsync: postCreditPaymentMutateAsync,
+    reset: resetPostCreditPaymentMutation,
+  } = usePostCreditPaymentMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
-      (usePostDirectPaymentMutationResult.isSuccess ||
-        usePostCreditPaymentMutationResult.isSuccess)
+      (isPostDirectPaymentMutationSuccess || isPostCreditPaymentMutationSuccess)
     ) {
       form.reset();
     }
   }, [
     form,
     form.formState.isSubmitSuccessful,
-    usePostCreditPaymentMutationResult.isSuccess,
-    usePostDirectPaymentMutationResult.isSuccess,
+    isPostCreditPaymentMutationSuccess,
+    isPostDirectPaymentMutationSuccess,
   ]);
 
   useEffect(() => {
@@ -104,25 +111,20 @@ export default function PaymentDialog({ organizationId }: Props) {
     // 일반적으로는 이 useEffect가 필요하지 않다. form을 submit할 때 하나의 request로 처리를 하기 때문에 그 mutation의 isSuccess state는 계속 업데이트될 것이기 때문에 위의 useEffect가 잘 동작한다.
     // 그런데 이 form을 submit할 때는 경우에 따라 두 개의 request로 처리를 하기 때문에 state를 초기화해주지 않으면 원하지 않는 상황에서 위의 useEffect가 동작하게 된다.
     if (!open) {
-      usePostDirectPaymentMutationResult.reset();
-      usePostCreditPaymentMutationResult.reset();
+      resetPostDirectPaymentMutation();
+      resetPostCreditPaymentMutation();
     }
-  }, [
-    open,
-    usePostCreditPaymentMutationResult,
-    usePostDirectPaymentMutationResult,
-  ]);
+  }, [open, resetPostCreditPaymentMutation, resetPostDirectPaymentMutation]);
 
   async function onSubmit(values: FieldValues) {
     if (values.paymentMethod === "Credit") {
-      await usePostCreditPaymentMutationResult
-        .mutateAsync({
-          amount: Number(values.amount),
-          creditTransactionType: "Deduction",
-          clientOrganizationId: organizationId,
-          relatedInvoiceId: clientInvoiceId,
-          note: transformStringIntoNullableString.parse(values.notes),
-        })
+      await postCreditPaymentMutateAsync({
+        amount: Number(values.amount),
+        creditTransactionType: "Deduction",
+        clientOrganizationId: organizationId,
+        relatedInvoiceId: clientInvoiceId,
+        note: transformStringIntoNullableString.parse(values.notes),
+      })
         .then(() => {
           setOpen(false);
           queryClient.invalidateQueries({
@@ -186,13 +188,12 @@ export default function PaymentDialog({ organizationId }: Props) {
     }
 
     if (values.paymentMethod === "Direct") {
-      await usePostDirectPaymentMutationResult
-        .mutateAsync({
-          amount: Number(values.amount),
-          notes: transformStringIntoNullableString.parse(values.notes),
-          paymentMethod: "Direct",
-          invoiceId: clientInvoiceId,
-        })
+      await postDirectPaymentMutateAsync({
+        amount: Number(values.amount),
+        notes: transformStringIntoNullableString.parse(values.notes),
+        paymentMethod: "Direct",
+        invoiceId: clientInvoiceId,
+      })
         .then(() => {
           setOpen(false);
           queryClient.invalidateQueries({

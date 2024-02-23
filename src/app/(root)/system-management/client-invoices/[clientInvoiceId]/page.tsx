@@ -104,7 +104,6 @@ export default function Page({ params: { clientInvoiceId } }: Props) {
             <PaymentsTable clientInvoice={clientInvoice} />
           </CollapsibleSection>
         )}
-
         <CollapsibleSection
           title="Jobs"
           action={<DownloadCSVButton clientInvoice={clientInvoice} />}

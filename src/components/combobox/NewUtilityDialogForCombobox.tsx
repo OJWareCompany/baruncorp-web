@@ -45,8 +45,16 @@ export default function NewUtilityDialogForCombobox({
   const { toast } = useToast();
   const [isExistingStep, setIsExistingStep] = useState(true);
 
-  const usePatchUtilityNoteMutationResult = usePatchUtilityNoteMutation();
-  const usePostUtilityMutationResult = usePostUtilityMutation();
+  const {
+    isSuccess: isPatchUtilityNoteMutationSuccess,
+    mutateAsync: patchUtilityNoteMutateAsync,
+    reset: resetPatchUtilityNoteMutation,
+  } = usePatchUtilityNoteMutation();
+  const {
+    isSuccess: isPostUtilityMutationSuccess,
+    mutateAsync: postUtilityMutateAsync,
+    reset: resetPostUtilityMutation,
+  } = usePostUtilityMutation();
 
   const formSchema = useMemo(
     () =>
@@ -101,16 +109,15 @@ export default function NewUtilityDialogForCombobox({
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
-      (usePatchUtilityNoteMutationResult.isSuccess ||
-        usePostUtilityMutationResult.isSuccess)
+      (isPatchUtilityNoteMutationSuccess || isPostUtilityMutationSuccess)
     ) {
       form.reset();
     }
   }, [
     form,
     form.formState.isSubmitSuccessful,
-    usePatchUtilityNoteMutationResult.isSuccess,
-    usePostUtilityMutationResult.isSuccess,
+    isPatchUtilityNoteMutationSuccess,
+    isPostUtilityMutationSuccess,
   ]);
 
   useEffect(() => {
@@ -118,29 +125,28 @@ export default function NewUtilityDialogForCombobox({
     // 일반적으로는 이 useEffect가 필요하지 않다. form을 submit할 때 하나의 request로 처리를 하기 때문에 그 mutation의 isSuccess state는 계속 업데이트될 것이기 때문에 위의 useEffect가 잘 동작한다.
     // 그런데 이 form을 submit할 때는 경우에 따라 두 개의 request로 처리를 하기 때문에 state를 초기화해주지 않으면 원하지 않는 상황에서 위의 useEffect가 동작하게 된다.
     if (!dialogProps.open) {
-      usePatchUtilityNoteMutationResult.reset();
-      usePostUtilityMutationResult.reset();
+      resetPatchUtilityNoteMutation();
+      resetPostUtilityMutation();
     }
   }, [
     dialogProps.open,
-    usePatchUtilityNoteMutationResult,
-    usePostUtilityMutationResult,
+    resetPatchUtilityNoteMutation,
+    resetPostUtilityMutation,
   ]);
 
   const newAbbr = stateNameAbbreviationMap[state.toUpperCase() as StateName];
 
   async function onSubmit(values: FieldValues) {
     if (isExistingStep) {
-      await usePatchUtilityNoteMutationResult
-        .mutateAsync({
-          utilityId: values.existingUtility.id,
-          name: values.existingUtility.name,
-          notes: values.existingUtility.notes,
-          stateAbbreviations: [
-            ...values.existingUtility.stateAbbreviations,
-            newAbbr,
-          ],
-        })
+      await patchUtilityNoteMutateAsync({
+        utilityId: values.existingUtility.id,
+        name: values.existingUtility.name,
+        notes: values.existingUtility.notes,
+        stateAbbreviations: [
+          ...values.existingUtility.stateAbbreviations,
+          newAbbr,
+        ],
+      })
         .then(() => {
           toast({ title: "Success" });
           queryClient.invalidateQueries({
@@ -167,12 +173,11 @@ export default function NewUtilityDialogForCombobox({
           }
         });
     } else {
-      await usePostUtilityMutationResult
-        .mutateAsync({
-          name: values.name,
-          notes: "",
-          stateAbbreviations: [newAbbr],
-        })
+      await postUtilityMutateAsync({
+        name: values.name,
+        notes: "",
+        stateAbbreviations: [newAbbr],
+      })
         .then(({ id }) => {
           toast({ title: "Success" });
           queryClient.invalidateQueries({

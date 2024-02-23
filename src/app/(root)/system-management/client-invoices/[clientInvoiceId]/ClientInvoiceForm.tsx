@@ -58,22 +58,18 @@ const formSchema = z.object({
   servicePeriodMonth: z
     .string()
     .datetime({ message: "Service Period Month is required" }),
-  notesToClient: z.string().trim(),
+  notes: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
 
 function getFieldValues(clientInvoice: InvoiceResponseDto): FieldValues {
-  const currentDate = new Date();
-
   return {
     organization: clientInvoice.clientOrganization.name,
     invoiceDate: new Date(clientInvoice.invoiceDate),
     terms: String(clientInvoice.terms) as z.infer<typeof TermsEnum>,
     servicePeriodMonth: clientInvoice.servicePeriodDate,
-    notesToClient: transformNullishStringIntoString.parse(
-      clientInvoice.notesToClient
-    ),
+    notes: transformNullishStringIntoString.parse(clientInvoice.notesToClient),
   };
 }
 
@@ -101,9 +97,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
   async function onSubmit(values: FieldValues) {
     await patchInvoiceMutateAsync({
       invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
-      notesToClient: transformStringIntoNullableString.parse(
-        values.notesToClient
-      ),
+      notesToClient: transformStringIntoNullableString.parse(values.notes),
       terms: Number(values.terms) as 21 | 30 | 60,
     })
       .then(() => {
@@ -248,10 +242,10 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
         </RowItemsContainer>
         <FormField
           control={form.control}
-          name="notesToClient"
+          name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes to Client</FormLabel>
+              <FormLabel>Notes</FormLabel>
               <FormControl>
                 <Textarea {...field} />
               </FormControl>

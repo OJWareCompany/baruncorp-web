@@ -197,8 +197,8 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
             title="Scopes"
             action={notForClient && <NewScopeSheet job={job} />}
           >
+            {isBarunCorpMember && <TotalJobPrice job={job} />}
             <ScopesTable job={job} project={project} pageType={pageType} />
-            <TotalJobPrice job={job} />
           </CollapsibleSection>
           {hasWetStamp && (
             <CollapsibleSection

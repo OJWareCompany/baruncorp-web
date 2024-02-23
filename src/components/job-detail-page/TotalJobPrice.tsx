@@ -1,4 +1,6 @@
 import { AffixInput } from "../AffixInput";
+import Item from "../Item";
+import { Label } from "../ui/label";
 import { JobResponseDto } from "@/api/api-spec";
 
 interface Props {
@@ -12,10 +14,13 @@ export default function TotalJobPrice({ job }: Props) {
   );
 
   return (
-    <AffixInput
-      prefixElement={<span>Total Job Price: </span>}
-      value={value}
-      readOnly
-    />
+    <Item>
+      <Label>Total Amount</Label>
+      <AffixInput
+        prefixElement={<span className="text-muted-foreground">$</span>}
+        value={value}
+        readOnly
+      />
+    </Item>
   );
 }

@@ -95,7 +95,7 @@ export default function OrganizationsTable() {
         fullAddress: addressSearchParam,
         name: orgNameSearchParam,
         phoneNumber: phoneNumberSearchParam,
-        email: emailSearchParam,
+        invoiceRecipientEmail: emailSearchParam,
         isVendor:
           transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
             vendorSearchParam
