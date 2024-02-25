@@ -339,6 +339,7 @@ export interface CreateJobRequestDto {
   systemSize: number | null;
   /** @default "d6935a65-2ec5-4df0-a8b5-a4e39f124d05" */
   projectId: string;
+  structuralUpgradeNote: string | null;
   /** @example "Ground Mount" */
   mountingType: "Roof Mount" | "Ground Mount";
   /** @default "Self" */
@@ -367,8 +368,7 @@ export interface UpdateJobRequestDto {
   additionalInformationFromClient: string | null;
   /** @default 300.1 */
   systemSize: number | null;
-  /** @example "Ground Mount" */
-  mountingType: "Roof Mount" | "Ground Mount";
+  structuralUpgradeNote: string | null;
   /** @default "Self" */
   loadCalcOrigin?: "Self" | "Client Provided";
   mailingAddressForWetStamp: AddressDto | null;
@@ -520,6 +520,7 @@ export interface JobResponseDto {
   updatedBy: string;
   /** @example "176 Morningmist Road, Naugatuck, Connecticut 06770" */
   propertyFullAddress: string;
+  structuralUpgradeNote: string | null;
   /** @example 5 */
   jobRequestNumber: number;
   /** @example "In Progress" */
@@ -545,6 +546,8 @@ export interface JobResponseDto {
   /** @example "High" */
   priority: "Immediate" | "High" | "Medium" | "Low";
   jobName: string;
+  propertyOwner: string;
+  projectNumber: string | null;
   isCurrentJob?: boolean;
   /** @format date-time */
   dateSentToClient: string | null;
@@ -923,9 +926,9 @@ export interface Engineering {
   /** @default "See Notes" */
   windUpliftCalculationRequired: "No" | "Yes" | "See Notes" | null;
   /** @default "115" */
-  windSpeed: string | null;
-  /** @default "See Notes" */
-  windExposure: "B" | "C" | "D" | "See Notes" | null;
+  windSpeedRiskCatFirst: string | null;
+  /** @default "115" */
+  windSpeedRiskCatSecond: string | null;
   /** @default "30" */
   snowLoadGround: string | null;
   /** @default "30" */
@@ -2255,6 +2258,19 @@ export interface CreateVendorInvoiceRequestDto {
   note: string | null;
 }
 
+export interface VendorInvoicePayment {
+  id: string;
+  paymentName: string;
+  vendorInvoiceId: string;
+  amount: number;
+  paymentMethod: "Direct" | "Deduction";
+  notes: string | null;
+  /** @format date-time */
+  paymentDate: string;
+  /** @format date-time */
+  canceledAt: string | null;
+}
+
 export interface VendorInvoiceResponseDto {
   /** @default "" */
   id: string;
@@ -2288,6 +2304,7 @@ export interface VendorInvoiceResponseDto {
   invoiceTotalDifference: number;
   /** @default "" */
   internalTotalBalanceDue: number | null;
+  vendorPayments: VendorInvoicePayment;
   /** @default "" */
   createdAt: string;
   /** @default "" */
@@ -2354,11 +2371,19 @@ export interface UpdateVendorInvoicedTotalRequestDto {
   total: number;
 }
 
+export interface UpdateVendorInvoiceRequestDto {
+  /** @format date-time */
+  invoiceDate: string;
+  /** @default 30 */
+  terms: 21 | 30 | 60;
+  note: string | null;
+}
+
 export interface CreateVendorPaymentRequestDto {
   vendorInvoiceId: string;
   /** @default 100 */
   amount: number;
-  paymentMethod: "Credit" | "Direct";
+  paymentMethod: "Direct";
   notes: string | null;
 }
 
@@ -2366,7 +2391,7 @@ export interface VendorPaymentResponseDto {
   id: string;
   vendorInvoiceId: string;
   amount: number;
-  paymentMethod: "Credit" | "Direct";
+  paymentMethod: "Direct";
   paymentDate: string;
   notes: string | null;
   canceledAt: string | null;
@@ -2910,6 +2935,15 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
   isExpedited?: boolean | null;
+  /** @default false */
+  inReview?: boolean | null;
+  /** @default "Medium" */
+  priority?: "Immediate" | "High" | "Medium" | "Low" | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  propertyOwner?: string | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -2956,6 +2990,15 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
   isExpedited?: boolean | null;
+  /** @default false */
+  inReview?: boolean | null;
+  /** @default "Medium" */
+  priority?: "Immediate" | "High" | "Medium" | "Low" | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  propertyOwner?: string | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -3024,6 +3067,15 @@ export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   /** @default false */
   isExpedited?: boolean | null;
+  /** @default false */
+  inReview?: boolean | null;
+  /** @default "Medium" */
+  priority?: "Immediate" | "High" | "Medium" | "Low" | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  propertyOwner?: string | null;
 }
 
 export interface FindServicePaginatedHttpControllerGetParams {
@@ -3153,6 +3205,7 @@ export interface FindAssignedTaskPaginatedHttpControllerGetParams {
    * @default ""
    */
   organizationName?: string | null;
+  vendorInvoiceId?: string | null;
   /** @default "Completed" */
   status?:
     | "Not Started"
@@ -7107,12 +7160,12 @@ export class Api<
     /**
      * No description
      *
-     * @name UpdateVendorInvoicedTotalHttpControllerPatch
+     * @name UpdateVendorInvoiceHttpControllerPatch
      * @request PATCH:/vendor-invoices/{vendorInvoiceId}
      */
-    updateVendorInvoicedTotalHttpControllerPatch: (
+    updateVendorInvoiceHttpControllerPatch: (
       vendorInvoiceId: string,
-      data: UpdateVendorInvoicedTotalRequestDto,
+      data: UpdateVendorInvoiceRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
@@ -7141,6 +7194,25 @@ export class Api<
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateVendorInvoicedTotalHttpControllerPatch
+     * @request PATCH:/vendor-invoices/{vendorInvoiceId}/total
+     */
+    updateVendorInvoicedTotalHttpControllerPatch: (
+      vendorInvoiceId: string,
+      data: UpdateVendorInvoicedTotalRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/vendor-invoices/${vendorInvoiceId}/total`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

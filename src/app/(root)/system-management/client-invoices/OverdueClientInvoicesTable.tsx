@@ -129,14 +129,14 @@ export default function OverdueClientInvoicesTable() {
         },
       }),
       columnHelper.accessor("invoiceDate", {
-        header: "Invoice Date (EST)",
+        header: "Invoice Date",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("terms", {
         header: "Terms",
       }),
       columnHelper.accessor("dueDate", {
-        header: "Due Date (EST)",
+        header: "Due Date",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("notesToClient", {
@@ -152,7 +152,7 @@ export default function OverdueClientInvoicesTable() {
         header: "Total",
       }),
       columnHelper.accessor("createdAt", {
-        header: "Date Created (EST)",
+        header: "Date Created",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],

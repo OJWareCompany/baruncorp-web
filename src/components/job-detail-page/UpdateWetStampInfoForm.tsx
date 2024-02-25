@@ -97,13 +97,13 @@ export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
       clientUserId: job.clientInfo.clientUserId,
       deliverablesEmails: job.clientInfo.deliverablesEmails,
       systemSize: job.systemSize,
-      mountingType: job.mountingType,
       numberOfWetStamp: Number(values.numberOfWetStamp),
       mailingAddressForWetStamp: values.mailingAddress,
       isExpedited: job.isExpedited,
       dueDate: job.dueDate,
       inReview: job.inReview,
       priority: job.priority,
+      structuralUpgradeNote: job.structuralUpgradeNote,
       loadCalcOrigin: job.loadCalcOrigin,
     })
       .then(() => {

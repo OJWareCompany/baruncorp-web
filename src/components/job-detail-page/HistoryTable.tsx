@@ -128,7 +128,7 @@ const columns = [
     },
   }),
   columnHelper.accessor("modifiedAt", {
-    header: "Date Modified (EST)",
+    header: "Date Modified",
     cell: ({ getValue }) => formatInEST(getValue()),
   }),
 ];

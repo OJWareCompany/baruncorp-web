@@ -67,7 +67,7 @@ const columns = [
     header: "Type",
   }),
   columnHelper.accessor("updatedAt", {
-    header: "Date Updated (EST)",
+    header: "Date Updated",
     cell: ({ getValue }) => formatInEST(getValue()),
   }),
 ];
@@ -383,12 +383,18 @@ function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
               />
             </Item>
             <Item>
-              <Label>Wind Speed (mph)</Label>
-              <Input value={data.engineering.windSpeed ?? ""} disabled />
+              <Label>Wind Speed Risk Cat I (mph)</Label>
+              <Input
+                value={data.engineering.windSpeedRiskCatFirst ?? ""}
+                disabled
+              />
             </Item>
             <Item>
-              <Label>Wind Exposure</Label>
-              <Input value={data.engineering.windExposure ?? ""} disabled />
+              <Label>Wind Speed Risk Cat II (mph)</Label>
+              <Input
+                value={data.engineering.windSpeedRiskCatSecond ?? ""}
+                disabled
+              />
             </Item>
           </RowItemsContainer>
           <RowItemsContainer>
@@ -467,7 +473,7 @@ function Content({ geoId, updatedAt }: ContentProps) {
           <Input value={data.historyType} disabled />
         </Item>
         <Item>
-          <Label>Date Updated (EST)</Label>
+          <Label>Date Updated</Label>
           <Input
             value={
               data.general.updatedAt == null

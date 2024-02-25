@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function ExpandProvider({ children }: Props) {
-  const toggleState = useToggleState();
+  const toggleState = useToggleState({ defaultSelected: true });
 
   return (
     <ExpandContext.Provider value={toggleState}>

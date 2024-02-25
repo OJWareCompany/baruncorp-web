@@ -123,7 +123,19 @@ const columns = [
     },
   }),
   columnHelper.accessor("completedCancelledDate", {
-    header: "Date Completed/Canceled (EST)",
+    header: "Date Completed/Canceled",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return formatInEST(value);
+    },
+  }),
+  columnHelper.accessor("dateSentToClient", {
+    header: "Date Sent to Client",
     cell: ({ getValue }) => {
       const value = getValue();
 

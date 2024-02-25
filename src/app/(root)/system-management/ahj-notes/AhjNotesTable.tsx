@@ -139,7 +139,7 @@ export default function AhjNotesTable() {
         },
       }),
       columnHelper.accessor("updatedAt", {
-        header: "Date Updated (EST)",
+        header: "Date Updated",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],

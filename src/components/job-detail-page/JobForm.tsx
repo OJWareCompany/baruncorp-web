@@ -33,7 +33,9 @@ import {
   ELECTRICAL_WET_STAMP_SERVICE_ID,
   INITIAL_EDITOR_VALUE,
   JobPriorityEnum,
+  LoadCalcOriginEnum,
   MountingTypeEnum,
+  STRUCTURAL_PE_STAMP_SERVICE_ID,
   STRUCTURAL_WET_STAMP_SERVICE_ID,
   digitRegExp,
   toTwoDecimalRegExp,
@@ -84,6 +86,13 @@ export default function JobForm({ project, job, pageType }: Props) {
       ) !== -1,
     [job]
   );
+  const hasStructuralPEStamp = useMemo(
+    () =>
+      job.orderedServices.findIndex(
+        (value) => value.serviceId === STRUCTURAL_PE_STAMP_SERVICE_ID
+      ) !== -1,
+    [job]
+  );
 
   const formSchema = useMemo(
     () =>
@@ -104,6 +113,7 @@ export default function JobForm({ project, job, pageType }: Props) {
               })
             ),
           }),
+          loadCalcOrigin: LoadCalcOriginEnum,
           additionalInformation: z.custom<Value>(),
           mountingType: MountingTypeEnum,
           dueDate: z.date().nullable(),
@@ -122,6 +132,7 @@ export default function JobForm({ project, job, pageType }: Props) {
             fullAddress: z.string().trim(),
             coordinates: z.array(z.number()),
           }),
+          structuralUpgradeNotes: z.custom<Value>(),
         })
         .superRefine((value, ctx) => {
           if (!hasWetStamp) {
@@ -183,6 +194,7 @@ export default function JobForm({ project, job, pageType }: Props) {
             email,
           })),
       },
+      loadCalcOrigin: job.loadCalcOrigin,
       additionalInformation:
         job.additionalInformationFromClient == null
           ? INITIAL_EDITOR_VALUE
@@ -205,6 +217,10 @@ export default function JobForm({ project, job, pageType }: Props) {
         street1: job.mailingAddressForWetStamp?.street1 ?? "",
         street2: job.mailingAddressForWetStamp?.street2 ?? "",
       },
+      structuralUpgradeNotes:
+        job.structuralUpgradeNote == null
+          ? INITIAL_EDITOR_VALUE
+          : getEditorValue(job.structuralUpgradeNote),
     };
   }, []);
 
@@ -263,13 +279,16 @@ export default function JobForm({ project, job, pageType }: Props) {
         project.propertyType === "Commercial"
           ? Number(values.systemSize)
           : null,
-      mountingType: values.mountingType,
       numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
       mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
       isExpedited: values.isExpedited,
       inReview: values.inReview,
       priority: values.priority,
       dueDate: values.dueDate == null ? null : values.dueDate.toISOString(),
+      structuralUpgradeNote: isEditorValueEmpty(values.structuralUpgradeNotes)
+        ? null
+        : JSON.stringify(values.structuralUpgradeNotes),
+      loadCalcOrigin: values.loadCalcOrigin,
     })
       .then(() => {
         toast({ title: "Success" });
@@ -461,7 +480,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                     ref={field.ref}
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={!isWorker}
+                    disabled
                   >
                     {MountingTypeEnum.options.map((value) => (
                       <FormItem
@@ -585,6 +604,33 @@ export default function JobForm({ project, job, pageType }: Props) {
               />
             </>
           )}
+          {isWorker && hasStructuralPEStamp && (
+            <FormField
+              control={form.control}
+              name="loadCalcOrigin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Structural Calculation Origin</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger ref={field.ref}>
+                        <SelectValue placeholder="Select an option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {LoadCalcOriginEnum.options.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             control={form.control}
             name="additionalInformation"
@@ -604,7 +650,7 @@ export default function JobForm({ project, job, pageType }: Props) {
               name="dueDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date Due (EST)</FormLabel>
+                  <FormLabel>Date Due</FormLabel>
                   <FormControl>
                     <DateTimePicker
                       value={field.value}
@@ -655,6 +701,21 @@ export default function JobForm({ project, job, pageType }: Props) {
               />
             )}
           </RowItemsContainer>
+          {isWorker && (
+            <FormField
+              control={form.control}
+              name="structuralUpgradeNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Structural Upgrade Notes</FormLabel>
+                  <FormControl>
+                    <BasicEditor {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             control={form.control}
             name="isExpedited"

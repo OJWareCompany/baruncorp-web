@@ -9,6 +9,10 @@ interface Props extends Pick<PlateProps, "value" | "onChange"> {
   disabled?: boolean;
 }
 
+/**
+ * floating link toolbar 가 입력 이후에 값이 유지되는 버그가 존재함
+ * https://github.com/udecode/plate/issues/2791
+ */
 export default function BasicEditor({ disabled, ...props }: Props) {
   if (disabled) {
     return (

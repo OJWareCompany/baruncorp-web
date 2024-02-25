@@ -29,7 +29,7 @@ const columns = [
     header: "Name",
   }),
   columnHelper.accessor("expiryDate", {
-    header: "Expiry Date (EST)",
+    header: "Expiry Date",
     cell: ({ getValue }) => {
       const value = getValue();
       if (value == null) {

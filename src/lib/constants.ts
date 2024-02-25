@@ -378,23 +378,6 @@ export const transformNullishSelectOptionIntoSelectOptionWithEmptyString =
 
 /* -------------------------------------------------------------------------- */
 
-// "See Notes" | "B" | "C" | "D"
-export const WindExposureEnum = z.enum(["B", "C", "D", "See Notes"], {
-  errorMap: () => ({ message: "Wind Exposure is required" }),
-});
-// "See Notes" | "B" | "C" | "D" | ""
-export const WindExposureEnumWithEmptyString = WindExposureEnum.or(
-  z.literal("")
-);
-// "See Notes" | "B" | "C" | "D" | "" => "See Notes" | "B" | "C" | "D" | null
-export const transformWindExposureWithEmptyStringIntoNullableWindExposure =
-  WindExposureEnumWithEmptyString.transform((v) => (v === "" ? null : v));
-// "See Notes" | "B" | "C" | "D" | null | undefined => "See Notes" | "B" | "C" | "D" | ""
-export const transformNullishWindExposureIntoWindExposureWithEmptyString =
-  WindExposureEnum.nullish().transform((v) => v ?? "");
-
-/* -------------------------------------------------------------------------- */
-
 // "Certified" | "Signed"
 export const DigitalSignatureTypeEnum = z.enum(["Certified", "Signed"], {
   errorMap: () => ({ message: "Digital Signature is required" }),
@@ -522,6 +505,14 @@ export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
 
 // "Immediate" | "High" | "Medium" | "Low"
 export const JobPriorityEnum = z.enum(["Immediate", "High", "Medium", "Low"]);
+// "Immediate" | "High" | "Medium" | "Low" | ""
+export const JobPriorityEnumWithEmptyString = JobPriorityEnum.or(z.literal(""));
+// "Immediate" | "High" | "Medium" | "Low" | "" => "Immediate" | "High" | "Medium" | "Low" | null
+export const transformJobPriorityEnumWithEmptyStringIntoNullableJobPriorityEnum =
+  JobPriorityEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+// // "Immediate" | "High" | "Medium" | "Low" | null | undefined => "Immediate" | "High" | "Medium" | "Low" | ""
+// export const transformNullishMountingTypeEnumIntoMountingTypeEnumWithEmptyString =
+//   MountingTypeEnum.nullish().transform((v) => v ?? "");
 export type JobPriorityEnum = z.infer<typeof JobPriorityEnum>;
 
 /* -------------------------------------------------------------------------- */
@@ -673,6 +664,23 @@ export const AutoAssignmentPropertyTypeEnumWithEmptyString =
 export type AutoAssignmentPropertyTypeEnum = z.infer<
   typeof AutoAssignmentPropertyTypeEnum
 >;
+
+/* -------------------------------------------------------------------------- */
+
+// "Self" | "Client Provided"
+export const LoadCalcOriginEnum = z.enum(["Self", "Client Provided"], {
+  errorMap: () => ({ message: "Structural Calculation Origin is required" }),
+});
+// // "Self" | "Client Provided" | ""
+// export const LoadCalcOriginEnumWithEmptyString = LoadCalcOriginEnum.or(
+//   z.literal("")
+// );
+// // "Self" | "Client Provided" | "" => "Self" | "Client Provided" | null
+// export const transformLoadCalcOriginEnumWithEmptyStringIntoNullableLoadCalcOriginEnum =
+//   LoadCalcOriginEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+// // "Self" | "Client Provided" | null | undefined => "Self" | "Client Provided" | ""
+// export const transformNullishSelectOptionIntoSelectOptionWithEmptyString =
+//   LoadCalcOriginEnum.nullish().transform((v) => v ?? "");
 
 /* -------------------------------------------------------------------------- */
 

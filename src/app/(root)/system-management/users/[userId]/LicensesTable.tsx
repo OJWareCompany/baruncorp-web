@@ -61,7 +61,7 @@ export default function LicensesTable({ licenses }: Props) {
         header: "Abbreviation",
       }),
       columnHelper.accessor("expiryDate", {
-        header: "Expiry Date (EST)",
+        header: "Expiry Date",
         cell: ({ getValue }) => {
           const value = getValue();
 

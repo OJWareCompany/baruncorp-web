@@ -175,14 +175,14 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
         },
       }),
       columnHelper.accessor("invoiceDate", {
-        header: "Invoice Date (EST)",
+        header: "Invoice Date",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("terms", {
         header: "Terms",
       }),
       columnHelper.accessor("dueDate", {
-        header: "Due Date (EST)",
+        header: "Due Date",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("notesToClient", {
@@ -198,7 +198,7 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
         header: "Total",
       }),
       columnHelper.accessor("createdAt", {
-        header: "Date Created (EST)",
+        header: "Date Created",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],

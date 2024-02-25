@@ -208,7 +208,7 @@ export default function ProjectsTable() {
         header: "Number of Jobs",
       }),
       columnHelper.accessor("createdAt", {
-        header: "Date Created (EST)",
+        header: "Date Created",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],

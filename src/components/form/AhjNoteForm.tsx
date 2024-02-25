@@ -29,7 +29,6 @@ import {
   ANSIEnum,
   DigitalSignatureTypeEnum,
   SelectOptionEnum,
-  WindExposureEnum,
 } from "@/lib/constants";
 import ItemsContainer from "@/components/ItemsContainer";
 import usePutAhjMutation from "@/mutations/usePutAhjMutation";
@@ -439,10 +438,10 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 />
                 <FormField
                   control={form.control}
-                  name="structuralEngineering.windSpeed"
+                  name="structuralEngineering.windSpeedRiskCatFirst"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Wind Speed (mph)</FormLabel>
+                      <FormLabel>Wind Speed Risk Cat I (mph)</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -451,28 +450,12 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 />
                 <FormField
                   control={form.control}
-                  name="structuralEngineering.windExposure"
+                  name="structuralEngineering.windSpeedRiskCatSecond"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Wind Exposure</FormLabel>
+                      <FormLabel>Wind Speed Risk Cat II (mph)</FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue placeholder="Select an wind exposure" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              {WindExposureEnum.options.map((option) => (
-                                <SelectItem key={option} value={option}>
-                                  {option}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
+                        <Input {...field} />
                       </FormControl>
                     </FormItem>
                   )}

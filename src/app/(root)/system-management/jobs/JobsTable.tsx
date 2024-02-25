@@ -38,12 +38,14 @@ import {
 } from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  JobPriorityEnum,
   JobStatusEnum,
   MountingTypeEnum,
   PropertyTypeEnum,
   YesOrNoEnum,
   jobPriorities,
   jobStatuses,
+  transformJobPriorityEnumWithEmptyStringIntoNullableJobPriorityEnum,
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
@@ -74,6 +76,10 @@ export default function JobsTable() {
   const expediteSearchParamName = "Expedite";
   const pageIndexSearchParamName = "PageIndex";
   const pageSizeSearchParamName = "PageSize";
+  const inReviewSearchParamName = "InReview";
+  const prioritySearchParamName = "Priority";
+  const projectNumberSearchParamName = "ProjectNumber";
+  const propertyOwnerSearchParamName = "PropertyOwner";
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
@@ -107,6 +113,22 @@ export default function JobsTable() {
   const expediteSearchParam = expediteSearchParamParseResult.success
     ? expediteSearchParamParseResult.data
     : "";
+  const inReviewSearchParamParseResult = YesOrNoEnum.safeParse(
+    searchParams.get(encodeURIComponent(inReviewSearchParamName))
+  );
+  const inReviewSearchParam = inReviewSearchParamParseResult.success
+    ? inReviewSearchParamParseResult.data
+    : "";
+  const prioritySearchParamParseResult = JobPriorityEnum.safeParse(
+    searchParams.get(encodeURIComponent(prioritySearchParamName))
+  );
+  const prioritySearchParam = prioritySearchParamParseResult.success
+    ? prioritySearchParamParseResult.data
+    : "";
+  const projectNumberSearchParam =
+    searchParams.get(encodeURIComponent(projectNumberSearchParamName)) ?? "";
+  const propertyOwnerSearchParam =
+    searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -136,15 +158,29 @@ export default function JobsTable() {
         transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           expediteSearchParam
         ),
+      inReview:
+        transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
+          inReviewSearchParam
+        ),
+      priority:
+        transformJobPriorityEnumWithEmptyStringIntoNullableJobPriorityEnum.parse(
+          prioritySearchParam
+        ),
+      projectNumber: projectNumberSearchParam,
+      propertyOwner: propertyOwnerSearchParam,
     }),
     [
-      expediteSearchParam,
-      jobStatusSearchParam,
-      mountingTypeSearchParam,
-      jobNameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
+      jobNameSearchParam,
+      jobStatusSearchParam,
+      mountingTypeSearchParam,
       propertyTypeSearchParam,
+      expediteSearchParam,
+      inReviewSearchParam,
+      prioritySearchParam,
+      projectNumberSearchParam,
+      propertyOwnerSearchParam,
     ]
   );
 
@@ -178,7 +214,17 @@ export default function JobsTable() {
         ),
       }),
       columnHelper.accessor("inReview", {
-        header: "In Review",
+        header: () => (
+          <EnumHeader
+            buttonText="In Review"
+            searchParamName={inReviewSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={YesOrNoEnum}
+            isLoading={
+              syncedParams != null && params.inReview !== syncedParams.inReview
+            }
+          />
+        ),
         cell: ({ getValue }) => (
           <div className="flex">
             <Checkbox checked={getValue()} />
@@ -186,7 +232,17 @@ export default function JobsTable() {
         ),
       }),
       columnHelper.accessor("priority", {
-        header: "Priority",
+        header: () => (
+          <EnumHeader
+            buttonText="Priority"
+            searchParamName={prioritySearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={JobPriorityEnum}
+            isLoading={
+              syncedParams != null && params.priority !== syncedParams.priority
+            }
+          />
+        ),
         cell: ({ getValue }) => {
           const value = getValue();
           const status = jobPriorities[value];
@@ -268,6 +324,50 @@ export default function JobsTable() {
           />
         ),
       }),
+      columnHelper.accessor("projectNumber", {
+        header: () => (
+          <SearchHeader
+            buttonText="Project Number"
+            searchParamName={projectNumberSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            isLoading={
+              syncedParams != null &&
+              params.projectNumber !== syncedParams.projectNumber
+            }
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
+      columnHelper.accessor("propertyOwner", {
+        header: () => (
+          <SearchHeader
+            buttonText="Property Owner"
+            searchParamName={propertyOwnerSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            isLoading={
+              syncedParams != null &&
+              params.propertyOwner !== syncedParams.propertyOwner
+            }
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
       columnHelper.accessor("additionalInformationFromClient", {
         header: "Additional Information",
         cell: ({ getValue }) => {
@@ -283,11 +383,35 @@ export default function JobsTable() {
         header: "Client User",
       }),
       columnHelper.accessor("receivedAt", {
-        header: "Date Received (EST)",
+        header: "Date Received",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("dueDate", {
-        header: "Date Due (EST)",
+        header: "Date Due",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
+        },
+      }),
+      columnHelper.accessor("completedCancelledDate", {
+        header: "Date Completed/Canceled",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
+        },
+      }),
+      columnHelper.accessor("dateSentToClient", {
+        header: "Date Sent to Client",
         cell: ({ getValue }) => {
           const value = getValue();
 
@@ -300,11 +424,15 @@ export default function JobsTable() {
       }),
     ];
   }, [
+    params.inReview,
     params.isExpedited,
     params.jobName,
     params.jobStatus,
     params.mountingType,
+    params.priority,
+    params.projectNumber,
     params.projectPropertyType,
+    params.propertyOwner,
     syncedParams,
   ]);
 

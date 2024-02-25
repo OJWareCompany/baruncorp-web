@@ -8,16 +8,13 @@ import {
   ANSIEnumWithEmptyString,
   DigitalSignatureTypeEnumWithEmptyString,
   SelectOptionEnumWithEmptyString,
-  WindExposureEnumWithEmptyString,
   transformNullishANSIIntoANSIWithEmptyString,
   transformNullishDigitalSignatureTypeIntoDigitalSignatureTypeWithEmptyString,
   transformNullishSelectOptionIntoSelectOptionWithEmptyString,
-  transformNullishWindExposureIntoWindExposureWithEmptyString,
   transformNullishStringIntoString,
   transformStringIntoNullableString,
   transformSelectOptionWithEmptyStringIntoNullableSelectOption,
   transformDigitalSignatureTypeWithEmptyStringIntoNullableDigitalSignatureType,
-  transformWindExposureWithEmptyStringIntoNullableWindExposure,
   transformANSIWithEmptyStringIntoNullableANSI,
 } from "@/lib/constants";
 import {
@@ -53,8 +50,8 @@ export const formSchema = z.object({
     structuralObservationRequired: SelectOptionEnumWithEmptyString,
     digitalSignatureType: DigitalSignatureTypeEnumWithEmptyString,
     windUpliftCalculationRequired: SelectOptionEnumWithEmptyString,
-    windSpeed: z.string().trim(),
-    windExposure: WindExposureEnumWithEmptyString,
+    windSpeedRiskCatFirst: z.string().trim(),
+    windSpeedRiskCatSecond: z.string().trim(),
     snowLoadGround: z.string().trim(),
     snowLoadFlatRoof: z.string().trim(),
     wetStampsRequired: SelectOptionEnumWithEmptyString,
@@ -130,13 +127,12 @@ export function getFieldValuesFromAhjNote(
         transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
           ahjNote?.engineering.windUpliftCalculationRequired
         ),
-      windSpeed: transformNullishStringIntoString.parse(
-        ahjNote?.engineering.windSpeed
+      windSpeedRiskCatFirst: transformNullishStringIntoString.parse(
+        ahjNote?.engineering.windSpeedRiskCatFirst
       ),
-      windExposure:
-        transformNullishWindExposureIntoWindExposureWithEmptyString.parse(
-          ahjNote?.engineering.windExposure
-        ),
+      windSpeedRiskCatSecond: transformNullishStringIntoString.parse(
+        ahjNote?.engineering.windSpeedRiskCatSecond
+      ),
       snowLoadGround: transformNullishStringIntoString.parse(
         ahjNote?.engineering.snowLoadGround
       ),
@@ -228,10 +224,6 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
         transformDigitalSignatureTypeWithEmptyStringIntoNullableDigitalSignatureType.parse(
           values.structuralEngineering.digitalSignatureType
         ),
-      windExposure:
-        transformWindExposureWithEmptyStringIntoNullableWindExposure.parse(
-          values.structuralEngineering.windExposure
-        ),
       wetStampSize: transformANSIWithEmptyStringIntoNullableANSI.parse(
         values.structuralEngineering.wetStampSize
       ),
@@ -247,8 +239,11 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
       snowLoadGround: transformStringIntoNullableString.parse(
         values.structuralEngineering.snowLoadGround
       ),
-      windSpeed: transformStringIntoNullableString.parse(
-        values.structuralEngineering.windSpeed
+      windSpeedRiskCatFirst: transformStringIntoNullableString.parse(
+        values.structuralEngineering.windSpeedRiskCatFirst
+      ),
+      windSpeedRiskCatSecond: transformStringIntoNullableString.parse(
+        values.structuralEngineering.windSpeedRiskCatSecond
       ),
     },
     electricalEngineering: {

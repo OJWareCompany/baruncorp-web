@@ -89,11 +89,11 @@ export default function PaymentsTable({ clientInvoice }: Props) {
         },
       }),
       columnHelper.accessor("paymentDate", {
-        header: "Payment Date (EST)",
+        header: "Payment Date",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("canceledAt", {
-        header: "Date Canceled (EST)",
+        header: "Date Canceled",
         cell: ({ getValue, column }) => {
           const value = getValue();
 

@@ -75,7 +75,7 @@ const columns = [
     header: "Created By",
   }),
   columnHelper.accessor("createdAt", {
-    header: "Date Created (EST)",
+    header: "Date Created",
     cell: ({ getValue }) => formatInEST(getValue()),
   }),
 ];

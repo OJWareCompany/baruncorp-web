@@ -128,7 +128,19 @@ const columns = [
     },
   }),
   columnHelper.accessor("completedCancelledDate", {
-    header: "Date Completed/Canceled (EST)",
+    header: "Date Completed/Canceled",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return formatInEST(value);
+    },
+  }),
+  columnHelper.accessor("dateSentToClient", {
+    header: "Date Sent to Client",
     cell: ({ getValue }) => {
       const value = getValue();
 
@@ -155,7 +167,7 @@ interface LineItemTableExportData {
   eeChangeScope: string;
   structuralRevisionScope: string;
   designRevisionScope: string;
-  "Date Completed/Canceled (EST)": string;
+  "Date Completed/Canceled": string;
 }
 
 export function getLineItemsTableExportDataFromLineItems(
@@ -174,7 +186,7 @@ export function getLineItemsTableExportDataFromLineItems(
     eeChangeScope: value.eeChangeScope ?? "-",
     structuralRevisionScope: value.structuralRevisionScope ?? "-",
     designRevisionScope: value.designRevisionScope ?? "-",
-    "Date Completed/Canceled (EST)": value.completedCancelledDate
+    "Date Completed/Canceled": value.completedCancelledDate
       ? formatInEST(value.completedCancelledDate)
       : "-",
   }));

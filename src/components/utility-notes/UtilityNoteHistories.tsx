@@ -71,7 +71,7 @@ const columns = [
     header: "Type",
   }),
   columnHelper.accessor("updatedAt", {
-    header: "Date Updated (EST)",
+    header: "Date Updated",
     cell: ({ getValue }) => formatInEST(getValue()),
   }),
 ];
@@ -320,7 +320,7 @@ function Content({ id }: ContentProps) {
           <Input value={data.type} disabled />
         </Item>
         <Item>
-          <Label>Date Updated (EST)</Label>
+          <Label>Date Updated</Label>
           <Input value={formatInEST(data.updatedAt)} disabled />
         </Item>
       </RowItemsContainer>

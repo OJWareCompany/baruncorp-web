@@ -37,12 +37,14 @@ import {
   JobPaginatedResponseDto,
 } from "@/api/api-spec";
 import {
+  JobPriorityEnum,
   JobStatusEnum,
   MountingTypeEnum,
   PropertyTypeEnum,
   YesOrNoEnum,
   jobPriorities,
   jobStatuses,
+  transformJobPriorityEnumWithEmptyStringIntoNullableJobPriorityEnum,
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
@@ -78,6 +80,10 @@ export default function JobsTable({ type }: Props) {
   const expediteSearchParamName = `${type}Expedite`;
   const pageIndexSearchParamName = `${type}PageIndex`;
   const pageSizeSearchParamName = `${type}PageSize`;
+  const inReviewSearchParamName = `${type}InReview`;
+  const prioritySearchParamName = `${type}Priority`;
+  const projectNumberSearchParamName = `${type}ProjectNumber`;
+  const propertyOwnerSearchParamName = `${type}PropertyOwner`;
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
@@ -114,6 +120,22 @@ export default function JobsTable({ type }: Props) {
   const expediteSearchParam = expediteSearchParamParseResult.success
     ? expediteSearchParamParseResult.data
     : "";
+  const inReviewSearchParamParseResult = YesOrNoEnum.safeParse(
+    searchParams.get(encodeURIComponent(inReviewSearchParamName))
+  );
+  const inReviewSearchParam = inReviewSearchParamParseResult.success
+    ? inReviewSearchParamParseResult.data
+    : "";
+  const prioritySearchParamParseResult = JobPriorityEnum.safeParse(
+    searchParams.get(encodeURIComponent(prioritySearchParamName))
+  );
+  const prioritySearchParam = prioritySearchParamParseResult.success
+    ? prioritySearchParamParseResult.data
+    : "";
+  const projectNumberSearchParam =
+    searchParams.get(encodeURIComponent(projectNumberSearchParamName)) ?? "";
+  const propertyOwnerSearchParam =
+    searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -143,15 +165,29 @@ export default function JobsTable({ type }: Props) {
         transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
           expediteSearchParam
         ),
+      inReview:
+        transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
+          inReviewSearchParam
+        ),
+      priority:
+        transformJobPriorityEnumWithEmptyStringIntoNullableJobPriorityEnum.parse(
+          prioritySearchParam
+        ),
+      projectNumber: projectNumberSearchParam,
+      propertyOwner: propertyOwnerSearchParam,
     }),
     [
-      expediteSearchParam,
-      jobStatusSearchParam,
-      mountingTypeSearchParam,
-      jobNameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
+      jobNameSearchParam,
+      jobStatusSearchParam,
+      mountingTypeSearchParam,
       propertyTypeSearchParam,
+      expediteSearchParam,
+      inReviewSearchParam,
+      prioritySearchParam,
+      projectNumberSearchParam,
+      propertyOwnerSearchParam,
     ]
   );
 
@@ -185,7 +221,17 @@ export default function JobsTable({ type }: Props) {
         ),
       }),
       columnHelper.accessor("inReview", {
-        header: "In Review",
+        header: () => (
+          <EnumHeader
+            buttonText="In Review"
+            searchParamName={inReviewSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={YesOrNoEnum}
+            isLoading={
+              syncedParams != null && params.inReview !== syncedParams.inReview
+            }
+          />
+        ),
         cell: ({ getValue }) => (
           <div className="flex">
             <Checkbox checked={getValue()} />
@@ -193,16 +239,23 @@ export default function JobsTable({ type }: Props) {
         ),
       }),
       columnHelper.accessor("priority", {
-        header: "Priority",
+        header: () => (
+          <EnumHeader
+            buttonText="Priority"
+            searchParamName={prioritySearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={JobPriorityEnum}
+            isLoading={
+              syncedParams != null && params.priority !== syncedParams.priority
+            }
+          />
+        ),
         cell: ({ getValue }) => {
           const value = getValue();
           const status = jobPriorities[value];
 
           return <Badge className={`${status.color}`}>{status.value}</Badge>;
         },
-      }),
-      columnHelper.accessor("clientInfo.clientOrganizationName", {
-        header: "Organization",
       }),
       columnHelper.accessor("jobName", {
         header: () => (
@@ -273,10 +326,55 @@ export default function JobsTable({ type }: Props) {
           />
         ),
       }),
+      columnHelper.accessor("projectNumber", {
+        header: () => (
+          <SearchHeader
+            buttonText="Project Number"
+            searchParamName={projectNumberSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            isLoading={
+              syncedParams != null &&
+              params.projectNumber !== syncedParams.projectNumber
+            }
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
+      columnHelper.accessor("propertyOwner", {
+        header: () => (
+          <SearchHeader
+            buttonText="Property Owner"
+            searchParamName={propertyOwnerSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            isLoading={
+              syncedParams != null &&
+              params.propertyOwner !== syncedParams.propertyOwner
+            }
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
       columnHelper.accessor("additionalInformationFromClient", {
         header: "Additional Information",
         cell: ({ getValue }) => {
           const value = getValue();
+
           if (value == null) {
             return <p className="text-muted-foreground">-</p>;
           }
@@ -284,15 +382,36 @@ export default function JobsTable({ type }: Props) {
           return <AdditionalInformationHoverCard value={value} />;
         },
       }),
-      columnHelper.accessor("clientInfo.clientUserName", {
-        header: "Client User",
-      }),
       columnHelper.accessor("receivedAt", {
-        header: "Date Received (EST)",
+        header: "Date Received",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("dueDate", {
-        header: "Date Due (EST)",
+        header: "Date Due",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
+        },
+      }),
+      columnHelper.accessor("completedCancelledDate", {
+        header: "Date Completed/Canceled",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
+        },
+      }),
+      columnHelper.accessor("dateSentToClient", {
+        header: "Date Sent to Client",
         cell: ({ getValue }) => {
           const value = getValue();
 
@@ -309,14 +428,22 @@ export default function JobsTable({ type }: Props) {
     pageIndexSearchParamName,
     syncedParams,
     params.isExpedited,
+    params.inReview,
+    params.priority,
     params.jobName,
     params.jobStatus,
     params.projectPropertyType,
     params.mountingType,
+    params.projectNumber,
+    params.propertyOwner,
+    inReviewSearchParamName,
+    prioritySearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
     propertyTypeSearchParamName,
     mountingTypeSearchParamName,
+    projectNumberSearchParamName,
+    propertyOwnerSearchParamName,
   ]);
 
   const table = useReactTable({

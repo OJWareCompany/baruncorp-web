@@ -96,11 +96,11 @@ const columns = [
     header: "Client User",
   }),
   columnHelper.accessor("receivedAt", {
-    header: "Date Received (EST)",
+    header: "Date Received",
     cell: ({ getValue }) => formatInEST(getValue()),
   }),
   columnHelper.accessor("dueDate", {
-    header: "Date Due (EST)",
+    header: "Date Due",
     cell: ({ getValue }) => {
       const value = getValue();
 

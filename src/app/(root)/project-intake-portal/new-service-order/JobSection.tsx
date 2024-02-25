@@ -35,6 +35,7 @@ import {
   ESS_ELECTRICAL_PE_STAMP_SERVICE_ID,
   ESS_STRUCTURAL_PE_STAMP_SERVICE_ID,
   INITIAL_EDITOR_VALUE,
+  LoadCalcOriginEnum,
   MountingTypeEnum,
   OTHER_SERVICE_ID,
   SPECIAL_INSPECTION_FORM_SERVICE_ID,
@@ -66,6 +67,14 @@ import BasicEditor from "@/components/editor/BasicEditor";
 import { isEditorValueEmpty } from "@/lib/plate-utils";
 import { useToast } from "@/components/ui/use-toast";
 import DateTimePicker from "@/components/date-time-picker/DateTimePicker";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface JobSectionWithDataProps {
   project: ProjectResponseDto;
@@ -121,6 +130,7 @@ function JobSectionWithData({
               description: z.string().trim(),
             })
           ),
+          loadCalcOrigin: LoadCalcOriginEnum,
           typeOfWetStamp: z.array(
             z.object({
               id: z.string().trim(),
@@ -246,6 +256,7 @@ function JobSectionWithData({
       mountingType: "Roof Mount",
       services: [],
       descriptionForOtherServices: [{ description: "" }],
+      loadCalcOrigin: "Self",
       numberOfWetStamp: "",
       mailingAddress: {
         city: "",
@@ -390,6 +401,7 @@ function JobSectionWithData({
               .filter((value) => value.serviceId === OTHER_SERVICE_ID)
               .map((value) => ({ description: value.description ?? "" }))
         : [{ description: "" }],
+      loadCalcOrigin: "Self",
       numberOfWetStamp: "",
       mailingAddress: {
         city: mailingAddressForWetStamp?.city ?? "",
@@ -474,6 +486,8 @@ function JobSectionWithData({
         ? Number(values.numberOfWetStamp)
         : null,
       dueDate: values.dueDate == null ? null : values.dueDate.toISOString(),
+      structuralUpgradeNote: null, // job detail 페이지에서만 수정 가능
+      loadCalcOrigin: values.loadCalcOrigin,
     })
       .then(({ id }) => {
         setResult({ open: true, jobId: id });
@@ -934,6 +948,39 @@ function JobSectionWithData({
                   )}
                 />
               )}
+              {isBarunCorpMember &&
+                watchServices.find(
+                  (service) => service.id === STRUCTURAL_PE_STAMP_SERVICE_ID
+                ) && (
+                  <FormField
+                    control={form.control}
+                    name="loadCalcOrigin"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Structural Calculation Origin</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger ref={field.ref}>
+                              <SelectValue placeholder="Select an option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                {LoadCalcOriginEnum.options.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                )}
               {isWetStampChecked &&
                 electricalWetStampService &&
                 structuralWetStampService && (
@@ -1147,7 +1194,7 @@ function JobSectionWithData({
                     name="dueDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date Due (EST)</FormLabel>
+                        <FormLabel>Date Due</FormLabel>
                         <FormControl>
                           <DateTimePicker
                             value={field.value}

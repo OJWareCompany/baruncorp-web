@@ -92,7 +92,7 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
         ),
       }),
       columnHelper.accessor("createdAt", {
-        header: "Date Created (EST)",
+        header: "Date Created",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("fileShareLink", {

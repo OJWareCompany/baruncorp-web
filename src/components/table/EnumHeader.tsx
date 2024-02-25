@@ -72,7 +72,8 @@ export default function EnumHeader<T extends EnumValues>({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const searchParam = searchParams.get(searchParamName) ?? "";
+  const searchParam =
+    searchParams.get(encodeURIComponent(searchParamName)) ?? "";
   const searchParamParseResult = zodEnum.safeParse(searchParam);
   const data = searchParamParseResult.success
     ? searchParamParseResult.data

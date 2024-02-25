@@ -31,7 +31,8 @@ export default function SearchHeader({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const searchParam = searchParams.get(searchParamName) ?? "";
+  const searchParam =
+    searchParams.get(encodeURIComponent(searchParamName)) ?? "";
   const [value, setValue] = useState(searchParam);
 
   const isFiltered = searchParam !== "";
@@ -64,8 +65,11 @@ export default function SearchHeader({
                 const newSearchParams = new URLSearchParams(
                   searchParams.toString()
                 );
-                newSearchParams.set(searchParamName, value);
-                newSearchParams.set(pageIndexSearchParamName, "0");
+                newSearchParams.set(encodeURIComponent(searchParamName), value);
+                newSearchParams.set(
+                  encodeURIComponent(pageIndexSearchParamName),
+                  "0"
+                );
                 router.push(`${pathname}?${newSearchParams.toString()}`, {
                   scroll: false,
                 });
@@ -82,8 +86,11 @@ export default function SearchHeader({
                   const newSearchParams = new URLSearchParams(
                     searchParams.toString()
                   );
-                  newSearchParams.delete(searchParamName);
-                  newSearchParams.set(pageIndexSearchParamName, "0");
+                  newSearchParams.delete(encodeURIComponent(searchParamName));
+                  newSearchParams.set(
+                    encodeURIComponent(pageIndexSearchParamName),
+                    "0"
+                  );
                   router.push(`${pathname}?${newSearchParams.toString()}`, {
                     scroll: false,
                   });
