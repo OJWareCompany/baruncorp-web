@@ -2,6 +2,7 @@
 import React from "react";
 import { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import {
   Popover,
@@ -42,6 +43,9 @@ export default function OrderedServiceStatusField({
   const [popoverOpen, setPopoverOpen] = useState(false);
   const currentStatus = orderedServiceStatuses[status];
   const dispatch = useAlertDialogDataDispatch();
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
 
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>

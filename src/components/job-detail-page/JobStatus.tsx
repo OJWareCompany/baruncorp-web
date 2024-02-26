@@ -34,16 +34,14 @@ export default function JobStatus({ job, pageType }: Props) {
   const { data: session } = useSession();
 
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
-  const isHome = pageType === "HOME";
 
   /**
    * 바른코프 멤버 ✅
    * 바른코프 멤버아닌데, 홈 ❌
    * 바른코프 멤버아닌데, 워크스페이스 ✅
    */
-  const isWorker = isBarunCorpMember || !isHome;
 
-  if (!isWorker) {
+  if (!isBarunCorpMember) {
     return (
       <div className="flex items-center gap-2 h-10 px-3 py-2 rounded-md text-sm border border-input bg-background">
         <currentStatus.Icon className={`w-4 h-4 ${currentStatus.color}`} />

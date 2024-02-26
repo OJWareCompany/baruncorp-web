@@ -387,8 +387,9 @@ export default function ScopesTable({ job, project, pageType }: Props) {
         header: "Status",
         cell: ({ getValue, row }) => {
           const value = getValue();
+          const status = assignedTaskStatuses[value as AssignedTaskStatusEnum];
 
-          if (isWorker) {
+          if (isBarunCorpMember) {
             if (row.depth === 0) {
               return (
                 <OrderedServiceStatusField
@@ -400,9 +401,13 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               );
             }
 
-            const status =
-              assignedTaskStatuses[value as AssignedTaskStatusEnum];
-
+            return (
+              <div className="flex items-center">
+                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+                <span className="whitespace-nowrap">{status.value}</span>
+              </div>
+            );
+          } else {
             return (
               <div className="flex items-center">
                 <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
@@ -410,15 +415,6 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               </div>
             );
           }
-
-          const status = assignedTaskStatuses[value as AssignedTaskStatusEnum];
-
-          return (
-            <div className="flex items-center">
-              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-              <span className="whitespace-nowrap">{status.value}</span>
-            </div>
-          );
         },
       }),
       columnHelper.accessor("assigneeId", {
