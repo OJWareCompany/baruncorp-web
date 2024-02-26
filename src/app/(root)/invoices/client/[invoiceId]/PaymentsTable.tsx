@@ -84,7 +84,7 @@ export default function PaymentsTable({ clientInvoice }: Props) {
           disabled
         />
       </Item>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

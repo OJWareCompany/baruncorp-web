@@ -103,7 +103,7 @@ export default function ClientsWithOutstandingBalancesTable() {
 
   return (
     <div className="space-y-2">
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

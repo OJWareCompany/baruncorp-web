@@ -161,7 +161,7 @@ export default function JobsTable({ jobs }: Props) {
   });
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-hidden">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

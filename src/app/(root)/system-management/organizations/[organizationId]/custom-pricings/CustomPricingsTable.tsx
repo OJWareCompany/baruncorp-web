@@ -51,7 +51,7 @@ export default function CustomPricingsTable({ organization }: Props) {
   });
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-hidden">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
