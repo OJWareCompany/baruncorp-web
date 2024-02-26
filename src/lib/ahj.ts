@@ -29,6 +29,9 @@ export const formSchema = z.object({
     name: z.string().trim(),
     website: z.custom<Value>(),
     specificFormRequired: SelectOptionEnumWithEmptyString,
+    structuralStampRequired: SelectOptionEnumWithEmptyString,
+    electricalStampRequired: SelectOptionEnumWithEmptyString,
+    wetStampRequired: SelectOptionEnumWithEmptyString,
     generalNotes: z.custom<Value>(),
     buildingCodes: z.custom<Value>(),
     updatedBy: z.string().trim(),
@@ -54,7 +57,6 @@ export const formSchema = z.object({
     windSpeedRiskCatSecond: z.string().trim(),
     snowLoadGround: z.string().trim(),
     snowLoadFlatRoof: z.string().trim(),
-    wetStampsRequired: SelectOptionEnumWithEmptyString,
     ofWetStamps: z.string().trim(),
     wetStampSize: ANSIEnumWithEmptyString,
     engineeringNotes: z.custom<Value>(),
@@ -78,6 +80,18 @@ export function getFieldValuesFromAhjNote(
       specificFormRequired:
         transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
           ahjNote?.general.specificFormRequired
+        ),
+      structuralStampRequired:
+        transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
+          ahjNote?.general.structuralStampRequired
+        ),
+      electricalStampRequired:
+        transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
+          ahjNote?.general.electricalStampRequired
+        ),
+      wetStampRequired:
+        transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
+          ahjNote?.general.wetStampRequired
         ),
       buildingCodes: getEditorValue(ahjNote?.general.buildingCodes),
       generalNotes: getEditorValue(ahjNote?.general.generalNotes),
@@ -139,10 +153,6 @@ export function getFieldValuesFromAhjNote(
       snowLoadFlatRoof: transformNullishStringIntoString.parse(
         ahjNote?.engineering.snowLoadFlatRoof
       ),
-      wetStampsRequired:
-        transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
-          ahjNote?.engineering.wetStampsRequired
-        ),
       ofWetStamps: transformNullishStringIntoString.parse(
         ahjNote?.engineering.ofWetStamps
       ),
@@ -175,6 +185,18 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
       specificFormRequired:
         transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
           values.general.specificFormRequired
+        ),
+      structuralStampRequired:
+        transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
+          values.general.structuralStampRequired
+        ),
+      electricalStampRequired:
+        transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
+          values.general.electricalStampRequired
+        ),
+      wetStampRequired:
+        transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
+          values.general.wetStampRequired
         ),
     },
     design: {
@@ -216,10 +238,7 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
         transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
           values.structuralEngineering.windUpliftCalculationRequired
         ),
-      wetStampsRequired:
-        transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
-          values.structuralEngineering.wetStampsRequired
-        ),
+      wetStampsRequired: null, // wetStampRequired는 general로 옮겨감에 따라 삭제되어야 하나, 백엔드 쪽에서 삭제되지 않아서 null을 넘기도록 처리함.
       digitalSignatureType:
         transformDigitalSignatureTypeWithEmptyStringIntoNullableDigitalSignatureType.parse(
           values.structuralEngineering.digitalSignatureType

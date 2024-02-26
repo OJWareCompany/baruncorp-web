@@ -285,9 +285,29 @@ function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
                 disabled
               />
             </Item>
+          </RowItemsContainer>
+          <RowItemsContainer>
             <Item>
               <Label>Specific Form Required?</Label>
               <Input value={data.general.specificFormRequired ?? ""} disabled />
+            </Item>
+            <Item>
+              <Label>Structural Stamp Required?</Label>
+              <Input
+                value={data.general.structuralStampRequired ?? ""}
+                disabled
+              />
+            </Item>
+            <Item>
+              <Label>Electrical Stamp Required?</Label>
+              <Input
+                value={data.general.electricalStampRequired ?? ""}
+                disabled
+              />
+            </Item>
+            <Item>
+              <Label>Wet Stamp Required?</Label>
+              <Input value={data.general.wetStampRequired ?? ""} disabled />
             </Item>
           </RowItemsContainer>
           <RowItemsContainer>
@@ -408,13 +428,6 @@ function AhjNoteHistoryForm({ data }: AhjNoteHistoryFormProps) {
             </Item>
           </RowItemsContainer>
           <RowItemsContainer>
-            <Item>
-              <Label>Wet Stamp Required?</Label>
-              <Input
-                value={data.engineering.wetStampsRequired ?? ""}
-                disabled
-              />
-            </Item>
             <Item>
               <Label># of Wet Stamps</Label>
               <Input value={data.engineering.ofWetStamps ?? ""} disabled />

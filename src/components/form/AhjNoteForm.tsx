@@ -122,12 +122,98 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     </FormItem>
                   )}
                 />
+              </RowItemsContainer>
+              <RowItemsContainer>
                 <FormField
                   control={form.control}
                   name="general.specificFormRequired"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Specific Form Required?</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select an option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {SelectOptionEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="general.structuralStampRequired"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Structural Stamp Required?</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select an option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {SelectOptionEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="general.electricalStampRequired"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Electrical Stamp Required?</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger ref={field.ref}>
+                            <SelectValue placeholder="Select an option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {SelectOptionEnum.options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="general.wetStampRequired"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Wet Stamp Required?</FormLabel>
                       <FormControl>
                         <Select
                           value={field.value}
@@ -488,34 +574,6 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                 />
               </RowItemsContainer>
               <RowItemsContainer>
-                <FormField
-                  control={form.control}
-                  name="structuralEngineering.wetStampsRequired"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Wet Stamp Required?</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger ref={field.ref}>
-                            <SelectValue placeholder="Select an option" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              {SelectOptionEnum.options.map((option) => (
-                                <SelectItem key={option} value={option}>
-                                  {option}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="structuralEngineering.ofWetStamps"
