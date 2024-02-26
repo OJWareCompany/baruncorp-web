@@ -52,7 +52,14 @@ import { getOrganizationsQueryKey } from "@/queries/useOrganizationsQuery";
 
 const formSchema = z
   .object({
-    name: z.string().trim().min(1, { message: "Name is required" }),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: "Name is required" })
+      .refine(
+        (value) => value.endsWith("_"),
+        "During the test period, the organization name must end with '_'"
+      ),
     emailAddressToReceiveInvoice: z
       .string()
       .trim()
