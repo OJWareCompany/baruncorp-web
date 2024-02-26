@@ -26,7 +26,8 @@ import { toTwoDecimalRegExp } from "@/lib/constants";
 import { AffixInput } from "@/components/AffixInput";
 import { useToast } from "@/components/ui/use-toast";
 import usePostVendorCreditPaymentMutation from "@/mutations/usePostVendorCreditPaymentMutation";
-import { getOrganizationVendorCreditQueryKey } from "@/queries/useOrganizationVendorCreditQuery";
+import { getVendorCreditQueryKey } from "@/queries/useVendorCreditQuery";
+import { getVendorCreditHistoriesQueryKey } from "@/queries/useVendorCreditHistoriesQuery";
 
 const formSchema = z
   .object({
@@ -89,7 +90,12 @@ export default function NewVendorCreditDialog({ organizationId }: Props) {
       .then(() => {
         setOpen(false);
         queryClient.invalidateQueries({
-          queryKey: getOrganizationVendorCreditQueryKey(organizationId),
+          queryKey: getVendorCreditQueryKey(organizationId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: getVendorCreditHistoriesQueryKey({
+            vendorOrganizationId: organizationId,
+          }),
         });
         toast({ title: "Success" });
       })

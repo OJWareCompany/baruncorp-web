@@ -6,20 +6,20 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
   Loader2,
-  Mail,
-  MoreHorizontal,
+  X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
+import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -29,9 +29,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  FindUsersHttpControllerGetFindUsersParams,
-  OrganizationResponseDto,
-  UserPaginatedResponseDto,
+  FindVendorCreditTransactionPaginatedHttpControllerGetParams,
+  VendorCreditTransactionPaginatedResponseDto,
 } from "@/api/api-spec";
 import {
   Select,
@@ -41,18 +40,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import useUsersQuery, { getUsersQueryKey } from "@/queries/useUsersQuery";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  BARUNCORP_ORGANIZATION_ID,
-  UserStatusEnum,
-  YesOrNoEnum,
-  transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum,
-  transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
-  userStatuses,
-} from "@/lib/constants";
-import SearchHeader from "@/components/table/SearchHeader";
-import EnumHeader from "@/components/table/EnumHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import {
   AlertDialog,
@@ -62,45 +49,46 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import usePostInvitationsMutation from "@/mutations/usePostInvitationsMutation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
+import useVendorCreditHistoriesQuery, {
+  getVendorCreditHistoriesQueryKey,
+} from "@/queries/useVendorCreditHistoriesQuery";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { formatInEST } from "@/lib/utils";
+import usePatchVendorCreditCancelMutation from "@/mutations/usePatchVendorCreditCancelMutation";
+import { getVendorCreditQueryKey } from "@/queries/useVendorCreditQuery";
 
 const columnHelper =
-  createColumnHelper<UserPaginatedResponseDto["items"][number]>();
+  createColumnHelper<
+    VendorCreditTransactionPaginatedResponseDto["items"][number]
+  >();
 
 interface Props {
-  organization: OrganizationResponseDto;
+  organizationId: string;
 }
 
-export default function UsersTable({ organization }: Props) {
-  const [alertDialogState, setAlertDialogState] = useState<
-    { open: false } | { open: true; email: string; organizationId: string }
-  >({ open: false });
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [syncedParams, setSyncedParams] =
-    useState<FindUsersHttpControllerGetFindUsersParams>();
+const TABLE_NAME = "VendorCreditHistories";
 
+export default function VendorCreditHistoriesTable({ organizationId }: Props) {
+  const [alertDialogState, setAlertDialogState] = useState<
+    { open: false } | { open: true; id: string }
+  >({ open: false });
+  const searchParams = useSearchParams();
   const {
-    mutateAsync: postInvitationsMutateAsync,
-    isPending: isPostInvitationsMutationPending,
-  } = usePostInvitationsMutation();
+    mutateAsync: patchVendorCreditCancelMutateAsync,
+    isPending: isPatchVendorCreditCancelMutationPending,
+  } = usePatchVendorCreditCancelMutation();
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const emailSearchParamName = "Email";
-  const userNameSearchParamName = "UserName";
-  const statusSearchParamName = "Status";
-  const contractorSearchParamName = "Contractor";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
@@ -109,20 +97,6 @@ export default function UsersTable({ organization }: Props) {
       ? Number(searchParams.get(pageSizeSearchParamName))
       : 5,
   };
-  const userNameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
-  const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
-  const contractorSearchParamParseResult = YesOrNoEnum.safeParse(
-    searchParams.get(contractorSearchParamName)
-  );
-  const contractorSearchParam = contractorSearchParamParseResult.success
-    ? contractorSearchParamParseResult.data
-    : "";
-  const statusSearchParamParseResult = UserStatusEnum.safeParse(
-    searchParams.get(statusSearchParamName)
-  );
-  const statusSearchParam = statusSearchParamParseResult.success
-    ? statusSearchParamParseResult.data
-    : "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -130,69 +104,51 @@ export default function UsersTable({ organization }: Props) {
     pagination,
   });
 
-  const params: FindUsersHttpControllerGetFindUsersParams = useMemo(
-    () => ({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      organizationId: organization.id,
-      userName: userNameSearchParam,
-      email: emailSearchParam,
-      isContractor:
-        transformYesOrNoEnumWithEmptyStringIntoNullableBoolean.parse(
-          contractorSearchParam
-        ),
-      status:
-        transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum.parse(
-          statusSearchParam
-        ),
-    }),
-    [
-      pagination.pageIndex,
-      pagination.pageSize,
-      organization.id,
-      userNameSearchParam,
-      emailSearchParam,
-      contractorSearchParam,
-      statusSearchParam,
-    ]
-  );
+  const params: FindVendorCreditTransactionPaginatedHttpControllerGetParams =
+    useMemo(
+      () => ({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        vendorOrganizationId: organizationId,
+      }),
+      [organizationId, pagination.pageIndex, pagination.pageSize]
+    );
 
-  const { data, isLoading, isFetching } = useUsersQuery(params, true);
-
-  useEffect(() => {
-    if (!isFetching) {
-      setSyncedParams(params);
-    }
-  }, [isFetching, params]);
+  const { data, isLoading } = useVendorCreditHistoriesQuery(params, true);
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("fullName", {
-        header: () => (
-          <SearchHeader
-            buttonText="Name"
-            searchParamName={userNameSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null && params.userName !== syncedParams.userName
-            }
-          />
-        ),
+      columnHelper.accessor("createdBy", {
+        header: "Created By",
       }),
-      columnHelper.accessor("email", {
-        header: () => (
-          <SearchHeader
-            buttonText="Email"
-            searchParamName={emailSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null && params.email !== syncedParams.email
-            }
-          />
-        ),
+      columnHelper.accessor("creditTransactionType", {
+        header: "Type",
+        cell: ({ row, getValue }) => {
+          const value = getValue();
+          const { relatedVendorInvoiceId } = row.original;
+          if (relatedVendorInvoiceId == null) {
+            return value;
+          }
+
+          return (
+            <Link
+              href={`/system-management/vendor-invoices/${relatedVendorInvoiceId}`}
+              className="underline"
+            >
+              {value}
+            </Link>
+          );
+        },
       }),
-      columnHelper.accessor("phoneNumber", {
-        header: "Phone Number",
+      columnHelper.accessor((row) => `$${row.amount}`, {
+        header: "Amount",
+      }),
+      columnHelper.accessor("transactionDate", {
+        header: "Transaction Date",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+      columnHelper.accessor("canceledAt", {
+        header: "Date Canceled",
         cell: ({ getValue }) => {
           const value = getValue();
 
@@ -200,79 +156,27 @@ export default function UsersTable({ organization }: Props) {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return value;
-        },
-      }),
-      columnHelper.accessor("isVendor", {
-        header: () => (
-          <EnumHeader
-            buttonText="Contractor"
-            searchParamName={contractorSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null &&
-              params.isContractor !== syncedParams.isContractor
-            }
-          />
-        ),
-        cell: ({ getValue, row }) => {
-          if (row.original.organizationId === BARUNCORP_ORGANIZATION_ID) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return (
-            <div className="flex">
-              <Checkbox checked={getValue()} />
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor("status", {
-        header: () => (
-          <EnumHeader
-            buttonText="Status"
-            searchParamName={statusSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={UserStatusEnum}
-            isLoading={
-              syncedParams != null && params.status !== syncedParams.status
-            }
-          />
-        ),
-        cell: ({ getValue }) => {
-          const value = getValue();
-          const status = userStatuses[value];
-
-          return (
-            <div className={`flex items-center`}>
-              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-              <span className="whitespace-nowrap">{status.value}</span>
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor("dateOfJoining", {
-        header: "Date of Joining",
-        cell: ({ getValue }) => {
-          const value = getValue();
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return format(new Date(value), "MM-dd-yyyy");
+          return formatInEST(value);
         },
       }),
       columnHelper.display({
         id: "action",
         cell: ({ row }) => {
-          const { status, email, organizationId } = row.original;
+          const isCanceled = row.original.canceledAt != null;
 
-          if (
-            status !== "Invitation Sent" &&
-            status !== "Invitation Not Sent"
-          ) {
-            return null;
+          if (isCanceled) {
+            return (
+              <div className="text-right">
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button variant={"ghost"} size={"icon"} className="w-9 h-9">
+                      <AlertTriangle className="w-4 h-4 text-orange-500" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Canceled</TooltipContent>
+                </Tooltip>
+              </div>
+            );
           }
 
           return (
@@ -283,36 +187,26 @@ export default function UsersTable({ organization }: Props) {
                   event.stopPropagation();
                 }}
               >
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setAlertDialogState({
-                          open: true,
-                          email,
-                          organizationId,
-                        });
-                      }}
-                    >
-                      <Mail className="mr-2 h-4 w-4" />
-                      {status === "Invitation Sent"
-                        ? "Resend Invitation Email"
-                        : "Send Invitation Email"}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="h-9 w-9"
+                  onClick={() => {
+                    setAlertDialogState({
+                      open: true,
+                      id: row.id,
+                    });
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </div>
           );
         },
       }),
     ],
-    [params, syncedParams]
+    []
   );
 
   const table = useReactTable({
@@ -325,10 +219,6 @@ export default function UsersTable({ organization }: Props) {
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility: {
-        dateOfJoining: organization.id === BARUNCORP_ORGANIZATION_ID,
-        isVendor: organization.id !== BARUNCORP_ORGANIZATION_ID,
-      },
     },
   });
 
@@ -376,10 +266,6 @@ export default function UsersTable({ organization }: Props) {
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
-                    onClick={() => {
-                      router.push(`/system-management/users/${row.id}`);
-                    }}
-                    className="cursor-pointer"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -485,24 +371,26 @@ export default function UsersTable({ organization }: Props) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <LoadingButton
-              isLoading={isPostInvitationsMutationPending}
+              isLoading={isPatchVendorCreditCancelMutationPending}
               onClick={() => {
                 if (!alertDialogState.open) {
                   return;
                 }
 
-                postInvitationsMutateAsync({
-                  email: alertDialogState.email,
-                  organizationId: alertDialogState.organizationId,
+                patchVendorCreditCancelMutateAsync({
+                  vendorCreditTransactionId: alertDialogState.id,
                 })
                   .then(() => {
-                    toast({ title: "Success" });
                     queryClient.invalidateQueries({
-                      queryKey: getUsersQueryKey({
-                        organizationId: organization.id,
+                      queryKey: getVendorCreditQueryKey(organizationId),
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: getVendorCreditHistoriesQueryKey({
+                        vendorOrganizationId: organizationId,
                       }),
                     });
                     setAlertDialogState({ open: false });
+                    toast({ title: "Success" });
                   })
                   .catch((error: AxiosError<ErrorResponseData>) => {
                     if (
@@ -518,7 +406,6 @@ export default function UsersTable({ organization }: Props) {
                       return;
                     }
                   });
-                return;
               }}
             >
               Continue

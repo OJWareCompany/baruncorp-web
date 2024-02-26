@@ -94,7 +94,7 @@ export default function PaymentsTable({ clientInvoice }: Props) {
       }),
       columnHelper.accessor("canceledAt", {
         header: "Date Canceled",
-        cell: ({ getValue, column }) => {
+        cell: ({ getValue }) => {
           const value = getValue();
 
           if (value == null) {

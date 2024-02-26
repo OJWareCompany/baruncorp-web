@@ -5,14 +5,16 @@ import NewUserByOrganizationSheet from "./NewUserByOrganizationSheet";
 import PageHeaderAction from "./PageHeaderAction";
 import NewClientCreditDialog from "./NewClientCreditDialog";
 import NewVendorCreditDialog from "./NewVendorCreditDialog";
+import ClientCreditHistoriesTable from "./ClientCreditsTable";
+import VendorCreditHistoriesTable from "./VendorCreditsTable";
 import PageHeader from "@/components/PageHeader";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
 import CollapsibleSection from "@/components/CollapsibleSection";
-import useOrganizationCreditQuery from "@/queries/useOrganizationCreditQuery";
+import useClientCreditQuery from "@/queries/useClientCreditQuery";
 import { AffixInput } from "@/components/AffixInput";
-import useOrganizationVendorCreditQuery from "@/queries/useOrganizationVendorCreditQuery";
+import useVendorCreditQuery from "@/queries/useVendorCreditQuery";
 
 interface Props {
   params: {
@@ -27,24 +29,24 @@ export default function Page({ params: { organizationId } }: Props) {
     error: organizationQueryError,
   } = useOrganizationQuery(organizationId);
   const {
-    data: credit,
-    isLoading: isCreditQueryLoading,
-    error: creditQueryError,
-  } = useOrganizationCreditQuery(organizationId);
+    data: clientCredit,
+    isLoading: isClientCreditQueryLoading,
+    error: clientCreditQueryError,
+  } = useClientCreditQuery(organizationId);
   const {
     data: vendorCredit,
     isLoading: isVendorCreditQueryLoading,
     error: vendorCreditQueryError,
-  } = useOrganizationVendorCreditQuery(organizationId);
+  } = useVendorCreditQuery(organizationId);
   useNotFound(organizationQueryError);
-  useNotFound(creditQueryError);
+  useNotFound(clientCreditQueryError);
   useNotFound(vendorCreditQueryError);
 
   if (
     isOrganizationQueryLoading ||
     organization == null ||
-    isCreditQueryLoading ||
-    credit == null ||
+    isClientCreditQueryLoading ||
+    clientCredit == null ||
     isVendorCreditQueryLoading ||
     vendorCredit == null
   ) {
@@ -67,6 +69,14 @@ export default function Page({ params: { organizationId } }: Props) {
         <section>
           <OrganizationForm organization={organization} />
         </section>
+        <CollapsibleSection
+          title="Users"
+          action={
+            <NewUserByOrganizationSheet organizationId={organizationId} />
+          }
+        >
+          <UsersTable organization={organization} />
+        </CollapsibleSection>
         {organization.organizationType !== "administration" && (
           <>
             <CollapsibleSection
@@ -75,9 +85,10 @@ export default function Page({ params: { organizationId } }: Props) {
             >
               <AffixInput
                 prefixElement={<span className="text-muted-foreground">$</span>}
-                value={credit.creditAmount}
+                value={clientCredit.creditAmount}
                 readOnly
               />
+              <ClientCreditHistoriesTable organizationId={organizationId} />
             </CollapsibleSection>
             {organization.isVendor && (
               <CollapsibleSection
@@ -93,18 +104,11 @@ export default function Page({ params: { organizationId } }: Props) {
                   value={vendorCredit.creditAmount}
                   readOnly
                 />
+                <VendorCreditHistoriesTable organizationId={organizationId} />
               </CollapsibleSection>
             )}
           </>
         )}
-        <CollapsibleSection
-          title="Users"
-          action={
-            <NewUserByOrganizationSheet organizationId={organizationId} />
-          }
-        >
-          <UsersTable organization={organization} />
-        </CollapsibleSection>
       </div>
     </div>
   );

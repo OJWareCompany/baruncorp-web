@@ -3,20 +3,20 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { VendorCreditOrganizationTransactionResponseDto } from "@/api/api-spec";
 
-export const getOrganizationVendorCreditQueryKey = (organizationId: string) => [
-  "organization-vendor-credit",
+export const getVendorCreditQueryKey = (organizationId: string) => [
+  "vendor-credit",
   "detail",
   organizationId,
 ];
 
-const useOrganizationVendorCreditQuery = (organizationId: string) => {
+const useVendorCreditQuery = (organizationId: string) => {
   const api = useApi();
 
   return useQuery<
     VendorCreditOrganizationTransactionResponseDto,
     AxiosError<ErrorResponseData>
   >({
-    queryKey: getOrganizationVendorCreditQueryKey(organizationId),
+    queryKey: getVendorCreditQueryKey(organizationId),
     queryFn: () =>
       api.vendorCreditTransactions
         .findVendorOrganizationCreditTransactionHttpControllerGet(
@@ -27,4 +27,4 @@ const useOrganizationVendorCreditQuery = (organizationId: string) => {
   });
 };
 
-export default useOrganizationVendorCreditQuery;
+export default useVendorCreditQuery;

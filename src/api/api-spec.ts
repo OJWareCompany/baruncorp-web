@@ -939,8 +939,6 @@ export interface Engineering {
   snowLoadGround: string | null;
   /** @default "30" */
   snowLoadFlatRoof: string | null;
-  /** @default "See Notes" */
-  wetStampsRequired: "No" | "Yes" | "See Notes" | null;
   /** @default "ofWetStamps..." */
   ofWetStamps: string | null;
   /** @default "ANSI B (11x17 INCH)" */
@@ -3807,7 +3805,7 @@ export interface FindVendorPaymentPaginatedHttpControllerGetParams {
 }
 
 export interface FindVendorCreditTransactionPaginatedHttpControllerGetParams {
-  organizationId?: string | null;
+  vendorOrganizationId?: string | null;
   /**
    * Specifies a limit of returned records
    * @default 20

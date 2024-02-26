@@ -26,7 +26,8 @@ import { toTwoDecimalRegExp } from "@/lib/constants";
 import { AffixInput } from "@/components/AffixInput";
 import { useToast } from "@/components/ui/use-toast";
 import usePostCreditPaymentMutation from "@/mutations/usePostCreditPaymentMutation";
-import { getOrganizationCreditQueryKey } from "@/queries/useOrganizationCreditQuery";
+import { getClientCreditQueryKey } from "@/queries/useClientCreditQuery";
+import { getClientCreditHistoriesQueryKey } from "@/queries/useClientCreditHistoriesQuery";
 
 const formSchema = z
   .object({
@@ -88,7 +89,12 @@ export default function NewClientCreditDialog({ organizationId }: Props) {
       .then(() => {
         setOpen(false);
         queryClient.invalidateQueries({
-          queryKey: getOrganizationCreditQueryKey(organizationId),
+          queryKey: getClientCreditQueryKey(organizationId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: getClientCreditHistoriesQueryKey({
+            organizationId,
+          }),
         });
         toast({ title: "Success" });
       })

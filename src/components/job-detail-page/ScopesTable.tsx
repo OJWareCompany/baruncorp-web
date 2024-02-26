@@ -81,17 +81,6 @@ export default function ScopesTable({ job, project, pageType }: Props) {
     () => session?.isBarunCorpMember ?? false,
     [session?.isBarunCorpMember]
   );
-  const isHome = useMemo(() => pageType === "HOME", [pageType]);
-
-  /**
-   * 바른코프 멤버 ✅
-   * 바른코프 멤버아닌데, 홈 ❌
-   * 바른코프 멤버아닌데, 워크스페이스 ✅
-   */
-  const isWorker = useMemo(
-    () => isBarunCorpMember || !isHome,
-    [isBarunCorpMember, isHome]
-  );
 
   const data = useMemo(
     () =>
@@ -440,12 +429,12 @@ export default function ScopesTable({ job, project, pageType }: Props) {
       }),
     ],
     [
+      project.propertyType,
+      project.projectId,
       job.id,
       job.projectId,
-      isWorker,
+      isBarunCorpMember,
       pageType,
-      project.projectId,
-      project.propertyType,
     ]
   );
 

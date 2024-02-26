@@ -238,7 +238,6 @@ export function getUpdateAhjNoteRequestDtoFromFieldValues(
         transformSelectOptionWithEmptyStringIntoNullableSelectOption.parse(
           values.structuralEngineering.windUpliftCalculationRequired
         ),
-      wetStampsRequired: null, // wetStampRequired는 general로 옮겨감에 따라 삭제되어야 하나, 백엔드 쪽에서 삭제되지 않아서 null을 넘기도록 처리함.
       digitalSignatureType:
         transformDigitalSignatureTypeWithEmptyStringIntoNullableDigitalSignatureType.parse(
           values.structuralEngineering.digitalSignatureType
