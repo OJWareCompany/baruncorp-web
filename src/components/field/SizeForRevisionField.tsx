@@ -80,7 +80,7 @@ export default function SizeForRevisionField({
       }}
       disabled={disabled}
     >
-      <SelectTrigger className="h-9 w-[150px] -ml-[13px]">
+      <SelectTrigger className="-ml-[9px] text-xs px-2 h-8 py-0 focus:ring-0 focus:ring-offset-0">
         <SelectValue placeholder="Select" />
       </SelectTrigger>
       <SelectContent>

@@ -35,7 +35,7 @@ export default function AssigneeField({
   const isWorker = isBarunCorpMember || !isHome;
 
   return (
-    <div className="flex gap-2 -ml-[13px]">
+    <div className="flex gap-1.5 -ml-[9px]">
       <AssigneeCombobox
         assignedTaskId={assignedTaskId}
         userId={userId}

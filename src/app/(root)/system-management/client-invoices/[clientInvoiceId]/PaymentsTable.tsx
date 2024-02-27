@@ -114,8 +114,8 @@ export default function PaymentsTable({ clientInvoice }: Props) {
               <div className="text-right">
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="w-9 h-9">
-                      <AlertTriangle className="w-4 h-4 text-orange-500" />
+                    <Button variant={"ghost"} size={"icon"} className="w-8 h-8">
+                      <AlertTriangle className="w-3 h-3 text-orange-500" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Canceled</TooltipContent>
@@ -135,7 +135,7 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                 <Button
                   variant={"ghost"}
                   size={"icon"}
-                  className="h-9 w-9"
+                  className="h-8 w-8"
                   onClick={() => {
                     setAlertDialogState({
                       open: true,
@@ -144,7 +144,7 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                     });
                   }}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </Button>
               </div>
             </div>

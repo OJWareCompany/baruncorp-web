@@ -134,8 +134,8 @@ function InternalTable({
             <div className="text-right">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant={"ghost"} size={"icon"} className="h-9 w-9">
-                    <MoreHorizontal className="w-4 h-4" />
+                  <Button variant={"ghost"} size={"icon"} className="h-8 w-8">
+                    <MoreHorizontal className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

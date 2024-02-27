@@ -111,12 +111,12 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
   ]);
 
   return (
-    <div className="border rounded-md text-sm">
-      <div className="flex items-center border-b transition-colors hover:bg-muted/50 last:border-none font-medium h-12 text-muted-foreground">
+    <div className="border rounded-md text-xs">
+      <div className="flex items-center border-b transition-colors hover:bg-muted/50 last:border-none font-medium h-9 text-muted-foreground">
         <div className="basis-[68px]"></div>
-        <div className="px-4 basis-[81px]">Priority</div>
-        <div className="px-4 flex-1">Name</div>
-        <div className="px-4 flex-1">Auto Assignment Property Type</div>
+        <div className="px-3 basis-[81px]">Priority</div>
+        <div className="px-3 flex-1">Name</div>
+        <div className="px-3 flex-1">Auto Assignment Property Type</div>
         <div className="basis-[68px]"></div>
       </div>
       {list.items.length === 0 ? (
@@ -136,16 +136,16 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
                 "flex items-center border-b transition-colors hover:bg-muted/50 last:border-none outline-none"
               }
             >
-              <div className="p-4">
-                <Button size={"icon"} className="h-9 w-9" variant={"ghost"}>
-                  <AlignJustify className="h-4 w-4" />
+              <div className="px-3 py-2">
+                <Button size={"icon"} className="h-8 w-8" variant={"ghost"}>
+                  <AlignJustify className="h-3 w-3" />
                 </Button>
               </div>
-              <div className="px-4 basis-[81px] text-muted-foreground">
+              <div className="px-3 basis-[81px] text-muted-foreground">
                 {item.order}.
               </div>
-              <div className="p-4 flex-1">{item.positionName}</div>
-              <div className="p-4 flex-1">
+              <div className="px-3 py-2 flex-1">{item.positionName}</div>
+              <div className="px-3 py-2 flex-1">
                 <Select
                   value={item.autoAssignmentType}
                   onValueChange={(newValue) => {
@@ -179,7 +179,7 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
                       });
                   }}
                 >
-                  <SelectTrigger className="-ml-[13px]">
+                  <SelectTrigger className="-ml-[9px] text-xs px-2 h-8 py-0 focus:ring-0 focus:ring-offset-0">
                     <SelectValue placeholder="Select a property type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -193,16 +193,16 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="p-4">
+              <div className="px-3 py-2">
                 <Button
                   variant={"ghost"}
                   size={"icon"}
-                  className="h-9 w-9"
+                  className="h-8 w-8"
                   onClick={() => {
                     deletePosition(item.positionId);
                   }}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </Button>
               </div>
             </GridListItem>

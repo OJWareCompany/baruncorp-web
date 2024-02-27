@@ -176,11 +176,11 @@ export default function ScopesTable({ job, project, pageType }: Props) {
           <Button
             variant={"ghost"}
             size={"icon"}
-            className="w-9 h-9 [&[data-expand=closed]>svg]:-rotate-90"
+            className="w-8 h-8 [&[data-expand=closed]>svg]:-rotate-90"
             onClick={table.getToggleAllRowsExpandedHandler()}
             data-expand={table.getIsAllRowsExpanded() ? "open" : "closed"}
           >
-            <ChevronsDown className="w-4 h-4 transition-transform duration-200" />
+            <ChevronsDown className="w-3 h-3 transition-transform duration-200" />
           </Button>
         ),
         cell: ({ row }) => {
@@ -189,11 +189,11 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               <Button
                 variant={"ghost"}
                 size={"icon"}
-                className="w-9 h-9 [&[data-expand=closed]>svg]:-rotate-90"
+                className="w-8 h-8 [&[data-expand=closed]>svg]:-rotate-90"
                 onClick={row.getToggleExpandedHandler()}
                 data-expand={row.getIsExpanded() ? "open" : "closed"}
               >
-                <ChevronDown className="w-4 h-4 transition-transform duration-200" />
+                <ChevronDown className="w-3 h-3 transition-transform duration-200" />
               </Button>
             );
           }
@@ -206,8 +206,8 @@ export default function ScopesTable({ job, project, pageType }: Props) {
             return (
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <Button variant={"ghost"} size={"icon"} className="w-9 h-9">
-                    <AlertTriangle className="w-4 h-4 text-orange-500" />
+                  <Button variant={"ghost"} size={"icon"} className="w-8 h-8">
+                    <AlertTriangle className="w-3 h-3 text-orange-500" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -258,7 +258,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
 
           return (
             <div className="flex gap-4 items-center">
-              <CornerDownRight className="h-4 w-4 text-muted-foreground" />
+              <CornerDownRight className="h-3 w-3 text-muted-foreground" />
               <p>{name}</p>
             </div>
           );

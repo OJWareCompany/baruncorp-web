@@ -97,7 +97,7 @@ export default function PtoField({ id, pto }: Props) {
   return (
     <Form {...form}>
       <form
-        className="flex gap-2 w-[150px] -ml-[13px]"
+        className="flex gap-1.5 w-[150px] -ml-[9px]"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <FormField
@@ -117,7 +117,8 @@ export default function PtoField({ id, pto }: Props) {
                       field.onChange(event);
                     }
                   }}
-                  className="h-9"
+                  className="data-[focused=true]:ring-0 data-[focused=true]:ring-offset-0"
+                  size="sm"
                 />
               </FormControl>
             </FormItem>
@@ -126,7 +127,7 @@ export default function PtoField({ id, pto }: Props) {
         <Button
           size={"icon"}
           variant={"outline"}
-          className="w-9 h-9 flex-shrink-0"
+          className="w-8 h-8 flex-shrink-0"
           type="submit"
           disabled={!form.formState.isDirty}
           onClick={(event) => {
@@ -136,9 +137,9 @@ export default function PtoField({ id, pto }: Props) {
           }}
         >
           {form.formState.isSubmitting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-3 h-3 animate-spin" />
           ) : (
-            <Pencil className="w-4 h-4" />
+            <Pencil className="w-3 h-3" />
           )}
         </Button>
       </form>

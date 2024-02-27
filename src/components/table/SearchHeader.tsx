@@ -50,9 +50,9 @@ export default function SearchHeader({
         >
           {buttonText}
           {isLoading ? (
-            <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+            <Loader2 className="h-3 w-3 ml-1.5 animate-spin" />
           ) : (
-            <ChevronsUpDown className="h-4 w-4 ml-2" />
+            <ChevronsUpDown className="h-3 w-3 ml-1.5" />
           )}
         </Button>
       </PopoverTrigger>

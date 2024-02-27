@@ -5,8 +5,10 @@ import { Editor } from "../plate-ui/editor";
 import { MentionCombobox } from "../plate-ui/mention-combobox";
 import { Toolbar } from "../plate-ui/toolbar";
 import { ToolbarButtons } from "../plate-ui/toolbar-buttons";
-import { mentionEditorPlugins } from "@/lib/plate/plugins";
+import { getMentionEditorPlugins } from "@/lib/plate/plugins";
 import useExcludeInactiveUsersQuery from "@/queries/useExcludeInactiveUsersQuery";
+
+const mentionEditorPlugins = getMentionEditorPlugins("default");
 
 interface Props extends Pick<PlateProps, "value" | "onChange" | "editorRef"> {}
 

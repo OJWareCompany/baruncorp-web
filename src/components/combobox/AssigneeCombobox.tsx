@@ -45,12 +45,12 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
       return (
         <Button
           variant="outline"
-          className="w-full px-3 font-normal gap-2 whitespace-nowrap"
+          className="w-full px-2 font-normal gap-2 whitespace-nowrap h-8 text-xs"
           ref={ref}
           disabled
         >
           <span className="flex-1 text-start">{placeholderText}</span>
-          <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin" />
+          <Loader2 className="ml-2 h-3 w-3 shrink-0 animate-spin" />
         </Button>
       );
     }
@@ -63,7 +63,7 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="w-full px-3 font-normal gap-2 whitespace-nowrap"
+            className="w-full px-2 font-normal gap-2 whitespace-nowrap h-8 text-xs focus-visible:ring-0 focus-visible:ring-offset-0"
             ref={ref}
             disabled={disabled}
           >
@@ -73,7 +73,7 @@ const AssigneeCombobox = forwardRef<HTMLButtonElement, Props>(
                 : availableWorkers.find((value) => value.id === userId)?.name ??
                   placeholderText}
             </span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-[200px]">

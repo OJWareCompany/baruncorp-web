@@ -89,54 +89,58 @@ export const inputEditorPlugins = createPlugins(
   }
 );
 
-export const mentionEditorPlugins = createPlugins(
-  [
-    // Nodes
-    createParagraphPlugin(),
-    createLinkPlugin({
-      renderAfterEditable: LinkFloatingToolbar as RenderAfterEditable,
-    }),
-    createMentionPlugin<MentionPlugin<{ email: string }>>({
-      options: {
-        createMentionNode: (item) => ({
-          children: [{ text: "" }],
-          type: "mention",
-          value: item.text,
-          email: item.data.email,
+export function getMentionEditorPlugins(mentionElementSize?: "default" | "sm") {
+  return createPlugins(
+    [
+      // Nodes
+      createParagraphPlugin(),
+      createLinkPlugin({
+        renderAfterEditable: LinkFloatingToolbar as RenderAfterEditable,
+      }),
+      createMentionPlugin<MentionPlugin<{ email: string }>>({
+        options: {
+          createMentionNode: (item) => ({
+            children: [{ text: "" }],
+            type: "mention",
+            value: item.text,
+            email: item.data.email,
+          }),
+          insertSpaceAfterMention: true,
+        },
+      }),
+
+      // Block Style
+      createIndentPlugin({
+        inject: {
+          props: {
+            validTypes: [ELEMENT_PARAGRAPH],
+          },
+        },
+      }),
+      createIndentListPlugin({
+        inject: {
+          props: {
+            validTypes: [ELEMENT_PARAGRAPH],
+          },
+        },
+      }),
+
+      // Functionality
+      createAutoformatPlugin(autoformatPlugin),
+      createComboboxPlugin(),
+    ],
+    {
+      components: {
+        [ELEMENT_LI]: withProps(PlateElement, { as: "li" }),
+        [ELEMENT_LINK]: LinkElement,
+        [ELEMENT_MENTION]: withProps(MentionElement, {
+          size: mentionElementSize,
         }),
-        insertSpaceAfterMention: true,
+        [ELEMENT_MENTION_INPUT]: MentionInputElement,
+        [ELEMENT_UL]: withProps(ListElement, { variant: "ul" }),
+        [ELEMENT_OL]: withProps(ListElement, { variant: "ol" }),
+        [ELEMENT_PARAGRAPH]: ParagraphElement,
       },
-    }),
-
-    // Block Style
-    createIndentPlugin({
-      inject: {
-        props: {
-          validTypes: [ELEMENT_PARAGRAPH],
-        },
-      },
-    }),
-    createIndentListPlugin({
-      inject: {
-        props: {
-          validTypes: [ELEMENT_PARAGRAPH],
-        },
-      },
-    }),
-
-    // Functionality
-    createAutoformatPlugin(autoformatPlugin),
-    createComboboxPlugin(),
-  ],
-  {
-    components: {
-      [ELEMENT_LI]: withProps(PlateElement, { as: "li" }),
-      [ELEMENT_LINK]: LinkElement,
-      [ELEMENT_MENTION]: MentionElement,
-      [ELEMENT_MENTION_INPUT]: MentionInputElement,
-      [ELEMENT_UL]: withProps(ListElement, { variant: "ul" }),
-      [ELEMENT_OL]: withProps(ListElement, { variant: "ol" }),
-      [ELEMENT_PARAGRAPH]: ParagraphElement,
-    },
-  }
-);
+    }
+  );
+}

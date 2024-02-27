@@ -45,21 +45,19 @@ export default function OrderedServiceStatusField({
   const dispatch = useAlertDialogDataDispatch();
   const { data: session } = useSession();
 
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
-
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="px-3 font-normal -ml-[13px]"
+          className="px-2 font-normal -ml-[9px] h-8 text-xs focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={disabled}
         >
           <div className="flex gap-2 items-center">
             <currentStatus.Icon className={`w-4 h-4 ${currentStatus.color}`} />
             <span className="whitespace-nowrap">{currentStatus.value}</span>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-3 w-3 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-auto" align="start">

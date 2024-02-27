@@ -105,7 +105,7 @@ export default function TasksTable({ position }: Props) {
                   });
               }}
             >
-              <SelectTrigger className="-ml-[13px]">
+              <SelectTrigger className="-ml-[9px] text-xs px-2 h-8 py-0 focus:ring-0 focus:ring-offset-0">
                 <SelectValue placeholder="Select a property type" />
               </SelectTrigger>
               <SelectContent>
@@ -135,7 +135,7 @@ export default function TasksTable({ position }: Props) {
                 <Button
                   variant={"ghost"}
                   size={"icon"}
-                  className="h-9 w-9"
+                  className="h-8 w-8"
                   onClick={() => {
                     setAlertDialogState({
                       open: true,
@@ -143,7 +143,7 @@ export default function TasksTable({ position }: Props) {
                     });
                   }}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </Button>
               </div>
             </div>

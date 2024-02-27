@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 import { useProvidedRefOrCreate } from "@/hook/useProvidedRefOrCreate";
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   prefixElement?: React.ReactElement | null;
   suffixElement?: React.ReactElement | null;
+  size?: "default" | "sm";
 }
 
 /**
@@ -16,7 +17,15 @@ export interface InputProps
  */
 const AffixInput = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, prefixElement, suffixElement, onFocus, onBlur, ...props },
+    {
+      className,
+      prefixElement,
+      suffixElement,
+      onFocus,
+      onBlur,
+      size = "default",
+      ...props
+    },
     ref
   ) => {
     const [isInputFocused, setIsInputFocused] = React.useState(false);
@@ -46,8 +55,11 @@ const AffixInput = React.forwardRef<HTMLInputElement, InputProps>(
       <div
         className={cn(
           "flex h-10 w-full rounded-md border border-input bg-background text-sm ring-offset-background items-center overflow-hidden data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2 data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
-          suffixElement && "pr-3",
-          prefixElement && "pl-3",
+          suffixElement && size === "default" && "pr-3",
+          suffixElement && size === "sm" && "pr-2",
+          prefixElement && size === "default" && "pl-3",
+          prefixElement && size === "sm" && "pl-2",
+          size === "sm" && "h-8 text-xs",
           className
         )}
         data-disabled={props.disabled}
@@ -57,7 +69,8 @@ const AffixInput = React.forwardRef<HTMLInputElement, InputProps>(
         {prefixElement}
         <input
           className={cn(
-            "bg-background flex-1 w-full min-w-0 h-full px-3 placeholder:text-muted-foreground focus-visible:outline-none disabled:pointer-events-none"
+            "bg-background flex-1 w-full min-w-0 h-full px-3 placeholder:text-muted-foreground focus-visible:outline-none disabled:pointer-events-none",
+            size === "sm" && "px-2"
           )}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}

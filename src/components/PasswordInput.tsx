@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { InputProps } from "./ui/input";
-import { AffixInput } from "./AffixInput";
+import { AffixInput, InputProps } from "./AffixInput";
 
 const PasswordInput = (inputProps: InputProps) => {
   const [isVisible, setIsVisible] = React.useState(false);

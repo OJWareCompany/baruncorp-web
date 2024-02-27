@@ -265,7 +265,10 @@ function InternalTable({ modifySchedule }: InternalTableProps) {
                   }}
                 >
                   {row.getVisibleCells().map((cell, index) => (
-                    <TableCell key={cell.id} className={cn(index > 1 && "p-0")}>
+                    <TableCell
+                      key={cell.id}
+                      className={cn("whitespace-normal", index > 1 && "p-0")}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

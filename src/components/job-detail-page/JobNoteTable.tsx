@@ -20,10 +20,12 @@ import {
 } from "@/components/ui/table";
 import { JobNoteResponseDto } from "@/api/api-spec";
 import { formatInEST } from "@/lib/utils";
-import { mentionEditorPlugins } from "@/lib/plate/plugins";
 import { getEditorValue } from "@/lib/plate-utils";
 import { Badge } from "@/components/ui/badge";
 import { openJobNoteFolder } from "@/lib/deeplink";
+import { getMentionEditorPlugins } from "@/lib/plate/plugins";
+
+const mentionEditorPlugins = getMentionEditorPlugins("sm");
 
 const columnHelper = createColumnHelper<JobNoteResponseDto["data"][number]>();
 
@@ -109,7 +111,7 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
               <Button
                 size={"icon"}
                 variant={"ghost"}
-                className="h-9 w-9"
+                className="h-8 w-8"
                 onClick={() => {
                   if (isWorker) {
                     openJobNoteFolder({
@@ -126,7 +128,7 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                   window.open(value, "_blank", "noopener,noreferrer");
                 }}
               >
-                <FolderOpen className="w-4 h-4" />
+                <FolderOpen className="w-3 h-3" />
               </Button>
             </div>
           );

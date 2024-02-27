@@ -68,12 +68,12 @@ export default function PrerequisiteTasksTable({ task }: Props) {
                 <Button
                   variant={"ghost"}
                   size={"icon"}
-                  className="h-9 w-9"
+                  className="h-8 w-8"
                   onClick={() => {
                     setAlertDialogState({ open: true, taskId: row.id });
                   }}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3" />
                 </Button>
               </div>
             </div>

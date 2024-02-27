@@ -50,8 +50,12 @@ export default function AssigneeAction({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant={"outline"} size={"icon"} className="flex-shrink-0">
-            <MoreHorizontal className="w-4 h-4" />
+          <Button
+            variant={"outline"}
+            size={"icon"}
+            className="h-8 w-8 flex-shrink-0"
+          >
+            <MoreHorizontal className="w-3 h-3" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

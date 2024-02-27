@@ -28,8 +28,10 @@ import {
   trimValue,
 } from "@/lib/plate-utils";
 import { INITIAL_EDITOR_VALUE } from "@/lib/constants";
-import { mentionEditorPlugins } from "@/lib/plate/plugins";
 import Dropzone from "@/components/Dropzone";
+import { getMentionEditorPlugins } from "@/lib/plate/plugins";
+
+const mentionEditorPlugins = getMentionEditorPlugins("default");
 
 const editor = createPlateEditor({ plugins: mentionEditorPlugins });
 
