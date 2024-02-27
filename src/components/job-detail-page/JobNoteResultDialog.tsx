@@ -38,7 +38,10 @@ export default function JobNoteResultDialog({
     value: 0,
     error: false,
   });
-  const { mutateAsync: postJobNoteMutateAsync } = usePostJobNoteMutation({
+  const {
+    mutateAsync: postJobNoteMutateAsync,
+    isSuccess: isPostJobNoteMutationSuccess,
+  } = usePostJobNoteMutation({
     onUploadProgress: (axiosProgressEvent) => {
       setPostJobNoteProgress({
         value: (axiosProgressEvent?.progress ?? 0) * 100,
@@ -82,6 +85,8 @@ export default function JobNoteResultDialog({
           jobNotesFolderId: jobNoteFolderId ?? "",
         })
           .catch((error: AxiosError<FileServerErrorResponseData>) => {
+            setPostJobNoteFilesProgress({ value: 100, error: true });
+
             toast({
               title: error.message,
               variant: "destructive",
@@ -96,16 +101,6 @@ export default function JobNoteResultDialog({
       .catch((error: AxiosError<ErrorResponseData>) => {
         setPostJobNoteProgress({ value: 100, error: true });
         setPostJobNoteFilesProgress({ value: 100, error: true });
-
-        switch (error.request.status) {
-          case 0:
-            toast({
-              title:
-                "When sending mail, the maximum file size is currently set to 1 MB, but we plan to modify this to allow up to 10 files with a maximum size of 25 MB.",
-              variant: "destructive",
-            });
-            return;
-        }
 
         if (
           error.response &&
@@ -160,9 +155,11 @@ export default function JobNoteResultDialog({
               )}
             >
               {postJobNoteProgress.value !== 100
-                ? "Please wait for the email to be sent..."
+                ? "Preparing to send email..."
                 : postJobNoteProgress.error
                 ? "Failed to send email"
+                : !isPostJobNoteMutationSuccess
+                ? "Please wait for the email to be sent... It may take up to 3 minutes"
                 : "Completed to send email"}
             </p>
           </div>

@@ -48,10 +48,11 @@ const formSchema = z.object({
       return;
     }
 
-    if (files.some((file) => file.size > 25000000)) {
+    const totalSize = files.reduce((prev, cur) => prev + cur.size, 0);
+    if (totalSize > 25000000) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Each file must not exceed 25 MB in size",
+        message: "The total size should not exceed 25MB",
       });
       return;
     }
@@ -189,9 +190,8 @@ export default function JobNoteForm({ job }: Props) {
                   />
                 </FormControl>
                 <FormDescription>
-                  When sending mail, the maximum file size is currently set to 1
-                  MB, but we plan to modify this to allow up to 10 files with a
-                  maximum size of 25 MB
+                  You can select up to 10 files, and the total size should not
+                  exceed 25MB
                 </FormDescription>
                 <FormMessage />
               </FormItem>
