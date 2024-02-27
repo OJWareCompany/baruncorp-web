@@ -44,7 +44,7 @@ export default function SearchHeader({
           size={"sm"}
           variant={"ghost"}
           className={cn(
-            "-ml-3 focus-visible:ring-0 whitespace-nowrap",
+            "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
             isFiltered && "underline decoration-2 underline-offset-2"
           )}
         >
