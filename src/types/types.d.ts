@@ -12,4 +12,5 @@ interface FileServerErrorResponseData {
   errorCode: string;
 }
 
-type PageType = "HOME" | "WORKSPACE" | "SYSTEM_MANAGEMENT";
+type InvoiceDetailPageType = "INVOICES" | "SYSTEM_MANAGEMENT";
+type JobDetailPageType = "HOME" | "WORKSPACE" | "SYSTEM_MANAGEMENT";

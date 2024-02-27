@@ -1,22 +1,23 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { CreateCreditTransactionRequestDto, IdResponse } from "@/api/api-spec";
 
-const usePostCreditPaymentMutation = () => {
+const usePatchClientCreditPaymentCancelMutation = () => {
   const api = useApi();
 
   return useMutation<
-    IdResponse,
+    void,
     AxiosError<ErrorResponseData>,
-    CreateCreditTransactionRequestDto
+    {
+      creditTransactionId: string;
+    }
   >({
     mutationFn: (reqData) => {
       return api.creditTransactions
-        .createCreditTransactionHttpControllerPost(reqData)
+        .cancelCreditTransactionHttpControllerPatch(reqData.creditTransactionId)
         .then(({ data: resData }) => resData);
     },
   });
 };
 
-export default usePostCreditPaymentMutation;
+export default usePatchClientCreditPaymentCancelMutation;

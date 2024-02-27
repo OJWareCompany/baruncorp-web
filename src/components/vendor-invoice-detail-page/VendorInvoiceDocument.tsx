@@ -1,15 +1,24 @@
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  Document,
+  StyleSheet,
+  Font,
+} from "@react-pdf/renderer";
 import { format } from "date-fns";
 import {
-  InvoiceResponseDto,
   OrganizationResponseDto,
-  ServicePaginatedResponseDto,
+  VendorInvoiceLineItemResponse,
+  VendorInvoiceResponseDto,
 } from "@/api/api-spec";
 
+Font.registerHyphenationCallback((word) => [word]);
+
 interface Props {
-  clientInvoice: InvoiceResponseDto;
+  vendorInvoice: VendorInvoiceResponseDto;
+  lineItems: VendorInvoiceLineItemResponse[];
   organization: OrganizationResponseDto;
-  services: ServicePaginatedResponseDto;
 }
 
 const styles = StyleSheet.create({
@@ -27,10 +36,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function InvoiceDocument({
-  clientInvoice,
+export default function VendorInvoiceDocument({
+  vendorInvoice,
+  lineItems,
   organization,
-  services,
 }: Props) {
   return (
     <Document>
@@ -53,7 +62,7 @@ export default function InvoiceDocument({
               textAlign: "center",
             }}
           >
-            INVOICE
+            VENDOR INVOICE
           </Text>
         </View>
         <View style={{ alignItems: "flex-end", marginBottom: 32 }}>
@@ -61,13 +70,15 @@ export default function InvoiceDocument({
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Invoice Date: </Text>
               <Text>
-                {format(new Date(clientInvoice.invoiceDate), "MM-dd-yyyy")}
+                {format(new Date(vendorInvoice.invoiceDate), "MM-dd-yyyy")}
               </Text>
             </View>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Due Date: </Text>
               <Text>
-                {format(new Date(clientInvoice.dueDate), "MM-dd-yyyy")}
+                {vendorInvoice.dueDate
+                  ? format(new Date(vendorInvoice.dueDate), "MM-dd-yyyy")
+                  : "-"}
               </Text>
             </View>
           </View>
@@ -81,71 +92,40 @@ export default function InvoiceDocument({
             <Text>{organization.invoiceRecipientEmail}</Text>
           )}
         </View>
-        <View style={{ marginBottom: 32 }}>
-          <Text style={[styles.bold, { textAlign: "center", marginBottom: 8 }]}>
-            Billing Code Legend
-          </Text>
-          <View
-            style={{
-              flexWrap: "wrap",
-              flexDirection: "row",
-              fontSize: 10,
-            }}
-          >
-            {services.items.map((value) => (
-              <View
-                key={value.billingCode}
-                style={{ flexBasis: "33%", flexDirection: "row" }}
-              >
-                <Text style={[styles.bold, { flexBasis: 20 }]}>
-                  {value.billingCode}
-                </Text>
-                <Text>{value.name}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
         <View style={{ fontSize: 8, marginBottom: 32 }}>
           <View
             style={[styles.tableRow, styles.bold, { borderColor: "#020817" }]}
           >
             <Text style={[styles.tableCell, { flexBasis: 20 }]}>#</Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}>Description</Text>
-            <Text style={[styles.tableCell, { flexBasis: 65 }]}>
-              Property Type
-            </Text>
-            <Text style={[styles.tableCell, { flexBasis: 70 }]}>
-              Billing Codes
-            </Text>
-            <Text style={[styles.tableCell, { flexBasis: 40 }]}>Price</Text>
+            <Text style={[styles.tableCell, { flexBasis: 60 }]}>User</Text>
+            <Text style={[styles.tableCell, { flex: 1 }]}>Job</Text>
+            <Text style={[styles.tableCell, { flexBasis: 100 }]}>Task</Text>
+            <Text style={[styles.tableCell, { flexBasis: 50 }]}>Cost</Text>
             <Text style={[styles.tableCell, { flexBasis: 60 }]}>
               Date{"         "} Completed {"  "} /Canceled
             </Text>
           </View>
-          {clientInvoice.lineItems.map((value, index) => (
+          {lineItems.map((value, index) => (
             <View key={index} style={styles.tableRow}>
               <Text style={[styles.tableCell, { flexBasis: 20 }]}>
                 {index + 1}
               </Text>
+              <Text style={[styles.tableCell, { flexBasis: 60 }]}>
+                {value.assigneeName}
+              </Text>
               <Text style={[styles.tableCell, { flex: 1 }]}>
-                {value.jobName}
+                {value.jobDescription}
               </Text>
-              <Text style={[styles.tableCell, { flexBasis: 65 }]}>
-                {value.projectPropertyType}
+              <Text style={[styles.tableCell, { flexBasis: 100 }]}>
+                {value.taskName}
               </Text>
-              <Text style={[styles.tableCell, { flexBasis: 70 }]}>
-                {value.billingCodes.map((value) => `(${value})`).join(" ")}
-              </Text>
-              <Text style={[styles.tableCell, { flexBasis: 40 }]}>
-                ${value.price}
+              <Text style={[styles.tableCell, { flexBasis: 50 }]}>
+                ${value.taskExpenseTotal}
               </Text>
               <Text style={[styles.tableCell, { flexBasis: 60 }]}>
-                {value.completedCancelledDate == null
+                {value.doneAt == null
                   ? "-"
-                  : format(
-                      new Date(value.completedCancelledDate),
-                      "MM-dd-yyyy"
-                    )}
+                  : format(new Date(value.doneAt), "MM-dd-yyyy")}
               </Text>
             </View>
           ))}
@@ -169,7 +149,7 @@ export default function InvoiceDocument({
               <Text style={[styles.bold, { lineHeight: 1 }]}>Notes</Text>
             </View>
             <View style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
-              <Text>{clientInvoice.notesToClient ?? "-"}</Text>
+              <Text>{vendorInvoice.note ?? "-"}</Text>
             </View>
           </View>
           <View style={{ flex: 1 }}>
@@ -177,19 +157,19 @@ export default function InvoiceDocument({
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text>Subtotal</Text>
-              <Text>${clientInvoice.subtotal}</Text>
-            </View>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              <Text>Discount</Text>
-              <Text>${clientInvoice.discount}</Text>
+              <Text>${vendorInvoice.subTotal}</Text>
             </View>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text>Total</Text>
-              <Text>${clientInvoice.total}</Text>
+              <Text>${vendorInvoice.total}</Text>
+            </View>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <Text>Total Difference</Text>
+              <Text>${vendorInvoice.invoiceTotalDifference}</Text>
             </View>
           </View>
         </View>

@@ -139,6 +139,10 @@ export default function NewProjectSheet({
   ]);
 
   async function onSubmit(values: FieldValues) {
+    toast({
+      title: "Please wait a minute",
+      description: "Creating related folders in Google Drive",
+    });
     await usePostProjectMutationResult
       .mutateAsync({
         clientOrganizationId: organizationId,
@@ -162,6 +166,9 @@ export default function NewProjectSheet({
         utilityId: values.utilityId === "" ? undefined : values.utilityId,
       })
       .then(async ({ id }) => {
+        toast({
+          title: "Success",
+        });
         dialogProps.onOpenChange?.(false);
         onProjectIdChange(id);
         queryClient.invalidateQueries({

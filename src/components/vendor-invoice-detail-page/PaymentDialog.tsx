@@ -4,7 +4,6 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
@@ -37,11 +36,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import usePostDirectPaymentMutation from "@/mutations/usePostDirectPaymentMutation";
+import usePostVendorDirectPaymentMutation from "@/mutations/usePostVendorDirectPaymentMutation";
 import { AffixInput } from "@/components/AffixInput";
-import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
-import usePostCreditPaymentMutation from "@/mutations/usePostCreditPaymentMutation";
+import usePostVendorCreditPaymentMutation from "@/mutations/usePostVendorCreditPaymentMutation";
+import { VendorInvoiceResponseDto } from "@/api/api-spec";
+import { getVendorInvoiceQueryKey } from "@/queries/useVendorInvoiceQuery";
 
 const formSchema = z
   .object({
@@ -65,11 +65,10 @@ const formSchema = z
 type FieldValues = z.infer<typeof formSchema>;
 
 interface Props {
-  organizationId: string;
+  vendorInvoice: VendorInvoiceResponseDto;
 }
 
-export default function PaymentDialog({ organizationId }: Props) {
-  const { clientInvoiceId } = useParams() as { clientInvoiceId: string };
+export default function PaymentDialog({ vendorInvoice }: Props) {
   const [open, setOpen] = useState(false);
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -80,30 +79,32 @@ export default function PaymentDialog({ organizationId }: Props) {
     },
   });
   const {
-    isSuccess: isPostDirectPaymentMutationSuccess,
-    mutateAsync: postDirectPaymentMutateAsync,
-    reset: resetPostDirectPaymentMutation,
-  } = usePostDirectPaymentMutation();
+    isSuccess: isPostVendorDirectPaymentMutationSuccess,
+    mutateAsync: postVendorDirectPaymentMutateAsync,
+    reset: resetPostVendorDirectPaymentMutation,
+  } = usePostVendorDirectPaymentMutation();
   const {
-    isSuccess: isPostCreditPaymentMutationSuccess,
-    mutateAsync: postCreditPaymentMutateAsync,
-    reset: resetPostCreditPaymentMutation,
-  } = usePostCreditPaymentMutation();
+    isSuccess: isPostVendorCreditPaymentMutationSuccess,
+    mutateAsync: postVendorCreditPaymentMutateAsync,
+    reset: resetPostVendorCreditPaymentMutation,
+  } = usePostVendorCreditPaymentMutation();
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
-      (isPostDirectPaymentMutationSuccess || isPostCreditPaymentMutationSuccess)
+      (isPostVendorDirectPaymentMutationSuccess ||
+        isPostVendorCreditPaymentMutationSuccess)
     ) {
       form.reset();
     }
   }, [
     form,
     form.formState.isSubmitSuccessful,
-    isPostCreditPaymentMutationSuccess,
-    isPostDirectPaymentMutationSuccess,
+    isPostVendorCreditPaymentMutationSuccess,
+    isPostVendorDirectPaymentMutationSuccess,
   ]);
 
   useEffect(() => {
@@ -111,31 +112,34 @@ export default function PaymentDialog({ organizationId }: Props) {
     // 일반적으로는 이 useEffect가 필요하지 않다. form을 submit할 때 하나의 request로 처리를 하기 때문에 그 mutation의 isSuccess state는 계속 업데이트될 것이기 때문에 위의 useEffect가 잘 동작한다.
     // 그런데 이 form을 submit할 때는 경우에 따라 두 개의 request로 처리를 하기 때문에 state를 초기화해주지 않으면 원하지 않는 상황에서 위의 useEffect가 동작하게 된다.
     if (!open) {
-      resetPostDirectPaymentMutation();
-      resetPostCreditPaymentMutation();
+      resetPostVendorDirectPaymentMutation();
+      resetPostVendorCreditPaymentMutation();
     }
-  }, [open, resetPostCreditPaymentMutation, resetPostDirectPaymentMutation]);
+  }, [
+    open,
+    resetPostVendorCreditPaymentMutation,
+    resetPostVendorDirectPaymentMutation,
+  ]);
 
   async function onSubmit(values: FieldValues) {
-    if (values.paymentMethod === "Credit") {
-      await postCreditPaymentMutateAsync({
+    if (values.paymentMethod === "Direct") {
+      await postVendorDirectPaymentMutateAsync({
         amount: Number(values.amount),
-        creditTransactionType: "Deduction",
-        clientOrganizationId: organizationId,
-        relatedInvoiceId: clientInvoiceId,
-        note: transformStringIntoNullableString.parse(values.notes),
+        notes: transformStringIntoNullableString.parse(values.notes),
+        paymentMethod: "Direct",
+        vendorInvoiceId: vendorInvoice.id,
       })
         .then(() => {
           setOpen(false);
           queryClient.invalidateQueries({
-            queryKey: getClientInvoiceQueryKey(clientInvoiceId),
+            queryKey: getVendorInvoiceQueryKey(vendorInvoice.id),
           });
           toast({ title: "Success" });
         })
         .catch((error: AxiosError<ErrorResponseData>) => {
           switch (error.response?.status) {
             case 400:
-              if (error.response?.data.errorCode.includes("70200")) {
+              if (error.response?.data.errorCode.includes("70300")) {
                 form.setError(
                   "amount",
                   {
@@ -145,33 +149,7 @@ export default function PaymentDialog({ organizationId }: Props) {
                 );
                 return;
               }
-
-              if (error.response?.data.errorCode.includes("70203")) {
-                form.setError(
-                  "amount",
-                  {
-                    message: `Amount should be greater than 0`,
-                  },
-                  { shouldFocus: true }
-                );
-                return;
-              }
-            case 422:
-              if (error.response?.data.errorCode.includes("50402")) {
-                const requiredCreditAmount = error.response.data.message
-                  .split("(")[1]
-                  .slice(0, -1);
-                const currentCreditAmount =
-                  Number(values.amount) - Number(requiredCreditAmount);
-                toast({
-                  title: `Not enough credit`,
-                  description: `Current credit amount: ${currentCreditAmount}`,
-                  variant: "destructive",
-                });
-                return;
-              }
           }
-
           if (
             error.response &&
             error.response.data.errorCode.filter((value) => value != null)
@@ -187,17 +165,18 @@ export default function PaymentDialog({ organizationId }: Props) {
       return;
     }
 
-    if (values.paymentMethod === "Direct") {
-      await postDirectPaymentMutateAsync({
+    if (values.paymentMethod === "Credit") {
+      await postVendorCreditPaymentMutateAsync({
         amount: Number(values.amount),
-        notes: transformStringIntoNullableString.parse(values.notes),
-        paymentMethod: "Direct",
-        invoiceId: clientInvoiceId,
+        creditTransactionType: "Deduction",
+        clientOrganizationId: vendorInvoice.organizationId,
+        relatedInvoiceId: vendorInvoice.id,
+        note: transformStringIntoNullableString.parse(values.notes),
       })
         .then(() => {
           setOpen(false);
           queryClient.invalidateQueries({
-            queryKey: getClientInvoiceQueryKey(clientInvoiceId),
+            queryKey: getVendorInvoiceQueryKey(vendorInvoice.id),
           });
           toast({ title: "Success" });
         })
@@ -214,15 +193,18 @@ export default function PaymentDialog({ organizationId }: Props) {
                 );
                 return;
               }
-
-              if (error.response?.data.errorCode.includes("70203")) {
-                form.setError(
-                  "amount",
-                  {
-                    message: `Amount should be greater than 0`,
-                  },
-                  { shouldFocus: true }
-                );
+            case 422:
+              if (error.response?.data.errorCode.includes("50432")) {
+                const requiredCreditAmount = error.response.data.message
+                  .split("(")[1]
+                  .slice(0, -1);
+                const currentCreditAmount =
+                  Number(values.amount) - Number(requiredCreditAmount);
+                toast({
+                  title: `Not enough credit`,
+                  description: `Current credit amount: $${currentCreditAmount}`,
+                  variant: "destructive",
+                });
                 return;
               }
           }

@@ -1,5 +1,4 @@
 "use client";
-import { useSession } from "next-auth/react";
 import ProjectForm from "../common/ProjectForm";
 import JobsRelatedToProjectTable from "../common/JobsRelatedToProjectTable";
 import PageHeaderAction from "./PageHeaderAction";
@@ -14,7 +13,7 @@ function getPageHeader({
   pageType,
   project,
 }: {
-  pageType: PageType;
+  pageType: JobDetailPageType;
   project: ProjectResponseDto;
 }) {
   switch (pageType) {
@@ -62,7 +61,7 @@ function getPageHeader({
 
 interface Props {
   projectId: string;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function ProjectDetailPage({ projectId, pageType }: Props) {
@@ -72,17 +71,6 @@ export default function ProjectDetailPage({ projectId, pageType }: Props) {
     error: projectQueryError,
   } = useProjectQuery(projectId);
   useNotFound(projectQueryError);
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
-  const isHome = pageType === "HOME";
-
-  /**
-   * 바른코프 멤버 ✅
-   * 바른코프 멤버아닌데, 홈 ❌
-   * 바른코프 멤버아닌데, 워크스페이스 ✅
-   */
-  const isWorker = isBarunCorpMember || !isHome;
 
   if (isProjectQueryLoading || project == null) {
     return <PageLoading />;

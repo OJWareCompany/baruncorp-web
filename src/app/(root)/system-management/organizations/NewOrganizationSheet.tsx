@@ -158,6 +158,10 @@ export default function NewOrganizationSheet() {
   ]);
 
   async function onSubmit(values: FieldValues) {
+    toast({
+      title: "Please wait a minute",
+      description: "Creating related folders in Google Drive",
+    });
     await usePostOrganizationMutationResult
       .mutateAsync({
         address: {

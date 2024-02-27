@@ -14,7 +14,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { format } from "date-fns";
 import {
   Table,
@@ -37,23 +37,77 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useVendorInvoicesQuery from "@/queries/useVendorInvoicesQuery";
-import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { formatInEST } from "@/lib/utils";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
+const TABLE_NAME = "VendorInvoices";
+
 const columnHelper =
   createColumnHelper<VendorInvoicePaginatedResponseDto["items"][number]>();
 
-export default function VendorInvoicesTable() {
+const columns = [
+  columnHelper.accessor("serviceMonth", {
+    header: "Service Period Month",
+    cell: ({ getValue }) =>
+      format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+  }),
+  columnHelper.accessor("invoiceDate", {
+    header: "Invoice Date",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+  columnHelper.accessor("terms", {
+    header: "Terms",
+  }),
+  columnHelper.accessor("dueDate", {
+    header: "Due Date",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return formatInEST(value);
+    },
+  }),
+  columnHelper.accessor((row) => `$${row.subTotal}`, {
+    header: "Subtotal",
+  }),
+  columnHelper.accessor((row) => `$${row.total}`, {
+    header: "Total",
+  }),
+  columnHelper.accessor((row) => `$${row.invoiceTotalDifference}`, {
+    header: "Total Difference",
+  }),
+  columnHelper.accessor("note", {
+    header: "Notes",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return <InvoiceNotesHoverCard value={value} />;
+    },
+  }),
+  columnHelper.accessor("createdAt", {
+    header: "Date Created",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+];
+
+interface Props {
+  organizationId: string;
+}
+
+export default function VendorInvoicesTable({ organizationId }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [syncedParams, setSyncedParams] =
-    useState<FindVendorInvoicePaginatedHttpControllerGetParams>();
 
-  const orgNameSearchParamName = `OrgName`;
-  const pageIndexSearchParamName = `PageIndex`;
-  const pageSizeSearchParamName = `PageSize`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
@@ -62,8 +116,6 @@ export default function VendorInvoicesTable() {
       ? Number(searchParams.get(pageSizeSearchParamName))
       : 10,
   };
-  const orgNameSearchParam =
-    searchParams.get(encodeURIComponent(orgNameSearchParamName)) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -75,91 +127,12 @@ export default function VendorInvoicesTable() {
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      organizationName: orgNameSearchParam,
+      organizationId,
     }),
-    [orgNameSearchParam, pagination.pageIndex, pagination.pageSize]
+    [organizationId, pagination.pageIndex, pagination.pageSize]
   );
 
-  const { data, isLoading, isFetching } = useVendorInvoicesQuery(params, true);
-
-  useEffect(() => {
-    if (!isFetching) {
-      setSyncedParams(params);
-    }
-  }, [isFetching, params]);
-
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("organizationName", {
-        header: () => (
-          <SearchHeader
-            buttonText="Organization"
-            searchParamName={orgNameSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null &&
-              params.organizationName !== syncedParams.organizationName
-            }
-          />
-        ),
-      }),
-      columnHelper.accessor("serviceMonth", {
-        header: "Service Period Month",
-        cell: ({ getValue }) =>
-          format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
-      }),
-      columnHelper.accessor("invoiceDate", {
-        header: "Invoice Date",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-      columnHelper.accessor("terms", {
-        header: "Terms",
-      }),
-      columnHelper.accessor("dueDate", {
-        header: "Due Date",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor((row) => `$${row.subTotal}`, {
-        header: "Subtotal",
-      }),
-      columnHelper.accessor((row) => `$${row.total}`, {
-        header: "Total",
-      }),
-      columnHelper.accessor((row) => `$${row.invoiceTotalDifference}`, {
-        header: "Total Difference",
-      }),
-      columnHelper.accessor("note", {
-        header: "Notes",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return <InvoiceNotesHoverCard value={value} />;
-        },
-      }),
-      columnHelper.accessor("createdAt", {
-        header: "Date Created",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-    ],
-    [
-      orgNameSearchParamName,
-      pageIndexSearchParamName,
-      params.organizationName,
-      syncedParams,
-    ]
-  );
+  const { data, isLoading } = useVendorInvoicesQuery(params, true);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -218,7 +191,7 @@ export default function VendorInvoicesTable() {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
-                    router.push(`/system-management/vendor-invoices/${row.id}`);
+                    router.push(`/invoices/vendor/${row.id}`);
                   }}
                   className="cursor-pointer"
                 >

@@ -49,7 +49,6 @@ const formSchema = z.object({
     }
 
     if (files.some((file) => file.size > 25000000)) {
-      // TODO: 25mb의 기준이 25000000인지 26214400인지 확인 필요
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Each file must not exceed 25 MB in size",
@@ -82,7 +81,7 @@ export default function JobNoteForm({ job }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const editorRef = useRef<PlateEditor<Value>>(null);
-  const [isResultDialogSuccess, setIsResultDialogSuccess] = useState(false);
+  const [toggleState, setToggleState] = useState(false);
 
   useEffect(() => {
     if (
@@ -90,6 +89,7 @@ export default function JobNoteForm({ job }: Props) {
       usePostJobNoteMutationResult.isSuccess
     ) {
       form.reset();
+      setToggleState((prev) => !prev);
     }
   }, [
     form,
@@ -122,7 +122,6 @@ export default function JobNoteForm({ job }: Props) {
     if (values.files.length !== 0) {
       // file 있는 경우
       setDialogState({ open: true, requestData });
-      setIsResultDialogSuccess(false);
       return;
     } else {
       // file 없는 경우
@@ -154,7 +153,7 @@ export default function JobNoteForm({ job }: Props) {
 
   const handleResultDialogSuccess = useCallback(() => {
     form.reset();
-    setIsResultDialogSuccess(true);
+    setToggleState((prev) => !prev);
   }, [form]);
 
   return (
@@ -171,11 +170,7 @@ export default function JobNoteForm({ job }: Props) {
                   <MentionEditor
                     {...field}
                     editorRef={editorRef}
-                    key={String(
-                      (form.formState.isSubmitSuccessful &&
-                        usePostJobNoteMutationResult.isSuccess) ||
-                        isResultDialogSuccess
-                    )}
+                    key={String(toggleState)}
                   />
                 </FormControl>
                 <FormMessage />

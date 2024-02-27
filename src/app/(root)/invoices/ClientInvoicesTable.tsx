@@ -45,8 +45,8 @@ import {
   transformInvoiceStatusEnumWithEmptyStringIntoNullableInvoiceStatusEnum,
 } from "@/lib/constants";
 import EnumHeader from "@/components/table/EnumHeader";
-import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -71,7 +71,6 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindInvoicePaginatedHttpControllerGetParams>();
 
-  const orgNameSearchParamName = `${TABLE_NAME}${type}OrgName`;
   const invoiceStatusSearchParamName = `${TABLE_NAME}${type}InvoiceStatus`;
   const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
   const pageSizeSearchParamName = `${TABLE_NAME}${type}PageSize`;
@@ -84,8 +83,6 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
       ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
-  const orgNameSearchParam =
-    searchParams.get(encodeURIComponent(orgNameSearchParamName)) ?? "";
   const invoiceStatusSearchParamParseResult = StatusEnum.safeParse(
     searchParams.get(encodeURIComponent(invoiceStatusSearchParamName))
   );
@@ -109,12 +106,10 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
         transformInvoiceStatusEnumWithEmptyStringIntoNullableInvoiceStatusEnum.parse(
           invoiceStatusSearchParam
         ),
-      organizationName: orgNameSearchParam,
       clientOrganizationId: organizationId,
     }),
     [
       invoiceStatusSearchParam,
-      orgNameSearchParam,
       organizationId,
       pagination.pageIndex,
       pagination.pageSize,
@@ -131,19 +126,6 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("clientOrganization.name", {
-        header: () => (
-          <SearchHeader
-            buttonText="Organization"
-            searchParamName={orgNameSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null &&
-              params.organizationName !== syncedParams.organizationName
-            }
-          />
-        ),
-      }),
       columnHelper.accessor("servicePeriodDate", {
         header: "Service Period Month",
         cell: ({ getValue }) =>
@@ -155,11 +137,11 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
             buttonText="Status"
             searchParamName={invoiceStatusSearchParamName}
             pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={StatusEnum}
+            zodEnum={InvoiceStatusEnum}
+            defaultValue={type === "All" ? null : type}
             isLoading={
               syncedParams != null && params.status !== syncedParams.status
             }
-            defaultValue={type === "All" ? null : type}
           />
         ),
         cell: ({ getValue }) => {
@@ -185,9 +167,6 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
         header: "Due Date",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
-      columnHelper.accessor("notesToClient", {
-        header: "Notes to Client",
-      }),
       columnHelper.accessor((row) => `$${row.subtotal}`, {
         header: "Subtotal",
       }),
@@ -197,6 +176,18 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
       columnHelper.accessor((row) => `$${row.total}`, {
         header: "Total",
       }),
+      columnHelper.accessor("notesToClient", {
+        header: "Notes",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <InvoiceNotesHoverCard value={value} />;
+        },
+      }),
       columnHelper.accessor("createdAt", {
         header: "Date Created",
         cell: ({ getValue }) => formatInEST(getValue()),
@@ -204,9 +195,7 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
     ],
     [
       invoiceStatusSearchParamName,
-      orgNameSearchParamName,
       pageIndexSearchParamName,
-      params.organizationName,
       params.status,
       syncedParams,
       type,

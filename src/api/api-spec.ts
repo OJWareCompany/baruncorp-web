@@ -410,6 +410,7 @@ export interface AssignedTaskResponseDto {
   orderedServiceId: string;
   serviceName: string;
   jobId: string;
+  jobDescription: string | null;
   /** @default "Not Started" */
   status: "Not Started" | "In Progress" | "On Hold" | "Canceled" | "Completed";
   description: string | null;
@@ -2314,7 +2315,8 @@ export interface VendorInvoiceResponseDto {
   invoiceTotalDifference: number;
   /** @default "" */
   internalTotalBalanceDue: number | null;
-  vendorPayments: VendorInvoicePayment;
+  internalTotalPayment: number;
+  vendorPayments: VendorInvoicePayment[];
   /** @default "" */
   createdAt: string;
   /** @default "" */
@@ -2352,11 +2354,15 @@ export interface VendorInvoiceLineItemResponse {
   assigneeOrganizationName: string;
   clientOrganizationId: string;
   clientOrganizationName: string;
+  taskName: string;
+  jobId: string;
   projectId: string;
   projectNumber: string | null;
   jobDescription: string | null;
   propertyOwnerName: string | null;
   serviceName: string;
+  serviceId: string;
+  orderedServiceId: string;
   serviceDescription: string | null;
   taskExpenseTotal: number;
   isRevision: boolean;

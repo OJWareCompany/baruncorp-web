@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 
-const usePatchPaymentCreditCancelMutation = () => {
+const usePatchVendorCreditPaymentCancelMutation = () => {
   const api = useApi();
 
   return useMutation<
@@ -13,11 +13,13 @@ const usePatchPaymentCreditCancelMutation = () => {
     }
   >({
     mutationFn: (reqData) => {
-      return api.creditTransactions
-        .cancelCreditTransactionHttpControllerPatch(reqData.creditTransactionId)
+      return api.vendorCreditTransactions
+        .cancelVendorCreditTransactionHttpControllerPatch(
+          reqData.creditTransactionId
+        )
         .then(({ data: resData }) => resData);
     },
   });
 };
 
-export default usePatchPaymentCreditCancelMutation;
+export default usePatchVendorCreditPaymentCancelMutation;

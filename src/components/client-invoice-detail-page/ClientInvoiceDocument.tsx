@@ -1,10 +1,19 @@
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  Document,
+  StyleSheet,
+  Font,
+} from "@react-pdf/renderer";
 import { format } from "date-fns";
 import {
   InvoiceResponseDto,
   OrganizationResponseDto,
   ServicePaginatedResponseDto,
 } from "@/api/api-spec";
+
+Font.registerHyphenationCallback((word) => [word]);
 
 interface Props {
   clientInvoice: InvoiceResponseDto;
@@ -27,7 +36,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function InvoiceDocument({
+export default function ClientInvoiceDocument({
   clientInvoice,
   organization,
   services,
@@ -53,7 +62,7 @@ export default function InvoiceDocument({
               textAlign: "center",
             }}
           >
-            INVOICE
+            CLIENT INVOICE
           </Text>
         </View>
         <View style={{ alignItems: "flex-end", marginBottom: 32 }}>
@@ -117,7 +126,7 @@ export default function InvoiceDocument({
             <Text style={[styles.tableCell, { flexBasis: 70 }]}>
               Billing Codes
             </Text>
-            <Text style={[styles.tableCell, { flexBasis: 40 }]}>Price</Text>
+            <Text style={[styles.tableCell, { flexBasis: 50 }]}>Price</Text>
             <Text style={[styles.tableCell, { flexBasis: 60 }]}>
               Date{"         "} Completed {"  "} /Canceled
             </Text>
@@ -136,7 +145,7 @@ export default function InvoiceDocument({
               <Text style={[styles.tableCell, { flexBasis: 70 }]}>
                 {value.billingCodes.map((value) => `(${value})`).join(" ")}
               </Text>
-              <Text style={[styles.tableCell, { flexBasis: 40 }]}>
+              <Text style={[styles.tableCell, { flexBasis: 50 }]}>
                 ${value.price}
               </Text>
               <Text style={[styles.tableCell, { flexBasis: 60 }]}>

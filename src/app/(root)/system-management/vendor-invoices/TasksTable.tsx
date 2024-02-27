@@ -15,6 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { VendorInvoiceLineItemPaginatedResponseDto } from "@/api/api-spec";
+import { Checkbox } from "@/components/ui/checkbox";
+import { formatInEST } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<
@@ -23,46 +25,54 @@ const columnHelper =
 
 const columns = [
   columnHelper.accessor("assigneeName", {
-    header: "assigneeName",
+    header: "User",
   }),
   columnHelper.accessor("clientOrganizationName", {
-    header: "clientOrganizationName",
-  }),
-  columnHelper.accessor("createdAt", {
-    header: "createdAt",
-  }),
-  columnHelper.accessor("doneAt", {
-    header: "doneAt",
-  }),
-  columnHelper.accessor("isRevision", {
-    header: "isRevision",
+    header: "Client Organization",
   }),
   columnHelper.accessor("jobDescription", {
-    header: "jobDescription",
-  }),
-  columnHelper.accessor("projectId", {
-    header: "projectId",
-  }),
-  columnHelper.accessor("projectNumber", {
-    header: "projectNumber",
-  }),
-  columnHelper.accessor("propertyOwnerName", {
-    header: "propertyOwnerName",
-  }),
-  columnHelper.accessor("serviceDescription", {
-    header: "serviceDescription",
+    header: "Job",
   }),
   columnHelper.accessor("serviceName", {
-    header: "serviceName",
+    header: "Scope",
   }),
-  columnHelper.accessor("taskExpenseTotal", {
-    header: "taskExpenseTotal",
+  columnHelper.accessor("taskName", {
+    header: "Task",
+    cell: ({ row, getValue }) => {
+      // TODO: replace with serviceId
+      if (row.original.serviceName === "Other") {
+        return row.original.serviceDescription;
+      }
+
+      return getValue();
+    },
   }),
-  columnHelper.accessor("taskId", {
-    header: "taskId",
+  columnHelper.accessor((row) => `$${row.taskExpenseTotal}`, {
+    header: "Expense Total",
   }),
-  columnHelper.accessor("vendorInvoiceId", {
-    header: "vendorInvoiceId",
+  columnHelper.accessor("isRevision", {
+    header: "Revision",
+    cell: ({ getValue }) => (
+      <div className="flex">
+        <Checkbox checked={getValue()} />
+      </div>
+    ),
+  }),
+  columnHelper.accessor("createdAt", {
+    header: "Date Created",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+  columnHelper.accessor("doneAt", {
+    header: "Date Done",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return formatInEST(value);
+    },
   }),
 ];
 

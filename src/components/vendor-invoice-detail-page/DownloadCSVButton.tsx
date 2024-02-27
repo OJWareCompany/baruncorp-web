@@ -2,24 +2,28 @@ import { format } from "date-fns";
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import { ArrowDownToLine } from "lucide-react";
 import { useMemo } from "react";
-import { getLineItemsTableExportDataFromLineItems } from "./JobsTable";
+import { getLineItemsTableExportDataFromLineItems } from "./TasksSection";
 import { Button } from "@/components/ui/button";
-import { InvoiceResponseDto } from "@/api/api-spec";
+import {
+  VendorInvoiceLineItemResponse,
+  VendorInvoiceResponseDto,
+} from "@/api/api-spec";
 
 interface Props {
-  clientInvoice: InvoiceResponseDto;
+  vendorInvoice: VendorInvoiceResponseDto;
+  lineItems: VendorInvoiceLineItemResponse[];
 }
 
-export default function DownloadCSVButton({ clientInvoice }: Props) {
+export default function DownloadCSVButton({ vendorInvoice, lineItems }: Props) {
   const csvConfig = useMemo(() => {
     return mkConfig({
       useKeysAsHeaders: true,
-      filename: `${clientInvoice.clientOrganization.name}, ${format(
-        new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
+      filename: `${vendorInvoice.organizationName}, ${format(
+        new Date(vendorInvoice.serviceMonth.slice(0, 7)),
         "MMM yyyy"
       )}`,
     });
-  }, [clientInvoice.clientOrganization.name, clientInvoice.servicePeriodDate]);
+  }, [vendorInvoice.organizationName, vendorInvoice.serviceMonth]);
 
   return (
     <Button
@@ -28,7 +32,7 @@ export default function DownloadCSVButton({ clientInvoice }: Props) {
       className="h-[28px] text-xs px-2"
       onClick={() => {
         const csv = generateCsv(csvConfig)(
-          getLineItemsTableExportDataFromLineItems(clientInvoice.lineItems)
+          getLineItemsTableExportDataFromLineItems(lineItems)
         );
         download(csvConfig)(csv);
       }}

@@ -196,11 +196,27 @@ export function getLineItemsTableExportDataFromLineItems(
   }));
 }
 
-interface Props {
-  clientInvoice: InvoiceResponseDto;
+function getJobDetailUrl({
+  pageType,
+  jobId,
+}: {
+  pageType: InvoiceDetailPageType;
+  jobId: string;
+}) {
+  switch (pageType) {
+    case "INVOICES":
+      return `/jobs/${jobId}`;
+    case "SYSTEM_MANAGEMENT":
+      return `/system-management/jobs/${jobId}`;
+  }
 }
 
-export default function JobsTable({ clientInvoice }: Props) {
+interface Props {
+  clientInvoice: InvoiceResponseDto;
+  pageType: InvoiceDetailPageType;
+}
+
+export default function JobsTable({ clientInvoice, pageType }: Props) {
   const router = useRouter();
   const table = useReactTable({
     data: clientInvoice.lineItems,
@@ -273,7 +289,7 @@ export default function JobsTable({ clientInvoice }: Props) {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
-                    router.push(`/system-management/jobs/${row.id}`);
+                    router.push(getJobDetailUrl({ jobId: row.id, pageType }));
                   }}
                   className="cursor-pointer"
                 >

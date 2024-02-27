@@ -1,22 +1,22 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
-import { IssueInvoiceRequestDto } from "@/api/api-spec";
+import { UpdateInvoiceRequestDto } from "@/api/api-spec";
 
-const usePatchInvoiceIssueMutation = (invoiceId: string) => {
+const usePatchClientInvoiceMutation = (invoiceId: string) => {
   const api = useApi();
 
   return useMutation<
     void,
     AxiosError<ErrorResponseData>,
-    IssueInvoiceRequestDto
+    UpdateInvoiceRequestDto
   >({
     mutationFn: (reqData) => {
       return api.invoices
-        .issueInvoiceHttpControllerPatch(invoiceId, reqData)
+        .updateInvoiceHttpControllerPatch(invoiceId, reqData)
         .then(({ data: resData }) => resData);
     },
   });
 };
 
-export default usePatchInvoiceIssueMutation;
+export default usePatchClientInvoiceMutation;

@@ -38,7 +38,7 @@ function getPageHeader({
   project,
   job,
 }: {
-  pageType: PageType;
+  pageType: JobDetailPageType;
   project: ProjectResponseDto;
   job: JobResponseDto;
 }) {
@@ -84,7 +84,7 @@ function getPageHeader({
 
 interface Props {
   jobId: string;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function JobDetailPage({ jobId, pageType }: Props) {

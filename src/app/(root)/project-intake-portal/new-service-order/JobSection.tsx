@@ -427,6 +427,11 @@ function JobSectionWithData({
   ]);
 
   async function onSubmit(values: FieldValues) {
+    toast({
+      title: "Please wait a minute",
+      description: "Creating related folders in Google Drive",
+    });
+
     const serviceIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[] = [];
     for (const service of values.services) {
       if (service.id === OTHER_SERVICE_ID) {

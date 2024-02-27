@@ -3,7 +3,7 @@ import { ArrowUp } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import InvoiceDocument from "./InvoiceDocument";
+import ClientInvoiceDocument from "./ClientInvoiceDocument";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import usePatchInvoiceIssueMutation from "@/mutations/usePatchInvoiceIssueMutation";
+import usePatchClientInvoiceIssueMutation from "@/mutations/usePatchClientInvoiceIssueMutation";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -37,7 +37,7 @@ export default function IssueButton({
   const [open, setOpen] = useState(false);
   const [instance] = usePDF({
     document: (
-      <InvoiceDocument
+      <ClientInvoiceDocument
         clientInvoice={clientInvoice}
         organization={organization}
         services={services}
@@ -47,9 +47,9 @@ export default function IssueButton({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const {
-    mutateAsync: patchInvoiceIssueMutateAsync,
-    isPending: isPatchInvoiceIssueMutationPending,
-  } = usePatchInvoiceIssueMutation(clientInvoice.id);
+    mutateAsync: patchClientInvoiceIssueMutateAsync,
+    isPending: isPatchClientInvoiceIssueMutationPending,
+  } = usePatchClientInvoiceIssueMutation(clientInvoice.id);
 
   return (
     <>
@@ -74,7 +74,7 @@ export default function IssueButton({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <LoadingButton
-              isLoading={isPatchInvoiceIssueMutationPending}
+              isLoading={isPatchClientInvoiceIssueMutationPending}
               onClick={() => {
                 const { blob } = instance;
                 if (blob == null) {
@@ -87,7 +87,7 @@ export default function IssueButton({
                   if (base64 == null || typeof base64 !== "string") {
                     return;
                   }
-                  patchInvoiceIssueMutateAsync({
+                  patchClientInvoiceIssueMutateAsync({
                     attachments: [
                       {
                         path: base64,

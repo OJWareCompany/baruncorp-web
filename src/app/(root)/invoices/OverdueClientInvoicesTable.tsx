@@ -15,7 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -39,11 +39,69 @@ import { Button } from "@/components/ui/button";
 import { formatInEST } from "@/lib/utils";
 import { invoiceStatuses } from "@/lib/constants";
 import useOverdueClientInvoicesQuery from "@/queries/useOverdueClientInvoicesQuery";
-import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
+
+const columns = [
+  columnHelper.accessor("servicePeriodDate", {
+    header: "Service Period Month",
+    cell: ({ getValue }) =>
+      format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+  }),
+  columnHelper.accessor("status", {
+    header: "Status",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      const status = invoiceStatuses[value];
+
+      return (
+        <div className={`flex items-center`}>
+          <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+          <span className="whitespace-nowrap">{status.value}</span>
+        </div>
+      );
+    },
+  }),
+  columnHelper.accessor("invoiceDate", {
+    header: "Invoice Date",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+  columnHelper.accessor("terms", {
+    header: "Terms",
+  }),
+  columnHelper.accessor("dueDate", {
+    header: "Due Date",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+  columnHelper.accessor((row) => `$${row.subtotal}`, {
+    header: "Subtotal",
+  }),
+  columnHelper.accessor((row) => `$${row.discount}`, {
+    header: "Discount",
+  }),
+  columnHelper.accessor((row) => `$${row.total}`, {
+    header: "Total",
+  }),
+  columnHelper.accessor("notesToClient", {
+    header: "Notes",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return <InvoiceNotesHoverCard value={value} />;
+    },
+  }),
+  columnHelper.accessor("createdAt", {
+    header: "Date Created",
+    cell: ({ getValue }) => formatInEST(getValue()),
+  }),
+];
 
 const TABLE_NAME = "OverdueClientInvoices";
 
@@ -54,10 +112,7 @@ interface Props {
 export default function OverdueClientInvoicesTable({ organizationId }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [syncedParams, setSyncedParams] =
-    useState<FindOverdueInvoicePaginatedHttpControllerGetParams>();
 
-  const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
   const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
@@ -69,8 +124,6 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
       ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
-  const orgNameSearchParam =
-    searchParams.get(encodeURIComponent(orgNameSearchParamName)) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -82,97 +135,12 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      organizationName: orgNameSearchParam,
       clientOrganizationId: organizationId,
     }),
-    [
-      orgNameSearchParam,
-      organizationId,
-      pagination.pageIndex,
-      pagination.pageSize,
-    ]
+    [organizationId, pagination.pageIndex, pagination.pageSize]
   );
 
-  const { data, isLoading, isFetching } = useOverdueClientInvoicesQuery(
-    params,
-    true
-  );
-
-  useEffect(() => {
-    if (!isFetching) {
-      setSyncedParams(params);
-    }
-  }, [isFetching, params]);
-
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("clientOrganization.name", {
-        header: () => (
-          <SearchHeader
-            buttonText="Organization"
-            searchParamName={orgNameSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            isLoading={
-              syncedParams != null &&
-              params.organizationName !== syncedParams.organizationName
-            }
-          />
-        ),
-      }),
-      columnHelper.accessor("servicePeriodDate", {
-        header: "Service Period Month",
-        cell: ({ getValue }) =>
-          format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
-      }),
-      columnHelper.accessor("status", {
-        header: "Status",
-        cell: ({ getValue }) => {
-          const value = getValue();
-          const status = invoiceStatuses[value];
-
-          return (
-            <div className={`flex items-center`}>
-              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-              <span className="whitespace-nowrap">{status.value}</span>
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor("invoiceDate", {
-        header: "Invoice Date",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-      columnHelper.accessor("terms", {
-        header: "Terms",
-      }),
-      columnHelper.accessor("dueDate", {
-        header: "Due Date",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-      columnHelper.accessor("notesToClient", {
-        header: "Notes to Client",
-      }),
-      columnHelper.accessor((row) => `$${row.subtotal}`, {
-        header: "Subtotal",
-      }),
-      columnHelper.accessor((row) => `$${row.discount}`, {
-        header: "Discount",
-      }),
-      columnHelper.accessor((row) => `$${row.total}`, {
-        header: "Total",
-      }),
-      columnHelper.accessor("createdAt", {
-        header: "Date Created",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-    ],
-    [
-      orgNameSearchParamName,
-      pageIndexSearchParamName,
-      params.organizationName,
-      syncedParams,
-    ]
-  );
+  const { data, isLoading } = useOverdueClientInvoicesQuery(params, true);
 
   const table = useReactTable({
     data: data?.items ?? [],

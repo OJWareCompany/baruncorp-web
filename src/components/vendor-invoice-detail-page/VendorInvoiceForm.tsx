@@ -6,6 +6,7 @@ import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useSession } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -14,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { InvoiceResponseDto } from "@/api/api-spec";
+import { VendorInvoiceResponseDto } from "@/api/api-spec";
 import {
   TermsEnum,
   transformNullishStringIntoString,
@@ -42,9 +43,9 @@ import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import usePatchInvoiceMutation from "@/mutations/usePatchInvoiceMutation";
-import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
+import usePatchVendorInvoiceMutation from "@/mutations/usePatchVendorInvoiceMutation";
+import { getVendorInvoiceQueryKey } from "@/queries/useVendorInvoiceQuery";
 
 const formSchema = z.object({
   organization: z
@@ -63,47 +64,50 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-function getFieldValues(clientInvoice: InvoiceResponseDto): FieldValues {
+function getFieldValues(vendorInvoice: VendorInvoiceResponseDto): FieldValues {
   return {
-    organization: clientInvoice.clientOrganization.name,
-    invoiceDate: new Date(clientInvoice.invoiceDate),
-    terms: String(clientInvoice.terms) as z.infer<typeof TermsEnum>,
-    servicePeriodMonth: clientInvoice.servicePeriodDate,
-    notes: transformNullishStringIntoString.parse(clientInvoice.notesToClient),
+    organization: vendorInvoice.organizationName,
+    invoiceDate: new Date(vendorInvoice.invoiceDate),
+    terms: String(vendorInvoice.terms) as z.infer<typeof TermsEnum>,
+    servicePeriodMonth: vendorInvoice.serviceMonth,
+    notes: transformNullishStringIntoString.parse(vendorInvoice.note),
   };
 }
 
 interface Props {
-  clientInvoice: InvoiceResponseDto;
+  vendorInvoice: VendorInvoiceResponseDto;
 }
 
-export default function ClientInvoiceForm({ clientInvoice }: Props) {
+export default function VendorInvoiceForm({ vendorInvoice }: Props) {
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: getFieldValues(clientInvoice),
+    defaultValues: getFieldValues(vendorInvoice),
   });
   const watchInvoiceDate = form.watch("invoiceDate");
   const watchTerms = form.watch("terms");
-  const { mutateAsync: patchInvoiceMutateAsync } = usePatchInvoiceMutation(
-    clientInvoice.id
-  );
-  const queryClient = useQueryClient();
+  const { mutateAsync: patchVendorInvoiceMutateAsync } =
+    usePatchVendorInvoiceMutation(vendorInvoice.id);
+  const queryVendor = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
-    form.reset(getFieldValues(clientInvoice));
-  }, [clientInvoice, form]);
+    form.reset(getFieldValues(vendorInvoice));
+  }, [vendorInvoice, form]);
 
   async function onSubmit(values: FieldValues) {
-    await patchInvoiceMutateAsync({
+    await patchVendorInvoiceMutateAsync({
       invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
-      notesToClient: transformStringIntoNullableString.parse(values.notes),
+      note: transformStringIntoNullableString.parse(values.notes),
       terms: Number(values.terms) as 21 | 30 | 60,
     })
       .then(() => {
         toast({ title: "Success" });
-        queryClient.invalidateQueries({
-          queryKey: getClientInvoiceQueryKey(clientInvoice.id),
+        queryVendor.invalidateQueries({
+          queryKey: getVendorInvoiceQueryKey(vendorInvoice.id),
         });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
@@ -174,6 +178,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                           "pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
+                        disabled={!isBarunCorpMember}
                       >
                         {field.value ? (
                           format(field.value, "MM-dd-yyyy")
@@ -210,7 +215,11 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
               <FormItem>
                 <FormLabel required>Terms</FormLabel>
                 <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={!isBarunCorpMember}
+                  >
                     <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder="Select a property type" />
                     </SelectTrigger>
@@ -247,20 +256,22 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea {...field} disabled={!isBarunCorpMember} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <LoadingButton
-          type="submit"
-          isLoading={form.formState.isSubmitting}
-          className="w-full"
-          disabled={!form.formState.isDirty}
-        >
-          Edit
-        </LoadingButton>
+        {isBarunCorpMember && (
+          <LoadingButton
+            type="submit"
+            isLoading={form.formState.isSubmitting}
+            className="w-full"
+            disabled={!form.formState.isDirty}
+          >
+            Edit
+          </LoadingButton>
+        )}
       </form>
     </Form>
   );

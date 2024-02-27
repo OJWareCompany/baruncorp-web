@@ -16,7 +16,7 @@ function getNotesUrl({
   noteType,
   jobId,
 }: {
-  pageType: PageType;
+  pageType: JobDetailPageType;
   noteType: "ahj-notes" | "client-notes" | "utility-notes";
   jobId: string;
 }) {
@@ -33,7 +33,7 @@ function getNotesUrl({
 interface Props {
   job: JobResponseDto;
   project: ProjectResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function PageHeaderAction({ job, project, pageType }: Props) {

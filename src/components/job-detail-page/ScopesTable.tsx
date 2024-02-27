@@ -70,7 +70,7 @@ const columnHelper = createColumnHelper<Data>();
 interface Props {
   job: JobResponseDto;
   project: ProjectResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function ScopesTable({ job, project, pageType }: Props) {

@@ -117,7 +117,7 @@ function getJobDetailUrl({
   pageType,
   jobId,
 }: {
-  pageType: PageType;
+  pageType: JobDetailPageType;
   jobId: string;
 }) {
   switch (pageType) {
@@ -132,7 +132,7 @@ function getJobDetailUrl({
 
 interface Props {
   project: ProjectResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function JobsRelatedToProjectTable({

@@ -60,7 +60,7 @@ import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 interface Props {
   project: ProjectResponseDto;
   job: JobResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function JobForm({ project, job, pageType }: Props) {

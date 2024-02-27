@@ -6,6 +6,7 @@ import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useSession } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -36,12 +37,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import LoadingButton from "@/components/LoadingButton";
 import { Textarea } from "@/components/ui/textarea";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import usePatchInvoiceMutation from "@/mutations/usePatchInvoiceMutation";
+import usePatchClientInvoiceMutation from "@/mutations/usePatchClientInvoiceMutation";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -57,22 +59,18 @@ const formSchema = z.object({
   servicePeriodMonth: z
     .string()
     .datetime({ message: "Service Period Month is required" }),
-  notesToClient: z.string().trim(),
+  notes: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
 
 function getFieldValues(clientInvoice: InvoiceResponseDto): FieldValues {
-  const currentDate = new Date();
-
   return {
     organization: clientInvoice.clientOrganization.name,
     invoiceDate: new Date(clientInvoice.invoiceDate),
     terms: String(clientInvoice.terms) as z.infer<typeof TermsEnum>,
     servicePeriodMonth: clientInvoice.servicePeriodDate,
-    notesToClient: transformNullishStringIntoString.parse(
-      clientInvoice.notesToClient
-    ),
+    notes: transformNullishStringIntoString.parse(clientInvoice.notesToClient),
   };
 }
 
@@ -81,15 +79,18 @@ interface Props {
 }
 
 export default function ClientInvoiceForm({ clientInvoice }: Props) {
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(clientInvoice),
   });
   const watchInvoiceDate = form.watch("invoiceDate");
   const watchTerms = form.watch("terms");
-  const { mutateAsync: patchInvoiceMutateAsync } = usePatchInvoiceMutation(
-    clientInvoice.id
-  );
+  const { mutateAsync: patchClientInvoiceMutateAsync } =
+    usePatchClientInvoiceMutation(clientInvoice.id);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -98,11 +99,9 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
   }, [clientInvoice, form]);
 
   async function onSubmit(values: FieldValues) {
-    await patchInvoiceMutateAsync({
+    await patchClientInvoiceMutateAsync({
       invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
-      notesToClient: transformStringIntoNullableString.parse(
-        values.notesToClient
-      ),
+      notesToClient: transformStringIntoNullableString.parse(values.notes),
       terms: Number(values.terms) as 21 | 30 | 60,
     })
       .then(() => {
@@ -179,7 +178,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                           "pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground"
                         )}
-                        disabled
+                        disabled={!isBarunCorpMember}
                       >
                         {field.value ? (
                           format(field.value, "MM-dd-yyyy")
@@ -219,7 +218,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled
+                    disabled={!isBarunCorpMember}
                   >
                     <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder="Select a property type" />
@@ -252,17 +251,27 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
         </RowItemsContainer>
         <FormField
           control={form.control}
-          name="notesToClient"
+          name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes to Client</FormLabel>
+              <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea {...field} disabled />
+                <Textarea {...field} disabled={!isBarunCorpMember} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        {isBarunCorpMember && (
+          <LoadingButton
+            type="submit"
+            isLoading={form.formState.isSubmitting}
+            className="w-full"
+            disabled={!form.formState.isDirty}
+          >
+            Edit
+          </LoadingButton>
+        )}
       </form>
     </Form>
   );

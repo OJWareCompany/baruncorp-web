@@ -52,8 +52,8 @@ import {
 import { TermsEnum, transformStringIntoNullableString } from "@/lib/constants";
 import useJobsForClientInvoiceQuery from "@/queries/useJobsForClientInvoiceQuery";
 import { AffixInput } from "@/components/AffixInput";
-import usePostInvoiceMutation from "@/mutations/usePostInvoiceMutation";
-import { getOrganizationsToInvoiceQueryKey } from "@/queries/useOrganizationsToInvoiceQuery";
+import usePostClientInvoiceMutation from "@/mutations/usePostClientInvoiceMutation";
+import { getClientsToInvoiceQueryKey } from "@/queries/useClientsToInvoiceQuery";
 import { getClientInvoicesQueryKey } from "@/queries/useClientInvoicesQuery";
 import CollapsibleSection from "@/components/CollapsibleSection";
 
@@ -103,24 +103,24 @@ export default function NewClientInvoiceSheet() {
     },
     true
   );
-  const usePostInvoiceMutationResult = usePostInvoiceMutation();
+  const usePostClientInvoiceMutationResult = usePostClientInvoiceMutation();
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
-      usePostInvoiceMutationResult.isSuccess
+      usePostClientInvoiceMutationResult.isSuccess
     ) {
       form.reset();
     }
   }, [
     form,
     form.formState.isSubmitSuccessful,
-    usePostInvoiceMutationResult.isSuccess,
+    usePostClientInvoiceMutationResult.isSuccess,
   ]);
 
   async function onSubmit(values: FieldValues) {
-    await usePostInvoiceMutationResult
+    await usePostClientInvoiceMutationResult
       .mutateAsync({
         clientOrganizationId: values.organizationId,
         invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
@@ -136,7 +136,7 @@ export default function NewClientInvoiceSheet() {
           title: "Success",
         });
         queryClient.invalidateQueries({
-          queryKey: getOrganizationsToInvoiceQueryKey(),
+          queryKey: getClientsToInvoiceQueryKey(),
         });
         queryClient.invalidateQueries({
           queryKey: getClientInvoicesQueryKey({}),

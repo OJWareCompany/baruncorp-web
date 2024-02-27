@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 
-const usePatchPaymentDirectCancelMutation = () => {
+const usePatchClientDirectPaymentCancelMutation = () => {
   const api = useApi();
 
   return useMutation<
@@ -20,4 +20,4 @@ const usePatchPaymentDirectCancelMutation = () => {
   });
 };
 
-export default usePatchPaymentDirectCancelMutation;
+export default usePatchClientDirectPaymentCancelMutation;

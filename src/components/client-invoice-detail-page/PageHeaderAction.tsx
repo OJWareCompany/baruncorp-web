@@ -1,7 +1,8 @@
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ArrowDownToLine } from "lucide-react";
 import React from "react";
-import InvoiceDocument from "./InvoiceDocument";
+import { format } from "date-fns";
+import ClientInvoiceDocument from "./ClientInvoiceDocument";
 import { Button } from "@/components/ui/button";
 import {
   InvoiceResponseDto,
@@ -23,13 +24,18 @@ export default function PageHeaderAction({
   return (
     <PDFDownloadLink
       document={
-        <InvoiceDocument
+        <ClientInvoiceDocument
           clientInvoice={clientInvoice}
           organization={organization}
           services={services}
         />
       }
-      fileName="invoice.pdf"
+      fileName={`[Barun Corp] ${
+        clientInvoice.clientOrganization.name
+      }, ${format(
+        new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
+        "MMM yyyy"
+      )}, Client Invoice.pdf`}
       className="inline-flex"
     >
       {({ blob, url, loading, error }) => (

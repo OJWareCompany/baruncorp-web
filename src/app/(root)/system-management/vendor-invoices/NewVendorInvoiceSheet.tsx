@@ -60,10 +60,6 @@ const formSchema = z.object({
   servicePeriodMonth: z
     .string()
     .datetime({ message: "Service Period Month is required" }),
-  invoiceNumber: z
-    .string()
-    .trim()
-    .min(1, { message: "Invoice Number is required" }),
   invoiceDate: z.date({
     required_error: "A date of birth is required.",
   }),
@@ -73,7 +69,7 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export default function NewClientInvoiceSheet() {
+export default function NewVendorInvoiceSheet() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
@@ -82,7 +78,6 @@ export default function NewClientInvoiceSheet() {
     defaultValues: {
       vendorId: "",
       servicePeriodMonth: "",
-      invoiceNumber: "",
       invoiceDate: new Date(),
       terms: "30",
       notes: "",
@@ -124,13 +119,13 @@ export default function NewClientInvoiceSheet() {
       .mutateAsync({
         organizationId: values.vendorId,
         note: transformStringIntoNullableString.parse(values.notes),
-        terms: Number(values.terms) as 21 | 30,
+        terms: Number(values.terms) as 21 | 30 | 60,
         serviceMonth: format(
           new Date(values.servicePeriodMonth.slice(0, 7)),
           "yyyy-MM"
         ),
         invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
-        invoiceNumber: values.invoiceNumber,
+        invoiceNumber: "", // api-spec 상에는 필수값으로 되어있는데, 필요하지 않은 값이라고 함. 백엔드 쪽에서 빈 문자열로 보내달라고 요청함.
       })
       .then(() => {
         toast({
@@ -184,7 +179,7 @@ export default function NewClientInvoiceSheet() {
                     name="vendorId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>Vendor</FormLabel>
+                        <FormLabel required>Organization</FormLabel>
                         <FormControl>
                           <VendorsToInvoiceCombobox
                             vendorId={field.value}
@@ -214,19 +209,6 @@ export default function NewClientInvoiceSheet() {
                             onServicePeriodMonthChange={field.onChange}
                             ref={field.ref}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="invoiceNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel required>Invoice Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

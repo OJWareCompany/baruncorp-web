@@ -10,7 +10,7 @@ interface Props {
   status: JobStatusEnum;
   jobId: string;
   projectId: string;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function AssigneeField({

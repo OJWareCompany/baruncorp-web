@@ -14,7 +14,7 @@ function getPageHeader({
   pageType,
   project,
 }: {
-  pageType: PageType;
+  pageType: JobDetailPageType;
   project: ProjectResponseDto;
 }) {
   switch (pageType) {
@@ -71,7 +71,7 @@ function getPageHeader({
 
 interface Props {
   projectId: string;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function ClientNotesPage({ projectId, pageType }: Props) {

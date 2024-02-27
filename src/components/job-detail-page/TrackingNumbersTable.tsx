@@ -59,7 +59,7 @@ const TABLE_NAME = "TrackingNumbers";
 
 interface InternalTableProps {
   job: JobResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
   modifyTrackingNumber: (initialValue: TrackingNumbersResponseDto) => void;
   deleteTrackingNumber: (trackingNumberId: string) => void;
 }
@@ -332,7 +332,7 @@ export type EditDialogState =
 
 interface Props {
   job: JobResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function TrackingNumbersTable({ job, pageType }: Props) {

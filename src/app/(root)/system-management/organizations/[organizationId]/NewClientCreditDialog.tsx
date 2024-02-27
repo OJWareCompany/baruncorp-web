@@ -25,7 +25,7 @@ import {
 import { toTwoDecimalRegExp } from "@/lib/constants";
 import { AffixInput } from "@/components/AffixInput";
 import { useToast } from "@/components/ui/use-toast";
-import usePostCreditPaymentMutation from "@/mutations/usePostCreditPaymentMutation";
+import usePostClientCreditPaymentMutation from "@/mutations/usePostClientCreditPaymentMutation";
 import { getClientCreditQueryKey } from "@/queries/useClientCreditQuery";
 import { getClientCreditHistoriesQueryKey } from "@/queries/useClientCreditHistoriesQuery";
 
@@ -60,25 +60,26 @@ export default function NewClientCreditDialog({ organizationId }: Props) {
       amount: "",
     },
   });
-  const usePostCreditPaymentMutationResult = usePostCreditPaymentMutation();
+  const usePostClientCreditPaymentMutationResult =
+    usePostClientCreditPaymentMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
-      usePostCreditPaymentMutationResult.isSuccess
+      usePostClientCreditPaymentMutationResult.isSuccess
     ) {
       form.reset();
     }
   }, [
     form,
     form.formState.isSubmitSuccessful,
-    usePostCreditPaymentMutationResult.isSuccess,
+    usePostClientCreditPaymentMutationResult.isSuccess,
   ]);
 
   async function onSubmit(values: FieldValues) {
-    await usePostCreditPaymentMutationResult
+    await usePostClientCreditPaymentMutationResult
       .mutateAsync({
         amount: Number(values.amount),
         creditTransactionType: "Reload",

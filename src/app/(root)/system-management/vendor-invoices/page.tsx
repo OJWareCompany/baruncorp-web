@@ -1,6 +1,7 @@
 import VendorInvoicesTable from "./VendorInvoicesTable";
 import NewVendorInvoiceSheet from "./NewVendorInvoiceSheet";
 import PageHeader from "@/components/PageHeader";
+import CollapsibleSection from "@/components/CollapsibleSection";
 
 export default function Page() {
   return (
@@ -14,7 +15,11 @@ export default function Page() {
         ]}
         action={<NewVendorInvoiceSheet />}
       />
-      <VendorInvoicesTable />
+      <div className="space-y-6">
+        <CollapsibleSection title="Open">
+          <VendorInvoicesTable />
+        </CollapsibleSection>
+      </div>
     </div>
   );
 }

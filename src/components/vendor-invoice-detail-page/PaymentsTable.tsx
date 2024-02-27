@@ -8,7 +8,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AxiosError } from "axios";
-import { InvoiceResponseDto } from "@/api/api-spec";
+import { useSession } from "next-auth/react";
+import { VendorInvoiceResponseDto } from "@/api/api-spec";
 import { AffixInput } from "@/components/AffixInput";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import usePatchPaymentDirectCancelMutation from "@/mutations/usePatchPaymentDirectCancelMutation";
+import usePatchVendorDirectPaymentCancelMutation from "@/mutations/usePatchVendorDirectPaymentCancelMutation";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -31,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
+import { getVendorInvoiceQueryKey } from "@/queries/useVendorInvoiceQuery";
 import {
   Tooltip,
   TooltipContent,
@@ -39,24 +40,31 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
-import usePatchPaymentCreditCancelMutation from "@/mutations/usePatchPaymentCreditCancelMutation";
+import usePatchVendorCreditPaymentCancelMutation from "@/mutations/usePatchVendorCreditPaymentCancelMutation";
 
 const columnHelper =
-  createColumnHelper<InvoiceResponseDto["payments"][number]>();
+  createColumnHelper<VendorInvoiceResponseDto["vendorPayments"][number]>();
 
 interface Props {
-  clientInvoice: InvoiceResponseDto;
+  vendorInvoice: VendorInvoiceResponseDto;
 }
 
-export default function PaymentsTable({ clientInvoice }: Props) {
+export default function PaymentsTable({ vendorInvoice }: Props) {
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = useMemo(
+    () => session?.isBarunCorpMember ?? false,
+    [session?.isBarunCorpMember]
+  );
+
   const {
-    mutateAsync: patchPaymentDirectCancelMutateAsync,
-    isPending: isPatchPaymentDirectCancelMutationPending,
-  } = usePatchPaymentDirectCancelMutation();
+    mutateAsync: patchVendorDirectPaymentCancelMutateAsync,
+    isPending: isPatchVendorDirectPaymentCancelMutationPending,
+  } = usePatchVendorDirectPaymentCancelMutation();
   const {
-    mutateAsync: patchPaymentCreditCancelMutateAsync,
-    isPending: isPatchPaymentCreditCancelMutationPending,
-  } = usePatchPaymentCreditCancelMutation();
+    mutateAsync: patchVendorCreditPaymentCancelMutateAsync,
+    isPending: isPatchVendorCreditPaymentCancelMutationPending,
+  } = usePatchVendorCreditPaymentCancelMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [alertDialogState, setAlertDialogState] = useState<
@@ -65,8 +73,8 @@ export default function PaymentsTable({ clientInvoice }: Props) {
   >({ open: false });
 
   const isPending =
-    isPatchPaymentDirectCancelMutationPending ||
-    isPatchPaymentCreditCancelMutationPending;
+    isPatchVendorDirectPaymentCancelMutationPending ||
+    isPatchVendorCreditPaymentCancelMutationPending;
 
   const columns = useMemo(
     () => [
@@ -124,6 +132,10 @@ export default function PaymentsTable({ clientInvoice }: Props) {
             );
           }
 
+          if (!isBarunCorpMember) {
+            return;
+          }
+
           return (
             <div className="text-right">
               <div
@@ -152,11 +164,11 @@ export default function PaymentsTable({ clientInvoice }: Props) {
         },
       }),
     ],
-    []
+    [isBarunCorpMember]
   );
 
   const table = useReactTable({
-    data: clientInvoice.payments,
+    data: vendorInvoice.vendorPayments,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
@@ -169,7 +181,7 @@ export default function PaymentsTable({ clientInvoice }: Props) {
           <Label>Total Amount</Label>
           <AffixInput
             prefixElement={<span className="text-muted-foreground">$</span>}
-            value={clientInvoice.totalOfPayment}
+            value={vendorInvoice.internalTotalPayment}
             readOnly
           />
         </Item>
@@ -246,12 +258,12 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                 }
 
                 if (alertDialogState.paymentMethod === "Direct") {
-                  patchPaymentDirectCancelMutateAsync({
+                  patchVendorDirectPaymentCancelMutateAsync({
                     paymentId: alertDialogState.id,
                   })
                     .then(() => {
                       queryClient.invalidateQueries({
-                        queryKey: getClientInvoiceQueryKey(clientInvoice.id),
+                        queryKey: getVendorInvoiceQueryKey(vendorInvoice.id),
                       });
                       setAlertDialogState({ open: false });
                       toast({ title: "Success" });
@@ -273,12 +285,12 @@ export default function PaymentsTable({ clientInvoice }: Props) {
                 }
 
                 if (alertDialogState.paymentMethod === "Deduction") {
-                  patchPaymentCreditCancelMutateAsync({
+                  patchVendorCreditPaymentCancelMutateAsync({
                     creditTransactionId: alertDialogState.id,
                   })
                     .then(() => {
                       queryClient.invalidateQueries({
-                        queryKey: getClientInvoiceQueryKey(clientInvoice.id),
+                        queryKey: getVendorInvoiceQueryKey(vendorInvoice.id),
                       });
                       setAlertDialogState({ open: false });
                       toast({ title: "Success" });

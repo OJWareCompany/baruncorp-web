@@ -77,7 +77,7 @@ function getFieldValues(project: ProjectResponseDto): FieldValues {
 
 interface Props {
   project: ProjectResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function ProjectForm({ project, pageType }: Props) {
@@ -106,6 +106,16 @@ export default function ProjectForm({ project, pageType }: Props) {
   const { mutateAsync } = usePatchProjectMutation(project.projectId);
 
   async function onSubmit(values: FieldValues) {
+    if (
+      values.propertyType !== project.propertyType ||
+      values.address.fullAddress !== project.propertyAddress.fullAddress
+    ) {
+      toast({
+        title: "Please wait a minute",
+        description: "Moving related folders in Google Drive",
+      });
+    }
+
     await mutateAsync({
       projectNumber: transformStringIntoNullableString.parse(
         values.projectNumber

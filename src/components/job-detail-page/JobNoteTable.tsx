@@ -31,7 +31,7 @@ const columnHelper = createColumnHelper<JobNoteResponseDto["data"][number]>();
 
 interface Props {
   jobNotes: JobNoteResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function JobNotesTable({ jobNotes, pageType }: Props) {

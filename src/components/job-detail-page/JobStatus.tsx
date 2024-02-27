@@ -24,7 +24,7 @@ import { JobStatusEnum, jobStatuses } from "@/lib/constants";
 
 interface Props {
   job: JobResponseDto;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function JobStatus({ job, pageType }: Props) {

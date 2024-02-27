@@ -15,7 +15,7 @@ function getPageHeader({
   pageType,
   job,
 }: {
-  pageType: PageType;
+  pageType: JobDetailPageType;
   job: JobResponseDto;
 }) {
   switch (pageType) {
@@ -60,7 +60,7 @@ function getPageHeader({
 
 interface Props {
   jobId: string;
-  pageType: PageType;
+  pageType: JobDetailPageType;
 }
 
 export default function AhjNotesPage({ jobId, pageType }: Props) {

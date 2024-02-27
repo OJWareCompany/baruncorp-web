@@ -3,16 +3,13 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { ClientToInvoiceResponseDto } from "@/api/api-spec";
 
-export const getOrganizationsToInvoiceQueryKey = () => [
-  "organizations-to-invoice",
-  "list",
-];
+export const getClientsToInvoiceQueryKey = () => ["clients-to-invoice", "list"];
 
-const useOrganizationsToInvoiceQuery = () => {
+const useClientsToInvoiceQuery = () => {
   const api = useApi();
 
   return useQuery<ClientToInvoiceResponseDto, AxiosError<ErrorResponseData>>({
-    queryKey: getOrganizationsToInvoiceQueryKey(),
+    queryKey: getClientsToInvoiceQueryKey(),
     queryFn: () =>
       api.invoicesClients
         .findClientToInvoiceHttpControllerGet()
@@ -20,4 +17,4 @@ const useOrganizationsToInvoiceQuery = () => {
   });
 };
 
-export default useOrganizationsToInvoiceQuery;
+export default useClientsToInvoiceQuery;

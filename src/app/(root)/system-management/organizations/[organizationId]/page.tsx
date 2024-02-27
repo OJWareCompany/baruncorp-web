@@ -15,6 +15,8 @@ import CollapsibleSection from "@/components/CollapsibleSection";
 import useClientCreditQuery from "@/queries/useClientCreditQuery";
 import { AffixInput } from "@/components/AffixInput";
 import useVendorCreditQuery from "@/queries/useVendorCreditQuery";
+import Item from "@/components/Item";
+import { Label } from "@/components/ui/label";
 
 interface Props {
   params: {
@@ -83,11 +85,16 @@ export default function Page({ params: { organizationId } }: Props) {
               title="Client Credit"
               action={<NewClientCreditDialog organizationId={organizationId} />}
             >
-              <AffixInput
-                prefixElement={<span className="text-muted-foreground">$</span>}
-                value={clientCredit.creditAmount}
-                readOnly
-              />
+              <Item>
+                <Label>Total Amount</Label>
+                <AffixInput
+                  prefixElement={
+                    <span className="text-muted-foreground">$</span>
+                  }
+                  value={clientCredit.creditAmount}
+                  readOnly
+                />
+              </Item>
               <ClientCreditHistoriesTable organizationId={organizationId} />
             </CollapsibleSection>
             {organization.isVendor && (
@@ -97,13 +104,16 @@ export default function Page({ params: { organizationId } }: Props) {
                   <NewVendorCreditDialog organizationId={organizationId} />
                 }
               >
-                <AffixInput
-                  prefixElement={
-                    <span className="text-muted-foreground">$</span>
-                  }
-                  value={vendorCredit.creditAmount}
-                  readOnly
-                />
+                <Item>
+                  <Label>Total Amount</Label>
+                  <AffixInput
+                    prefixElement={
+                      <span className="text-muted-foreground">$</span>
+                    }
+                    value={vendorCredit.creditAmount}
+                    readOnly
+                  />
+                </Item>
                 <VendorCreditHistoriesTable organizationId={organizationId} />
               </CollapsibleSection>
             )}
