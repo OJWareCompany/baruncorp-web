@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Mail } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -51,21 +51,27 @@ export default function IssueButton({
     isPending: isPatchClientInvoiceIssueMutationPending,
   } = usePatchClientInvoiceIssueMutation(clientInvoice.id);
 
+  if (clientInvoice.status === "Paid") {
+    return;
+  }
+
   return (
     <>
-      {clientInvoice.status === "Unissued" && (
-        <Button
-          onClick={() => {
-            setOpen(true);
-          }}
-          variant={"outline"}
-          size={"sm"}
-          className="h-[28px] text-xs px-2"
-        >
+      <Button
+        onClick={() => {
+          setOpen(true);
+        }}
+        variant={"outline"}
+        size={"sm"}
+        className="h-[28px] text-xs px-2"
+      >
+        {clientInvoice.status === "Unissued" ? (
           <ArrowUp className="mr-2 h-4 w-4" />
-          Issue
-        </Button>
-      )}
+        ) : (
+          <Mail className="mr-2 h-4 w-4" />
+        )}
+        {clientInvoice.status === "Unissued" ? "Issue" : "Remind"}
+      </Button>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
