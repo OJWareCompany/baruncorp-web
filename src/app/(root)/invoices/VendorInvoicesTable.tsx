@@ -80,6 +80,18 @@ const columns = [
   columnHelper.accessor((row) => `$${row.invoiceTotalDifference}`, {
     header: "Total Difference",
   }),
+  columnHelper.accessor("internalTotalBalanceDue", {
+    header: "Internal Total Balance Due",
+    cell: ({ getValue }) => {
+      const value = getValue();
+
+      if (value == null) {
+        return <p className="text-muted-foreground">-</p>;
+      }
+
+      return `$${value}`;
+    },
+  }),
   columnHelper.accessor("note", {
     header: "Notes",
     cell: ({ getValue }) => {
