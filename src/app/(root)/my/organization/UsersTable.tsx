@@ -40,6 +40,7 @@ import { Button } from "@/components/ui/button";
 import useUsersQuery from "@/queries/useUsersQuery";
 import SearchHeader from "@/components/table/SearchHeader";
 import {
+  BARUNCORP_ORGANIZATION_ID,
   UserStatusEnum,
   transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum,
   userStatuses,
@@ -205,6 +206,9 @@ export default function UsersTable({ organization }: Props) {
     manualPagination: true,
     state: {
       pagination,
+      columnVisibility: {
+        dateOfJoining: organization.id === BARUNCORP_ORGANIZATION_ID,
+      },
     },
   });
 
