@@ -76,6 +76,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+export type ResultDialogState =
+  | { open: false }
+  | { open: true; jobId: string; files: File[] };
+
 interface JobSectionWithDataProps {
   project: ProjectResponseDto;
   organization: OrganizationResponseDto;
@@ -91,12 +95,11 @@ function JobSectionWithData({
     useNewServiceOrderData();
   const dispatch = useNewServiceOrderDataDispatch();
   const [isWetStampChecked, setIsWetStampChecked] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
   const { mutateAsync } = usePostJobMutation();
   const { toast } = useToast();
-  const [result, setResult] = useState<{ open: boolean; jobId?: string }>({
-    open: false,
-  });
+  const [resultDialogState, setResultDialogState] = useState<ResultDialogState>(
+    { open: false }
+  );
 
   const formSchema = useMemo(
     () =>
@@ -151,6 +154,25 @@ function JobSectionWithData({
           additionalInformation: z.custom<Value>(),
           dueDate: z.date().nullable(),
           isExpedited: z.boolean(),
+          files: z.custom<File[]>().superRefine((files, ctx) => {
+            if (files.length > 6) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "The number of files cannot exceed 6",
+              });
+              return;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+              if (files[i].size > 10000000) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "The size of each file should not exceed 10MB",
+                });
+                return;
+              }
+            }
+          }),
         })
         .superRefine((values, ctx) => {
           const { services, descriptionForOtherServices } = values;
@@ -272,6 +294,7 @@ function JobSectionWithData({
       additionalInformation: INITIAL_EDITOR_VALUE,
       dueDate: null,
       isExpedited: false,
+      files: [],
     },
   });
 
@@ -417,6 +440,7 @@ function JobSectionWithData({
       additionalInformation: INITIAL_EDITOR_VALUE,
       dueDate: null,
       isExpedited: false,
+      files: [],
     });
   }, [
     form,
@@ -431,7 +455,6 @@ function JobSectionWithData({
       title: "Please wait a minute",
       description: "Creating related folders in Google Drive",
     });
-
     const serviceIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[] = [];
     for (const service of values.services) {
       if (service.id === OTHER_SERVICE_ID) {
@@ -495,7 +518,7 @@ function JobSectionWithData({
       loadCalcOrigin: values.loadCalcOrigin,
     })
       .then(({ id }) => {
-        setResult({ open: true, jobId: id });
+        setResultDialogState({ open: true, jobId: id, files: values.files });
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
@@ -1242,7 +1265,25 @@ function JobSectionWithData({
                   />
                 </>
               )}
-              <Dropzone files={files} onFilesChange={setFiles} />
+              <FormField
+                control={form.control}
+                name="files"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Dropzone
+                        files={field.value}
+                        onFilesChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      You can select up to 6 files, and the size of each file
+                      should not exceed 10MB
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <LoadingButton
                 className="w-full"
                 type="submit"
@@ -1255,15 +1296,14 @@ function JobSectionWithData({
         </Form>
       </section>
       <ResultDialog
-        files={files}
-        open={result.open}
-        jobId={result.jobId}
+        state={resultDialogState}
         onOpenChange={(newOpen) => {
-          if (!newOpen) {
-            dispatch({ type: "RESET" });
-            setResult({ open: false });
-            setFiles([]);
+          if (newOpen) {
+            return;
           }
+
+          dispatch({ type: "RESET" });
+          setResultDialogState({ open: newOpen });
         }}
       />
     </>

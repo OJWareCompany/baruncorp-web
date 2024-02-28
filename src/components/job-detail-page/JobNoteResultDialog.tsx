@@ -125,6 +125,7 @@ export default function JobNoteResultDialog({
   return (
     <Dialog
       {...dialogProps}
+      open={state.open}
       onOpenChange={(newOpen) => {
         if (
           postJobNoteProgress.value !== 100 ||
@@ -135,7 +136,6 @@ export default function JobNoteResultDialog({
 
         dialogProps.onOpenChange(newOpen);
       }}
-      open={state.open}
     >
       <DialogContent>
         <DialogHeader>
