@@ -397,7 +397,9 @@ function JobSectionWithData({
     form.reset({
       clientUser: {
         id: isBarunCorpMember ? "" : session.id,
-        emailAddressesToReceiveDeliverables: [],
+        emailAddressesToReceiveDeliverables: form.getValues(
+          "clientUser.emailAddressesToReceiveDeliverables"
+        ),
       },
       systemSize: systemSize == null ? "" : String(systemSize),
       mountingType:
