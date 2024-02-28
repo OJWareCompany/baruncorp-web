@@ -164,10 +164,10 @@ function JobSectionWithData({
             }
 
             for (let i = 0; i < files.length; i++) {
-              if (files[i].size > 10000000) {
+              if (files[i].size > 100000000) {
                 ctx.addIssue({
                   code: z.ZodIssueCode.custom,
-                  message: "The size of each file should not exceed 10MB",
+                  message: "The size of each file should not exceed 100MB",
                 });
                 return;
               }
@@ -354,8 +354,8 @@ function JobSectionWithData({
     const {
       systemSize,
       mailingAddressForWetStamp,
-      hasHistoryElectricalPEStamp, // TODO: replace name
-      hasHistoryStructuralPEStamp, // TODO: replace name
+      hasHistoryElectricalPEStamp,
+      hasHistoryStructuralPEStamp,
       jobs,
     } = project;
 
@@ -1278,7 +1278,7 @@ function JobSectionWithData({
                     </FormControl>
                     <FormDescription>
                       You can select up to 6 files, and the size of each file
-                      should not exceed 10MB
+                      should not exceed 100MB
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
