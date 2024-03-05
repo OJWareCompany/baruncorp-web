@@ -131,7 +131,7 @@ export default function UsersTable({ department }: Props) {
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      departmentName: department.name, // TODO: replace with id
+      departmentId: department.id,
       userName: userNameSearchParam,
       email: emailSearchParam,
       isContractor:
@@ -146,7 +146,7 @@ export default function UsersTable({ department }: Props) {
     [
       pagination.pageIndex,
       pagination.pageSize,
-      department.name,
+      department.id,
       userNameSearchParam,
       emailSearchParam,
       contractorSearchParam,
@@ -458,7 +458,7 @@ export default function UsersTable({ department }: Props) {
                     toast({ title: "Success" });
                     queryClient.invalidateQueries({
                       queryKey: getUsersQueryKey({
-                        departmentName: department.name, // TODO: replace with id
+                        departmentId: department.id,
                       }),
                     });
                     setAlertDialogState({ open: false });

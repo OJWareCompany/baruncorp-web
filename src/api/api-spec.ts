@@ -1069,8 +1069,17 @@ export interface ClientToInvoiceResponseDto {
   clientToInvoices: ClientToInvoice[];
 }
 
+export interface Attachments {
+  filename?: string;
+  content?: string;
+  path?: string;
+  contentType?: string;
+  encoding?: string;
+  raw?: string;
+}
+
 export interface IssueInvoiceRequestDto {
-  attachments: File[];
+  attachments: Attachments[];
 }
 
 export interface ClientWithOutstandingBalancesResponseDto {
@@ -2795,26 +2804,36 @@ export interface SchedulePaginatedResponseDto {
 export interface CreateDepartmentRequestDto {
   name: string;
   description: string | null;
+  /** @default false */
   viewClientInvoice: boolean;
+  /** @default false */
   viewVendorInvoice: boolean;
+  /** @default false */
   viewCustomPricing: boolean;
+  /** @default false */
   viewExpensePricing: boolean;
+  /** @default false */
   viewScopePrice: boolean;
+  /** @default false */
   viewTaskCost: boolean;
 }
 
 export interface UpdateDepartmentRequestDto {
   name: string;
   description: string | null;
+  /** @default false */
   viewClientInvoice: boolean;
+  /** @default false */
   viewVendorInvoice: boolean;
+  /** @default false */
   viewCustomPricing: boolean;
+  /** @default false */
   viewExpensePricing: boolean;
+  /** @default false */
   viewScopePrice: boolean;
+  /** @default false */
   viewTaskCost: boolean;
 }
-
-export type DeleteDepartmentRequestDto = object;
 
 export interface DepartmentResponseDto {
   id: string;
@@ -2873,6 +2892,8 @@ export interface FindUsersHttpControllerGetFindUsersParams {
    * @default null
    */
   departmentName?: string | null;
+  /** @default null */
+  departmentId?: string | null;
   hasDepartment?: boolean | null;
   /** @default "Active" */
   status?:
@@ -7929,14 +7950,11 @@ export class Api<
      */
     deleteDepartmentHttpControllerDelete: (
       departmentId: string,
-      data: DeleteDepartmentRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
         path: `/departments/${departmentId}`,
         method: "DELETE",
-        body: data,
-        type: ContentType.Json,
         ...params,
       }),
 

@@ -202,6 +202,18 @@ export default function UsersTable({ organization }: Props) {
           return value;
         },
       }),
+      columnHelper.accessor("departmentName", {
+        header: "Department",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return value;
+        },
+      }),
       columnHelper.accessor("isVendor", {
         header: () => (
           <EnumHeader
@@ -322,6 +334,7 @@ export default function UsersTable({ organization }: Props) {
     state: {
       pagination,
       columnVisibility: {
+        departmentName: isOrganizationBarunCorp,
         dateOfJoining: isOrganizationBarunCorp,
         isVendor: !isOrganizationBarunCorp,
       },

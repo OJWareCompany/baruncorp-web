@@ -86,7 +86,7 @@ export default function NewUserDialog({ department }: Props) {
 
         toast({ title: "Success" });
         queryClient.invalidateQueries({
-          queryKey: getUsersQueryKey({ departmentName: department.name }), // TODO: replace with id
+          queryKey: getUsersQueryKey({ departmentId: department.id }),
         });
         setOpen(false);
       })
