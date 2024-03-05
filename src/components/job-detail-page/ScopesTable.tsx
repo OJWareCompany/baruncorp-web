@@ -45,6 +45,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import CostField from "@/components/field/CostField";
+import useProfileQuery from "@/queries/useProfileQuery";
+import useDepartmentQuery from "@/queries/useDepartmentQuery";
 
 interface Data {
   id: string;
@@ -74,6 +76,12 @@ interface Props {
 }
 
 export default function ScopesTable({ job, project, pageType }: Props) {
+  const { data: profile } = useProfileQuery();
+  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
+
+  const canViewScopePrice = department?.viewScopePrice ?? false;
+  const canViewTaskCost = department?.viewTaskCost ?? false;
+
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const { data: session } = useSession();
 
@@ -81,6 +89,14 @@ export default function ScopesTable({ job, project, pageType }: Props) {
     () => session?.isBarunCorpMember ?? false,
     [session?.isBarunCorpMember]
   );
+  const isHome = pageType === "HOME";
+
+  /**
+   * 바른코프 멤버 ✅
+   * 바른코프 멤버아닌데, 홈 ❌
+   * 바른코프 멤버아닌데, 워크스페이스 ✅
+   */
+  const isWorker = isBarunCorpMember || !isHome;
 
   const data = useMemo(
     () =>
@@ -445,9 +461,9 @@ export default function ScopesTable({ job, project, pageType }: Props) {
       expanded,
       columnVisibility: {
         sizeForRevision: isBarunCorpMember,
-        price: isBarunCorpMember,
-        cost: isBarunCorpMember,
-        duration: isBarunCorpMember,
+        price: isBarunCorpMember && canViewScopePrice,
+        cost: isBarunCorpMember && canViewTaskCost,
+        duration: isWorker,
       },
     },
     onExpandedChange: setExpanded,

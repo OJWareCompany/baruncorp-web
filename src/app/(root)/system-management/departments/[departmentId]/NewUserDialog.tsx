@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
+import { useSession } from "next-auth/react";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,11 +23,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { getPositionQueryKey } from "@/queries/usePositionQuery";
-import { PositionResponseDto } from "@/api/api-spec";
-import WorkersCombobox from "@/components/combobox/WorkerCombobox";
-import usePostUserPositionMutation from "@/mutations/usePostUserPositionMutation";
+import { DepartmentResponseDto } from "@/api/api-spec";
+// import usePostUserDepartmentMutation from "@/mutations/usePostUserDepartmentMutation";
 import { useToast } from "@/components/ui/use-toast";
+import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizationCombobox";
+import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
+import usePostDepartmentAddUserMutation from "@/mutations/usePostDepartmentAddUserMutation";
+import { getUsersQueryKey } from "@/queries/useUsersQuery";
+import { getProfileQueryKey } from "@/queries/useProfileQuery";
 
 const formSchema = z.object({
   userId: z.string().trim().min(1, { message: "User is required" }),
@@ -35,14 +39,16 @@ const formSchema = z.object({
 type FieldValues = z.infer<typeof formSchema>;
 
 interface Props {
-  position: PositionResponseDto;
+  department: DepartmentResponseDto;
 }
 
-export default function NewWorkerDialog({ position }: Props) {
-  const usePostUserPositionMutationResult = usePostUserPositionMutation();
+export default function NewUserDialog({ department }: Props) {
+  const usePostDepartmentAddUserMutationResult =
+    usePostDepartmentAddUserMutation();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: session } = useSession();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -54,55 +60,37 @@ export default function NewWorkerDialog({ position }: Props) {
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
-      usePostUserPositionMutationResult.isSuccess
+      usePostDepartmentAddUserMutationResult.isSuccess
     ) {
       form.reset();
     }
   }, [
     form,
     form.formState.isSubmitSuccessful,
-    usePostUserPositionMutationResult.isSuccess,
+    usePostDepartmentAddUserMutationResult.isSuccess,
   ]);
 
   async function onSubmit(values: FieldValues) {
-    await usePostUserPositionMutationResult
+    await usePostDepartmentAddUserMutationResult
       .mutateAsync({
+        departmentId: department.id,
         userId: values.userId,
-        positionId: position.id,
       })
       .then(() => {
+        // 만약에 수정하는 유저가 자신이라면, 자신의 profile을 받아오는 query에 대한 cache를 지워서, 자신의 profile에 담긴 department id도 업데이트한다.
+        if (values.userId === session?.id ?? "") {
+          queryClient.invalidateQueries({
+            queryKey: getProfileQueryKey(),
+          });
+        }
+
         toast({ title: "Success" });
         queryClient.invalidateQueries({
-          queryKey: getPositionQueryKey(position.id),
+          queryKey: getUsersQueryKey({ departmentName: department.name }), // TODO: replace with id
         });
         setOpen(false);
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
-        switch (error.response?.status) {
-          case 400:
-            if (error.response?.data.errorCode.includes("20208")) {
-              form.setError(
-                "userId",
-                {
-                  message: `Electrical License is required`,
-                },
-                { shouldFocus: true }
-              );
-              return;
-            }
-
-            if (error.response?.data.errorCode.includes("20209")) {
-              form.setError(
-                "userId",
-                {
-                  message: `Structural License is required`,
-                },
-                { shouldFocus: true }
-              );
-              return;
-            }
-        }
-
         if (
           error.response &&
           error.response.data.errorCode.filter((value) => value != null)
@@ -126,12 +114,12 @@ export default function NewWorkerDialog({ position }: Props) {
           className="h-[28px] text-xs px-2"
         >
           <Plus className="mr-2 h-4 w-4" />
-          New Worker
+          New User
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Worker</DialogTitle>
+          <DialogTitle>New User</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -142,14 +130,12 @@ export default function NewWorkerDialog({ position }: Props) {
                 <FormItem>
                   <FormLabel required>User</FormLabel>
                   <FormControl>
-                    <WorkersCombobox
+                    <UsersByOrganizationCombobox
+                      organizationId={BARUNCORP_ORGANIZATION_ID}
                       userId={field.value}
                       onUserIdChange={field.onChange}
                       ref={field.ref}
                       modal
-                      filteringIds={position.workers.map(
-                        (value) => value.userId
-                      )}
                     />
                   </FormControl>
                   <FormMessage />

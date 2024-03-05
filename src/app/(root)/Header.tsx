@@ -18,10 +18,12 @@ import {
 import { cn } from "@/lib/utils";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu-trigger-style";
 import useProfileQuery from "@/queries/useProfileQuery";
+import useDepartmentQuery from "@/queries/useDepartmentQuery";
 
 const systemManagementItems: {
   title: string;
   href: string;
+  authority?: "viewClientInvoice" | "viewVendorInvoice";
 }[] = [
   {
     title: "Projects",
@@ -56,6 +58,10 @@ const systemManagementItems: {
     href: "/system-management/licenses",
   },
   {
+    title: "Departments",
+    href: "/system-management/departments",
+  },
+  {
     title: "PTO",
     href: "/system-management/pto",
   },
@@ -70,10 +76,12 @@ const systemManagementItems: {
   {
     title: "Client Invoices",
     href: "/system-management/client-invoices",
+    authority: "viewClientInvoice",
   },
   {
     title: "Vendor Invoices",
     href: "/system-management/vendor-invoices",
+    authority: "viewVendorInvoice",
   },
   {
     title: "Utilities",
@@ -100,6 +108,7 @@ const systemManagementItems: {
 export default function Header() {
   const { data: session } = useSession();
   const { data: profile } = useProfileQuery();
+  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
   const { isSelected: isExpanded } = useExpandContext();
 
   const isBarunCorpMember = session?.isBarunCorpMember ?? false;
@@ -128,16 +137,30 @@ export default function Header() {
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
                         <ul className="p-1 w-56">
-                          {systemManagementItems.map((item) => (
-                            <li key={item.title}>
-                              <Link
-                                href={item.href}
-                                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-                              >
-                                {item.title}
-                              </Link>
-                            </li>
-                          ))}
+                          {systemManagementItems
+                            .filter((item) => {
+                              if (item.authority == null) {
+                                return true;
+                              }
+
+                              if (item.authority === "viewClientInvoice") {
+                                return department?.viewClientInvoice ?? false;
+                              }
+
+                              if (item.authority === "viewVendorInvoice") {
+                                return department?.viewVendorInvoice ?? false;
+                              }
+                            })
+                            .map((item) => (
+                              <li key={item.title}>
+                                <Link
+                                  href={item.href}
+                                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                                >
+                                  {item.title}
+                                </Link>
+                              </li>
+                            ))}
                         </ul>
                       </NavigationMenuContent>
                     </NavigationMenuItem>

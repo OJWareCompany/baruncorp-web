@@ -32,6 +32,8 @@ import {
   JobResponseDto,
   ProjectResponseDto,
 } from "@/api/api-spec";
+import useProfileQuery from "@/queries/useProfileQuery";
+import useDepartmentQuery from "@/queries/useDepartmentQuery";
 
 function getPageHeader({
   pageType,
@@ -88,6 +90,11 @@ interface Props {
 }
 
 export default function JobDetailPage({ jobId, pageType }: Props) {
+  const { data: profile } = useProfileQuery();
+  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
+
+  const canViewScopePrice = department?.viewScopePrice ?? false;
+
   const { data: session } = useSession();
   const {
     data: job,
@@ -199,7 +206,9 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
             title="Scopes"
             action={isWorker && <NewScopeSheet job={job} />}
           >
-            {isBarunCorpMember && <TotalJobPrice job={job} />}
+            {isBarunCorpMember && canViewScopePrice && (
+              <TotalJobPrice job={job} />
+            )}
             <ScopesTable job={job} project={project} pageType={pageType} />
           </CollapsibleSection>
           {hasWetStamp && (

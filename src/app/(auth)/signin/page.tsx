@@ -36,8 +36,8 @@ let defaultValues: DefaultValues<FieldValues> = {
 };
 if (process.env.NODE_ENV === "development") {
   defaultValues = {
-    email: "chrisk@baruncorp.com",
-    password: "Test123123!@#",
+    email: "admin-test@baruncorp.com",
+    password: "Test123!@#",
   };
 }
 
@@ -65,6 +65,7 @@ export default function Page() {
       toast(defaultErrorToast);
       return;
     }
+
     const { error } = signInResponse;
     if (error == null) {
       toast({ title: "Sign-in success" });

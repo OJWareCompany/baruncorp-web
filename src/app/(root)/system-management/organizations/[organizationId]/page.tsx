@@ -17,6 +17,8 @@ import { AffixInput } from "@/components/AffixInput";
 import useVendorCreditQuery from "@/queries/useVendorCreditQuery";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
+import useProfileQuery from "@/queries/useProfileQuery";
+import useDepartmentQuery from "@/queries/useDepartmentQuery";
 
 interface Props {
   params: {
@@ -25,6 +27,12 @@ interface Props {
 }
 
 export default function Page({ params: { organizationId } }: Props) {
+  const { data: profile } = useProfileQuery();
+  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
+
+  const canViewClientInvoice = department?.viewClientInvoice ?? false;
+  const canViewVendorInvoice = department?.viewVendorInvoice ?? false;
+
   const {
     data: organization,
     isLoading: isOrganizationQueryLoading,
@@ -55,6 +63,9 @@ export default function Page({ params: { organizationId } }: Props) {
     return <PageLoading />;
   }
 
+  const isOrganizationBarunCorp =
+    organization.organizationType === "administration";
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -79,25 +90,29 @@ export default function Page({ params: { organizationId } }: Props) {
         >
           <UsersTable organization={organization} />
         </CollapsibleSection>
-        {organization.organizationType !== "administration" && (
+        {!isOrganizationBarunCorp && (
           <>
-            <CollapsibleSection
-              title="Client Credit"
-              action={<NewClientCreditDialog organizationId={organizationId} />}
-            >
-              <Item>
-                <Label>Total Amount</Label>
-                <AffixInput
-                  prefixElement={
-                    <span className="text-muted-foreground">$</span>
-                  }
-                  value={clientCredit.creditAmount}
-                  readOnly
-                />
-              </Item>
-              <ClientCreditHistoriesTable organizationId={organizationId} />
-            </CollapsibleSection>
-            {organization.isVendor && (
+            {canViewClientInvoice && (
+              <CollapsibleSection
+                title="Client Credit"
+                action={
+                  <NewClientCreditDialog organizationId={organizationId} />
+                }
+              >
+                <Item>
+                  <Label>Total Amount</Label>
+                  <AffixInput
+                    prefixElement={
+                      <span className="text-muted-foreground">$</span>
+                    }
+                    value={clientCredit.creditAmount}
+                    readOnly
+                  />
+                </Item>
+                <ClientCreditHistoriesTable organizationId={organizationId} />
+              </CollapsibleSection>
+            )}
+            {organization.isVendor && canViewVendorInvoice && (
               <CollapsibleSection
                 title="Vendor Credit"
                 action={

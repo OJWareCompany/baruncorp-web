@@ -6,6 +6,7 @@ import NewAvailableTaskDialog from "./NewAvailableTaskDialog";
 import AvailableTasksTable from "./AvailableTasksTable";
 import PositionForm from "./PositionForm";
 import StatusSectionHeaderAction from "./StatusSectionHeaderAction";
+import DepartmentForm from "./DepartmentForm";
 import PageHeader from "@/components/PageHeader";
 import useUserQuery from "@/queries/useUserQuery";
 import PageLoading from "@/components/PageLoading";
@@ -73,6 +74,11 @@ export default function Page({ params: { userId } }: Props) {
             </div>
           </div>
         </CollapsibleSection>
+        {isOrganizationBarunCorp && (
+          <CollapsibleSection title="Department">
+            <DepartmentForm user={user} />
+          </CollapsibleSection>
+        )}
         {(user.isVendor || isOrganizationBarunCorp) && (
           <>
             <CollapsibleSection title="Position">

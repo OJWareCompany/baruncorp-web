@@ -87,6 +87,8 @@ export interface UserResponseDto {
   status: "Invitation Not Sent" | "Invitation Sent" | "Inactive" | "Active";
   /** @format date-time */
   dateOfJoining: string | null;
+  departmentId: string | null;
+  departmentName: string | null;
 }
 
 export interface UpdateUserRequestDto {
@@ -714,310 +716,60 @@ export interface ServicePaginatedResponseDto {
   items: ServiceResponseDto[];
 }
 
-export interface AddressFromMapBox {
-  /** @default [-97.87,34] */
-  coordinates: number[];
+export interface CreateJobNoteRequestDto {
+  /** @default "hs8da-cdef-gh22321ask-xzcm12e3" */
+  jobId: string;
+  /** @default "This is Job Note Content" */
+  content: string;
+  /** @default "<div class=......>hello world</div>" */
+  emailBody?: string;
+  /** @default "JobNote" */
+  type: "JobNote" | "RFI";
+  /** @default ["yunwoo@oj.vision","antifragilista@oj.vision"] */
+  receiverEmails?: string[];
+  files: File[];
 }
 
-export interface CreateProjectRequestDto {
-  /** @default "Residential" */
-  projectPropertyType: "Residential" | "Commercial";
-  /** @default "Chris Kim" */
-  projectPropertyOwner: string | null;
-  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
-  clientOrganizationId: string;
-  /** @default "000152" */
-  projectNumber: string | null;
-  projectPropertyAddress: AddressDto;
-  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
-  utilityId?: string;
+export interface CreateJobNoteResponseDto {
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  id: string;
+  /** @default 1 */
+  jobNoteNumber: number;
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  jobNoteFolderId: string | null;
 }
 
-export interface UpdateProjectRequestDto {
-  /** @default "Residential" */
-  projectPropertyType: "Residential" | "Commercial";
-  /** @default "Chris Kim" */
-  projectPropertyOwner: string | null;
-  /** @default "50021" */
-  projectNumber: string | null;
-  projectPropertyAddress: AddressDto;
-  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
-  utilityId?: string;
-}
-
-export interface ProjectPaginatedResponseFields {
-  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
-  projectId: string;
-  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
-  organizationId: string;
-  /** @example "Freedom Forever" */
-  organizationName: string;
-  /** @example "Residential" */
-  propertyType: "Residential" | "Commercial";
-  /** @example "https://host.com/projects/path" */
-  projectFolderLink: string | null;
-  /** @example null */
-  projectNumber: string | null;
-  /** @example "3480 Northwest 33rd Court, Lauderdale Lakes, Florida 33309" */
-  propertyFullAddress: string;
-  /** @example "Smith Kim" */
-  propertyOwnerName: string | null;
-  /** @example "Ground Mount" */
-  mountingType: "Roof Mount" | "Ground Mount";
-  /** @example "2023-09-05T07:14:57.270Z" */
+export interface JobNoteDetailResponseDto {
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  id: string;
+  /** @default "JobNote" */
+  type: "JobNote" | "RFI";
+  /** @example "Chris Kim" */
+  creatorName: string;
+  /** @example "what do you think about Jazz?" */
+  content: string;
+  /** @default 1 */
+  jobNoteNumber: number;
+  /** @default "yunwoo@oj.vision" */
+  senderMail: string | null;
+  /** @default ["yunwoo@oj.vision"] */
+  receiverMails: string[] | null;
+  /** @default ["https://drive.google.com/drive/folders/1MFhV8NTBNsPM3pvfBz6UKKTdKntXfWd7"] */
+  fileShareLink: string | null;
+  /** @format date-time */
   createdAt: string;
+}
+
+export interface JobNoteResponseDto {
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  clientOrganizationName: string;
+  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
+  projectType: string;
+  /** @example "Chris Kim" */
+  propertyAddress: string;
   /** @example 1 */
-  totalOfJobs: number;
-  /**
-   * 필요한지 확인 필요
-   * @example false
-   */
-  masterLogUpload: boolean;
-  /**
-   * 필요한지 확인 필요
-   * @example false
-   */
-  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
-}
-
-export interface ProjectPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: ProjectPaginatedResponseFields[];
-}
-
-export interface ProjectAssociatedRegulatoryBodyDto {
-  /** @default "12" */
-  stateId: string;
-  /** @default "12011" */
-  countyId: string | null;
-  /** @default "1201191098" */
-  countySubdivisionsId: string | null;
-  /** @default "1239525" */
-  placeId: string | null;
-  /** @default "1239525" */
-  ahjId: string;
-}
-
-export interface ProjectResponseDto {
-  /** @example "07e12e89-6077-4fd1-a029-c50060b57f43" */
-  projectId: string;
-  /** @example 201 */
-  systemSize: number | null;
-  /** @example "Kevin Brook" */
-  projectPropertyOwnerName: string | null;
-  /** @example "Ground Mount" */
-  mountingType: "Roof Mount" | "Ground Mount";
-  /** @example "Barun Corp" */
-  clientOrganization: string;
-  /** @example "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
-  clientOrganizationId: string;
-  /** @example "https://host.com/projects/path" */
-  projectFolderLink: string | null;
-  propertyAddress: AddressDto;
-  mailingAddressForWetStamp: AddressDto | null;
-  /** @example 3 */
-  numberOfWetStamp: number | null;
-  /** @example "Residential" */
-  propertyType: "Residential" | "Commercial";
-  /** @example null */
-  projectNumber: string | null;
-  /** @example "2023-09-05T07:14:57.270Z" */
-  createdAt: string;
-  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto;
-  /** @example 1 */
-  totalOfJobs: number;
-  /** @example false */
-  masterLogUpload: boolean;
-  /** @example false */
-  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
-  /** @example false */
-  hasHistoryElectricalPEStamp: boolean;
-  /** @example false */
-  hasHistoryStructuralPEStamp: boolean;
-  /** @example "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
-  utilityId: string | null;
-  /** @example [] */
-  jobs: JobResponseDto[];
-  /** @example "GnpyEmUZfZ1k7e6Jsvy_fcG8r-PWCQswP" */
-  projectFolderId: string | null;
-  /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
-  shareLink: string | null;
-}
-
-export interface ProjectsCountResponseDto {
-  projectsCount: number;
-  jobsCount: number;
-}
-
-export interface AhjNoteListResponseDto {
-  geoId: string;
-  name: string;
-  fullAhjName: string;
-  updatedBy: string;
-  updatedAt: string;
-  type: string | null;
-}
-
-export interface AhjNotePaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: AhjNoteListResponseDto[];
-}
-
-export interface General {
-  /** @default "https://google.com" */
-  website: string | null;
-  /** @default "See Notes" */
-  specificFormRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "generalNotes..." */
-  generalNotes: string | null;
-  /** @default "2015 IBC2" */
-  buildingCodes: string | null;
-  /** @default "See Notes" */
-  structuralStampRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "See Notes" */
-  electricalStampRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "See Notes" */
-  wetStampRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "Arcata city" */
-  name: string;
-  /** @default "Arroyo Grande city, California" */
-  fullAhjName: string;
-  /** @default "2023-09-04T07:31:27.217Z" */
-  createdAt: string | null;
-  /** @default "2023-09-04T07:31:27.217Z" */
-  updatedAt: string | null;
-  /** @default "2023-09-04T07:31:27.217Z" */
-  updatedBy: string | null;
-  /** @default "COUNTY" */
-  type: "STATE" | "COUNTY" | "COUNTY SUBDIVISIONS" | "PLACE" | null;
-}
-
-export interface Design {
-  /** @default "fireSetBack..." */
-  fireSetBack: string | null;
-  /** @default "utilityNotes..." */
-  utilityNotes: string | null;
-  /** @default "designNotes..." */
-  designNotes: string | null;
-  /** @default "See Notes" */
-  pvMeterRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "See Notes" */
-  acDisconnectRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "See Notes" */
-  centerFed120Percent: "No" | "Yes" | "See Notes" | null;
-  /** @default "deratedAmpacity..." */
-  deratedAmpacity: string | null;
-}
-
-export interface Engineering {
-  /** @default "See Notes" */
-  iebcAccepted: "No" | "Yes" | "See Notes" | null;
-  /** @default "See Notes" */
-  structuralObservationRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "Certified" */
-  digitalSignatureType: "Certified" | "Signed" | null;
-  /** @default "See Notes" */
-  windUpliftCalculationRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "115" */
-  windSpeedRiskCatFirst: string | null;
-  /** @default "115" */
-  windSpeedRiskCatSecond: string | null;
-  /** @default "30" */
-  snowLoadGround: string | null;
-  /** @default "30" */
-  snowLoadFlatRoof: string | null;
-  /** @default "ofWetStamps..." */
-  ofWetStamps: string | null;
-  /** @default "ANSI B (11x17 INCH)" */
-  wetStampSize:
-    | "ANSI A (8.5x11 INCH)"
-    | "ANSI B (11x17 INCH)"
-    | "ANSI D (22x34 INCH)"
-    | "ARCH D (24x36 INCH)"
-    | "See Notes"
-    | null;
-  /** @default "engineeringNotes..." */
-  engineeringNotes: string | null;
-}
-
-export interface ElectricalEngineering {
-  /** @default "electricalNotes..." */
-  electricalNotes: string | null;
-}
-
-export interface AhjNoteResponseDto {
-  general: General;
-  design: Design;
-  engineering: Engineering;
-  electricalEngineering: ElectricalEngineering;
-}
-
-export interface UpdateAhjGeneral {
-  /** @example "https://google.com" */
-  website: string | null;
-  /** @example "See Notes" */
-  specificFormRequired: "No" | "Yes" | "See Notes" | null;
-  /** @example "generalNotes..." */
-  generalNotes: string | null;
-  /** @example "buildingCodes..." */
-  buildingCodes: string | null;
-  /** @default "See Notes" */
-  structuralStampRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "See Notes" */
-  electricalStampRequired: "No" | "Yes" | "See Notes" | null;
-  /** @default "See Notes" */
-  wetStampRequired: "No" | "Yes" | "See Notes" | null;
-}
-
-export interface UpdateAhjNoteRequestDto {
-  general: UpdateAhjGeneral;
-  design: Design;
-  engineering: Engineering;
-  electricalEngineering: ElectricalEngineering;
-}
-
-export interface AhjNoteHistoryResponseDto {
-  historyType: "Create" | "Modify";
-  general: General;
-  design: Design;
-  engineering: Engineering;
-  electricalEngineering: ElectricalEngineering;
-  beforeModification?: AhjNoteHistoryResponseDto;
-}
-
-export interface AhjNoteHistoryListResponseDto {
-  geoId: string;
-  historyType: "Create" | "Modify";
-  name: string;
-  fullAhjName: string;
-  updatedBy: string;
-  updatedAt: string;
-}
-
-export interface AhjNoteHistoryPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: AhjNoteHistoryListResponseDto[];
+  jobRequestNumber: number;
+  data: JobNoteDetailResponseDto[];
 }
 
 export interface AssignTaskRequestDto {
@@ -1317,17 +1069,8 @@ export interface ClientToInvoiceResponseDto {
   clientToInvoices: ClientToInvoice[];
 }
 
-export interface Attachments {
-  filename?: string;
-  content?: string;
-  path?: string;
-  contentType?: string;
-  encoding?: string;
-  raw?: string;
-}
-
 export interface IssueInvoiceRequestDto {
-  attachments: Attachments[];
+  attachments: File[];
 }
 
 export interface ClientWithOutstandingBalancesResponseDto {
@@ -1884,6 +1627,312 @@ export interface PaymentPaginatedResponseDto {
   items: PaymentResponseDto[];
 }
 
+export interface AddressFromMapBox {
+  /** @default [-97.87,34] */
+  coordinates: number[];
+}
+
+export interface CreateProjectRequestDto {
+  /** @default "Residential" */
+  projectPropertyType: "Residential" | "Commercial";
+  /** @default "Chris Kim" */
+  projectPropertyOwner: string | null;
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  clientOrganizationId: string;
+  /** @default "000152" */
+  projectNumber: string | null;
+  projectPropertyAddress: AddressDto;
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  utilityId?: string;
+}
+
+export interface UpdateProjectRequestDto {
+  /** @default "Residential" */
+  projectPropertyType: "Residential" | "Commercial";
+  /** @default "Chris Kim" */
+  projectPropertyOwner: string | null;
+  /** @default "50021" */
+  projectNumber: string | null;
+  projectPropertyAddress: AddressDto;
+  /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
+  utilityId?: string;
+}
+
+export interface ProjectPaginatedResponseFields {
+  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  projectId: string;
+  /** @example "96d39061-a4d7-4de9-a147-f627467e11d5" */
+  organizationId: string;
+  /** @example "Freedom Forever" */
+  organizationName: string;
+  /** @example "Residential" */
+  propertyType: "Residential" | "Commercial";
+  /** @example "https://host.com/projects/path" */
+  projectFolderLink: string | null;
+  /** @example null */
+  projectNumber: string | null;
+  /** @example "3480 Northwest 33rd Court, Lauderdale Lakes, Florida 33309" */
+  propertyFullAddress: string;
+  /** @example "Smith Kim" */
+  propertyOwnerName: string | null;
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @example "2023-09-05T07:14:57.270Z" */
+  createdAt: string;
+  /** @example 1 */
+  totalOfJobs: number;
+  /**
+   * 필요한지 확인 필요
+   * @example false
+   */
+  masterLogUpload: boolean;
+  /**
+   * 필요한지 확인 필요
+   * @example false
+   */
+  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
+}
+
+export interface ProjectPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: ProjectPaginatedResponseFields[];
+}
+
+export interface ProjectAssociatedRegulatoryBodyDto {
+  /** @default "12" */
+  stateId: string;
+  /** @default "12011" */
+  countyId: string | null;
+  /** @default "1201191098" */
+  countySubdivisionsId: string | null;
+  /** @default "1239525" */
+  placeId: string | null;
+  /** @default "1239525" */
+  ahjId: string;
+}
+
+export interface ProjectResponseDto {
+  /** @example "07e12e89-6077-4fd1-a029-c50060b57f43" */
+  projectId: string;
+  /** @example 201 */
+  systemSize: number | null;
+  /** @example "Kevin Brook" */
+  projectPropertyOwnerName: string | null;
+  /** @example "Ground Mount" */
+  mountingType: "Roof Mount" | "Ground Mount";
+  /** @example "Barun Corp" */
+  clientOrganization: string;
+  /** @example "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
+  clientOrganizationId: string;
+  /** @example "https://host.com/projects/path" */
+  projectFolderLink: string | null;
+  propertyAddress: AddressDto;
+  mailingAddressForWetStamp: AddressDto | null;
+  /** @example 3 */
+  numberOfWetStamp: number | null;
+  /** @example "Residential" */
+  propertyType: "Residential" | "Commercial";
+  /** @example null */
+  projectNumber: string | null;
+  /** @example "2023-09-05T07:14:57.270Z" */
+  createdAt: string;
+  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto;
+  /** @example 1 */
+  totalOfJobs: number;
+  /** @example false */
+  masterLogUpload: boolean;
+  /** @example false */
+  designOrPEStampPreviouslyDoneOnProjectOutSide: boolean;
+  /** @example false */
+  hasHistoryElectricalPEStamp: boolean;
+  /** @example false */
+  hasHistoryStructuralPEStamp: boolean;
+  /** @example "eaefe251-0f1f-49ac-88cb-3582ec76601d" */
+  utilityId: string | null;
+  /** @example [] */
+  jobs: JobResponseDto[];
+  /** @example "GnpyEmUZfZ1k7e6Jsvy_fcG8r-PWCQswP" */
+  projectFolderId: string | null;
+  /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
+  shareLink: string | null;
+}
+
+export interface ProjectsCountResponseDto {
+  projectsCount: number;
+  jobsCount: number;
+}
+
+export interface AhjNoteListResponseDto {
+  geoId: string;
+  name: string;
+  fullAhjName: string;
+  updatedBy: string;
+  updatedAt: string;
+  type: string | null;
+}
+
+export interface AhjNotePaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: AhjNoteListResponseDto[];
+}
+
+export interface General {
+  /** @default "https://google.com" */
+  website: string | null;
+  /** @default "See Notes" */
+  specificFormRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "generalNotes..." */
+  generalNotes: string | null;
+  /** @default "2015 IBC2" */
+  buildingCodes: string | null;
+  /** @default "See Notes" */
+  structuralStampRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "See Notes" */
+  electricalStampRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "See Notes" */
+  wetStampRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "Arcata city" */
+  name: string;
+  /** @default "Arroyo Grande city, California" */
+  fullAhjName: string;
+  /** @default "2023-09-04T07:31:27.217Z" */
+  createdAt: string | null;
+  /** @default "2023-09-04T07:31:27.217Z" */
+  updatedAt: string | null;
+  /** @default "2023-09-04T07:31:27.217Z" */
+  updatedBy: string | null;
+  /** @default "COUNTY" */
+  type: "STATE" | "COUNTY" | "COUNTY SUBDIVISIONS" | "PLACE" | null;
+}
+
+export interface Design {
+  /** @default "fireSetBack..." */
+  fireSetBack: string | null;
+  /** @default "utilityNotes..." */
+  utilityNotes: string | null;
+  /** @default "designNotes..." */
+  designNotes: string | null;
+  /** @default "See Notes" */
+  pvMeterRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "See Notes" */
+  acDisconnectRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "See Notes" */
+  centerFed120Percent: "No" | "Yes" | "See Notes" | null;
+  /** @default "deratedAmpacity..." */
+  deratedAmpacity: string | null;
+}
+
+export interface Engineering {
+  /** @default "See Notes" */
+  iebcAccepted: "No" | "Yes" | "See Notes" | null;
+  /** @default "See Notes" */
+  structuralObservationRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "Certified" */
+  digitalSignatureType: "Certified" | "Signed" | null;
+  /** @default "See Notes" */
+  windUpliftCalculationRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "115" */
+  windSpeedRiskCatFirst: string | null;
+  /** @default "115" */
+  windSpeedRiskCatSecond: string | null;
+  /** @default "30" */
+  snowLoadGround: string | null;
+  /** @default "30" */
+  snowLoadFlatRoof: string | null;
+  /** @default "ofWetStamps..." */
+  ofWetStamps: string | null;
+  /** @default "ANSI B (11x17 INCH)" */
+  wetStampSize:
+    | "ANSI A (8.5x11 INCH)"
+    | "ANSI B (11x17 INCH)"
+    | "ANSI D (22x34 INCH)"
+    | "ARCH D (24x36 INCH)"
+    | "See Notes"
+    | null;
+  /** @default "engineeringNotes..." */
+  engineeringNotes: string | null;
+}
+
+export interface ElectricalEngineering {
+  /** @default "electricalNotes..." */
+  electricalNotes: string | null;
+}
+
+export interface AhjNoteResponseDto {
+  general: General;
+  design: Design;
+  engineering: Engineering;
+  electricalEngineering: ElectricalEngineering;
+}
+
+export interface UpdateAhjGeneral {
+  /** @example "https://google.com" */
+  website: string | null;
+  /** @example "See Notes" */
+  specificFormRequired: "No" | "Yes" | "See Notes" | null;
+  /** @example "generalNotes..." */
+  generalNotes: string | null;
+  /** @example "buildingCodes..." */
+  buildingCodes: string | null;
+  /** @default "See Notes" */
+  structuralStampRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "See Notes" */
+  electricalStampRequired: "No" | "Yes" | "See Notes" | null;
+  /** @default "See Notes" */
+  wetStampRequired: "No" | "Yes" | "See Notes" | null;
+}
+
+export interface UpdateAhjNoteRequestDto {
+  general: UpdateAhjGeneral;
+  design: Design;
+  engineering: Engineering;
+  electricalEngineering: ElectricalEngineering;
+}
+
+export interface AhjNoteHistoryResponseDto {
+  historyType: "Create" | "Modify";
+  general: General;
+  design: Design;
+  engineering: Engineering;
+  electricalEngineering: ElectricalEngineering;
+  beforeModification?: AhjNoteHistoryResponseDto;
+}
+
+export interface AhjNoteHistoryListResponseDto {
+  geoId: string;
+  historyType: "Create" | "Modify";
+  name: string;
+  fullAhjName: string;
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export interface AhjNoteHistoryPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: AhjNoteHistoryListResponseDto[];
+}
+
 export interface CreateOrderedServiceRequestDto {
   /** @default "" */
   serviceId: string;
@@ -1962,33 +2011,6 @@ export interface OrderedServicePaginatedResponseDto {
   /** @example 500 */
   totalPage: number;
   items: OrderedServiceResponseDto[];
-}
-
-export interface IntegratedOrderModificationHistoryResponseDto {
-  jobId: string;
-  /** @format date-time */
-  modifiedAt: string;
-  modifiedBy: string;
-  entity: string;
-  entityId: string;
-  scopeOrTaskName: string | null;
-  attribute: string | null;
-  isDateType: boolean;
-  operation: "Create" | "Update" | "Delete";
-  afterValue: string | null;
-  beforeValue: string | null;
-}
-
-export interface IntegratedOrderModificationHistoryPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: IntegratedOrderModificationHistoryResponseDto[];
 }
 
 export interface CreateUtilityRequestDto {
@@ -2083,60 +2105,31 @@ export interface UtilityHistoryPaginatedResponseDto {
   items: UtilityHistoryResponseDto[];
 }
 
-export interface CreateJobNoteRequestDto {
-  /** @default "hs8da-cdef-gh22321ask-xzcm12e3" */
+export interface IntegratedOrderModificationHistoryResponseDto {
   jobId: string;
-  /** @default "This is Job Note Content" */
-  content: string;
-  /** @default "<div class=......>hello world</div>" */
-  emailBody?: string;
-  /** @default "JobNote" */
-  type: "JobNote" | "RFI";
-  /** @default ["yunwoo@oj.vision","antifragilista@oj.vision"] */
-  receiverEmails?: string[];
-  files: File[];
-}
-
-export interface CreateJobNoteResponseDto {
-  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
-  id: string;
-  /** @default 1 */
-  jobNoteNumber: number;
-  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
-  jobNoteFolderId: string | null;
-}
-
-export interface JobNoteDetailResponseDto {
-  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
-  id: string;
-  /** @default "JobNote" */
-  type: "JobNote" | "RFI";
-  /** @example "Chris Kim" */
-  creatorName: string;
-  /** @example "what do you think about Jazz?" */
-  content: string;
-  /** @default 1 */
-  jobNoteNumber: number;
-  /** @default "yunwoo@oj.vision" */
-  senderMail: string | null;
-  /** @default ["yunwoo@oj.vision"] */
-  receiverMails: string[] | null;
-  /** @default ["https://drive.google.com/drive/folders/1MFhV8NTBNsPM3pvfBz6UKKTdKntXfWd7"] */
-  fileShareLink: string | null;
   /** @format date-time */
-  createdAt: string;
+  modifiedAt: string;
+  modifiedBy: string;
+  entity: string;
+  entityId: string;
+  scopeOrTaskName: string | null;
+  attribute: string | null;
+  isDateType: boolean;
+  operation: "Create" | "Update" | "Delete";
+  afterValue: string | null;
+  beforeValue: string | null;
 }
 
-export interface JobNoteResponseDto {
-  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
-  clientOrganizationName: string;
-  /** @default "a1918979-a454-4d83-8eb0-31195a5967c6" */
-  projectType: string;
-  /** @example "Chris Kim" */
-  propertyAddress: string;
-  /** @example 1 */
-  jobRequestNumber: number;
-  data: JobNoteDetailResponseDto[];
+export interface IntegratedOrderModificationHistoryPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: IntegratedOrderModificationHistoryResponseDto[];
 }
 
 export interface CreateTaskRequestDto {
@@ -2799,6 +2792,62 @@ export interface SchedulePaginatedResponseDto {
   items: ScheduleResponseDto[];
 }
 
+export interface CreateDepartmentRequestDto {
+  name: string;
+  description: string | null;
+  viewClientInvoice: boolean;
+  viewVendorInvoice: boolean;
+  viewCustomPricing: boolean;
+  viewExpensePricing: boolean;
+  viewScopePrice: boolean;
+  viewTaskCost: boolean;
+}
+
+export interface UpdateDepartmentRequestDto {
+  name: string;
+  description: string | null;
+  viewClientInvoice: boolean;
+  viewVendorInvoice: boolean;
+  viewCustomPricing: boolean;
+  viewExpensePricing: boolean;
+  viewScopePrice: boolean;
+  viewTaskCost: boolean;
+}
+
+export type DeleteDepartmentRequestDto = object;
+
+export interface DepartmentResponseDto {
+  id: string;
+  name: string;
+  description: string | null;
+  viewClientInvoice: boolean;
+  viewVendorInvoice: boolean;
+  viewCustomPricing: boolean;
+  viewExpensePricing: boolean;
+  viewScopePrice: boolean;
+  viewTaskCost: boolean;
+}
+
+export interface DepartmentPaginatedResponseDto {
+  /** @default 1 */
+  page: number;
+  /** @default 20 */
+  pageSize: number;
+  /** @example 10000 */
+  totalCount: number;
+  /** @example 500 */
+  totalPage: number;
+  items: DepartmentResponseDto[];
+}
+
+export interface AddUserRequestDto {
+  userId: string;
+}
+
+export interface RemoveUserRequestDto {
+  userId: string;
+}
+
 export interface AuthenticationControllerPostSignInTimeParams {
   /** @default 20 */
   jwt: number;
@@ -2813,16 +2862,18 @@ export interface FindUsersHttpControllerGetFindUsersParams {
   organizationId?: string | null;
   /** @default "BarunCorp" */
   organizationName?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default null
-   */
   isContractor?: boolean | null;
   /**
    * Using LIKE (중간 값 검색)
    * @default null
    */
   userName?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default null
+   */
+  departmentName?: string | null;
+  hasDepartment?: boolean | null;
   /** @default "Active" */
   status?:
     | "Invitation Not Sent"
@@ -3107,90 +3158,6 @@ export interface FindServicePaginatedHttpControllerGetParams {
    * @example 1
    */
   page?: number;
-}
-
-export interface FindProjectsHttpControllerFindUsersParams {
-  /** @default "" */
-  organizationId?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default ""
-   */
-  organizationName?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default null
-   */
-  projectNumber?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default null
-   */
-  projectPropertyOwner?: string | null;
-  /**
-   * Using LIKE (중간 값 검색)
-   * @default "3480 Northwest 33rd Court"
-   */
-  propertyFullAddress?: string | null;
-  /** @default "Residential" */
-  propertyType?: "Residential" | "Commercial" | null;
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-}
-
-export interface GeographyControllerGetFindNotesParams {
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-  /** @default "1239525" */
-  geoId?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  fullAhjName?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  name?: string | null;
-}
-
-export interface GeographyControllerGetFinNoteUpdateHistoryDetailParams {
-  /** @format date-time */
-  updatedAt: string;
-  /** @default "1239525" */
-  geoId: string;
-}
-
-export interface GeographyControllerGetFindNoteUpdateHistoryParams {
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-  /** @default "1239525" */
-  geoId: string | null;
 }
 
 export interface FindAssignedTaskPaginatedHttpControllerGetParams {
@@ -3610,6 +3577,90 @@ export interface FindPaymentPaginatedHttpControllerGetParams {
   page?: number;
 }
 
+export interface FindProjectsHttpControllerFindUsersParams {
+  /** @default "" */
+  organizationId?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
+  organizationName?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default null
+   */
+  projectNumber?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default null
+   */
+  projectPropertyOwner?: string | null;
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default "3480 Northwest 33rd Court"
+   */
+  propertyFullAddress?: string | null;
+  /** @default "Residential" */
+  propertyType?: "Residential" | "Commercial" | null;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface GeographyControllerGetFindNotesParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  /** @default "1239525" */
+  geoId?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  fullAhjName?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  name?: string | null;
+}
+
+export interface GeographyControllerGetFinNoteUpdateHistoryDetailParams {
+  /** @format date-time */
+  updatedAt: string;
+  /** @default "1239525" */
+  geoId: string;
+}
+
+export interface GeographyControllerGetFindNoteUpdateHistoryParams {
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+  /** @default "1239525" */
+  geoId: string | null;
+}
+
 export interface FindOrderedServicePaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
@@ -3654,22 +3705,6 @@ export interface FindOrderedServicePaginatedHttpControllerGetParams {
   jobName?: string | null;
 }
 
-export interface FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams {
-  jobId: string;
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-}
-
 export interface FindUtilityPaginatedHttpControllerGetParams {
   /** @default "AL" */
   stateAbbreviation?: string;
@@ -3702,6 +3737,22 @@ export interface FindUtilityHistoryPaginatedHttpControllerGetParams {
   page?: number;
   /** @default "674e3b83-0255-46fe-bc4b-047fca3c43cf" */
   utilityId: string;
+}
+
+export interface FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams {
+  jobId: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
 }
 
 export interface FindTaskPaginatedHttpControllerGetParams {
@@ -3944,6 +3995,22 @@ export interface FindTrackingNumbersPaginatedHttpControllerGetParams {
 export interface FindSchedulePaginatedHttpControllerGetParams {
   /** @default "John Doe" */
   userName?: string;
+  /**
+   * Specifies a limit of returned records
+   * @default 20
+   * @example 20
+   */
+  limit?: number;
+  /**
+   * Page number
+   * @default 1
+   * @example 1
+   */
+  page?: number;
+}
+
+export interface FindDepartmentPaginatedHttpControllerGetParams {
+  name?: string | null;
   /**
    * Specifies a limit of returned records
    * @default 20
@@ -5136,41 +5203,22 @@ export class Api<
         ...params,
       }),
   };
-  searchCensus = {
+  orderedJobNotes = {
     /**
-     * @description Census에서 행정구역이 매칭되지 않는 주소들이 있음 Census 결과와 상관 없이 프로젝트는 생성되어야함
+     * No description
      *
-     * @name SearchCensusHttpControllerPostSearchCensus
-     * @request POST:/search-census
+     * @name CreateJobNoteHttpControllerCreate
+     * @request POST:/ordered-job-notes
      */
-    searchCensusHttpControllerPostSearchCensus: (
-      data: AddressFromMapBox,
+    createJobNoteHttpControllerCreate: (
+      data: CreateJobNoteRequestDto,
       params: RequestParams = {}
     ) =>
-      this.request<void, any>({
-        path: `/search-census`,
+      this.request<CreateJobNoteResponseDto, any>({
+        path: `/ordered-job-notes`,
         method: "POST",
         body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-  };
-  projects = {
-    /**
-     * No description
-     *
-     * @name CreateProjectHttpControllerPostCreateProejct
-     * @request POST:/projects
-     */
-    createProjectHttpControllerPostCreateProejct: (
-      data: CreateProjectRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<IdResponse, any>({
-        path: `/projects`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -5178,215 +5226,16 @@ export class Api<
     /**
      * No description
      *
-     * @name FindProjectsHttpControllerFindUsers
-     * @summary Find projects
-     * @request GET:/projects
+     * @name FindJobNotesHttpControllerFind
+     * @request GET:/ordered-job-notes/{jobId}
      */
-    findProjectsHttpControllerFindUsers: (
-      query: FindProjectsHttpControllerFindUsersParams,
+    findJobNotesHttpControllerFind: (
+      jobId: string,
       params: RequestParams = {}
     ) =>
-      this.request<ProjectPaginatedResponseDto, any>({
-        path: `/projects`,
+      this.request<JobNoteResponseDto, any>({
+        path: `/ordered-job-notes/${jobId}`,
         method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateProjectHttpControllerUpdate
-     * @request PATCH:/projects/{projectId}
-     */
-    updateProjectHttpControllerUpdate: (
-      projectId: string,
-      data: UpdateProjectRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/projects/${projectId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DeleteProjectHttpControllerDelete
-     * @request DELETE:/projects/{projectId}
-     */
-    deleteProjectHttpControllerDelete: (
-      projectId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/projects/${projectId}`,
-        method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindProjectDetailHttpControllerFindProjectDetail
-     * @summary Find projects
-     * @request GET:/projects/{projectId}
-     */
-    findProjectDetailHttpControllerFindProjectDetail: (
-      projectId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<ProjectResponseDto, any>({
-        path: `/projects/${projectId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-  };
-  projectsCount = {
-    /**
-     * No description
-     *
-     * @name FindProjectsCountHttpControllerFindUsers
-     * @summary Find projects count
-     * @request GET:/projects-count
-     */
-    findProjectsCountHttpControllerFindUsers: (params: RequestParams = {}) =>
-      this.request<ProjectsCountResponseDto, any>({
-        path: `/projects-count`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-  };
-  geography = {
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFindNotes
-     * @request GET:/geography/notes
-     * @secure
-     */
-    geographyControllerGetFindNotes: (
-      query: GeographyControllerGetFindNotesParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNotePaginatedResponseDto, any>({
-        path: `/geography/notes`,
-        method: "GET",
-        query: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFindNoteByGeoId
-     * @request GET:/geography/{geoId}/notes
-     * @secure
-     */
-    geographyControllerGetFindNoteByGeoId: (
-      geoId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNoteResponseDto, any>({
-        path: `/geography/${geoId}/notes`,
-        method: "GET",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerPutUpdateNote
-     * @request PUT:/geography/{geoId}/notes
-     * @secure
-     */
-    geographyControllerPutUpdateNote: (
-      geoId: string,
-      data: UpdateAhjNoteRequestDto,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/geography/${geoId}/notes`,
-        method: "PUT",
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerDeleteNoteByGeoId
-     * @request DELETE:/geography/{geoId}/notes
-     * @secure
-     */
-    geographyControllerDeleteNoteByGeoId: (
-      geoId: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<void, any>({
-        path: `/geography/${geoId}/notes`,
-        method: "DELETE",
-        secure: true,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFinNoteUpdateHistoryDetail
-     * @request GET:/geography/{geoId}/notes/history
-     * @secure
-     */
-    geographyControllerGetFinNoteUpdateHistoryDetail: (
-      {
-        geoId,
-        ...query
-      }: GeographyControllerGetFinNoteUpdateHistoryDetailParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNoteHistoryResponseDto, any>({
-        path: `/geography/${geoId}/notes/history`,
-        method: "GET",
-        query: query,
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags geography
-     * @name GeographyControllerGetFindNoteUpdateHistory
-     * @request GET:/geography/notes/history
-     * @secure
-     */
-    geographyControllerGetFindNoteUpdateHistory: (
-      query: GeographyControllerGetFindNoteUpdateHistoryParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<AhjNoteHistoryPaginatedResponseDto, any>({
-        path: `/geography/notes/history`,
-        method: "GET",
-        query: query,
-        secure: true,
         format: "json",
         ...params,
       }),
@@ -6628,6 +6477,261 @@ export class Api<
         ...params,
       }),
   };
+  searchCensus = {
+    /**
+     * @description Census에서 행정구역이 매칭되지 않는 주소들이 있음 Census 결과와 상관 없이 프로젝트는 생성되어야함
+     *
+     * @name SearchCensusHttpControllerPostSearchCensus
+     * @request POST:/search-census
+     */
+    searchCensusHttpControllerPostSearchCensus: (
+      data: AddressFromMapBox,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/search-census`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  projects = {
+    /**
+     * No description
+     *
+     * @name CreateProjectHttpControllerPostCreateProejct
+     * @request POST:/projects
+     */
+    createProjectHttpControllerPostCreateProejct: (
+      data: CreateProjectRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/projects`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindProjectsHttpControllerFindUsers
+     * @summary Find projects
+     * @request GET:/projects
+     */
+    findProjectsHttpControllerFindUsers: (
+      query: FindProjectsHttpControllerFindUsersParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<ProjectPaginatedResponseDto, any>({
+        path: `/projects`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateProjectHttpControllerUpdate
+     * @request PATCH:/projects/{projectId}
+     */
+    updateProjectHttpControllerUpdate: (
+      projectId: string,
+      data: UpdateProjectRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/projects/${projectId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeleteProjectHttpControllerDelete
+     * @request DELETE:/projects/{projectId}
+     */
+    deleteProjectHttpControllerDelete: (
+      projectId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/projects/${projectId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindProjectDetailHttpControllerFindProjectDetail
+     * @summary Find projects
+     * @request GET:/projects/{projectId}
+     */
+    findProjectDetailHttpControllerFindProjectDetail: (
+      projectId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<ProjectResponseDto, any>({
+        path: `/projects/${projectId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  projectsCount = {
+    /**
+     * No description
+     *
+     * @name FindProjectsCountHttpControllerFindUsers
+     * @summary Find projects count
+     * @request GET:/projects-count
+     */
+    findProjectsCountHttpControllerFindUsers: (params: RequestParams = {}) =>
+      this.request<ProjectsCountResponseDto, any>({
+        path: `/projects-count`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  geography = {
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFindNotes
+     * @request GET:/geography/notes
+     * @secure
+     */
+    geographyControllerGetFindNotes: (
+      query: GeographyControllerGetFindNotesParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNotePaginatedResponseDto, any>({
+        path: `/geography/notes`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFindNoteByGeoId
+     * @request GET:/geography/{geoId}/notes
+     * @secure
+     */
+    geographyControllerGetFindNoteByGeoId: (
+      geoId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNoteResponseDto, any>({
+        path: `/geography/${geoId}/notes`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerPutUpdateNote
+     * @request PUT:/geography/{geoId}/notes
+     * @secure
+     */
+    geographyControllerPutUpdateNote: (
+      geoId: string,
+      data: UpdateAhjNoteRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/geography/${geoId}/notes`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerDeleteNoteByGeoId
+     * @request DELETE:/geography/{geoId}/notes
+     * @secure
+     */
+    geographyControllerDeleteNoteByGeoId: (
+      geoId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/geography/${geoId}/notes`,
+        method: "DELETE",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFinNoteUpdateHistoryDetail
+     * @request GET:/geography/{geoId}/notes/history
+     * @secure
+     */
+    geographyControllerGetFinNoteUpdateHistoryDetail: (
+      {
+        geoId,
+        ...query
+      }: GeographyControllerGetFinNoteUpdateHistoryDetailParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNoteHistoryResponseDto, any>({
+        path: `/geography/${geoId}/notes/history`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags geography
+     * @name GeographyControllerGetFindNoteUpdateHistory
+     * @request GET:/geography/notes/history
+     * @secure
+     */
+    geographyControllerGetFindNoteUpdateHistory: (
+      query: GeographyControllerGetFindNoteUpdateHistoryParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<AhjNoteHistoryPaginatedResponseDto, any>({
+        path: `/geography/notes/history`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+  };
   orderedServices = {
     /**
      * No description
@@ -6768,47 +6872,6 @@ export class Api<
         ...params,
       }),
   };
-  integratedOrderModificationHistory = {
-    /**
-     * No description
-     *
-     * @name FindIntegratedOrderModificationHistoryHttpControllerGet
-     * @request GET:/integrated-order-modification-history/{jobId}/{entityId}/{attribute}/{modifiedAt}
-     */
-    findIntegratedOrderModificationHistoryHttpControllerGet: (
-      entityId: string,
-      jobId: string,
-      attribute: string,
-      modifiedAt: string,
-      params: RequestParams = {}
-    ) =>
-      this.request<IntegratedOrderModificationHistoryResponseDto, any>({
-        path: `/integrated-order-modification-history/${jobId}/${entityId}/${attribute}/${modifiedAt}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FindIntegratedOrderModificationHistoryPaginatedHttpControllerGet
-     * @request GET:/integrated-order-modification-history
-     */
-    findIntegratedOrderModificationHistoryPaginatedHttpControllerGet: (
-      query: FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<IntegratedOrderModificationHistoryPaginatedResponseDto, any>(
-        {
-          path: `/integrated-order-modification-history`,
-          method: "GET",
-          query: query,
-          format: "json",
-          ...params,
-        }
-      ),
-  };
   utilities = {
     /**
      * No description
@@ -6921,22 +6984,23 @@ export class Api<
         ...params,
       }),
   };
-  orderedJobNotes = {
+  integratedOrderModificationHistory = {
     /**
      * No description
      *
-     * @name CreateJobNoteHttpControllerCreate
-     * @request POST:/ordered-job-notes
+     * @name FindIntegratedOrderModificationHistoryHttpControllerGet
+     * @request GET:/integrated-order-modification-history/{jobId}/{entityId}/{attribute}/{modifiedAt}
      */
-    createJobNoteHttpControllerCreate: (
-      data: CreateJobNoteRequestDto,
+    findIntegratedOrderModificationHistoryHttpControllerGet: (
+      entityId: string,
+      jobId: string,
+      attribute: string,
+      modifiedAt: string,
       params: RequestParams = {}
     ) =>
-      this.request<CreateJobNoteResponseDto, any>({
-        path: `/ordered-job-notes`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
+      this.request<IntegratedOrderModificationHistoryResponseDto, any>({
+        path: `/integrated-order-modification-history/${jobId}/${entityId}/${attribute}/${modifiedAt}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
@@ -6944,19 +7008,22 @@ export class Api<
     /**
      * No description
      *
-     * @name FindJobNotesHttpControllerFind
-     * @request GET:/ordered-job-notes/{jobId}
+     * @name FindIntegratedOrderModificationHistoryPaginatedHttpControllerGet
+     * @request GET:/integrated-order-modification-history
      */
-    findJobNotesHttpControllerFind: (
-      jobId: string,
+    findIntegratedOrderModificationHistoryPaginatedHttpControllerGet: (
+      query: FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams,
       params: RequestParams = {}
     ) =>
-      this.request<JobNoteResponseDto, any>({
-        path: `/ordered-job-notes/${jobId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
+      this.request<IntegratedOrderModificationHistoryPaginatedResponseDto, any>(
+        {
+          path: `/integrated-order-modification-history`,
+          method: "GET",
+          query: query,
+          format: "json",
+          ...params,
+        }
+      ),
   };
   tasks = {
     /**
@@ -7794,6 +7861,137 @@ export class Api<
       this.request<void, any>({
         path: `/tracking-numbers/${trackingNumberId}`,
         method: "DELETE",
+        ...params,
+      }),
+  };
+  departments = {
+    /**
+     * No description
+     *
+     * @name CreateDepartmentHttpControllerPost
+     * @request POST:/departments
+     */
+    createDepartmentHttpControllerPost: (
+      data: CreateDepartmentRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/departments`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindDepartmentPaginatedHttpControllerGet
+     * @request GET:/departments
+     */
+    findDepartmentPaginatedHttpControllerGet: (
+      query: FindDepartmentPaginatedHttpControllerGetParams,
+      params: RequestParams = {}
+    ) =>
+      this.request<DepartmentPaginatedResponseDto, any>({
+        path: `/departments`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateDepartmentHttpControllerPatch
+     * @request PATCH:/departments/{departmentId}
+     */
+    updateDepartmentHttpControllerPatch: (
+      departmentId: string,
+      data: UpdateDepartmentRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/departments/${departmentId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeleteDepartmentHttpControllerDelete
+     * @request DELETE:/departments/{departmentId}
+     */
+    deleteDepartmentHttpControllerDelete: (
+      departmentId: string,
+      data: DeleteDepartmentRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/departments/${departmentId}`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindDepartmentHttpControllerGet
+     * @request GET:/departments/{departmentId}
+     */
+    findDepartmentHttpControllerGet: (
+      departmentId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<DepartmentResponseDto, any>({
+        path: `/departments/${departmentId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AddUserHttpControllerAdd
+     * @request POST:/departments/{departmentId}/add-user
+     */
+    addUserHttpControllerAdd: (
+      departmentId: string,
+      data: AddUserRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/departments/${departmentId}/add-user`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RemoveUserHttpControllerRemove
+     * @request POST:/departments/{departmentId}/remove-user
+     */
+    removeUserHttpControllerRemove: (
+      departmentId: string,
+      data: RemoveUserRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/departments/${departmentId}/remove-user`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

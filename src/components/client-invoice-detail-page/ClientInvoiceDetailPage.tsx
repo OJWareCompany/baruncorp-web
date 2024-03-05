@@ -9,7 +9,7 @@ import PageHeaderAction from "./PageHeaderAction";
 import DownloadCSVButton from "./DownloadCSVButton";
 import PaymentsTable from "./PaymentsTable";
 import PaymentDialog from "./PaymentDialog";
-import IssueButton from "./IssueButton";
+// import IssueButton from "./IssueButton";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useClientInvoiceQuery from "@/queries/useClientInvoiceQuery";
 import useNotFound from "@/hook/useNotFound";
@@ -146,15 +146,15 @@ export default function ClientInvoiceDetailPage({
         </section>
         <CollapsibleSection
           title="Status"
-          action={
-            isBarunCorpMember && (
-              <IssueButton
-                organization={organization}
-                clientInvoice={clientInvoice}
-                services={services}
-              />
-            )
-          }
+          // action={
+          //   isBarunCorpMember && (
+          //     <IssueButton
+          //       organization={organization}
+          //       clientInvoice={clientInvoice}
+          //       services={services}
+          //     />
+          //   )
+          // }
         >
           <ClientInvoiceStatus clientInvoice={clientInvoice} />
         </CollapsibleSection>
