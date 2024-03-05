@@ -44,7 +44,6 @@ import { Button } from "@/components/ui/button";
 import useUsersQuery, { getUsersQueryKey } from "@/queries/useUsersQuery";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  BARUNCORP_ORGANIZATION_ID,
   UserStatusEnum,
   YesOrNoEnum,
   transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum,
@@ -216,17 +215,11 @@ export default function UsersTable({ organization }: Props) {
             }
           />
         ),
-        cell: ({ getValue, row }) => {
-          if (row.original.organizationId === BARUNCORP_ORGANIZATION_ID) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return (
-            <div className="flex">
-              <Checkbox checked={getValue()} />
-            </div>
-          );
-        },
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
       }),
       columnHelper.accessor("status", {
         header: () => (
@@ -315,6 +308,9 @@ export default function UsersTable({ organization }: Props) {
     [params, syncedParams]
   );
 
+  const isOrganizationBarunCorp =
+    organization.organizationType.toUpperCase() === "ADMINISTRATION";
+
   const table = useReactTable({
     data: data?.items ?? [],
     columns,
@@ -326,8 +322,8 @@ export default function UsersTable({ organization }: Props) {
     state: {
       pagination,
       columnVisibility: {
-        dateOfJoining: organization.id === BARUNCORP_ORGANIZATION_ID,
-        isVendor: organization.id !== BARUNCORP_ORGANIZATION_ID,
+        dateOfJoining: isOrganizationBarunCorp,
+        isVendor: !isOrganizationBarunCorp,
       },
     },
   });

@@ -1,6 +1,5 @@
 import { Session } from "next-auth";
 import { Dispatch, createContext, useContext, useReducer } from "react";
-import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
 
 interface NewServiceOrderData {
   session: {
@@ -53,20 +52,17 @@ function newServiceOrderDataReducer(
 }
 
 function getInitialNewServiceOrderData(session?: Session): NewServiceOrderData {
-  const organizationId =
-    session != null && session.organizationId !== BARUNCORP_ORGANIZATION_ID
-      ? session.organizationId
-      : "";
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const myOrganizationId = session?.organizationId ?? "";
+
+  const organizationId = isBarunCorpMember ? "" : myOrganizationId;
 
   return {
     session: {
       id: session?.id ?? "",
       organizationId: session?.organizationId ?? "",
     },
-    isBarunCorpMember:
-      session == null
-        ? false
-        : session.organizationId === BARUNCORP_ORGANIZATION_ID,
+    isBarunCorpMember,
     organizationId,
     projectId: "",
   };

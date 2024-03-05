@@ -12,6 +12,7 @@ declare module "next-auth" {
     organizationId: string;
     authError?: AuthError;
     isBarunCorpMember: boolean;
+    isAdmin: boolean;
   }
 
   interface User {
@@ -21,6 +22,7 @@ declare module "next-auth" {
     email: string;
     organizationId: string;
     isBarunCorpMember: boolean;
+    isAdmin: boolean;
   }
 }
 
@@ -33,5 +35,6 @@ declare module "next-auth/jwt" {
     organizationId: string;
     authError?: AuthError;
     isBarunCorpMember: boolean;
+    isAdmin: boolean;
   }
 }

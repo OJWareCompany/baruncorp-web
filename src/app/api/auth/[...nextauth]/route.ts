@@ -3,7 +3,6 @@ import { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import api from "@/api";
-import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
 
 const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -33,9 +32,21 @@ const authOptions: NextAuthOptions = {
           });
 
         const {
-          data: { id, organizationId },
+          data: { id, organizationId, role },
         } = await api.users
           .usersControllerGetUserInfo({
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          })
+          .catch((error) => {
+            throw new Error("0");
+          });
+
+        const {
+          data: { organizationType },
+        } = await api.organizations
+          .findOrganizationHttpControllerGet(organizationId, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -50,7 +61,12 @@ const authOptions: NextAuthOptions = {
           email,
           id,
           organizationId,
-          isBarunCorpMember: organizationId === BARUNCORP_ORGANIZATION_ID,
+          // uppercase로 사용해달라는 백엔드의 요청이 있었음
+          isBarunCorpMember:
+            organizationType.toUpperCase() === "ADMINISTRATION",
+          isAdmin:
+            role.toUpperCase() === "SPECIAL ADMIN" ||
+            role.toUpperCase() === "ADMIN",
         };
       },
     }),
@@ -108,6 +124,7 @@ const authOptions: NextAuthOptions = {
         organizationId,
         authError,
         isBarunCorpMember,
+        isAdmin,
       } = token;
 
       return {
@@ -118,6 +135,7 @@ const authOptions: NextAuthOptions = {
         id,
         organizationId,
         isBarunCorpMember,
+        isAdmin,
       };
     },
   },

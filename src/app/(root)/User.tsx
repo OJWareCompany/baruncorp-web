@@ -1,6 +1,6 @@
 "use client";
 import { Building, Clock, LogOut, Palmtree, User2 } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -22,7 +22,6 @@ import useHandsStatusQuery, {
   getHandsStatusQueryKey,
 } from "@/queries/useHandsStatusQuery";
 import usePostUserHandsDownMutation from "@/mutations/usePostUserHandsDownMutation";
-import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
 
 export default function User() {
   const [open, setOpen] = useState(false);
@@ -33,6 +32,9 @@ export default function User() {
     usePostUserHandsDownMutation();
   const queryClient = useQueryClient();
   const [date, setDate] = useState<Date>();
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
 
   const handleSignOutButtonClick = () => {
     if (handStatus != null && handStatus.status) {
@@ -129,7 +131,7 @@ export default function User() {
             <span>Organization</span>
           </Link>
         </DropdownMenuItem>
-        {user.organizationId === BARUNCORP_ORGANIZATION_ID && (
+        {isBarunCorpMember && (
           <DropdownMenuItem asChild>
             <Link href="/my/pto">
               <Palmtree className="mr-2 h-4 w-4" />

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -7,9 +7,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
-import { useParams } from "next/navigation";
 import Link from "next/link";
-import { UserResponseDto } from "@/api/api-spec";
+import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import {
   Form,
   FormControl,
@@ -22,10 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import LoadingButton from "@/components/LoadingButton";
-import {
-  BARUNCORP_ORGANIZATION_ID,
-  transformStringIntoNullableString,
-} from "@/lib/constants";
+import { transformStringIntoNullableString } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import usePatchProfileByUserIdMutation from "@/mutations/usePatchProfileByUserIdMutation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,79 +32,85 @@ import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
 import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 
-const formSchema = z
-  .object({
-    organizationId: z
-      .string()
-      .trim()
-      .min(1, { message: "Organization is required" }),
-    firstName: z.string().trim().min(1, {
-      message: "First Name is required",
-    }),
-    lastName: z.string().trim().min(1, {
-      message: "Last Name is required",
-    }),
-    phoneNumber: z.string().trim(),
-    emailAddress: z
-      .string()
-      .trim()
-      .min(1, { message: "Email Address is required" })
-      .email({
-        message: "Format of Email Address is incorrect",
-      }),
-    emailAddressesToReceiveDeliverables: z.array(
-      z.object({
-        email: z
-          .string()
-          .trim()
-          .min(1, { message: "Email Address is required" })
-          .email({ message: "Format of Email Address is incorrect" }),
-      })
-    ),
-    isContractor: z.boolean(),
-    dateOfJoining: z.date().optional(),
-  })
-  .superRefine((values, ctx) => {
-    if (
-      values.organizationId === BARUNCORP_ORGANIZATION_ID &&
-      values.dateOfJoining == null
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Date of Joining is required",
-        path: ["dateOfJoining"],
-      });
-      return;
-    }
-  });
-
-type FieldValues = z.infer<typeof formSchema>;
-
-const getFieldValues = (user: UserResponseDto): FieldValues => {
-  return {
-    emailAddress: user.email,
-    emailAddressesToReceiveDeliverables: user.deliverablesEmails.map(
-      (email) => ({
-        email,
-      })
-    ),
-    firstName: user.firstName,
-    lastName: user.lastName,
-    organizationId: user.organizationId,
-    phoneNumber: user.phoneNumber ?? "",
-    isContractor: user.isVendor,
-    dateOfJoining:
-      user.dateOfJoining == null ? undefined : new Date(user.dateOfJoining),
-  };
-};
-
 interface Props {
   user: UserResponseDto;
+  organization: OrganizationResponseDto;
 }
 
-export default function UserForm({ user }: Props) {
+export default function UserForm({ user, organization }: Props) {
   const { data: session, status } = useSession();
-  const { userId } = useParams() as { userId: string };
+
+  const isOrganizationBarunCorp = useMemo(
+    () => organization.organizationType.toUpperCase() === "ADMINISTRATION",
+    [organization.organizationType]
+  );
+
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          organizationId: z
+            .string()
+            .trim()
+            .min(1, { message: "Organization is required" }),
+          firstName: z.string().trim().min(1, {
+            message: "First Name is required",
+          }),
+          lastName: z.string().trim().min(1, {
+            message: "Last Name is required",
+          }),
+          phoneNumber: z.string().trim(),
+          emailAddress: z
+            .string()
+            .trim()
+            .min(1, { message: "Email Address is required" })
+            .email({
+              message: "Format of Email Address is incorrect",
+            }),
+          emailAddressesToReceiveDeliverables: z.array(
+            z.object({
+              email: z
+                .string()
+                .trim()
+                .min(1, { message: "Email Address is required" })
+                .email({ message: "Format of Email Address is incorrect" }),
+            })
+          ),
+          isContractor: z.boolean(),
+          dateOfJoining: z.date().optional(),
+        })
+        .superRefine((values, ctx) => {
+          if (isOrganizationBarunCorp && values.dateOfJoining == null) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Date of Joining is required",
+              path: ["dateOfJoining"],
+            });
+            return;
+          }
+        }),
+    [isOrganizationBarunCorp]
+  );
+
+  type FieldValues = z.infer<typeof formSchema>;
+
+  const getFieldValues = useCallback((user: UserResponseDto): FieldValues => {
+    return {
+      emailAddress: user.email,
+      emailAddressesToReceiveDeliverables: user.deliverablesEmails.map(
+        (email) => ({
+          email,
+        })
+      ),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      organizationId: user.organizationId,
+      phoneNumber: user.phoneNumber ?? "",
+      isContractor: user.isVendor,
+      dateOfJoining:
+        user.dateOfJoining == null ? undefined : new Date(user.dateOfJoining),
+    };
+  }, []);
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -119,7 +121,7 @@ export default function UserForm({ user }: Props) {
     name: "emailAddressesToReceiveDeliverables",
   });
 
-  const { mutateAsync } = usePatchProfileByUserIdMutation(userId);
+  const { mutateAsync } = usePatchProfileByUserIdMutation(user.id);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -127,7 +129,7 @@ export default function UserForm({ user }: Props) {
     if (user) {
       form.reset(getFieldValues(user));
     }
-  }, [form, user]);
+  }, [form, getFieldValues, user]);
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
@@ -137,19 +139,15 @@ export default function UserForm({ user }: Props) {
       firstName: values.firstName,
       lastName: values.lastName,
       phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
-      isVendor:
-        user.organizationId === BARUNCORP_ORGANIZATION_ID
-          ? false
-          : values.isContractor,
-      dateOfJoining:
-        user.organizationId === BARUNCORP_ORGANIZATION_ID
-          ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
-          : null,
+      isVendor: isOrganizationBarunCorp ? false : values.isContractor,
+      dateOfJoining: isOrganizationBarunCorp
+        ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+        : null,
     })
       .then(() => {
         toast({ title: "Success" });
         queryClient.invalidateQueries({
-          queryKey: getUserQueryKey(userId),
+          queryKey: getUserQueryKey(user.id),
         });
 
         if (
@@ -356,7 +354,7 @@ export default function UserForm({ user }: Props) {
             );
           }}
         />
-        {user.organizationId !== BARUNCORP_ORGANIZATION_ID && (
+        {!isOrganizationBarunCorp && (
           <FormField
             control={form.control}
             name="isContractor"
@@ -375,7 +373,7 @@ export default function UserForm({ user }: Props) {
             )}
           />
         )}
-        {user.organizationId === BARUNCORP_ORGANIZATION_ID && (
+        {isOrganizationBarunCorp && (
           <FormField
             control={form.control}
             name="dateOfJoining"

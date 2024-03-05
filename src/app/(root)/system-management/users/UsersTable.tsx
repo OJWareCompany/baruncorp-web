@@ -42,7 +42,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import useUsersQuery, { getUsersQueryKey } from "@/queries/useUsersQuery";
 import {
-  BARUNCORP_ORGANIZATION_ID,
   UserStatusEnum,
   YesOrNoEnum,
   transformUserStatusEnumWithEmptyStringIntoNullableUserStatusEnum,
@@ -225,17 +224,11 @@ export default function UsersTable() {
             }
           />
         ),
-        cell: ({ getValue, row }) => {
-          if (row.original.organizationId === BARUNCORP_ORGANIZATION_ID) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return (
-            <div className="flex">
-              <Checkbox checked={getValue()} />
-            </div>
-          );
-        },
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
       }),
       columnHelper.accessor("status", {
         header: () => (

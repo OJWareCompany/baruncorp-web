@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import LoadingButton from "@/components/LoadingButton";
@@ -23,10 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  AutoAssignmentPropertyTypeEnum,
-  BARUNCORP_ORGANIZATION_ID,
-} from "@/lib/constants";
+import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import {
   Select,
   SelectContent,
@@ -38,7 +34,7 @@ import {
 import usePostUserAvailableTaskMutation from "@/mutations/usePostUserAvailableTaskMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import NoLicensedTasksCombobox from "@/components/combobox/NoLicensedTasksCombobox";
-import { UserResponseDto } from "@/api/api-spec";
+import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
@@ -50,12 +46,12 @@ type FieldValues = z.infer<typeof formSchema>;
 
 interface Props {
   user: UserResponseDto;
+  organization: OrganizationResponseDto;
 }
 
-export default function NewAvailableTaskDialog({ user }: Props) {
-  const { userId } = useParams() as { userId: string };
+export default function NewAvailableTaskDialog({ user, organization }: Props) {
   const usePostUserAvailableTaskMutationResult =
-    usePostUserAvailableTaskMutation(userId);
+    usePostUserAvailableTaskMutation(user.id);
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -90,7 +86,7 @@ export default function NewAvailableTaskDialog({ user }: Props) {
       .then(() => {
         toast({ title: "Success" });
         queryClient.invalidateQueries({
-          queryKey: getUserQueryKey(userId),
+          queryKey: getUserQueryKey(user.id),
         });
         setOpen(false);
       })
@@ -108,6 +104,9 @@ export default function NewAvailableTaskDialog({ user }: Props) {
         }
       });
   }
+
+  const isOrganizationBarunCorp =
+    organization.organizationType.toUpperCase() === "ADMINISTRATION";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -149,7 +148,7 @@ export default function NewAvailableTaskDialog({ user }: Props) {
                 </FormItem>
               )}
             />
-            {user.organizationId === BARUNCORP_ORGANIZATION_ID && (
+            {isOrganizationBarunCorp && (
               <FormField
                 control={form.control}
                 name="autoAssignmentPropertyType"

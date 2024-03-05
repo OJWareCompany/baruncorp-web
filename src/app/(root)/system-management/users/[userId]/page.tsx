@@ -10,8 +10,9 @@ import PageHeader from "@/components/PageHeader";
 import useUserQuery from "@/queries/useUserQuery";
 import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
-import { BARUNCORP_ORGANIZATION_ID, userStatuses } from "@/lib/constants";
+import { userStatuses } from "@/lib/constants";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import useOrganizationQuery from "@/queries/useOrganizationQuery";
 
 interface Props {
   params: {
@@ -25,13 +26,26 @@ export default function Page({ params: { userId } }: Props) {
     isLoading: isUserQueryLoading,
     error: userQueryError,
   } = useUserQuery(userId);
+  const {
+    data: organization,
+    isLoading: isOrganizationQueryLoading,
+    error: organizationQueryError,
+  } = useOrganizationQuery(user?.organizationId ?? "");
   useNotFound(userQueryError);
+  useNotFound(organizationQueryError);
 
-  if (isUserQueryLoading || user == null) {
+  if (
+    isUserQueryLoading ||
+    user == null ||
+    isOrganizationQueryLoading ||
+    organization == null
+  ) {
     return <PageLoading />;
   }
 
   const status = userStatuses[user.status];
+  const isOrganizationBarunCorp =
+    organization.organizationType.toUpperCase() === "ADMINISTRATION";
 
   return (
     <div className="flex flex-col gap-4">
@@ -46,7 +60,7 @@ export default function Page({ params: { userId } }: Props) {
       />
       <div className="space-y-6">
         <section>
-          <UserForm user={user} />
+          <UserForm user={user} organization={organization} />
         </section>
         <CollapsibleSection
           title="Status"
@@ -59,8 +73,7 @@ export default function Page({ params: { userId } }: Props) {
             </div>
           </div>
         </CollapsibleSection>
-        {(user.isVendor ||
-          user.organizationId === BARUNCORP_ORGANIZATION_ID) && (
+        {(user.isVendor || isOrganizationBarunCorp) && (
           <>
             <CollapsibleSection title="Position">
               <PositionForm positionId={user.position?.id ?? ""} />
@@ -70,9 +83,14 @@ export default function Page({ params: { userId } }: Props) {
             </CollapsibleSection>
             <CollapsibleSection
               title="Available Tasks"
-              action={<NewAvailableTaskDialog user={user} />}
+              action={
+                <NewAvailableTaskDialog
+                  user={user}
+                  organization={organization}
+                />
+              }
             >
-              <AvailableTasksTable user={user} />
+              <AvailableTasksTable user={user} organization={organization} />
             </CollapsibleSection>
           </>
         )}

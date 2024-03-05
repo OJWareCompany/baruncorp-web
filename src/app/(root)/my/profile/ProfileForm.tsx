@@ -6,6 +6,7 @@ import * as z from "zod";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useSession } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -20,10 +21,7 @@ import usePatchProfileMutation from "@/mutations/usePatchProfileMutation";
 import LoadingButton from "@/components/LoadingButton";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { UserResponseDto } from "@/api/api-spec";
-import {
-  BARUNCORP_ORGANIZATION_ID,
-  transformStringIntoNullableString,
-} from "@/lib/constants";
+import { transformStringIntoNullableString } from "@/lib/constants";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
 import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
 import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
@@ -93,6 +91,9 @@ export default function ProfileForm({ profile }: Props) {
     control: form.control,
     name: "emailAddressesToReceiveDeliverables",
   });
+  const { data: session } = useSession();
+
+  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
 
   const queryClient = useQueryClient();
   const { mutateAsync } = usePatchProfileMutation();
@@ -113,10 +114,9 @@ export default function ProfileForm({ profile }: Props) {
         .map(({ email }) => transformStringIntoNullableString.parse(email))
         .filter((value): value is string => value != null),
       isVendor: profile.isVendor,
-      dateOfJoining:
-        profile.organizationId === BARUNCORP_ORGANIZATION_ID
-          ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
-          : null,
+      dateOfJoining: isBarunCorpMember
+        ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+        : null,
     })
       .then(() => {
         toast({ title: "Success" });
@@ -297,7 +297,7 @@ export default function ProfileForm({ profile }: Props) {
             );
           }}
         />
-        {profile.organizationId === BARUNCORP_ORGANIZATION_ID && (
+        {isBarunCorpMember && (
           <FormField
             control={form.control}
             name="dateOfJoining"

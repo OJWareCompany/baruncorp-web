@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserResponseDto } from "@/api/api-spec";
+import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -39,10 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  AutoAssignmentPropertyTypeEnum,
-  BARUNCORP_ORGANIZATION_ID,
-} from "@/lib/constants";
+import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import usePatchUserAvailableTaskMutation from "@/mutations/usePatchUserAvailableTaskMutation";
 import LoadingButton from "@/components/LoadingButton";
 
@@ -51,9 +48,10 @@ const columnHelper =
 
 interface Props {
   user: UserResponseDto;
+  organization: OrganizationResponseDto;
 }
 
-export default function AvailableTasksTable({ user }: Props) {
+export default function AvailableTasksTable({ user, organization }: Props) {
   const { toast } = useToast();
   const router = useRouter();
   const {
@@ -170,6 +168,9 @@ export default function AvailableTasksTable({ user }: Props) {
     [patchUserAvailableTaskMutateAsync, queryClient, toast, user.id]
   );
 
+  const isOrganizationBarunCorp =
+    organization.organizationType.toUpperCase() === "ADMINISTRATION";
+
   const table = useReactTable({
     data: user.availableTasks,
     columns,
@@ -177,7 +178,7 @@ export default function AvailableTasksTable({ user }: Props) {
     getRowId: ({ id }) => id,
     state: {
       columnVisibility: {
-        autoAssignmentType: user.organizationId === BARUNCORP_ORGANIZATION_ID,
+        autoAssignmentType: isOrganizationBarunCorp,
       },
     },
   });

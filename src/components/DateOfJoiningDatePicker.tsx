@@ -11,7 +11,7 @@ import {
 
 interface Props {
   value: Date | undefined;
-  onChange: (value: Date | undefined) => void;
+  onChange: (value: Date) => void;
   disabled?: boolean;
 }
 
@@ -41,6 +41,10 @@ const DateOfJoiningDatePicker = forwardRef<HTMLButtonElement, Props>(
             mode="single"
             selected={value}
             onSelect={(day) => {
+              if (day == null) {
+                return;
+              }
+
               onChange(day);
             }}
             captionLayout="dropdown"

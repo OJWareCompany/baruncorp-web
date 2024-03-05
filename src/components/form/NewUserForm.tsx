@@ -392,24 +392,19 @@ export default function NewUserForm({ onSuccess, organizationId }: Props) {
                       {...field}
                       onChange={(value) => {
                         field.onChange(value);
-                        if (value != null) {
-                          const yearsDifference = differenceInYears(
-                            new Date(),
-                            value
-                          );
-                          const tenureAsNumber = yearsDifference + 1;
-                          form.setValue("tenure", String(tenureAsNumber));
-                          const totalPto = ptoPerTenure?.items.find(
-                            (value) => value.tenure === tenureAsNumber
-                          )?.total;
-                          form.setValue(
-                            "pto",
-                            totalPto ? String(totalPto) : "10"
-                          );
-                        } else {
-                          form.resetField("tenure");
-                          form.resetField("pto");
-                        }
+                        const yearsDifference = differenceInYears(
+                          new Date(),
+                          value
+                        );
+                        const tenureAsNumber = yearsDifference + 1;
+                        form.setValue("tenure", String(tenureAsNumber));
+                        const totalPto = ptoPerTenure?.items.find(
+                          (value) => value.tenure === tenureAsNumber
+                        )?.total;
+                        form.setValue(
+                          "pto",
+                          totalPto ? String(totalPto) : "10"
+                        );
                       }}
                     />
                   </FormControl>
