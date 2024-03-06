@@ -15,6 +15,7 @@ import {
 import usePatchOrderedServiceRevisionSizeMutation from "@/mutations/usePatchOrderedServiceRevisionSizeMutation";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import { useToast } from "@/components/ui/use-toast";
+import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 
 interface SizeForRevisionProps {
   sizeForRevision: "Major" | "Minor" | null;
@@ -48,6 +49,9 @@ export default function SizeForRevisionField({
           .then(() => {
             queryClient.invalidateQueries({
               queryKey: getJobQueryKey(jobId),
+            });
+            queryClient.invalidateQueries({
+              queryKey: getJobHistoriesQueryKey({ jobId }),
             });
             toast({
               title: "Success",

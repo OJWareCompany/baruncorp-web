@@ -18,7 +18,7 @@ export default function TotalJobPrice({ job }: Props) {
       <Label>Total Amount</Label>
       <AffixInput
         prefixElement={<span className="text-muted-foreground">$</span>}
-        value={value}
+        value={Number(value.toFixed(2))}
         readOnly
       />
     </Item>
