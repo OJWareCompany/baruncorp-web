@@ -3,6 +3,7 @@ import { ArrowUp, Mail } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { format } from "date-fns";
 import ClientInvoiceDocument from "./ClientInvoiceDocument";
 import {
   AlertDialog,
@@ -64,6 +65,7 @@ export default function IssueButton({
         variant={"outline"}
         size={"sm"}
         className="h-[28px] text-xs px-2"
+        disabled={instance.loading}
       >
         {clientInvoice.status === "Unissued" ? (
           <ArrowUp className="mr-2 h-4 w-4" />
@@ -86,44 +88,45 @@ export default function IssueButton({
                 if (blob == null) {
                   return;
                 }
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => {
-                  const base64 = reader.result;
-                  if (base64 == null || typeof base64 !== "string") {
-                    return;
-                  }
-                  patchClientInvoiceIssueMutateAsync({
-                    attachments: [
-                      {
-                        path: base64,
-                      },
-                    ],
-                  })
-                    .then(() => {
-                      queryClient.invalidateQueries({
-                        queryKey: getClientInvoiceQueryKey(clientInvoice.id),
-                      });
-                      toast({
-                        title: "Success",
-                      });
-                      setOpen(false);
-                    })
-                    .catch((error: AxiosError<ErrorResponseData>) => {
-                      if (
-                        error.response &&
-                        error.response.data.errorCode.filter(
-                          (value) => value != null
-                        ).length !== 0
-                      ) {
-                        toast({
-                          title: error.response.data.message,
-                          variant: "destructive",
-                        });
-                        return;
-                      }
+
+                const fileName = `[Barun Corp] ${
+                  clientInvoice.clientOrganization.name
+                }, ${format(
+                  new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
+                  "MMM yyyy"
+                )}, Client Invoice.pdf`;
+
+                // Blob을 File로 변환
+                const file = new File([blob], fileName, {
+                  type: blob.type,
+                });
+
+                patchClientInvoiceIssueMutateAsync({
+                  files: [file],
+                })
+                  .then(() => {
+                    queryClient.invalidateQueries({
+                      queryKey: getClientInvoiceQueryKey(clientInvoice.id),
                     });
-                };
+                    toast({
+                      title: "Success",
+                    });
+                    setOpen(false);
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                  });
               }}
             >
               Continue

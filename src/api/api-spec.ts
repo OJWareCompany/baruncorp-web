@@ -1069,17 +1069,8 @@ export interface ClientToInvoiceResponseDto {
   clientToInvoices: ClientToInvoice[];
 }
 
-export interface Attachments {
-  filename?: string;
-  content?: string;
-  path?: string;
-  contentType?: string;
-  encoding?: string;
-  raw?: string;
-}
-
 export interface IssueInvoiceRequestDto {
-  attachments: Attachments[];
+  files: File[];
 }
 
 export interface ClientWithOutstandingBalancesResponseDto {
@@ -5730,7 +5721,7 @@ export class Api<
         path: `/invoices/${invoiceId}/issue`,
         method: "PATCH",
         body: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         ...params,
       }),
   };
