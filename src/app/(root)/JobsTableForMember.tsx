@@ -31,12 +31,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import useMyJobsQuery from "@/queries/useMyJobsQuery";
 import {
-  FindMyJobPaginatedHttpControllerFindJobParams,
+  FindMyOrderedJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
 } from "@/api/api-spec";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   JobPriorityEnum,
   JobStatusEnum,
@@ -51,14 +49,16 @@ import {
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
-import TasksBadge from "@/components/badge/TasksBadge";
-import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
-import { formatInEST } from "@/lib/utils";
 import EnumHeader from "@/components/table/EnumHeader";
+import { Checkbox } from "@/components/ui/checkbox";
 import SearchHeader from "@/components/table/SearchHeader";
+import TasksBadge from "@/components/badge/TasksBadge";
+import { formatInEST } from "@/lib/utils";
+import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 import { Badge } from "@/components/ui/badge";
+import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
+import useJobsQuery from "@/queries/useJobsQuery";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -67,11 +67,11 @@ interface Props {
   type: "All" | JobStatusEnum;
 }
 
-export default function JobsTable({ type }: Props) {
+export default function JobsTableForMember({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
-    useState<FindMyJobPaginatedHttpControllerFindJobParams>();
+    useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
 
   const jobStatusSearchParamName = `${type}JobStatus`;
   const jobNameSearchParamName = `${type}JobName`;
@@ -92,7 +92,6 @@ export default function JobsTable({ type }: Props) {
       ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
       : 10,
   };
-
   const jobNameSearchParam =
     searchParams.get(encodeURIComponent(jobNameSearchParamName)) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
@@ -145,7 +144,7 @@ export default function JobsTable({ type }: Props) {
   });
   const columnVisibility = useJobsColumnVisibility();
 
-  const params: FindMyJobPaginatedHttpControllerFindJobParams = useMemo(
+  const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
@@ -192,7 +191,7 @@ export default function JobsTable({ type }: Props) {
     ]
   );
 
-  const { data, isLoading, isFetching } = useMyJobsQuery(params, true);
+  const { data, isLoading, isFetching } = useJobsQuery(params, true);
 
   useEffect(() => {
     if (!isFetching) {
@@ -200,8 +199,8 @@ export default function JobsTable({ type }: Props) {
     }
   }, [isFetching, params]);
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    return [
       columnHelper.accessor("isExpedited", {
         header: () => (
           <EnumHeader
@@ -379,6 +378,7 @@ export default function JobsTable({ type }: Props) {
         header: "Additional Information",
         cell: ({ getValue }) => {
           const value = getValue();
+
           if (value == null) {
             return <p className="text-muted-foreground">-</p>;
           }
@@ -429,31 +429,30 @@ export default function JobsTable({ type }: Props) {
           return formatInEST(value);
         },
       }),
-    ],
-    [
-      expediteSearchParamName,
-      pageIndexSearchParamName,
-      syncedParams,
-      params.isExpedited,
-      params.inReview,
-      params.priority,
-      params.jobName,
-      params.jobStatus,
-      params.projectPropertyType,
-      params.mountingType,
-      params.projectNumber,
-      params.propertyOwner,
-      inReviewSearchParamName,
-      prioritySearchParamName,
-      jobNameSearchParamName,
-      jobStatusSearchParamName,
-      type,
-      propertyTypeSearchParamName,
-      mountingTypeSearchParamName,
-      projectNumberSearchParamName,
-      propertyOwnerSearchParamName,
-    ]
-  );
+    ];
+  }, [
+    expediteSearchParamName,
+    pageIndexSearchParamName,
+    syncedParams,
+    params.isExpedited,
+    params.inReview,
+    params.priority,
+    params.jobName,
+    params.jobStatus,
+    params.projectPropertyType,
+    params.mountingType,
+    params.projectNumber,
+    params.propertyOwner,
+    inReviewSearchParamName,
+    prioritySearchParamName,
+    jobNameSearchParamName,
+    jobStatusSearchParamName,
+    type,
+    propertyTypeSearchParamName,
+    mountingTypeSearchParamName,
+    projectNumberSearchParamName,
+    propertyOwnerSearchParamName,
+  ]);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -513,7 +512,7 @@ export default function JobsTable({ type }: Props) {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
-                    router.push(`/workspace/jobs/${row.id}`);
+                    router.push(`/jobs/${row.id}`);
                   }}
                   className="cursor-pointer"
                 >

@@ -67,7 +67,7 @@ interface Props {
   type: "All" | JobStatusEnum;
 }
 
-export default function JobsTable({ type }: Props) {
+export default function JobsTableForClient({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
@@ -280,6 +280,7 @@ export default function JobsTable({ type }: Props) {
               syncedParams != null &&
               params.jobStatus !== syncedParams.jobStatus
             }
+            defaultValue={type === "All" ? null : type}
           />
         ),
         cell: ({ getValue }) => {
@@ -440,6 +441,7 @@ export default function JobsTable({ type }: Props) {
     prioritySearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
+    type,
     propertyTypeSearchParamName,
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
