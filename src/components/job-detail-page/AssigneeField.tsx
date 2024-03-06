@@ -1,8 +1,8 @@
-import { useSession } from "next-auth/react";
 import AssigneeAction from "./AssigneeAction";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import AssigneeCombobox from "@/components/combobox/AssigneeCombobox";
 import { JobStatusEnum } from "@/lib/constants";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   assignedTaskId: string;
@@ -22,9 +22,8 @@ export default function AssigneeField({
   pageType,
 }: Props) {
   const dispatch = useAlertDialogDataDispatch();
-  const { data: session } = useSession();
 
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**

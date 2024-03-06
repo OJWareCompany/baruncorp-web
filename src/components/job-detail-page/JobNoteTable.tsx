@@ -8,7 +8,6 @@ import {
 import { Plate, PlateContent } from "@udecode/plate-common";
 import { FolderOpen } from "lucide-react";
 import { useMemo } from "react";
-import { useSession } from "next-auth/react";
 import { Button } from "../ui/button";
 import {
   Table,
@@ -24,6 +23,7 @@ import { getEditorValue } from "@/lib/plate-utils";
 import { Badge } from "@/components/ui/badge";
 import { openJobNoteFolder } from "@/lib/deeplink";
 import { getMentionEditorPlugins } from "@/lib/plate/plugins";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const mentionEditorPlugins = getMentionEditorPlugins("sm");
 
@@ -35,9 +35,7 @@ interface Props {
 }
 
 export default function JobNotesTable({ jobNotes, pageType }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**

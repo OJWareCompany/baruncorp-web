@@ -32,21 +32,9 @@ const authOptions: NextAuthOptions = {
           });
 
         const {
-          data: { id, organizationId, role },
+          data: { id, organizationId },
         } = await api.users
           .usersControllerGetUserInfo({
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          })
-          .catch((error) => {
-            throw new Error("0");
-          });
-
-        const {
-          data: { organizationType },
-        } = await api.organizations
-          .findOrganizationHttpControllerGet(organizationId, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -61,12 +49,6 @@ const authOptions: NextAuthOptions = {
           email,
           id,
           organizationId,
-          // uppercase로 사용해달라는 백엔드의 요청이 있었음
-          isBarunCorpMember:
-            organizationType.toUpperCase() === "ADMINISTRATION",
-          isAdmin:
-            role.toUpperCase() === "SPECIAL ADMIN" ||
-            role.toUpperCase() === "ADMIN",
         };
       },
     }),
@@ -117,15 +99,7 @@ const authOptions: NextAuthOptions = {
       return { ...token, authError: "REFRESH_TOKEN_ERROR" };
     },
     async session({ session, token }) {
-      const {
-        accessToken,
-        email,
-        id,
-        organizationId,
-        authError,
-        isBarunCorpMember,
-        isAdmin,
-      } = token;
+      const { accessToken, email, id, organizationId, authError } = token;
 
       return {
         ...session,
@@ -134,8 +108,6 @@ const authOptions: NextAuthOptions = {
         email,
         id,
         organizationId,
-        isBarunCorpMember,
-        isAdmin,
       };
     },
   },

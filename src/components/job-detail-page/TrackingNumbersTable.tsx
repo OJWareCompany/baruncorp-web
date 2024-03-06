@@ -16,7 +16,6 @@ import {
   Loader2,
   MoreHorizontal,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import EditTrackingNumberDialog from "./EditTrackingNumberDialog";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import {
@@ -51,6 +50,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper =
   createColumnHelper<TrackingNumbersPaginatedResponseDto["items"][number]>();
@@ -164,9 +164,8 @@ function InternalTable({
     ],
     [deleteTrackingNumber, modifyTrackingNumber]
   );
-  const { data: session } = useSession();
 
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**

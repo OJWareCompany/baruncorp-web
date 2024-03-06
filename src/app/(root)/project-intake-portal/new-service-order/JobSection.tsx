@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { X } from "lucide-react";
 import { Value } from "@udecode/plate-common";
+import { useSession } from "next-auth/react";
+import { useProfileContext } from "../../ProfileProvider";
 import ResultDialog from "./ResultDialog";
 import {
   useNewServiceOrderData,
@@ -91,8 +93,7 @@ function JobSectionWithData({
   organization,
   services,
 }: JobSectionWithDataProps) {
-  const { organizationId, isBarunCorpMember, session } =
-    useNewServiceOrderData();
+  const { data: session } = useSession();
   const dispatch = useNewServiceOrderDataDispatch();
   const [isWetStampChecked, setIsWetStampChecked] = useState(false);
   const { mutateAsync } = usePostJobMutation();
@@ -100,6 +101,8 @@ function JobSectionWithData({
   const [resultDialogState, setResultDialogState] = useState<ResultDialogState>(
     { open: false }
   );
+  const { isBarunCorpMember } = useProfileContext();
+  const { selectedOrganizationId } = useNewServiceOrderData();
 
   const formSchema = useMemo(
     () =>
@@ -271,7 +274,7 @@ function JobSectionWithData({
     resolver: zodResolver(formSchema),
     defaultValues: {
       clientUser: {
-        id: isBarunCorpMember ? "" : session.id,
+        id: isBarunCorpMember ? "" : session?.id ?? "",
         emailAddressesToReceiveDeliverables: [],
       },
       systemSize: "",
@@ -396,7 +399,7 @@ function JobSectionWithData({
 
     form.reset({
       clientUser: {
-        id: isBarunCorpMember ? "" : session.id,
+        id: isBarunCorpMember ? "" : session?.id ?? "",
         emailAddressesToReceiveDeliverables: form.getValues(
           "clientUser.emailAddressesToReceiveDeliverables"
         ),
@@ -449,7 +452,7 @@ function JobSectionWithData({
     isBarunCorpMember,
     organization.mountingTypeDefaultValue,
     project,
-    session.id,
+    session?.id,
   ]);
 
   async function onSubmit(values: FieldValues) {
@@ -588,7 +591,7 @@ function JobSectionWithData({
                     <FormLabel required>Client User</FormLabel>
                     <FormControl>
                       <UsersByOrganizationCombobox
-                        organizationId={organizationId}
+                        organizationId={selectedOrganizationId}
                         userId={field.value}
                         onUserIdChange={field.onChange}
                         ref={field.ref}
@@ -1313,11 +1316,12 @@ function JobSectionWithData({
 }
 
 export default function JobSection() {
-  const { projectId, organizationId } = useNewServiceOrderData();
+  const { selectedOrganizationId, selectedProjectId } =
+    useNewServiceOrderData();
   const { data: project, isLoading: isProjectQueryLoading } =
-    useProjectQuery(projectId);
+    useProjectQuery(selectedProjectId);
   const { data: organization, isLoading: isOrganizationQueryLoading } =
-    useOrganizationQuery(organizationId);
+    useOrganizationQuery(selectedOrganizationId);
   const { data: services, isLoading: isServicesQueryLoading } =
     useServicesQuery({
       limit: Number.MAX_SAFE_INTEGER,

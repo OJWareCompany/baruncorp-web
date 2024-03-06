@@ -14,7 +14,6 @@ import {
   ChevronsDown,
   CornerDownRight,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import AssigneeField from "./AssigneeField";
 import OrderedServiceStatusField from "./OrderedServiceStatusField";
 import PriceField from "@/components/field/PriceField";
@@ -47,6 +46,7 @@ import {
 import CostField from "@/components/field/CostField";
 import useProfileQuery from "@/queries/useProfileQuery";
 import useDepartmentQuery from "@/queries/useDepartmentQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Data {
   id: string;
@@ -83,12 +83,8 @@ export default function ScopesTable({ job, project, pageType }: Props) {
   const canViewTaskCost = department?.viewTaskCost ?? false;
 
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const { data: session } = useSession();
 
-  const isBarunCorpMember = useMemo(
-    () => session?.isBarunCorpMember ?? false,
-    [session?.isBarunCorpMember]
-  );
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**

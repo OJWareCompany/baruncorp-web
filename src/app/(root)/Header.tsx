@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { useSession } from "next-auth/react";
 import User from "./User";
 import HandToggle from "./HandToggle";
 import Notification from "./Notification";
 import ExpandToggle from "./ExpandToggle";
 import { useExpandContext } from "./ExpandProvider";
+import { useProfileContext } from "./ProfileProvider";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -106,13 +106,11 @@ const systemManagementItems: {
 ];
 
 export default function Header() {
-  const { data: session } = useSession();
   const { data: profile } = useProfileQuery();
   const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
   const { isSelected: isExpanded } = useExpandContext();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
-  const isContractor = profile?.isVendor ?? false;
+  const { isInitialized, isBarunCorpMember, isContractor } =
+    useProfileContext();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white">
@@ -126,7 +124,7 @@ export default function Header() {
           <Link href="/">
             <h1 className="h3 pointer-events-none">Barun Corp</h1>
           </Link>
-          {session && profile && (
+          {isInitialized && (
             <nav className="animate-in fade-in">
               <NavigationMenu delayDuration={0}>
                 <NavigationMenuList>
@@ -199,7 +197,7 @@ export default function Header() {
             </nav>
           )}
         </div>
-        {session && profile && (
+        {isInitialized && (
           <div className="flex gap-2 animate-in fade-in">
             <ExpandToggle />
             {isBarunCorpMember && <HandToggle />}

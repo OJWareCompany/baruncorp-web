@@ -2,7 +2,6 @@
 import React from "react";
 import { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import { JobResponseDto } from "@/api/api-spec";
 import {
@@ -21,25 +20,17 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { JobStatusEnum, jobStatuses } from "@/lib/constants";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   job: JobResponseDto;
-  pageType: JobDetailPageType;
 }
 
-export default function JobStatus({ job, pageType }: Props) {
+export default function JobStatus({ job }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const currentStatus = jobStatuses[job.jobStatus];
   const dispatch = useAlertDialogDataDispatch();
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
-
-  /**
-   * 바른코프 멤버 ✅
-   * 바른코프 멤버아닌데, 홈 ❌
-   * 바른코프 멤버아닌데, 워크스페이스 ✅
-   */
+  const { isBarunCorpMember } = useProfileContext();
 
   if (!isBarunCorpMember) {
     return (

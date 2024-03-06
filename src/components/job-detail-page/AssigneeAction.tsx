@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   assignedTaskId: string;
@@ -39,7 +40,7 @@ export default function AssigneeAction({
   const { data: session } = useSession();
   const queryClient = useQueryClient();
 
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
   const isMine = session?.id === userId;
 
   if (!isMine && !isBarunCorpMember) {

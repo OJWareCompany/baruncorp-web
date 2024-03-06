@@ -1,13 +1,11 @@
 "use client";
-import { useSession } from "next-auth/react";
+import { useProfileContext } from "../../ProfileProvider";
 import NewDepartmentSheet from "./NewDepartmentSheet";
 import DepartmentsTable from "./DepartmentsTable";
 import PageHeader from "@/components/PageHeader";
 
 export default function Page() {
-  const { data: session } = useSession();
-
-  const isAdmin = session?.isAdmin ?? false;
+  const { isAdmin } = useProfileContext();
 
   return (
     <div className="flex flex-col gap-4">

@@ -52,7 +52,7 @@ export default function Authenticate({ children }: Props) {
     }
   }, [router, status]);
 
-  if (status === "unauthenticated") {
+  if (status === "loading" || status === "unauthenticated") {
     return <PageLoading isPageHeaderPlaceholder={false} />;
   }
 

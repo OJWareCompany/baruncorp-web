@@ -5,7 +5,6 @@ import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { ProjectResponseDto } from "@/api/api-spec";
 import {
   Form,
@@ -36,6 +35,7 @@ import {
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
 import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const formSchema = z.object({
   organization: z
@@ -81,9 +81,7 @@ interface Props {
 }
 
 export default function ProjectForm({ project, pageType }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**

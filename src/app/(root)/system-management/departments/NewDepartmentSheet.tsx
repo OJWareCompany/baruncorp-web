@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
+import { useProfileContext } from "../../ProfileProvider";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -51,9 +51,7 @@ export default function NewDepartmentSheet() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const usePostDepartmentMutationResult = usePostDepartmentMutation();
-  const { data: session } = useSession();
-
-  const isAdmin = session?.isAdmin ?? false;
+  const { isAdmin } = useProfileContext();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),

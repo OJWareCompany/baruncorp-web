@@ -1,5 +1,4 @@
 "use client";
-import { useSession } from "next-auth/react";
 import DepartmentForm from "./DepartmentForm";
 import PageHeaderAction from "./PageHeaderAction";
 import UsersTable from "./UsersTable";
@@ -9,6 +8,7 @@ import useDepartmentQuery from "@/queries/useDepartmentQuery";
 import useNotFound from "@/hook/useNotFound";
 import PageLoading from "@/components/PageLoading";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   params: {
@@ -23,9 +23,7 @@ export default function Page({ params: { departmentId } }: Props) {
     error: departmentQueryError,
   } = useDepartmentQuery(departmentId);
   useNotFound(departmentQueryError);
-  const { data: session } = useSession();
-
-  const isAdmin = session?.isAdmin ?? false;
+  const { isAdmin } = useProfileContext();
 
   if (isDepartmentQueryLoading || department == null) {
     return <PageLoading />;

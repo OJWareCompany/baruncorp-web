@@ -8,7 +8,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
 import { InvoiceResponseDto } from "@/api/api-spec";
 import { AffixInput } from "@/components/AffixInput";
 import Item from "@/components/Item";
@@ -41,6 +40,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import usePatchClientCreditPaymentCancelMutation from "@/mutations/usePatchClientCreditPaymentCancelMutation";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["payments"][number]>();
@@ -50,12 +50,7 @@ interface Props {
 }
 
 export default function PaymentsTable({ clientInvoice }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = useMemo(
-    () => session?.isBarunCorpMember ?? false,
-    [session?.isBarunCorpMember]
-  );
+  const { isBarunCorpMember } = useProfileContext();
 
   const {
     mutateAsync: patchClientDirectPaymentCancelMutateAsync,
@@ -76,8 +71,9 @@ export default function PaymentsTable({ clientInvoice }: Props) {
     isPatchClientDirectPaymentCancelMutationPending ||
     isPatchClientCreditPaymentCancelMutationPending;
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    console.log("rerender");
+    return [
       columnHelper.accessor("paymentMethod", {
         header: "Payment Method",
       }),
@@ -163,9 +159,8 @@ export default function PaymentsTable({ clientInvoice }: Props) {
           );
         },
       }),
-    ],
-    [isBarunCorpMember]
-  );
+    ];
+  }, [isBarunCorpMember]);
 
   const table = useReactTable({
     data: clientInvoice.payments,

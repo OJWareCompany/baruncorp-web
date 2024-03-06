@@ -6,7 +6,6 @@ import { z } from "zod";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -29,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -63,9 +63,7 @@ interface Props {
 export default function DepartmentForm({ department }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data: session } = useSession();
-
-  const isAdmin = session?.isAdmin ?? false;
+  const { isAdmin } = useProfileContext();
 
   const { mutateAsync } = usePatchDepartmentMutation(department.id);
 

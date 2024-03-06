@@ -1,27 +1,26 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useProfileContext } from "../ProfileProvider";
-import PageLoading from "@/components/PageLoading";
+import { useProfileContext } from "../../ProfileProvider";
 import { useToast } from "@/components/ui/use-toast";
+import PageLoading from "@/components/PageLoading";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { toast } = useToast();
-  const { isInitialized, isBarunCorpMember, isContractor } =
-    useProfileContext();
+  const { isInitialized, isBarunCorpMember } = useProfileContext();
 
   useEffect(() => {
-    if (isInitialized && !isBarunCorpMember && !isContractor) {
+    if (isInitialized && !isBarunCorpMember) {
       router.push("/");
       toast({
         title: "Invalid access",
         variant: "destructive",
       });
     }
-  }, [isBarunCorpMember, isContractor, isInitialized, router, toast]);
+  }, [isBarunCorpMember, isInitialized, router, toast]);
 
-  if (!isInitialized || (!isBarunCorpMember && !isContractor)) {
+  if (!isInitialized || !isBarunCorpMember) {
     return <PageLoading />;
   }
 

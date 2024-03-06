@@ -20,12 +20,13 @@ import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
 
 export default function ProjectSection() {
   const [newProjectSheetOpen, setNewProjectSheetOpen] = useState(false);
-  const { organizationId, projectId } = useNewServiceOrderData();
+  const { selectedOrganizationId, selectedProjectId } =
+    useNewServiceOrderData();
   const dispatch = useNewServiceOrderDataDispatch();
   const { data: project, isLoading: isProjectQueryLoading } =
-    useProjectQuery(projectId);
+    useProjectQuery(selectedProjectId);
 
-  if (organizationId === "") {
+  if (selectedOrganizationId === "") {
     return;
   }
 
@@ -37,8 +38,8 @@ export default function ProjectSection() {
           <Item>
             <Label>Existing Project</Label>
             <ExistingProjectCombobox
-              organizationId={organizationId}
-              projectId={projectId}
+              organizationId={selectedOrganizationId}
+              projectId={selectedProjectId}
               onProjectIdChange={(newProjectId) => {
                 dispatch({
                   type: "SET_PROJECT_ID",
@@ -55,7 +56,7 @@ export default function ProjectSection() {
               Project Not Found / This is New Project
             </Button>
           </Item>
-          {projectId !== "" &&
+          {selectedProjectId !== "" &&
             (isProjectQueryLoading || project == null ? (
               <PageLoading isPageHeaderPlaceholder={false} />
             ) : (
@@ -107,7 +108,7 @@ export default function ProjectSection() {
             ))}
         </ItemsContainer>
       </section>
-      {projectId !== "" && project != null && (
+      {selectedProjectId !== "" && project != null && (
         <section>
           <h2 className="h4 mb-2">Jobs Related to Project</h2>
           <ItemsContainer>
@@ -118,7 +119,7 @@ export default function ProjectSection() {
       <NewProjectSheet
         open={newProjectSheetOpen}
         onOpenChange={setNewProjectSheetOpen}
-        organizationId={organizationId}
+        organizationId={selectedOrganizationId}
         onProjectIdChange={(newProjectId) => {
           dispatch({
             type: "SET_PROJECT_ID",

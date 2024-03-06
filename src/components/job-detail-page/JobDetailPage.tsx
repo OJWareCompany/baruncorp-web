@@ -34,6 +34,7 @@ import {
 } from "@/api/api-spec";
 import useProfileQuery from "@/queries/useProfileQuery";
 import useDepartmentQuery from "@/queries/useDepartmentQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 function getPageHeader({
   pageType,
@@ -130,10 +131,7 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
     );
   }, [job]);
 
-  const isBarunCorpMember = useMemo(
-    () => session?.isBarunCorpMember ?? false,
-    [session?.isBarunCorpMember]
-  );
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = useMemo(() => pageType === "HOME", [pageType]);
 
   const processedJobNotesData = useMemo<JobNoteDetailResponseDto[]>(() => {
@@ -200,7 +198,7 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
             </ItemsContainer>
           </CollapsibleSection>
           <CollapsibleSection title="Status">
-            <JobStatus job={job} pageType={pageType} />
+            <JobStatus job={job} />
           </CollapsibleSection>
           <CollapsibleSection
             title="Scopes"

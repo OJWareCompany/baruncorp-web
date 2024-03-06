@@ -20,6 +20,7 @@ import usePostDepartmentAddUserMutation from "@/mutations/usePostDepartmentAddUs
 import usePostDepartmentRemoveUserMutation from "@/mutations/usePostDepartmentRemoveUserMutation";
 import { UserResponseDto } from "@/api/api-spec";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 // import usePostUserDepartmentResetMutation from "@/mutations/usePostUserDepartmentResetMutation";
 
 const formSchema = z.object({
@@ -34,8 +35,7 @@ interface Props {
 
 export default function DepartmentForm({ user }: Props) {
   const { data: session } = useSession();
-
-  const isAdmin = session?.isAdmin ?? false;
+  const { isAdmin } = useProfileContext();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),

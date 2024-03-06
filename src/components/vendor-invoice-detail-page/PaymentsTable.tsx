@@ -8,7 +8,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
 import { VendorInvoiceResponseDto } from "@/api/api-spec";
 import { AffixInput } from "@/components/AffixInput";
 import Item from "@/components/Item";
@@ -41,6 +40,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import usePatchVendorCreditPaymentCancelMutation from "@/mutations/usePatchVendorCreditPaymentCancelMutation";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper =
   createColumnHelper<VendorInvoiceResponseDto["vendorPayments"][number]>();
@@ -50,12 +50,7 @@ interface Props {
 }
 
 export default function PaymentsTable({ vendorInvoice }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = useMemo(
-    () => session?.isBarunCorpMember ?? false,
-    [session?.isBarunCorpMember]
-  );
+  const { isBarunCorpMember } = useProfileContext();
 
   const {
     mutateAsync: patchVendorDirectPaymentCancelMutateAsync,

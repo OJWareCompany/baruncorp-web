@@ -1,13 +1,8 @@
 import { VisibilityState } from "@tanstack/react-table";
-import { useSession } from "next-auth/react";
-import useProfileQuery from "@/queries/useProfileQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 export default function useJobsColumnVisibility(): VisibilityState {
-  const { data: session } = useSession();
-  const { data: user } = useProfileQuery();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
-  const isContractor = user?.isVendor ?? false;
+  const { isBarunCorpMember, isContractor } = useProfileContext();
 
   return {
     inReview: isBarunCorpMember || isContractor,

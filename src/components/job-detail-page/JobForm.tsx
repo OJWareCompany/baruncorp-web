@@ -7,7 +7,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { AxiosError } from "axios";
 import { Value } from "@udecode/plate-common";
-import { useSession } from "next-auth/react";
 import RowItemsContainer from "../RowItemsContainer";
 import {
   Form,
@@ -56,6 +55,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   project: ProjectResponseDto;
@@ -64,9 +64,7 @@ interface Props {
 }
 
 export default function JobForm({ project, job, pageType }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**

@@ -1,16 +1,17 @@
 "use client";
-import { useSession } from "next-auth/react";
+import { useProfileContext } from "../../ProfileProvider";
 import OrganizationSection from "./OrganizationSection";
 import NewServiceOrderDataProvider from "./NewServiceOrderDataProvider";
 import ProjectSection from "./ProjectSection";
 import JobSection from "./JobSection";
-import PageLoading from "@/components/PageLoading";
 import PageHeader from "@/components/PageHeader";
+import PageLoading from "@/components/PageLoading";
 
 export default function Page() {
-  const { data: session, status } = useSession();
+  const { isInitialized } = useProfileContext();
 
-  if (status !== "authenticated") {
+  // initialized된 상태에서 NewServiceOrderDataProvider를 렌더링해야, 제대로된 초기값을 집어넣을 수 있다.
+  if (!isInitialized) {
     return <PageLoading />;
   }
 
@@ -25,7 +26,7 @@ export default function Page() {
           },
         ]}
       />
-      <NewServiceOrderDataProvider session={session}>
+      <NewServiceOrderDataProvider>
         <OrganizationSection />
         <ProjectSection />
         <JobSection />

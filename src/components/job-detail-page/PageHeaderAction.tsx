@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ScrollText } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import OpenJobFolderButton from "@/components/job-detail-page/OpenJobFolderButton";
@@ -10,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 function getNotesUrl({
   pageType,
@@ -37,9 +37,7 @@ interface Props {
 }
 
 export default function PageHeaderAction({ job, project, pageType }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**

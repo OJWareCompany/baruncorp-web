@@ -1,5 +1,5 @@
 "use client";
-
+import { useProfileContext } from "../../ProfileProvider";
 import {
   useNewServiceOrderData,
   useNewServiceOrderDataDispatch,
@@ -9,17 +9,18 @@ import OrganizationsCombobox from "@/components/combobox/OrganizationsCombobox";
 import { Label } from "@/components/ui/label";
 
 export default function OrganizationSection() {
-  const { organizationId, isBarunCorpMember } = useNewServiceOrderData();
+  const { selectedOrganizationId } = useNewServiceOrderData();
   const dispatch = useNewServiceOrderDataDispatch();
+  const { isBarunCorpMember } = useProfileContext();
 
   return (
     <section>
       <Item>
         <Label>Organization</Label>
         <OrganizationsCombobox
-          organizationId={organizationId}
+          organizationId={selectedOrganizationId}
           onOrganizationIdChange={(newOrganizationId) => {
-            if (organizationId === newOrganizationId) {
+            if (selectedOrganizationId === newOrganizationId) {
               return;
             }
 

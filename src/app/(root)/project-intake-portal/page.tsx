@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { Info } from "lucide-react";
 import { Plate, PlateContent } from "@udecode/plate-common";
-import { useSession } from "next-auth/react";
+import { useProfileContext } from "../ProfileProvider";
 import EditDialog from "./EditDialog";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,7 @@ export default function Page() {
     limit: 1,
   });
   useNotFound(informationsQueryError);
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isAdmin } = useProfileContext();
 
   if (isInformationsQueryLoading || informations == null) {
     return <PageLoading />;
@@ -56,7 +54,7 @@ export default function Page() {
             </Plate>
           </AlertDescription>
         </Alert>
-        {isBarunCorpMember && (
+        {isAdmin && (
           <div className="absolute top-[17px] right-[17px]">
             <EditDialog information={information} />
           </div>

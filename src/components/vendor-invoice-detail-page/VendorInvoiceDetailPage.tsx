@@ -1,7 +1,6 @@
 "use client";
 import { format } from "date-fns";
 import React from "react";
-import { useSession } from "next-auth/react";
 import VendorInvoiceForm from "./VendorInvoiceForm";
 import PaymentsTable from "./PaymentsTable";
 import PaymentDialog from "./PaymentDialog";
@@ -13,6 +12,7 @@ import PageLoading from "@/components/PageLoading";
 import useNotFound from "@/hook/useNotFound";
 import CollapsibleSection from "@/components/CollapsibleSection";
 import { VendorInvoiceResponseDto } from "@/api/api-spec";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 function getPageHeader({
   pageType,
@@ -76,9 +76,7 @@ export default function VendorInvoiceDetailPage({
   vendorInvoiceId,
   pageType,
 }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
 
   const {
     data: vendorInvoice,

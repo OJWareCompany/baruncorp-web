@@ -1,11 +1,12 @@
 "use client";
 import { Building, Clock, LogOut, Palmtree, User2 } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 import { AxiosError } from "axios";
+import { useProfileContext } from "./ProfileProvider";
 import { useToast } from "@/components/ui/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
 import {
@@ -32,9 +33,7 @@ export default function User() {
     usePostUserHandsDownMutation();
   const queryClient = useQueryClient();
   const [date, setDate] = useState<Date>();
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
 
   const handleSignOutButtonClick = () => {
     if (handStatus != null && handStatus.status) {

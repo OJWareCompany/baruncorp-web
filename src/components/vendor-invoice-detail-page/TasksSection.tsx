@@ -8,7 +8,6 @@ import {
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useMemo } from "react";
-import { useSession } from "next-auth/react";
 import DownloadCSVButton from "./DownloadCSVButton";
 import ExpenseTotalForm from "./ExpenseTotalForm";
 import {
@@ -34,6 +33,7 @@ import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
 import { AffixInput } from "@/components/AffixInput";
 import { OTHER_SERVICE_ID } from "@/lib/constants";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper =
   createColumnHelper<
@@ -153,9 +153,7 @@ interface Props {
 
 export default function TasksSection({ vendorInvoice, pageType }: Props) {
   const router = useRouter();
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
 
   const params: FindVendorInvoiceLineItemHttpControllerGetParams = useMemo(
     () => ({

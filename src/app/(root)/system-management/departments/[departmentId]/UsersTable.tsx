@@ -64,6 +64,7 @@ import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import usePostDepartmentRemoveUserMutation from "@/mutations/usePostDepartmentRemoveUserMutation";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -74,8 +75,7 @@ interface Props {
 
 export default function UsersTable({ department }: Props) {
   const { data: session } = useSession();
-
-  const isAdmin = session?.isAdmin ?? false;
+  const { isAdmin } = useProfileContext();
 
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; userId: string }

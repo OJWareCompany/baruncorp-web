@@ -6,7 +6,7 @@ import * as z from "zod";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
+import { useProfileContext } from "../../ProfileProvider";
 import {
   Form,
   FormControl,
@@ -91,9 +91,7 @@ export default function ProfileForm({ profile }: Props) {
     control: form.control,
     name: "emailAddressesToReceiveDeliverables",
   });
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
 
   const queryClient = useQueryClient();
   const { mutateAsync } = usePatchProfileMutation();

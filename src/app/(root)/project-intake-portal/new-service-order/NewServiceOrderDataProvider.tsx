@@ -1,14 +1,10 @@
-import { Session } from "next-auth";
 import { Dispatch, createContext, useContext, useReducer } from "react";
+import { useSession } from "next-auth/react";
+import { useProfileContext } from "../../ProfileProvider";
 
 interface NewServiceOrderData {
-  session: {
-    id: string;
-    organizationId: string;
-  };
-  isBarunCorpMember: boolean;
-  organizationId: string;
-  projectId: string;
+  selectedOrganizationId: string;
+  selectedProjectId: string;
 }
 
 type Action =
@@ -32,61 +28,50 @@ function newServiceOrderDataReducer(
     case "SET_ORGANIZATION_ID": {
       return {
         ...newServiceOrderData,
-        organizationId: action.organizationId,
-        projectId: "",
+        selectedOrganizationId: action.organizationId,
+        selectedProjectId: "",
       };
     }
     case "SET_PROJECT_ID": {
       return {
         ...newServiceOrderData,
-        projectId: action.projectId,
+        selectedProjectId: action.projectId,
       };
     }
     case "RESET": {
       return {
         ...newServiceOrderData,
-        projectId: "",
+        selectedProjectId: "",
       };
     }
   }
 }
 
-function getInitialNewServiceOrderData(session?: Session): NewServiceOrderData {
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
-  const myOrganizationId = session?.organizationId ?? "";
-
-  const organizationId = isBarunCorpMember ? "" : myOrganizationId;
-
-  return {
-    session: {
-      id: session?.id ?? "",
-      organizationId: session?.organizationId ?? "",
-    },
-    isBarunCorpMember,
-    organizationId,
-    projectId: "",
-  };
-}
-
-const NewServiceOrderDataContext = createContext<NewServiceOrderData>(
-  getInitialNewServiceOrderData()
-);
+const NewServiceOrderDataContext = createContext<NewServiceOrderData>({
+  selectedOrganizationId: "",
+  selectedProjectId: "",
+});
 const NewServiceOrderDataDispatchContext = createContext<Dispatch<Action>>(
   () => {}
 );
 
 interface Props {
   children: React.ReactNode;
-  session: Session;
 }
 
-export default function NewServiceOrderDataProvider({
-  children,
-  session,
-}: Props) {
+export default function NewServiceOrderDataProvider({ children }: Props) {
+  const { isBarunCorpMember } = useProfileContext(); // 이 시점에서는 initialized된 상태
+  const { data: session } = useSession();
+  const myOrganizationId = session?.organizationId ?? "";
+
+  const selectedOrganizationId = isBarunCorpMember ? "" : myOrganizationId;
+
   const [newServiceOrderData, dispatch] = useReducer(
     newServiceOrderDataReducer,
-    getInitialNewServiceOrderData(session)
+    {
+      selectedOrganizationId,
+      selectedProjectId: "",
+    }
   );
 
   return (

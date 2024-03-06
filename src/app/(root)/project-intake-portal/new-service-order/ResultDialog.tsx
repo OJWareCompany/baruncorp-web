@@ -2,7 +2,7 @@
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useNewServiceOrderData } from "./NewServiceOrderDataProvider";
+import { useProfileContext } from "../../ProfileProvider";
 import { ResultDialogState } from "./JobSection";
 import {
   Dialog,
@@ -26,7 +26,7 @@ interface Props extends DialogProps {
 }
 
 export default function ResultDialog({ state, ...dialogProps }: Props) {
-  const { isBarunCorpMember } = useNewServiceOrderData();
+  const { isBarunCorpMember } = useProfileContext();
   const router = useRouter();
   const { data: job } = useJobQuery(state.open ? state.jobId : "");
 

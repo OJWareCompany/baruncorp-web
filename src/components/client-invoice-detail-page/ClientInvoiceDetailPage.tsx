@@ -1,7 +1,6 @@
 "use client";
 import { format } from "date-fns";
 import React from "react";
-import { useSession } from "next-auth/react";
 import ClientInvoiceForm from "./ClientInvoiceForm";
 import ClientInvoiceStatus from "./ClientInvoiceStatus";
 import JobsTable from "./JobsTable";
@@ -22,6 +21,7 @@ import {
   OrganizationResponseDto,
   ServicePaginatedResponseDto,
 } from "@/api/api-spec";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 function getPageHeader({
   pageType,
@@ -101,9 +101,7 @@ export default function ClientInvoiceDetailPage({
   clientInvoiceId,
   pageType,
 }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
 
   const {
     data: clientInvoice,

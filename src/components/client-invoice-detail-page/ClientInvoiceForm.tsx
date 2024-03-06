@@ -6,7 +6,6 @@ import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useSession } from "next-auth/react";
 import {
   Form,
   FormControl,
@@ -46,6 +45,7 @@ import { Input } from "@/components/ui/input";
 import usePatchClientInvoiceMutation from "@/mutations/usePatchClientInvoiceMutation";
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const formSchema = z.object({
   organization: z
@@ -79,9 +79,7 @@ interface Props {
 }
 
 export default function ClientInvoiceForm({ clientInvoice }: Props) {
-  const { data: session } = useSession();
-
-  const isBarunCorpMember = session?.isBarunCorpMember ?? false;
+  const { isBarunCorpMember } = useProfileContext();
 
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
