@@ -15,11 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import LoadingButton from "@/components/LoadingButton";
-import {
-  ExpenseTypeEnum,
-  digitRegExp,
-  toTwoDecimalRegExp,
-} from "@/lib/constants";
+import { ExpenseTypeEnum, toTwoDecimalRegExp } from "@/lib/constants";
 import { AffixInput } from "@/components/AffixInput";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import { useToast } from "@/components/ui/use-toast";
@@ -297,7 +293,10 @@ export default function ExpensePricingForm({ onSuccess }: Props) {
                             value={field.value}
                             onChange={(event) => {
                               const { value } = event.target;
-                              if (value === "" || digitRegExp.test(value)) {
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
                                 if (Number(value) > 100) {
                                   field.onChange({
                                     ...event,
@@ -401,7 +400,10 @@ export default function ExpensePricingForm({ onSuccess }: Props) {
                             value={field.value}
                             onChange={(event) => {
                               const { value } = event.target;
-                              if (value === "" || digitRegExp.test(value)) {
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
                                 if (Number(value) > 100) {
                                   field.onChange({
                                     ...event,
@@ -505,7 +507,10 @@ export default function ExpensePricingForm({ onSuccess }: Props) {
                             value={field.value}
                             onChange={(event) => {
                               const { value } = event.target;
-                              if (value === "" || digitRegExp.test(value)) {
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
                                 if (Number(value) > 100) {
                                   field.onChange({
                                     ...event,
@@ -609,7 +614,10 @@ export default function ExpensePricingForm({ onSuccess }: Props) {
                             value={field.value}
                             onChange={(event) => {
                               const { value } = event.target;
-                              if (value === "" || digitRegExp.test(value)) {
+                              if (
+                                value === "" ||
+                                toTwoDecimalRegExp.test(value)
+                              ) {
                                 if (Number(value) > 100) {
                                   field.onChange({
                                     ...event,

@@ -8,11 +8,7 @@ import {
   ExpensePricingResponseDto,
   OrganizationResponseDto,
 } from "@/api/api-spec";
-import {
-  ExpenseTypeEnum,
-  digitRegExp,
-  toTwoDecimalRegExp,
-} from "@/lib/constants";
+import { ExpenseTypeEnum, toTwoDecimalRegExp } from "@/lib/constants";
 import {
   Form,
   FormControl,
@@ -263,7 +259,10 @@ export default function ExpensePricingForm({
                           value={field.value}
                           onChange={(event) => {
                             const { value } = event.target;
-                            if (value === "" || digitRegExp.test(value)) {
+                            if (
+                              value === "" ||
+                              toTwoDecimalRegExp.test(value)
+                            ) {
                               if (Number(value) > 100) {
                                 field.onChange({
                                   ...event,
@@ -367,7 +366,10 @@ export default function ExpensePricingForm({
                           value={field.value}
                           onChange={(event) => {
                             const { value } = event.target;
-                            if (value === "" || digitRegExp.test(value)) {
+                            if (
+                              value === "" ||
+                              toTwoDecimalRegExp.test(value)
+                            ) {
                               if (Number(value) > 100) {
                                 field.onChange({
                                   ...event,
@@ -471,7 +473,10 @@ export default function ExpensePricingForm({
                           value={field.value}
                           onChange={(event) => {
                             const { value } = event.target;
-                            if (value === "" || digitRegExp.test(value)) {
+                            if (
+                              value === "" ||
+                              toTwoDecimalRegExp.test(value)
+                            ) {
                               if (Number(value) > 100) {
                                 field.onChange({
                                   ...event,
@@ -575,7 +580,10 @@ export default function ExpensePricingForm({
                           value={field.value}
                           onChange={(event) => {
                             const { value } = event.target;
-                            if (value === "" || digitRegExp.test(value)) {
+                            if (
+                              value === "" ||
+                              toTwoDecimalRegExp.test(value)
+                            ) {
                               if (Number(value) > 100) {
                                 field.onChange({
                                   ...event,
