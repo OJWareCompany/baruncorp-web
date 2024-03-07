@@ -1,6 +1,5 @@
 "use client";
 import { useMemo } from "react";
-import { useSession } from "next-auth/react";
 import ProjectForm from "../common/ProjectForm";
 import JobsRelatedToProjectTable from "../common/JobsRelatedToProjectTable";
 import PageHeaderAction from "./PageHeaderAction";
@@ -96,7 +95,6 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
 
   const canViewScopePrice = department?.viewScopePrice ?? false;
 
-  const { data: session } = useSession();
   const {
     data: job,
     isLoading: isJobQueryLoading,

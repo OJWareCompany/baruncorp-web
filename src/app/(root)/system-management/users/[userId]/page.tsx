@@ -47,6 +47,7 @@ export default function Page({ params: { userId } }: Props) {
   const status = userStatuses[user.status];
   const isOrganizationBarunCorp =
     organization.organizationType.toUpperCase() === "ADMINISTRATION";
+  const isContractor = user.isVendor;
 
   return (
     <div className="flex flex-col gap-4">
@@ -79,7 +80,7 @@ export default function Page({ params: { userId } }: Props) {
             <DepartmentForm user={user} />
           </CollapsibleSection>
         )}
-        {(user.isVendor || isOrganizationBarunCorp) && (
+        {(isContractor || isOrganizationBarunCorp) && (
           <>
             <CollapsibleSection title="Position">
               <PositionForm positionId={user.position?.id ?? ""} />

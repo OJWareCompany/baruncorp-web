@@ -8,20 +8,19 @@ import { useToast } from "@/components/ui/use-toast";
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { toast } = useToast();
-  const { isInitialized, isBarunCorpMember, isContractor } =
-    useProfileContext();
+  const { isBarunCorpMember, isContractor } = useProfileContext();
 
   useEffect(() => {
-    if (isInitialized && !isBarunCorpMember && !isContractor) {
+    if (!isBarunCorpMember && !isContractor) {
       router.push("/");
       toast({
         title: "Invalid access",
         variant: "destructive",
       });
     }
-  }, [isBarunCorpMember, isContractor, isInitialized, router, toast]);
+  }, [isBarunCorpMember, isContractor, router, toast]);
 
-  if (!isInitialized || (!isBarunCorpMember && !isContractor)) {
+  if (!isBarunCorpMember && !isContractor) {
     return <PageLoading />;
   }
 

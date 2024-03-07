@@ -4,14 +4,9 @@ import { useProfileContext } from "./ProfileProvider";
 import JobsTableForMember from "./JobsTableForMember";
 import CollapsibleSection from "@/components/CollapsibleSection";
 import PageHeader from "@/components/PageHeader";
-import PageLoading from "@/components/PageLoading";
 
 export default function Page() {
-  const { isInitialized, isBarunCorpMember } = useProfileContext();
-
-  if (!isInitialized) {
-    return <PageLoading />;
-  }
+  const { isBarunCorpMember } = useProfileContext();
 
   // 멤버인 경우
   if (isBarunCorpMember) {

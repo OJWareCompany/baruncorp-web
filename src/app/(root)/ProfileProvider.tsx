@@ -2,16 +2,15 @@
 import { createContext, useContext, useMemo } from "react";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useProfileQuery from "@/queries/useProfileQuery";
+import PageLoading from "@/components/PageLoading";
 
 export interface ProfileData {
-  isInitialized: boolean;
   isAdmin: boolean;
   isBarunCorpMember: boolean;
   isContractor: boolean;
 }
 
 const ProfileContext = createContext<ProfileData>({
-  isInitialized: false,
   isAdmin: false,
   isBarunCorpMember: false,
   isContractor: false,
@@ -27,10 +26,11 @@ export default function ProfileProvider({ children }: Props) {
     profile?.organizationId ?? ""
   );
 
+  const isInitialized = profile != null && organization != null;
+
   const value = useMemo<ProfileData>(() => {
     if (profile == null || organization == null) {
       return {
-        isInitialized: false,
         isAdmin: false,
         isBarunCorpMember: false,
         isContractor: false,
@@ -38,7 +38,6 @@ export default function ProfileProvider({ children }: Props) {
     }
 
     return {
-      isInitialized: true,
       // uppercase로 사용해달라는 백엔드의 요청이 있었음
       isAdmin:
         profile.role.toUpperCase() === "SPECIAL ADMIN" ||
@@ -48,6 +47,10 @@ export default function ProfileProvider({ children }: Props) {
       isContractor: profile.isVendor,
     };
   }, [organization, profile]);
+
+  if (!isInitialized) {
+    return <PageLoading isPageHeaderPlaceholder={false} />;
+  }
 
   return (
     <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>

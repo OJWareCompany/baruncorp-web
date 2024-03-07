@@ -58,7 +58,6 @@ export default function User() {
         });
     }
 
-    queryClient.clear(); // 로그아웃시킬 때 cache를 지워서 다음 로그인 때 cache가 남아있지 않게 하기 위함
     signOut({ redirect: false });
     toast({ title: "Sign-out success" });
   };
@@ -90,9 +89,7 @@ export default function User() {
         <Button variant={"ghost"} className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
             <AvatarFallback>
-              <span className="animate-in fade-in">
-                {user.fullName.slice(0, 2)}
-              </span>
+              <span>{user.fullName.slice(0, 2)}</span>
             </AvatarFallback>
           </Avatar>
         </Button>

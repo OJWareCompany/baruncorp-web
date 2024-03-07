@@ -8,19 +8,19 @@ import PageLoading from "@/components/PageLoading";
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { toast } = useToast();
-  const { isInitialized, isBarunCorpMember } = useProfileContext();
+  const { isBarunCorpMember } = useProfileContext();
 
   useEffect(() => {
-    if (isInitialized && !isBarunCorpMember) {
+    if (!isBarunCorpMember) {
       router.push("/");
       toast({
         title: "Invalid access",
         variant: "destructive",
       });
     }
-  }, [isBarunCorpMember, isInitialized, router, toast]);
+  }, [isBarunCorpMember, router, toast]);
 
-  if (!isInitialized || !isBarunCorpMember) {
+  if (!isBarunCorpMember) {
     return <PageLoading />;
   }
 

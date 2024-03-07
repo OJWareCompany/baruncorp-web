@@ -127,11 +127,6 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
                 return;
               }
 
-              if (isBarunCorpMember) {
-                router.push(`/system-management/jobs/${state.jobId}`);
-                return;
-              }
-
               router.push(`/jobs/${state.jobId}`);
             }}
             disabled={

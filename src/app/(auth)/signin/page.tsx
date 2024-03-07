@@ -5,6 +5,8 @@ import { DefaultValues, useForm } from "react-hook-form";
 import * as z from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import {
   Form,
   FormControl,
@@ -44,6 +46,13 @@ if (process.env.NODE_ENV === "development") {
 export default function Page() {
   const router = useRouter();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // 이 페이지에 처음 진입할 때 cache를 지움
+    // 로그아웃시키면 이 페이지에 진입하게 되는데, 일반적으로 이때 실행됨
+    queryClient.clear();
+  }, [queryClient]);
 
   /**
    * Form

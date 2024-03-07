@@ -60,7 +60,7 @@ interface Props {
 }
 
 export default function NewServiceOrderDataProvider({ children }: Props) {
-  const { isBarunCorpMember } = useProfileContext(); // 이 시점에서는 initialized된 상태
+  const { isBarunCorpMember } = useProfileContext();
   const { data: session } = useSession();
   const myOrganizationId = session?.organizationId ?? "";
 

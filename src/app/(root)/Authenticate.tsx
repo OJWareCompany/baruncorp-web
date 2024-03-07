@@ -41,7 +41,6 @@ export default function Authenticate({ children }: Props) {
         break;
     }
 
-    queryClient.clear(); // 로그아웃시킬 때 cache를 지워서 다음 로그인 때 cache가 남아있지 않게 하기 위함
     isSignOutTriggeredRef.current = true; // authError로 로그아웃이 되었을 때, signOut이 trigger 되었다는 값을 기억하게 해서 여러 번 이 코드가 실행되지 않도록 함
     signOut({ redirect: false });
   }, [queryClient, session, status, toast]);

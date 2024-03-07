@@ -109,8 +109,7 @@ export default function Header() {
   const { data: profile } = useProfileQuery();
   const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
   const { isSelected: isExpanded } = useExpandContext();
-  const { isInitialized, isBarunCorpMember, isContractor } =
-    useProfileContext();
+  const { isBarunCorpMember, isContractor } = useProfileContext();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white">
@@ -124,87 +123,83 @@ export default function Header() {
           <Link href="/">
             <h1 className="h3 pointer-events-none">Barun Corp</h1>
           </Link>
-          {isInitialized && (
-            <nav className="animate-in fade-in">
-              <NavigationMenu delayDuration={0}>
-                <NavigationMenuList>
-                  {isBarunCorpMember && (
-                    <NavigationMenuItem>
-                      <NavigationMenuTrigger>
-                        System Management
-                      </NavigationMenuTrigger>
-                      <NavigationMenuContent>
-                        <ul className="p-1 w-56">
-                          {systemManagementItems
-                            .filter((item) => {
-                              if (item.authority == null) {
-                                return true;
-                              }
-
-                              if (item.authority === "viewClientInvoice") {
-                                return department?.viewClientInvoice ?? false;
-                              }
-
-                              if (item.authority === "viewVendorInvoice") {
-                                return department?.viewVendorInvoice ?? false;
-                              }
-                            })
-                            .map((item) => (
-                              <li key={item.title}>
-                                <Link
-                                  href={item.href}
-                                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-                                >
-                                  {item.title}
-                                </Link>
-                              </li>
-                            ))}
-                        </ul>
-                      </NavigationMenuContent>
-                    </NavigationMenuItem>
-                  )}
-                  {(isBarunCorpMember || isContractor) && (
-                    <NavigationMenuItem>
-                      <Link href="/workspace" legacyBehavior passHref>
-                        <NavigationMenuLink
-                          className={navigationMenuTriggerStyle()}
-                        >
-                          Workspace
-                        </NavigationMenuLink>
-                      </Link>
-                    </NavigationMenuItem>
-                  )}
+          <nav>
+            <NavigationMenu delayDuration={0}>
+              <NavigationMenuList>
+                {isBarunCorpMember && (
                   <NavigationMenuItem>
-                    <Link href="/project-intake-portal" legacyBehavior passHref>
+                    <NavigationMenuTrigger>
+                      System Management
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="p-1 w-56">
+                        {systemManagementItems
+                          .filter((item) => {
+                            if (item.authority == null) {
+                              return true;
+                            }
+
+                            if (item.authority === "viewClientInvoice") {
+                              return department?.viewClientInvoice ?? false;
+                            }
+
+                            if (item.authority === "viewVendorInvoice") {
+                              return department?.viewVendorInvoice ?? false;
+                            }
+                          })
+                          .map((item) => (
+                            <li key={item.title}>
+                              <Link
+                                href={item.href}
+                                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                              >
+                                {item.title}
+                              </Link>
+                            </li>
+                          ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                )}
+                {(isBarunCorpMember || isContractor) && (
+                  <NavigationMenuItem>
+                    <Link href="/workspace" legacyBehavior passHref>
                       <NavigationMenuLink
                         className={navigationMenuTriggerStyle()}
                       >
-                        Project Intake Portal
+                        Workspace
                       </NavigationMenuLink>
                     </Link>
                   </NavigationMenuItem>
-                  <NavigationMenuItem>
-                    <Link href="/invoices" legacyBehavior passHref>
-                      <NavigationMenuLink
-                        className={navigationMenuTriggerStyle()}
-                      >
-                        Invoices
-                      </NavigationMenuLink>
-                    </Link>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
-            </nav>
-          )}
+                )}
+                <NavigationMenuItem>
+                  <Link href="/project-intake-portal" legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      Project Intake Portal
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link href="/invoices" legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      Invoices
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </nav>
         </div>
-        {isInitialized && (
-          <div className="flex gap-2 animate-in fade-in">
-            <ExpandToggle />
-            {isBarunCorpMember && <HandToggle />}
-            <Notification />
-            <User />
-          </div>
-        )}
+        <div className="flex gap-2">
+          <ExpandToggle />
+          {isBarunCorpMember && <HandToggle />}
+          <Notification />
+          <User />
+        </div>
       </div>
     </header>
   );
