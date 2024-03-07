@@ -7,13 +7,18 @@ import { UserResponseDto } from "@/api/api-spec";
 interface LicenseTabsContentProps {
   licenses: UserResponseDto["licenses"];
   value: LicenseTypeEnum;
+  userId: string;
 }
 
-function LicenseTabsContent({ value, licenses }: LicenseTabsContentProps) {
+function LicenseTabsContent({
+  value,
+  licenses,
+  userId,
+}: LicenseTabsContentProps) {
   return (
     <TabsContent value={value}>
       <div className="mt-2">
-        <LicensesTable licenses={licenses} />
+        <LicensesTable licenses={licenses} userId={userId} />
       </div>
     </TabsContent>
   );
@@ -45,10 +50,12 @@ export default function LicensesTabs({ user }: Props) {
       <LicenseTabsContent
         value={LicenseTypeEnum.Values.Structural}
         licenses={user.licenses.filter((value) => value.type === "Structural")}
+        userId={user.id}
       />
       <LicenseTabsContent
         value={LicenseTypeEnum.Values.Electrical}
         licenses={user.licenses.filter((value) => value.type === "Electrical")}
+        userId={user.id}
       />
     </Tabs>
   );

@@ -1,20 +1,9 @@
 "use client";
-import ProfileForm from "./ProfileForm";
-import useProfileQuery from "@/queries/useProfileQuery";
-import PageHeader from "@/components/PageHeader";
-import PageLoading from "@/components/PageLoading";
+import { useSession } from "next-auth/react";
+import UserDetailPage from "@/components/user-detail-page/UserDetailPage";
 
 export default function Page() {
-  const { data: profile, isLoading: isProfileQueryLoading } = useProfileQuery();
+  const { data: session } = useSession();
 
-  if (isProfileQueryLoading || profile == null) {
-    return <PageLoading />;
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <PageHeader items={[{ href: "/my/profile", name: "My Profile" }]} />
-      <ProfileForm profile={profile} />
-    </div>
-  );
+  return <UserDetailPage userId={session?.id ?? ""} pageType="PROFILE" />;
 }

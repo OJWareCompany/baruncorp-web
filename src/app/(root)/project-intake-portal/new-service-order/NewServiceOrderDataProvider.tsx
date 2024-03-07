@@ -1,3 +1,4 @@
+"use client";
 import { Dispatch, createContext, useContext, useReducer } from "react";
 import { useSession } from "next-auth/react";
 import { useProfileContext } from "../../ProfileProvider";

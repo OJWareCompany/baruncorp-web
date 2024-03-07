@@ -7,7 +7,6 @@ import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import DepartmentsCombobox from "@/components/combobox/DepartmentsCombobox";
 import { useToast } from "@/components/ui/use-toast";
-// import usePostUserDepartmentMutation from "@/mutations/usePostUserDepartmentMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import {
   Form,
@@ -21,7 +20,6 @@ import usePostDepartmentRemoveUserMutation from "@/mutations/usePostDepartmentRe
 import { UserResponseDto } from "@/api/api-spec";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
-// import usePostUserDepartmentResetMutation from "@/mutations/usePostUserDepartmentResetMutation";
 
 const formSchema = z.object({
   departmentId: z.string().trim(),

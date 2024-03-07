@@ -3,7 +3,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
 import { AxiosError } from "axios";
 import PositionsCombobox from "@/components/combobox/PositionsCombobox";
 import { useToast } from "@/components/ui/use-toast";
@@ -26,10 +25,10 @@ type FieldValues = z.infer<typeof formSchema>;
 
 interface Props {
   positionId: string;
+  userId: string;
 }
 
-export default function PositionForm({ positionId }: Props) {
-  const { userId } = useParams() as { userId: string };
+export default function PositionForm({ positionId, userId }: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {

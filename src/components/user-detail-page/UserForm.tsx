@@ -1,124 +1,186 @@
 "use client";
-import { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { ExternalLink, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
-import { useProfileContext } from "../../ProfileProvider";
+import Link from "next/link";
+import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import usePatchProfileMutation from "@/mutations/usePatchProfileMutation";
-import LoadingButton from "@/components/LoadingButton";
 import RowItemsContainer from "@/components/RowItemsContainer";
-import { UserResponseDto } from "@/api/api-spec";
+import LoadingButton from "@/components/LoadingButton";
 import { transformStringIntoNullableString } from "@/lib/constants";
+import { Button } from "@/components/ui/button";
+import usePatchProfileByUserIdMutation from "@/mutations/usePatchProfileByUserIdMutation";
+import { Checkbox } from "@/components/ui/checkbox";
+import { getUserQueryKey } from "@/queries/useUserQuery";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
+import OrganizationsCombobox from "@/components/combobox/OrganizationsCombobox";
 import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
 import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
-const formSchema = z.object({
-  organization: z.string().trim().min(1, {
-    message: "Organization is required",
-  }),
-  firstName: z.string().trim().min(1, {
-    message: "First Name is required",
-  }),
-  lastName: z.string().trim().min(1, {
-    message: "Last Name is required",
-  }),
-  phoneNumber: z.string().trim(),
-  emailAddress: z
-    .string()
-    .trim()
-    .min(1, { message: "Email Address is required" })
-    .email({
-      message: "Format of Email Address is incorrect",
-    }),
-  emailAddressesToReceiveDeliverables: z.array(
-    z.object({
-      email: z
-        .string()
-        .trim()
-        .min(1, { message: "Email Address is required" })
-        .email({ message: "Format of Email Address is incorrect" }),
-    })
-  ),
-  dateOfJoining: z.date().optional(),
-});
-
-type FieldValues = z.infer<typeof formSchema>;
-
-function getFieldValues(profile: UserResponseDto): FieldValues {
-  return {
-    organization: profile.organization,
-    firstName: profile.firstName,
-    lastName: profile.lastName,
-    emailAddress: profile.email,
-    emailAddressesToReceiveDeliverables: (profile.deliverablesEmails ?? []).map(
-      (email) => ({
-        email,
-      })
-    ),
-    phoneNumber: profile.phoneNumber ?? "",
-    dateOfJoining:
-      profile.dateOfJoining == null
-        ? undefined
-        : new Date(profile.dateOfJoining),
-  };
+function getOrganizationDetailUrl({
+  pageType,
+  organizationId,
+}: {
+  pageType: UserDetailPageType;
+  organizationId: string;
+}) {
+  switch (pageType) {
+    case "PROFILE":
+      return `/my/organization`;
+    case "SYSTEM_MANAGEMENT":
+      return `/system-management/organizations/${organizationId}`;
+  }
 }
 
 interface Props {
-  profile: UserResponseDto;
+  pageType: UserDetailPageType;
+  user: UserResponseDto;
+  organization: OrganizationResponseDto;
 }
 
-export default function ProfileForm({ profile }: Props) {
+export default function UserForm({ pageType, user, organization }: Props) {
+  const { data: session, status } = useSession();
+  const { isBarunCorpMember: isSignedInUserBarunCorpMember } =
+    useProfileContext();
+
+  const isTargetUserOrganizationBarunCorp = useMemo(
+    () => organization.organizationType.toUpperCase() === "ADMINISTRATION",
+    [organization.organizationType]
+  );
+
+  const formSchema = useMemo(
+    () =>
+      z
+        .object({
+          organizationId: z
+            .string()
+            .trim()
+            .min(1, { message: "Organization is required" }),
+          firstName: z.string().trim().min(1, {
+            message: "First Name is required",
+          }),
+          lastName: z.string().trim().min(1, {
+            message: "Last Name is required",
+          }),
+          phoneNumber: z.string().trim(),
+          emailAddress: z
+            .string()
+            .trim()
+            .min(1, { message: "Email Address is required" })
+            .email({
+              message: "Format of Email Address is incorrect",
+            }),
+          emailAddressesToReceiveDeliverables: z.array(
+            z.object({
+              email: z
+                .string()
+                .trim()
+                .min(1, { message: "Email Address is required" })
+                .email({ message: "Format of Email Address is incorrect" }),
+            })
+          ),
+          isContractor: z.boolean(),
+          dateOfJoining: z.date().optional(),
+        })
+        .superRefine((values, ctx) => {
+          if (
+            isTargetUserOrganizationBarunCorp &&
+            values.dateOfJoining == null
+          ) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Date of Joining is required",
+              path: ["dateOfJoining"],
+            });
+            return;
+          }
+        }),
+    [isTargetUserOrganizationBarunCorp]
+  );
+
+  type FieldValues = z.infer<typeof formSchema>;
+
+  const getFieldValues = useCallback((user: UserResponseDto): FieldValues => {
+    return {
+      emailAddress: user.email,
+      emailAddressesToReceiveDeliverables: user.deliverablesEmails.map(
+        (email) => ({
+          email,
+        })
+      ),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      organizationId: user.organizationId,
+      phoneNumber: user.phoneNumber ?? "",
+      isContractor: user.isVendor,
+      dateOfJoining:
+        user.dateOfJoining == null ? undefined : new Date(user.dateOfJoining),
+    };
+  }, []);
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: getFieldValues(profile),
+    defaultValues: getFieldValues(user),
   });
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "emailAddressesToReceiveDeliverables",
   });
-  const { isBarunCorpMember } = useProfileContext();
 
+  const { mutateAsync } = usePatchProfileByUserIdMutation(user.id);
   const queryClient = useQueryClient();
-  const { mutateAsync } = usePatchProfileMutation();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (profile) {
-      form.reset(getFieldValues(profile));
+    if (user) {
+      form.reset(getFieldValues(user));
     }
-  }, [form, profile]);
+  }, [form, getFieldValues, user]);
 
   async function onSubmit(values: FieldValues) {
     await mutateAsync({
+      deliverablesEmails: values.emailAddressesToReceiveDeliverables.map(
+        ({ email }) => email
+      ),
       firstName: values.firstName,
       lastName: values.lastName,
       phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
-      deliverablesEmails: values.emailAddressesToReceiveDeliverables
-        .map(({ email }) => transformStringIntoNullableString.parse(email))
-        .filter((value): value is string => value != null),
-      isVendor: profile.isVendor,
-      dateOfJoining: isBarunCorpMember
+      isVendor: isTargetUserOrganizationBarunCorp ? false : values.isContractor,
+      dateOfJoining: isTargetUserOrganizationBarunCorp
         ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
         : null,
     })
       .then(() => {
         toast({ title: "Success" });
-        queryClient.invalidateQueries({ queryKey: getProfileQueryKey() });
+        queryClient.invalidateQueries({
+          queryKey: getUserQueryKey(user.id),
+        });
+
+        if (
+          status === "authenticated" &&
+          user &&
+          session.email === user.email
+        ) {
+          queryClient.invalidateQueries({
+            queryKey: getProfileQueryKey(),
+          });
+        }
       })
       .catch((error: AxiosError<ErrorResponseData>) => {
         switch (error.response?.status) {
@@ -165,13 +227,35 @@ export default function ProfileForm({ profile }: Props) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="organization"
+          name="organizationId"
           render={({ field }) => (
             <FormItem>
               <FormLabel required>Organization</FormLabel>
-              <FormControl>
-                <Input {...field} disabled />
-              </FormControl>
+              <div className="flex gap-2">
+                <FormControl>
+                  <OrganizationsCombobox
+                    organizationId={field.value}
+                    onOrganizationIdChange={field.onChange}
+                    ref={field.ref}
+                    disabled
+                  />
+                </FormControl>
+                <Button
+                  size={"icon"}
+                  variant={"outline"}
+                  className="shrink-0"
+                  asChild
+                >
+                  <Link
+                    href={getOrganizationDetailUrl({
+                      pageType,
+                      organizationId: user.organizationId,
+                    })}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -226,7 +310,6 @@ export default function ProfileForm({ profile }: Props) {
               <FormControl>
                 <Input
                   {...field}
-                  disabled
                   onChange={(event) => {
                     field.onChange(event);
                     form.setValue(
@@ -237,6 +320,7 @@ export default function ProfileForm({ profile }: Props) {
                       }
                     );
                   }}
+                  disabled
                 />
               </FormControl>
               <FormMessage />
@@ -295,7 +379,27 @@ export default function ProfileForm({ profile }: Props) {
             );
           }}
         />
-        {isBarunCorpMember && (
+        {!isTargetUserOrganizationBarunCorp &&
+          isSignedInUserBarunCorpMember && (
+            <FormField
+              control={form.control}
+              name="isContractor"
+              render={({ field }) => (
+                <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                  <FormLabel>Contractor</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      ref={field.ref}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        {isTargetUserOrganizationBarunCorp && (
           <FormField
             control={form.control}
             name="dateOfJoining"
@@ -303,8 +407,11 @@ export default function ProfileForm({ profile }: Props) {
               <FormItem>
                 <FormLabel required>Date of Joining</FormLabel>
                 <FormControl>
-                  <DateOfJoiningDatePicker {...field} disabled />
+                  <DateOfJoiningDatePicker {...field} />
                 </FormControl>
+                <FormDescription>
+                  Tenure and PTO are updated based on Date of Joining
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -312,9 +419,9 @@ export default function ProfileForm({ profile }: Props) {
         )}
         <LoadingButton
           type="submit"
-          disabled={!form.formState.isDirty}
-          isLoading={form.formState.isSubmitting}
           className="w-full"
+          isLoading={form.formState.isSubmitting}
+          disabled={!form.formState.isDirty}
         >
           Edit
         </LoadingButton>

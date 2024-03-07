@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,8 +12,11 @@ import {
 import NewLicenseForm from "@/components/form/NewLicenseForm";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 
-export default function NewLicenseDialog() {
-  const { userId } = useParams() as { userId: string };
+interface Props {
+  userId: string;
+}
+
+export default function NewLicenseDialog({ userId }: Props) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 

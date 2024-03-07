@@ -5,7 +5,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { UserResponseDto } from "@/api/api-spec";
-import { formatInEST } from "@/lib/utils";
+import { cn, formatInEST } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -33,16 +33,17 @@ import useDeleteUserLicenseMutation from "@/mutations/useDeleteUserLicenseMutati
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper = createColumnHelper<UserResponseDto["licenses"][number]>();
 
 interface Props {
   licenses: UserResponseDto["licenses"];
+  userId: string;
 }
 
-export default function LicensesTable({ licenses }: Props) {
+export default function LicensesTable({ licenses, userId }: Props) {
   const router = useRouter();
-  const { userId } = useParams() as { userId: string };
   const [alertDialogState, setAlertDialogState] = useState<
     | { open: false }
     | { open: true; abbreviation: string; type: "Structural" | "Electrical" }
@@ -51,6 +52,8 @@ export default function LicensesTable({ licenses }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { mutateAsync, isPending } = useDeleteUserLicenseMutation();
+
+  const { isBarunCorpMember } = useProfileContext();
 
   const columns = useMemo(
     () => [
@@ -150,11 +153,13 @@ export default function LicensesTable({ licenses }: Props) {
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
-                      router.push(
-                        `/system-management/licenses/${row.original.type}/${row.original.abbreviation}`
-                      );
+                      if (isBarunCorpMember) {
+                        router.push(
+                          `/system-management/licenses/${row.original.type}/${row.original.abbreviation}`
+                        );
+                      }
                     }}
-                    className="cursor-pointer"
+                    className={cn(isBarunCorpMember && "cursor-pointer")}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

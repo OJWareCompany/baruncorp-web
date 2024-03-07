@@ -42,6 +42,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import usePatchUserAvailableTaskMutation from "@/mutations/usePatchUserAvailableTaskMutation";
 import LoadingButton from "@/components/LoadingButton";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import { cn } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<UserResponseDto["availableTasks"][number]>();
@@ -64,6 +66,8 @@ export default function AvailableTasksTable({ user, organization }: Props) {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; taskId: string }
   >({ open: false });
+
+  const { isBarunCorpMember } = useProfileContext();
 
   const columns = useMemo(
     () => [
@@ -220,9 +224,11 @@ export default function AvailableTasksTable({ user, organization }: Props) {
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
-                      router.push(`/system-management/tasks/${row.id}`);
+                      if (isBarunCorpMember) {
+                        router.push(`/system-management/tasks/${row.id}`);
+                      }
                     }}
-                    className="cursor-pointer"
+                    className={cn(isBarunCorpMember && "cursor-pointer")}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
