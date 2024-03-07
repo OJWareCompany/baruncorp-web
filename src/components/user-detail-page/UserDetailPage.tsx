@@ -25,9 +25,18 @@ function getPageHeader({
   user: UserResponseDto;
 }) {
   switch (pageType) {
-    case "PROFILE":
+    case "MY_PROFILE":
       return (
         <PageHeader items={[{ href: "/my/profile", name: "My Profile" }]} />
+      );
+    case "MY_ORGANIZATION":
+      return (
+        <PageHeader
+          items={[
+            { href: "/my/organization", name: "My Organization" },
+            { href: `/my/organization/users${user.id}`, name: user.fullName },
+          ]}
+        />
       );
     case "SYSTEM_MANAGEMENT":
       return (

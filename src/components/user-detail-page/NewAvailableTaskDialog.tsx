@@ -105,7 +105,7 @@ export default function NewAvailableTaskDialog({ user, organization }: Props) {
       });
   }
 
-  const isOrganizationBarunCorp =
+  const isTargetUserOrganizationBarunCorp =
     organization.organizationType.toUpperCase() === "ADMINISTRATION";
 
   return (
@@ -148,7 +148,7 @@ export default function NewAvailableTaskDialog({ user, organization }: Props) {
                 </FormItem>
               )}
             />
-            {isOrganizationBarunCorp && (
+            {isTargetUserOrganizationBarunCorp && (
               <FormField
                 control={form.control}
                 name="autoAssignmentPropertyType"

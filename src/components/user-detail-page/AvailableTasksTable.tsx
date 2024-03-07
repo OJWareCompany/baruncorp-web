@@ -172,7 +172,7 @@ export default function AvailableTasksTable({ user, organization }: Props) {
     [patchUserAvailableTaskMutateAsync, queryClient, toast, user.id]
   );
 
-  const isOrganizationBarunCorp =
+  const isTargetUserOrganizationBarunCorp =
     organization.organizationType.toUpperCase() === "ADMINISTRATION";
 
   const table = useReactTable({
@@ -182,7 +182,7 @@ export default function AvailableTasksTable({ user, organization }: Props) {
     getRowId: ({ id }) => id,
     state: {
       columnVisibility: {
-        autoAssignmentType: isOrganizationBarunCorp,
+        autoAssignmentType: isTargetUserOrganizationBarunCorp,
       },
     },
   });

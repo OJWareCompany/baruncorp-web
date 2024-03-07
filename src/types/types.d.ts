@@ -14,4 +14,7 @@ interface FileServerErrorResponseData {
 
 type InvoiceDetailPageType = "INVOICES" | "SYSTEM_MANAGEMENT";
 type JobDetailPageType = "HOME" | "WORKSPACE" | "SYSTEM_MANAGEMENT";
-type UserDetailPageType = "PROFILE" | "SYSTEM_MANAGEMENT";
+type UserDetailPageType =
+  | "MY_PROFILE"
+  | "MY_ORGANIZATION"
+  | "SYSTEM_MANAGEMENT";

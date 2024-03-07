@@ -41,7 +41,8 @@ function getOrganizationDetailUrl({
   organizationId: string;
 }) {
   switch (pageType) {
-    case "PROFILE":
+    case "MY_PROFILE":
+    case "MY_ORGANIZATION":
       return `/my/organization`;
     case "SYSTEM_MANAGEMENT":
       return `/system-management/organizations/${organizationId}`;
