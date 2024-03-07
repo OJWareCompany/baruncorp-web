@@ -30,6 +30,7 @@ import usePatchTaskPositionOrderMutation from "@/mutations/usePatchTaskPositionO
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import usePatchPositionTaskMutation from "@/mutations/usePatchPositionTaskMutation";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface InternalTableProps {
   task: TaskResponseDto;
@@ -51,6 +52,9 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
     usePatchTaskPositionOrderMutation(task.id);
   const { mutateAsync: patchPositionTaskMutateAsync } =
     usePatchPositionTaskMutation();
+  const {
+    authority: { canEditTask },
+  } = useProfileContext();
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: (keys) =>
@@ -113,11 +117,11 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
   return (
     <div className="border rounded-md text-xs">
       <div className="flex items-center border-b transition-colors hover:bg-muted/50 last:border-none font-medium h-9 text-muted-foreground">
-        <div className="basis-[68px]"></div>
+        {canEditTask && <div className="basis-[56px]"></div>}
         <div className="px-3 basis-[81px]">Priority</div>
         <div className="px-3 flex-1">Name</div>
         <div className="px-3 flex-1">Auto Assignment Property Type</div>
-        <div className="basis-[68px]"></div>
+        {canEditTask && <div className="basis-[56px]"></div>}
       </div>
       {list.items.length === 0 ? (
         <div className="h-24 flex items-center justify-center transition-colors hover:bg-muted/50">
@@ -125,7 +129,7 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
         </div>
       ) : (
         <GridList
-          dragAndDropHooks={dragAndDropHooks}
+          dragAndDropHooks={canEditTask ? dragAndDropHooks : undefined}
           items={list.items}
           className="[&>div.react-aria-DropIndicator]:outline [&>div.react-aria-DropIndicator]:outline-1 [&>div.react-aria-DropIndicator]:outline-primary"
         >
@@ -136,11 +140,13 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
                 "flex items-center border-b transition-colors hover:bg-muted/50 last:border-none outline-none"
               }
             >
-              <div className="px-3 py-2">
-                <Button size={"icon"} className="h-8 w-8" variant={"ghost"}>
-                  <AlignJustify className="h-3 w-3" />
-                </Button>
-              </div>
+              {canEditTask && (
+                <div className="px-3 py-2">
+                  <Button size={"icon"} className="h-8 w-8" variant={"ghost"}>
+                    <AlignJustify className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
               <div className="px-3 basis-[81px] text-muted-foreground">
                 {item.order}.
               </div>
@@ -178,6 +184,7 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
                         }
                       });
                   }}
+                  disabled={!canEditTask}
                 >
                   <SelectTrigger className="-ml-[9px] text-xs px-2 h-8 py-0 focus:ring-0 focus:ring-offset-0">
                     <SelectValue placeholder="Select a property type" />
@@ -193,18 +200,20 @@ function InternalTable({ task, deletePosition }: InternalTableProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="px-3 py-2">
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  className="h-8 w-8"
-                  onClick={() => {
-                    deletePosition(item.positionId);
-                  }}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
+              {canEditTask && (
+                <div className="px-3 py-2">
+                  <Button
+                    variant={"ghost"}
+                    size={"icon"}
+                    className="h-8 w-8"
+                    onClick={() => {
+                      deletePosition(item.positionId);
+                    }}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
             </GridListItem>
           )}
         </GridList>

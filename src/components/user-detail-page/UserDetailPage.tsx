@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import UserForm from "./UserForm";
 import NewLicenseDialog from "./NewLicenseDialog";
 import LicensesTabs from "./LicensesTabs";
@@ -59,6 +60,7 @@ interface Props {
 }
 
 export default function UserDetailPage({ userId, pageType }: Props) {
+  const { data: session } = useSession();
   const {
     data: user,
     isLoading: isUserQueryLoading,
@@ -72,8 +74,10 @@ export default function UserDetailPage({ userId, pageType }: Props) {
   useNotFound(userQueryError);
   useNotFound(organizationQueryError);
 
-  const { isBarunCorpMember: isSignedInUserBarunCorpMember } =
-    useProfileContext();
+  const {
+    isBarunCorpMember: isSignedInUserBarunCorpMember,
+    authority: { canEditPosition, canEditLicense, canEditTask },
+  } = useProfileContext();
 
   if (
     isUserQueryLoading ||
@@ -88,6 +92,25 @@ export default function UserDetailPage({ userId, pageType }: Props) {
   const isTargetUserOrganizationBarunCorp =
     organization.organizationType.toUpperCase() === "ADMINISTRATION";
   const isTargetUserContractor = user.isVendor;
+
+  const isMine = session?.id === user.id;
+  const isMyOrganization = session?.organizationId === organization.id;
+
+  // 수정하려는 사람이 본인이면 무조건 가능
+  // 권한이 있으면 무조건 가능
+  // 수정하려는 사람의 조직이 baruncorp가 아니고, 그 사람의 조직이 나의 조직과 같으면 가능 (외주 조직에 속한 사람이 자신의 조직원들 보는 경우)
+  const canEditUserPosition =
+    isMine ||
+    canEditPosition ||
+    (!isTargetUserOrganizationBarunCorp && isMyOrganization);
+  const canEditUserLicense =
+    isMine ||
+    canEditLicense ||
+    (!isTargetUserOrganizationBarunCorp && isMyOrganization);
+  const canEditUserTask =
+    isMine ||
+    canEditTask ||
+    (!isTargetUserOrganizationBarunCorp && isMyOrganization);
 
   return (
     <div className="flex flex-col gap-4">
@@ -126,24 +149,33 @@ export default function UserDetailPage({ userId, pageType }: Props) {
               <PositionForm
                 positionId={user.position?.id ?? ""}
                 userId={user.id}
+                disabled={!canEditUserPosition}
               />
             </CollapsibleSection>
             <CollapsibleSection
               title="Licenses"
-              action={<NewLicenseDialog userId={user.id} />}
+              action={
+                canEditUserLicense && <NewLicenseDialog userId={user.id} />
+              }
             >
-              <LicensesTabs user={user} />
+              <LicensesTabs user={user} disabled={!canEditUserLicense} />
             </CollapsibleSection>
             <CollapsibleSection
               title="Available Tasks"
               action={
-                <NewAvailableTaskDialog
-                  user={user}
-                  organization={organization}
-                />
+                canEditUserTask && (
+                  <NewAvailableTaskDialog
+                    user={user}
+                    organization={organization}
+                  />
+                )
               }
             >
-              <AvailableTasksTable user={user} organization={organization} />
+              <AvailableTasksTable
+                user={user}
+                organization={organization}
+                disabled={!canEditUserTask}
+              />
             </CollapsibleSection>
           </>
         )}

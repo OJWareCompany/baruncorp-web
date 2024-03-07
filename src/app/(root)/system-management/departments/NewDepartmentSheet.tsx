@@ -42,6 +42,9 @@ const formSchema = z.object({
   viewExpensePricing: z.boolean(),
   viewScopePrice: z.boolean(),
   viewTaskCost: z.boolean(),
+  editTask: z.boolean(),
+  editLicense: z.boolean(),
+  editPosition: z.boolean(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -64,6 +67,9 @@ export default function NewDepartmentSheet() {
       viewExpensePricing: false,
       viewScopePrice: false,
       viewTaskCost: false,
+      editTask: false,
+      editLicense: false,
+      editPosition: false,
     },
   });
 
@@ -93,6 +99,9 @@ export default function NewDepartmentSheet() {
         viewExpensePricing: values.viewExpensePricing,
         viewScopePrice: values.viewScopePrice,
         viewTaskCost: values.viewTaskCost,
+        editUserTask: values.editTask,
+        editUserLicense: values.editLicense,
+        editUserPosition: values.editPosition,
       })
       .then(() => {
         setOpen(false);
@@ -174,143 +183,216 @@ export default function NewDepartmentSheet() {
             />
             {/* 권한 처리. Admin만 View Options를 설정할 수 있음 */}
             {isAdmin && (
-              <div className="flex flex-col gap-2">
-                <Label>View Options</Label>
-                <div className="grid grid-cols-3 gap-y-2 gap-x-4">
-                  <FormField
-                    control={form.control}
-                    name="viewClientInvoice"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row gap-3 items-center">
-                        <FormControl>
-                          <Checkbox
-                            ref={field.ref}
-                            checked={field.value}
-                            onCheckedChange={(newChecked) => {
-                              if (typeof newChecked === "boolean") {
-                                field.onChange(newChecked);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Can View Client Invoice
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="viewVendorInvoice"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row gap-3 items-center">
-                        <FormControl>
-                          <Checkbox
-                            ref={field.ref}
-                            checked={field.value}
-                            onCheckedChange={(newChecked) => {
-                              if (typeof newChecked === "boolean") {
-                                field.onChange(newChecked);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Can View Vendor Invoice
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="viewCustomPricing"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row gap-3 items-center">
-                        <FormControl>
-                          <Checkbox
-                            ref={field.ref}
-                            checked={field.value}
-                            onCheckedChange={(newChecked) => {
-                              if (typeof newChecked === "boolean") {
-                                field.onChange(newChecked);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Can View Custom Pricing
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="viewExpensePricing"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row gap-3 items-center">
-                        <FormControl>
-                          <Checkbox
-                            ref={field.ref}
-                            checked={field.value}
-                            onCheckedChange={(newChecked) => {
-                              if (typeof newChecked === "boolean") {
-                                field.onChange(newChecked);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Can View Expense Pricing
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="viewScopePrice"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row gap-3 items-center">
-                        <FormControl>
-                          <Checkbox
-                            ref={field.ref}
-                            checked={field.value}
-                            onCheckedChange={(newChecked) => {
-                              if (typeof newChecked === "boolean") {
-                                field.onChange(newChecked);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Can View Scope Price
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="viewTaskCost"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row gap-3 items-center">
-                        <FormControl>
-                          <Checkbox
-                            ref={field.ref}
-                            checked={field.value}
-                            onCheckedChange={(newChecked) => {
-                              if (typeof newChecked === "boolean") {
-                                field.onChange(newChecked);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Can View Task Cost
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
+              <>
+                <div className="flex flex-col gap-2">
+                  <Label>View Options</Label>
+                  <div className="grid grid-cols-3 gap-y-2 gap-x-4">
+                    <FormField
+                      control={form.control}
+                      name="viewClientInvoice"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can View Client Invoice
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="viewVendorInvoice"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can View Vendor Invoice
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="viewCustomPricing"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can View Custom Pricing
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="viewExpensePricing"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can View Expense Pricing
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="viewScopePrice"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can View Scope Price
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="viewTaskCost"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can View Task Cost
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
-              </div>
+                <div className="flex flex-col gap-2">
+                  <Label>Edit Options</Label>
+                  <div className="grid grid-cols-3 gap-y-2 gap-x-4">
+                    <FormField
+                      control={form.control}
+                      name="editPosition"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can Edit Position
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="editLicense"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can Edit License
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="editTask"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row gap-3 items-center">
+                          <FormControl>
+                            <Checkbox
+                              ref={field.ref}
+                              checked={field.value}
+                              onCheckedChange={(newChecked) => {
+                                if (typeof newChecked === "boolean") {
+                                  field.onChange(newChecked);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Can Edit Task
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </>
             )}
             <LoadingButton
               type="submit"

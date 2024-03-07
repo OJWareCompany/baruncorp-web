@@ -11,6 +11,7 @@ import PageLoading from "@/components/PageLoading";
 import useServiceQuery from "@/queries/useServiceQuery";
 import useNotFound from "@/hook/useNotFound";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   params: {
@@ -31,6 +32,9 @@ export default function Page({ params: { taskId } }: Props) {
   } = useServiceQuery(task?.serviceId ?? "");
   useNotFound(taskQueryError);
   useNotFound(serviceQueryError);
+  const {
+    authority: { canEditTask },
+  } = useProfileContext();
 
   if (
     isTaskQueryLoading ||
@@ -58,13 +62,13 @@ export default function Page({ params: { taskId } }: Props) {
         </section>
         <CollapsibleSection
           title="Prerequisite Tasks"
-          action={<NewPrerequisiteTaskDialog task={task} />}
+          action={canEditTask && <NewPrerequisiteTaskDialog task={task} />}
         >
           <PrerequisiteTasksTable task={task} />
         </CollapsibleSection>
         <CollapsibleSection
           title="Positions"
-          action={<NewPositionDialog task={task} />}
+          action={canEditTask && <NewPositionDialog task={task} />}
         >
           <PositionsTable task={task} />
         </CollapsibleSection>

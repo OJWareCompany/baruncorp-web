@@ -39,6 +39,9 @@ const formSchema = z.object({
   viewExpensePricing: z.boolean(),
   viewScopePrice: z.boolean(),
   viewTaskCost: z.boolean(),
+  editTask: z.boolean(),
+  editLicense: z.boolean(),
+  editPosition: z.boolean(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -53,6 +56,9 @@ const getFieldValues = (department: DepartmentResponseDto): FieldValues => {
     viewExpensePricing: department.viewExpensePricing,
     viewScopePrice: department.viewScopePrice,
     viewTaskCost: department.viewTaskCost,
+    editTask: department.editUserTask,
+    editLicense: department.editUserLicense,
+    editPosition: department.editUserPosition,
   };
 };
 
@@ -82,6 +88,9 @@ export default function DepartmentForm({ department }: Props) {
       viewExpensePricing: values.viewExpensePricing,
       viewScopePrice: values.viewScopePrice,
       viewTaskCost: values.viewTaskCost,
+      editUserTask: values.editTask,
+      editUserLicense: values.editLicense,
+      editUserPosition: values.editPosition,
     })
       .then(() => {
         toast({ title: "Success" });
@@ -288,6 +297,77 @@ export default function DepartmentForm({ department }: Props) {
                         </FormControl>
                         <FormLabel className="font-normal">
                           Can View Task Cost
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>Edit Options</Label>
+                <div className="grid grid-cols-3 gap-y-2 gap-x-4">
+                  <FormField
+                    control={form.control}
+                    name="editPosition"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row gap-3 items-center">
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              if (typeof newChecked === "boolean") {
+                                field.onChange(newChecked);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Can Edit Position
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="editLicense"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row gap-3 items-center">
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              if (typeof newChecked === "boolean") {
+                                field.onChange(newChecked);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Can Edit License
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="editTask"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row gap-3 items-center">
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              if (typeof newChecked === "boolean") {
+                                field.onChange(newChecked);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Can Edit Task
                         </FormLabel>
                       </FormItem>
                     )}

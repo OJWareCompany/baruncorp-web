@@ -8,17 +8,23 @@ interface LicenseTabsContentProps {
   licenses: UserResponseDto["licenses"];
   value: LicenseTypeEnum;
   userId: string;
+  disabled?: boolean;
 }
 
 function LicenseTabsContent({
   value,
   licenses,
   userId,
+  disabled = false,
 }: LicenseTabsContentProps) {
   return (
     <TabsContent value={value}>
       <div className="mt-2">
-        <LicensesTable licenses={licenses} userId={userId} />
+        <LicensesTable
+          licenses={licenses}
+          userId={userId}
+          disabled={disabled}
+        />
       </div>
     </TabsContent>
   );
@@ -26,9 +32,10 @@ function LicenseTabsContent({
 
 interface Props {
   user: UserResponseDto;
+  disabled?: boolean;
 }
 
-export default function LicensesTabs({ user }: Props) {
+export default function LicensesTabs({ user, disabled = false }: Props) {
   const [tabsValue, setTabsValue] = useState<LicenseTypeEnum>(
     LicenseTypeEnum.Values.Structural
   );
@@ -51,11 +58,13 @@ export default function LicensesTabs({ user }: Props) {
         value={LicenseTypeEnum.Values.Structural}
         licenses={user.licenses.filter((value) => value.type === "Structural")}
         userId={user.id}
+        disabled={disabled}
       />
       <LicenseTabsContent
         value={LicenseTypeEnum.Values.Electrical}
         licenses={user.licenses.filter((value) => value.type === "Electrical")}
         userId={user.id}
+        disabled={disabled}
       />
     </Tabs>
   );

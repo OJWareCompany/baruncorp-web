@@ -22,11 +22,21 @@ interface Props {
   positionId: string;
   onPositionChange: (newPosition: { id: string; name: string }) => void;
   modal?: boolean;
+  disabled?: boolean;
   filteringIds?: string[];
 }
 
 const PositionsCombobox = forwardRef<HTMLButtonElement, Props>(
-  ({ positionId, onPositionChange, filteringIds, modal = false }, ref) => {
+  (
+    {
+      positionId,
+      onPositionChange,
+      filteringIds,
+      modal = false,
+      disabled = false,
+    },
+    ref
+  ) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const { data: positions, isLoading: isPositionsQueryLoading } =
@@ -74,6 +84,7 @@ const PositionsCombobox = forwardRef<HTMLButtonElement, Props>(
             variant="outline"
             className="px-3 font-normal gap-2"
             ref={ref}
+            disabled={disabled}
           >
             <span className="flex-1 text-start">
               {!isSelected

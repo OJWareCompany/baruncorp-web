@@ -29,6 +29,7 @@ import {
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -58,6 +59,9 @@ export default function PositionForm({ position }: Props) {
   const { positionId } = useParams() as { positionId: string };
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const {
+    authority: { canEditPosition },
+  } = useProfileContext();
 
   const { mutateAsync } = usePatchPositionMutation(positionId);
 
@@ -127,7 +131,7 @@ export default function PositionForm({ position }: Props) {
                 <FormItem>
                   <FormLabel required>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={!canEditPosition} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -140,7 +144,7 @@ export default function PositionForm({ position }: Props) {
                 <FormItem>
                   <FormLabel>Maximum Number of Tasks Held</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={!canEditPosition} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -167,20 +171,22 @@ export default function PositionForm({ position }: Props) {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea {...field} disabled={!canEditPosition} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <LoadingButton
-            type="submit"
-            className="w-full"
-            isLoading={form.formState.isSubmitting}
-            disabled={!form.formState.isDirty}
-          >
-            Edit
-          </LoadingButton>
+          {canEditPosition && (
+            <LoadingButton
+              type="submit"
+              className="w-full"
+              isLoading={form.formState.isSubmitting}
+              disabled={!form.formState.isDirty}
+            >
+              Edit
+            </LoadingButton>
+          )}
         </ItemsContainer>
       </form>
     </Form>

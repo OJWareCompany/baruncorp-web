@@ -26,9 +26,14 @@ type FieldValues = z.infer<typeof formSchema>;
 interface Props {
   positionId: string;
   userId: string;
+  disabled?: boolean;
 }
 
-export default function PositionForm({ positionId, userId }: Props) {
+export default function PositionForm({
+  positionId,
+  userId,
+  disabled = false,
+}: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -126,6 +131,7 @@ export default function PositionForm({ positionId, userId }: Props) {
                         }
                       });
                   }}
+                  disabled={disabled}
                   ref={field.ref}
                 />
               </FormControl>

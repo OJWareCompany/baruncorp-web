@@ -384,6 +384,8 @@ export interface UpdateJobRequestDto {
    * @default null
    */
   dueDate: string | null;
+  /** @example "Ground Mount" */
+  mountingType?: "Roof Mount" | "Ground Mount" | null;
   inReview: boolean;
   /** @default "Medium" */
   priority: "Immediate" | "High" | "Medium" | "Low";
@@ -1635,6 +1637,8 @@ export interface AddressFromMapBox {
 export interface CreateProjectRequestDto {
   /** @default "Residential" */
   projectPropertyType: "Residential" | "Commercial";
+  /** @default 100 */
+  systemSize?: number | null;
   /** @default "Chris Kim" */
   projectPropertyOwner: string | null;
   /** @default "07ec8e89-6877-4fa1-a029-c58360b57f43" */
@@ -1649,6 +1653,8 @@ export interface CreateProjectRequestDto {
 export interface UpdateProjectRequestDto {
   /** @default "Residential" */
   projectPropertyType: "Residential" | "Commercial";
+  /** @default 100 */
+  systemSize?: number | null;
   /** @default "Chris Kim" */
   projectPropertyOwner: string | null;
   /** @default "50021" */
@@ -2807,6 +2813,12 @@ export interface CreateDepartmentRequestDto {
   viewScopePrice: boolean;
   /** @default false */
   viewTaskCost: boolean;
+  /** @default false */
+  editUserTask: boolean;
+  /** @default false */
+  editUserLicense: boolean;
+  /** @default false */
+  editUserPosition: boolean;
 }
 
 export interface UpdateDepartmentRequestDto {
@@ -2824,6 +2836,12 @@ export interface UpdateDepartmentRequestDto {
   viewScopePrice: boolean;
   /** @default false */
   viewTaskCost: boolean;
+  /** @default false */
+  editUserTask: boolean;
+  /** @default false */
+  editUserLicense: boolean;
+  /** @default false */
+  editUserPosition: boolean;
 }
 
 export interface DepartmentResponseDto {
@@ -2836,6 +2854,9 @@ export interface DepartmentResponseDto {
   viewExpensePricing: boolean;
   viewScopePrice: boolean;
   viewTaskCost: boolean;
+  editUserTask: boolean;
+  editUserLicense: boolean;
+  editUserPosition: boolean;
 }
 
 export interface DepartmentPaginatedResponseDto {

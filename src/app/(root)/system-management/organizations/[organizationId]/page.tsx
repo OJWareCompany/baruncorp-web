@@ -17,8 +17,7 @@ import { AffixInput } from "@/components/AffixInput";
 import useVendorCreditQuery from "@/queries/useVendorCreditQuery";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
-import useProfileQuery from "@/queries/useProfileQuery";
-import useDepartmentQuery from "@/queries/useDepartmentQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   params: {
@@ -27,11 +26,9 @@ interface Props {
 }
 
 export default function Page({ params: { organizationId } }: Props) {
-  const { data: profile } = useProfileQuery();
-  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
-
-  const canViewClientInvoice = department?.viewClientInvoice ?? false;
-  const canViewVendorInvoice = department?.viewVendorInvoice ?? false;
+  const {
+    authority: { canViewClientInvoice, canViewVendorInvoice },
+  } = useProfileContext();
 
   const {
     data: organization,

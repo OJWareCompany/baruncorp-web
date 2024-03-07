@@ -9,6 +9,7 @@ import usePositionQuery from "@/queries/usePositionQuery";
 import useNotFound from "@/hook/useNotFound";
 import PageLoading from "@/components/PageLoading";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   params: {
@@ -23,6 +24,9 @@ export default function Page({ params: { positionId } }: Props) {
     error: positionQueryError,
   } = usePositionQuery(positionId);
   useNotFound(positionQueryError);
+  const {
+    authority: { canEditPosition },
+  } = useProfileContext();
 
   if (isPositionQueryLoading || position == null) {
     return <PageLoading />;
@@ -45,13 +49,13 @@ export default function Page({ params: { positionId } }: Props) {
         </section>
         <CollapsibleSection
           title="Tasks"
-          action={<NewTaskDialog position={position} />}
+          action={canEditPosition && <NewTaskDialog position={position} />}
         >
           <TasksTable position={position} />
         </CollapsibleSection>
         <CollapsibleSection
           title="Workers"
-          action={<NewWorkerDialog position={position} />}
+          action={canEditPosition && <NewWorkerDialog position={position} />}
         >
           <WorkersTable position={position} />
         </CollapsibleSection>

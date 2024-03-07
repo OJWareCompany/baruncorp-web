@@ -105,6 +105,7 @@ export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
       priority: job.priority,
       structuralUpgradeNote: job.structuralUpgradeNote,
       loadCalcOrigin: job.loadCalcOrigin,
+      mountingType: job.mountingType,
     })
       .then(() => {
         onSuccess();

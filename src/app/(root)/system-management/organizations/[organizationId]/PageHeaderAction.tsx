@@ -3,19 +3,16 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { OrganizationResponseDto } from "@/api/api-spec";
-import useProfileQuery from "@/queries/useProfileQuery";
-import useDepartmentQuery from "@/queries/useDepartmentQuery";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   organization: OrganizationResponseDto;
 }
 
 export default function PageHeaderAction({ organization }: Props) {
-  const { data: profile } = useProfileQuery();
-  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
-
-  const canViewCustomPricing = department?.viewCustomPricing ?? false;
-  const canViewExpensePricing = department?.viewExpensePricing ?? false;
+  const {
+    authority: { canViewCustomPricing, canViewExpensePricing },
+  } = useProfileContext();
 
   return (
     <div className="flex gap-2">

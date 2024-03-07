@@ -32,6 +32,7 @@ import {
 import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper =
   createColumnHelper<TaskResponseDto["prerequisiteTask"][number]>();
@@ -48,6 +49,9 @@ export default function PrerequisiteTasksTable({ task }: Props) {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; taskId: string }
   >({ open: false });
+  const {
+    authority: { canEditTask },
+  } = useProfileContext();
 
   const columns = useMemo(
     () => [
@@ -89,6 +93,11 @@ export default function PrerequisiteTasksTable({ task }: Props) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ taskId }) => taskId,
+    state: {
+      columnVisibility: {
+        action: canEditTask,
+      },
+    },
   });
 
   return (

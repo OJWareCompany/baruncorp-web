@@ -41,6 +41,7 @@ import { AutoAssignmentPropertyTypeEnum } from "@/lib/constants";
 import usePatchPositionTaskMutation from "@/mutations/usePatchPositionTaskMutation";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper = createColumnHelper<PositionResponseDto["tasks"][number]>();
 
@@ -62,6 +63,9 @@ export default function TasksTable({ position }: Props) {
   } = useDeletePositionTaskMutation();
   const { mutateAsync: patchPositionTaskMutateAsync } =
     usePatchPositionTaskMutation();
+  const {
+    authority: { canEditPosition },
+  } = useProfileContext();
 
   const columns = useMemo(
     () => [
@@ -104,6 +108,7 @@ export default function TasksTable({ position }: Props) {
                     }
                   });
               }}
+              disabled={!canEditPosition}
             >
               <SelectTrigger className="-ml-[9px] text-xs px-2 h-8 py-0 focus:ring-0 focus:ring-offset-0">
                 <SelectValue placeholder="Select a property type" />
@@ -151,7 +156,13 @@ export default function TasksTable({ position }: Props) {
         },
       }),
     ],
-    [patchPositionTaskMutateAsync, position.id, queryClient, toast]
+    [
+      canEditPosition,
+      patchPositionTaskMutateAsync,
+      position.id,
+      queryClient,
+      toast,
+    ]
   );
 
   const table = useReactTable({
@@ -159,6 +170,11 @@ export default function TasksTable({ position }: Props) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ taskId }) => taskId,
+    state: {
+      columnVisibility: {
+        action: canEditPosition,
+      },
+    },
   });
 
   return (

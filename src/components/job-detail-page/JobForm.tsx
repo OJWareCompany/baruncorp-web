@@ -287,6 +287,7 @@ export default function JobForm({ project, job, pageType }: Props) {
         ? null
         : JSON.stringify(values.structuralUpgradeNotes),
       loadCalcOrigin: values.loadCalcOrigin,
+      mountingType: values.mountingType,
     })
       .then(() => {
         toast({ title: "Success" });
@@ -478,7 +479,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                     ref={field.ref}
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled
+                    disabled={!isWorker}
                   >
                     {MountingTypeEnum.options.map((value) => (
                       <FormItem

@@ -51,9 +51,14 @@ const columnHelper =
 interface Props {
   user: UserResponseDto;
   organization: OrganizationResponseDto;
+  disabled?: boolean;
 }
 
-export default function AvailableTasksTable({ user, organization }: Props) {
+export default function AvailableTasksTable({
+  user,
+  organization,
+  disabled = false,
+}: Props) {
   const { toast } = useToast();
   const router = useRouter();
   const {
@@ -121,6 +126,7 @@ export default function AvailableTasksTable({ user, organization }: Props) {
                     }
                   });
               }}
+              disabled={disabled}
             >
               <SelectTrigger className="-ml-[9px] text-xs px-2 h-8 py-0 focus:ring-0 focus:ring-offset-0">
                 <SelectValue placeholder="Select a property type" />
@@ -169,7 +175,7 @@ export default function AvailableTasksTable({ user, organization }: Props) {
         },
       }),
     ],
-    [patchUserAvailableTaskMutateAsync, queryClient, toast, user.id]
+    [disabled, patchUserAvailableTaskMutateAsync, queryClient, toast, user.id]
   );
 
   const isTargetUserOrganizationBarunCorp =
@@ -183,6 +189,7 @@ export default function AvailableTasksTable({ user, organization }: Props) {
     state: {
       columnVisibility: {
         autoAssignmentType: isTargetUserOrganizationBarunCorp,
+        action: !disabled,
       },
     },
   });

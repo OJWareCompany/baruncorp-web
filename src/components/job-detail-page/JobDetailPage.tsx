@@ -31,8 +31,6 @@ import {
   JobResponseDto,
   ProjectResponseDto,
 } from "@/api/api-spec";
-import useProfileQuery from "@/queries/useProfileQuery";
-import useDepartmentQuery from "@/queries/useDepartmentQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 function getPageHeader({
@@ -90,11 +88,6 @@ interface Props {
 }
 
 export default function JobDetailPage({ jobId, pageType }: Props) {
-  const { data: profile } = useProfileQuery();
-  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
-
-  const canViewScopePrice = department?.viewScopePrice ?? false;
-
   const {
     data: job,
     isLoading: isJobQueryLoading,
@@ -129,7 +122,10 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
     );
   }, [job]);
 
-  const { isBarunCorpMember } = useProfileContext();
+  const {
+    isBarunCorpMember,
+    authority: { canViewScopePrice },
+  } = useProfileContext();
   const isHome = useMemo(() => pageType === "HOME", [pageType]);
 
   const processedJobNotesData = useMemo<JobNoteDetailResponseDto[]>(() => {

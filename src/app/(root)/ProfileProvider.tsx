@@ -3,17 +3,40 @@ import { createContext, useContext, useMemo } from "react";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useProfileQuery from "@/queries/useProfileQuery";
 import PageLoading from "@/components/PageLoading";
+import useDepartmentQuery from "@/queries/useDepartmentQuery";
 
 export interface ProfileData {
   isAdmin: boolean;
   isBarunCorpMember: boolean;
   isContractor: boolean;
+  authority: {
+    canViewClientInvoice: boolean;
+    canViewVendorInvoice: boolean;
+    canViewCustomPricing: boolean;
+    canViewExpensePricing: boolean;
+    canViewScopePrice: boolean;
+    canViewTaskCost: boolean;
+    canEditTask: boolean;
+    canEditLicense: boolean;
+    canEditPosition: boolean;
+  };
 }
 
 const ProfileContext = createContext<ProfileData>({
   isAdmin: false,
   isBarunCorpMember: false,
   isContractor: false,
+  authority: {
+    canViewClientInvoice: false,
+    canViewVendorInvoice: false,
+    canViewCustomPricing: false,
+    canViewExpensePricing: false,
+    canViewScopePrice: false,
+    canViewTaskCost: false,
+    canEditTask: false,
+    canEditLicense: false,
+    canEditPosition: false,
+  },
 });
 
 interface Props {
@@ -25,30 +48,84 @@ export default function ProfileProvider({ children }: Props) {
   const { data: organization } = useOrganizationQuery(
     profile?.organizationId ?? ""
   );
-
-  const isInitialized = profile != null && organization != null;
+  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
 
   const value = useMemo<ProfileData>(() => {
+    // profile과 organization 받아오는 중
     if (profile == null || organization == null) {
       return {
         isAdmin: false,
         isBarunCorpMember: false,
         isContractor: false,
+        authority: {
+          canViewClientInvoice: false,
+          canViewVendorInvoice: false,
+          canViewCustomPricing: false,
+          canViewExpensePricing: false,
+          canViewScopePrice: false,
+          canViewTaskCost: false,
+          canEditTask: false,
+          canEditLicense: false,
+          canEditPosition: false,
+        },
       };
     }
 
-    return {
-      // uppercase로 사용해달라는 백엔드의 요청이 있었음
-      isAdmin:
-        profile.role.toUpperCase() === "SPECIAL ADMIN" ||
-        profile.role.toUpperCase() === "ADMIN",
-      isBarunCorpMember:
-        organization.organizationType.toUpperCase() === "ADMINISTRATION",
-      isContractor: profile.isVendor,
-    };
-  }, [organization, profile]);
+    // uppercase로 사용해달라는 백엔드의 요청이 있었음
+    const isAdmin =
+      profile.role.toUpperCase() === "SPECIAL ADMIN" ||
+      profile.role.toUpperCase() === "ADMIN";
+    const isBarunCorpMember =
+      organization.organizationType.toUpperCase() === "ADMINISTRATION";
+    const isContractor = profile.isVendor;
 
-  if (!isInitialized) {
+    // profile 받아왔는데, 소속된 department 없는 경우
+    // 혹은 소속된 department가 있는데 department 받아오는 중
+    if (profile.departmentId == null || department == null) {
+      return {
+        isAdmin,
+        isBarunCorpMember,
+        isContractor,
+        authority: {
+          canViewClientInvoice: false,
+          canViewVendorInvoice: false,
+          canViewCustomPricing: false,
+          canViewExpensePricing: false,
+          canViewScopePrice: false,
+          canViewTaskCost: false,
+          canEditTask: false,
+          canEditLicense: false,
+          canEditPosition: false,
+        },
+      };
+    }
+
+    // profile 받아왔는데, 소속된 department가 있고 department 받아온 경우
+    return {
+      isAdmin,
+      isBarunCorpMember,
+      isContractor,
+      authority: {
+        canViewClientInvoice: department.viewClientInvoice,
+        canViewVendorInvoice: department.viewVendorInvoice,
+        canViewCustomPricing: department.viewCustomPricing,
+        canViewExpensePricing: department.viewExpensePricing,
+        canViewScopePrice: department.viewScopePrice,
+        canViewTaskCost: department.viewTaskCost,
+        canEditTask: department.editUserTask,
+        canEditLicense: department.editUserLicense,
+        canEditPosition: department.editUserPosition,
+      },
+    };
+  }, [department, organization, profile]);
+
+  const hasDepartment = profile != null && profile.departmentId != null;
+
+  if (
+    profile == null ||
+    organization == null ||
+    (hasDepartment && department == null)
+  ) {
     return <PageLoading isPageHeaderPlaceholder={false} />;
   }
 

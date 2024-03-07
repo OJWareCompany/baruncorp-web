@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -72,6 +73,9 @@ export default function TaskForm({ task, service }: Props) {
   const { taskId } = useParams() as { taskId: string };
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const {
+    authority: { canEditTask },
+  } = useProfileContext();
 
   const { mutateAsync } = usePatchTaskMutation(taskId);
 
@@ -126,7 +130,7 @@ export default function TaskForm({ task, service }: Props) {
                 <FormItem>
                   <FormLabel required>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={!canEditTask} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,6 +172,7 @@ export default function TaskForm({ task, service }: Props) {
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
+                        disabled={!canEditTask}
                       >
                         <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder="Select a license type" />
@@ -183,34 +188,38 @@ export default function TaskForm({ task, service }: Props) {
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    <Button
-                      size={"icon"}
-                      variant={"outline"}
-                      className="shrink-0"
-                      disabled={watchLicenseType === ""}
-                      onClick={() => {
-                        form.setValue("licenseType", "", {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        });
-                      }}
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
+                    {canEditTask && (
+                      <Button
+                        size={"icon"}
+                        variant={"outline"}
+                        className="shrink-0"
+                        disabled={watchLicenseType === ""}
+                        onClick={() => {
+                          form.setValue("licenseType", "", {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
+                        }}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </RowItemsContainer>
-          <LoadingButton
-            type="submit"
-            className="w-full"
-            isLoading={form.formState.isSubmitting}
-            disabled={!form.formState.isDirty}
-          >
-            Edit
-          </LoadingButton>
+          {canEditTask && (
+            <LoadingButton
+              type="submit"
+              className="w-full"
+              isLoading={form.formState.isSubmitting}
+              disabled={!form.formState.isDirty}
+            >
+              Edit
+            </LoadingButton>
+          )}
         </ItemsContainer>
       </form>
     </Form>

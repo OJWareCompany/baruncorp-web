@@ -43,9 +43,8 @@ import usePatchServiceMutation from "@/mutations/usePatchServiceMutation";
 import { getServiceQueryKey } from "@/queries/useServiceQuery";
 import { useToast } from "@/components/ui/use-toast";
 import CollapsibleSection from "@/components/CollapsibleSection";
-import useProfileQuery from "@/queries/useProfileQuery";
-import useDepartmentQuery from "@/queries/useDepartmentQuery";
 import { cn } from "@/lib/utils";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const estimatedDaysRefinement: SuperRefinement<string> = (value, ctx) => {
   if (value === "") {
@@ -66,10 +65,9 @@ interface Props {
 }
 
 export default function ServiceForm({ service }: Props) {
-  const { data: profile } = useProfileQuery();
-  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
-
-  const canViewScopePrice = department?.viewScopePrice ?? false;
+  const {
+    authority: { canViewScopePrice },
+  } = useProfileContext();
 
   const { serviceId } = useParams() as { serviceId: string };
   const [standardSectionExisting, setStandardSectionExisting] = useState<{

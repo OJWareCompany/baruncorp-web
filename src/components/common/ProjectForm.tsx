@@ -213,7 +213,7 @@ export default function ProjectForm({ project, pageType }: Props) {
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={!isWorker}
+                    disabled
                   >
                     <SelectTrigger ref={field.ref}>
                       <SelectValue placeholder="Select a property type" />

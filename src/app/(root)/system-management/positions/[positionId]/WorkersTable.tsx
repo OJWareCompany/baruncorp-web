@@ -32,6 +32,7 @@ import useDeletePositionUserMutation from "@/mutations/useDeletePositionUserMuta
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import LoadingButton from "@/components/LoadingButton";
 import { useToast } from "@/components/ui/use-toast";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 const columnHelper =
   createColumnHelper<PositionResponseDto["workers"][number]>();
@@ -48,6 +49,9 @@ export default function WorkersTable({ position }: Props) {
     { open: false } | { open: true; userId: string }
   >({ open: false });
   const { toast } = useToast();
+  const {
+    authority: { canEditPosition },
+  } = useProfileContext();
 
   const columns = useMemo(
     () => [
@@ -92,6 +96,11 @@ export default function WorkersTable({ position }: Props) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ userId }) => userId,
+    state: {
+      columnVisibility: {
+        action: canEditPosition,
+      },
+    },
   });
 
   return (

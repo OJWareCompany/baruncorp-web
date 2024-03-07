@@ -40,9 +40,14 @@ const columnHelper = createColumnHelper<UserResponseDto["licenses"][number]>();
 interface Props {
   licenses: UserResponseDto["licenses"];
   userId: string;
+  disabled?: boolean;
 }
 
-export default function LicensesTable({ licenses, userId }: Props) {
+export default function LicensesTable({
+  licenses,
+  userId,
+  disabled = false,
+}: Props) {
   const router = useRouter();
   const [alertDialogState, setAlertDialogState] = useState<
     | { open: false }
@@ -114,6 +119,11 @@ export default function LicensesTable({ licenses, userId }: Props) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ abbreviation }) => abbreviation,
+    state: {
+      columnVisibility: {
+        action: !disabled,
+      },
+    },
   });
 
   return (

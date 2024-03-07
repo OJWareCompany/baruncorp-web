@@ -1,20 +1,16 @@
 "use client";
 import { useEffect, useMemo } from "react";
-// import LicenseForm from "./LicenseForm";
-// import UsersTable from "./UsersTable";
-// import NewUserByLicenseSheet from "./NewUserByLicenseSheet";
-// import PageHeaderAction from "./PageHeaderAction";
 import { useRouter } from "next/navigation";
 import LicenseForm from "./LicenseForm";
 import LicensedWorkersTable from "./LicensedWorkersTable";
 import NewLicensedWorkerDialog from "./NewLicensedWorkerDialog";
 import PageHeader from "@/components/PageHeader";
-// import useLicenseQuery from "@/queries/useLicenseQuery";
 import PageLoading from "@/components/PageLoading";
 import { LicenseTypeEnum } from "@/lib/constants";
 import useLicenseQuery from "@/queries/useLicenseQuery";
 import useNotFound from "@/hook/useNotFound";
 import CollapsibleSection from "@/components/CollapsibleSection";
+import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   params: {
@@ -25,6 +21,9 @@ interface Props {
 
 export default function Page({ params: { type, abbreviation } }: Props) {
   const router = useRouter();
+  const {
+    authority: { canEditLicense },
+  } = useProfileContext();
 
   const isInvalid = useMemo(
     () =>
@@ -67,7 +66,6 @@ export default function Page({ params: { type, abbreviation } }: Props) {
             name: license.state,
           },
         ]}
-        // action={<PageHeaderAction license={license} />}
       />
       <div className="space-y-6">
         <section>
@@ -77,11 +75,13 @@ export default function Page({ params: { type, abbreviation } }: Props) {
         <CollapsibleSection
           title="Licensed Workers"
           action={
-            <NewLicensedWorkerDialog
-              type={type}
-              abbreviation={abbreviation}
-              license={license}
-            />
+            canEditLicense && (
+              <NewLicensedWorkerDialog
+                type={type}
+                abbreviation={abbreviation}
+                license={license}
+              />
+            )
           }
         >
           <LicensedWorkersTable license={license} />

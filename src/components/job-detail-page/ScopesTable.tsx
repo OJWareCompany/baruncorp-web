@@ -44,8 +44,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import CostField from "@/components/field/CostField";
-import useProfileQuery from "@/queries/useProfileQuery";
-import useDepartmentQuery from "@/queries/useDepartmentQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Data {
@@ -76,15 +74,12 @@ interface Props {
 }
 
 export default function ScopesTable({ job, project, pageType }: Props) {
-  const { data: profile } = useProfileQuery();
-  const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
-
-  const canViewScopePrice = department?.viewScopePrice ?? false;
-  const canViewTaskCost = department?.viewTaskCost ?? false;
-
   const [expanded, setExpanded] = useState<ExpandedState>({});
 
-  const { isBarunCorpMember } = useProfileContext();
+  const {
+    isBarunCorpMember,
+    authority: { canViewScopePrice, canViewTaskCost },
+  } = useProfileContext();
   const isHome = pageType === "HOME";
 
   /**
