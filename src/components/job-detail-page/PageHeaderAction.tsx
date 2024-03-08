@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ScrollText } from "lucide-react";
+import OpenJobFolderOnWebButton from "./OpenJobFolderOnWebButton";
 import { Button } from "@/components/ui/button";
 import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
-import OpenJobFolderButton from "@/components/job-detail-page/OpenJobFolderButton";
+import OpenJobFolderOnDesktopButton from "@/components/job-detail-page/OpenJobFolderOnDesktopButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,7 +51,8 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
   if (isWorker) {
     return (
       <div className="flex gap-2">
-        <OpenJobFolderButton job={job} project={project} />
+        <OpenJobFolderOnWebButton job={job} />
+        <OpenJobFolderOnDesktopButton job={job} project={project} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size={"sm"} variant={"outline"}>

@@ -9,7 +9,7 @@ interface Props {
   project: ProjectResponseDto;
 }
 
-export default function OpenJobFolderButton({ job, project }: Props) {
+export default function OpenJobFolderOnDesktopButton({ job, project }: Props) {
   return (
     <Button
       size={"sm"}
@@ -26,7 +26,7 @@ export default function OpenJobFolderButton({ job, project }: Props) {
       }}
     >
       <FolderOpen className="mr-2 h-4 w-4" />
-      <span>Open Folder</span>
+      <span>Open Folder on Desktop</span>
     </Button>
   );
 }
