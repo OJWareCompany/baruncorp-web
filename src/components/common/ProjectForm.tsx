@@ -361,7 +361,7 @@ export default function ProjectForm({ project, pageType }: Props) {
             isLoading={form.formState.isSubmitting}
             disabled={!form.formState.isDirty}
           >
-            Edit
+            Save
           </LoadingButton>
         )}
       </form>

@@ -267,7 +267,7 @@ export default function VendorInvoiceForm({ vendorInvoice }: Props) {
             className="w-full"
             disabled={!form.formState.isDirty}
           >
-            Edit
+            Save
           </LoadingButton>
         )}
       </form>

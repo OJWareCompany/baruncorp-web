@@ -652,7 +652,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
           isLoading={form.formState.isSubmitting}
           className="w-full"
         >
-          Edit
+          Save
         </LoadingButton>
       </form>
     </Form>

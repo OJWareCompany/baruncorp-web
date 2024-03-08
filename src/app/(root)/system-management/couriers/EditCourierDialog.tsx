@@ -152,7 +152,7 @@ export default function EditCourierDialog({ state, ...dialogProps }: Props) {
               disabled={!form.formState.isDirty}
               className="w-full"
             >
-              Edit
+              Save
             </LoadingButton>
           </form>
         </Form>

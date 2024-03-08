@@ -217,7 +217,7 @@ export default function TaskForm({ task, service }: Props) {
               isLoading={form.formState.isSubmitting}
               disabled={!form.formState.isDirty}
             >
-              Edit
+              Save
             </LoadingButton>
           )}
         </ItemsContainer>

@@ -762,7 +762,7 @@ export default function JobForm({ project, job, pageType }: Props) {
               disabled={!form.formState.isDirty}
               isLoading={form.formState.isSubmitting}
             >
-              Edit
+              Save
             </LoadingButton>
           )}
         </ItemsContainer>

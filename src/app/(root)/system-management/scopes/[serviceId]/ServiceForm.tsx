@@ -1223,7 +1223,7 @@ export default function ServiceForm({ service }: Props) {
               isLoading={form.formState.isSubmitting}
               disabled={!form.formState.isDirty}
             >
-              Edit
+              Save
             </LoadingButton>
           </div>
         </form>
@@ -1267,7 +1267,7 @@ export default function ServiceForm({ service }: Props) {
               isLoading={form.formState.isSubmitting}
               disabled={!form.formState.isDirty}
             >
-              Edit
+              Save
             </LoadingButton>
           </ItemsContainer>
         </form>

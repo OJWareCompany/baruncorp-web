@@ -121,7 +121,7 @@ export default function EditDialog({ information }: Props) {
               disabled={!form.formState.isDirty}
               isLoading={form.formState.isSubmitting}
             >
-              Edit
+              Save
             </LoadingButton>
           </form>
         </Form>

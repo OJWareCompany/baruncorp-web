@@ -273,7 +273,7 @@ export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
             isLoading={form.formState.isSubmitting}
             disabled={!form.formState.isDirty}
           >
-            Edit
+            Save
           </LoadingButton>
         </RowItemsContainer>
       </form>

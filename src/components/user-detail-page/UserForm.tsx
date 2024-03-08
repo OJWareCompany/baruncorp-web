@@ -424,7 +424,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
           isLoading={form.formState.isSubmitting}
           disabled={!form.formState.isDirty}
         >
-          Edit
+          Save
         </LoadingButton>
       </form>
     </Form>

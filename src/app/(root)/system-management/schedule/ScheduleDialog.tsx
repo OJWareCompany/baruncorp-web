@@ -285,7 +285,7 @@ function ScheduleForm({ state, ...dialogProps }: ScheduleFormProps) {
           disabled={!form.formState.isDirty}
           isLoading={form.formState.isSubmitting}
         >
-          Edit
+          Save
         </LoadingButton>
       </form>
     </Form>

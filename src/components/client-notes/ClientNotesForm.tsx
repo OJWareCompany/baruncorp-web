@@ -148,7 +148,7 @@ export default function ClientNotesForm({ clientNote, organizationId }: Props) {
           disabled={!form.formState.isDirty}
           isLoading={form.formState.isSubmitting}
         >
-          Edit
+          Save
         </LoadingButton>
       </form>
     </Form>

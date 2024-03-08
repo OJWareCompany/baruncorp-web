@@ -1265,7 +1265,7 @@ export default function CustomPricingForm({
             isLoading={form.formState.isSubmitting}
             disabled={!form.formState.isDirty}
           >
-            Edit
+            Save
           </LoadingButton>
         </form>
       </Form>
@@ -1305,7 +1305,7 @@ export default function CustomPricingForm({
               isLoading={form.formState.isSubmitting}
               disabled={!form.formState.isDirty}
             >
-              Edit
+              Save
             </LoadingButton>
           </ItemsContainer>
         </form>

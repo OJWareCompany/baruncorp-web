@@ -156,7 +156,7 @@ export default function UtilityNotesForm({ utility }: Props) {
           disabled={!form.formState.isDirty}
           isLoading={form.formState.isSubmitting}
         >
-          Edit
+          Save
         </LoadingButton>
       </form>
     </Form>
