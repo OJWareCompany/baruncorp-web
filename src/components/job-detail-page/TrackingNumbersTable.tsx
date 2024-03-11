@@ -16,6 +16,7 @@ import {
   Loader2,
   MoreHorizontal,
 } from "lucide-react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import EditTrackingNumberDialog from "./EditTrackingNumberDialog";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import {
@@ -56,6 +57,7 @@ const columnHelper =
   createColumnHelper<TrackingNumbersPaginatedResponseDto["items"][number]>();
 
 const TABLE_NAME = "TrackingNumbers";
+const RELATIVE_PATH = "src/components/job-detail-page/TrackingNumbersTable.tsx";
 
 interface InternalTableProps {
   job: JobResponseDto;
@@ -73,21 +75,22 @@ function InternalTable({
   const searchParams = useSearchParams();
 
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams =

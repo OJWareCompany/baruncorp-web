@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import {
   PaginationState,
   createColumnHelper,
@@ -7,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,6 +14,8 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -23,7 +24,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClientWithOutstandingBalancesPaginatedResponseDto } from "@/api/api-spec";
+import {
+  ClientWithOutstandingBalancesPaginatedResponseDto,
+  FindClientWithOutstandingBalancesHttpControllerGetParams,
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,
@@ -33,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useClientsWithOutstandingBalancesQuery from "@/queries/useClientsWithOutstandingBalancesQuery";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<
@@ -49,26 +54,41 @@ const columns = [
 ];
 
 const TABLE_NAME = "ClientsWithOutstandingBalances";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/client-invoices/ClientsWithOutstandingBalancesTable.tsx";
 
 export default function ClientsWithOutstandingBalancesTable() {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageIndex`)))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`))
-      ? Number(searchParams.get(encodeURIComponent(`${TABLE_NAME}pageSize`)))
-      : 10,
+    pageSize,
   };
 
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pagination,
+    updatePageSize: setPageSize,
+  });
+
+  const params: FindClientWithOutstandingBalancesHttpControllerGetParams =
+    useMemo(
+      () => ({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+      }),
+      [pagination.pageIndex, pagination.pageSize]
+    );
+
   const { data, isLoading } = useClientsWithOutstandingBalancesQuery(
-    {
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-    },
+    params,
     true
   );
 
@@ -78,23 +98,7 @@ export default function ClientsWithOutstandingBalancesTable() {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ organizationId }) => organizationId,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageIndex`),
-          String(pageIndex)
-        );
-        newSearchParams.set(
-          encodeURIComponent(`${TABLE_NAME}pageSize`),
-          String(pageSize)
-        );
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

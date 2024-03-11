@@ -13,8 +13,9 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -63,34 +64,40 @@ import { Badge } from "@/components/ui/badge";
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Jobs";
+const RELATIVE_PATH = "src/app/(root)/workspace/JobsTable.tsx";
+
 interface Props {
   type: "All" | JobStatusEnum;
 }
 
 export default function JobsTable({ type }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindMyJobPaginatedHttpControllerFindJobParams>();
 
-  const jobStatusSearchParamName = `${type}JobStatus`;
-  const jobNameSearchParamName = `${type}JobName`;
-  const propertyTypeSearchParamName = `${type}PropertyType`;
-  const mountingTypeSearchParamName = `${type}MountingType`;
-  const expediteSearchParamName = `${type}Expedite`;
-  const pageIndexSearchParamName = `${type}PageIndex`;
-  const pageSizeSearchParamName = `${type}PageSize`;
-  const inReviewSearchParamName = `${type}InReview`;
-  const prioritySearchParamName = `${type}Priority`;
-  const projectNumberSearchParamName = `${type}ProjectNumber`;
-  const propertyOwnerSearchParamName = `${type}PropertyOwner`;
+  const jobStatusSearchParamName = `${TABLE_NAME}${type}JobStatus`;
+  const jobNameSearchParamName = `${TABLE_NAME}${type}JobName`;
+  const propertyTypeSearchParamName = `${TABLE_NAME}${type}PropertyType`;
+  const mountingTypeSearchParamName = `${TABLE_NAME}${type}MountingType`;
+  const expediteSearchParamName = `${TABLE_NAME}${type}Expedite`;
+  const inReviewSearchParamName = `${TABLE_NAME}${type}InReview`;
+  const prioritySearchParamName = `${TABLE_NAME}${type}Priority`;
+  const projectNumberSearchParamName = `${TABLE_NAME}${type}ProjectNumber`;
+  const propertyOwnerSearchParamName = `${TABLE_NAME}${type}PropertyOwner`;
+  const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}_${type}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
-      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
-      : 10,
+    pageSize,
   };
 
   const jobNameSearchParam =
@@ -140,8 +147,8 @@ export default function JobsTable({ type }: Props) {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
   const columnVisibility = useJobsColumnVisibility();
 

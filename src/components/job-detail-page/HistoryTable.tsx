@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,6 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Plate, PlateContent } from "@udecode/plate-common";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -134,30 +135,33 @@ const columns = [
 ];
 
 const TABLE_NAME = "History";
+const RELATIVE_PATH = "src/components/job-detail-page/HistoryTable.tsx";
 
 interface Props {
   job: JobResponseDto;
 }
 
 export default function HistoryTable({ job }: Props) {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindIntegratedOrderModificationHistoryPaginatedHttpControllerGetParams =

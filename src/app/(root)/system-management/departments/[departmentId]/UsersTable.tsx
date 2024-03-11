@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -69,6 +70,10 @@ import { useProfileContext } from "@/app/(root)/ProfileProvider";
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Users";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/departments/[departmentId]/UsersTable.tsx";
+
 interface Props {
   department: DepartmentResponseDto;
 }
@@ -92,19 +97,21 @@ export default function UsersTable({ department }: Props) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const emailSearchParamName = "Email";
-  const userNameSearchParamName = "UserName";
-  const statusSearchParamName = "Status";
-  const contractorSearchParamName = "Contractor";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const emailSearchParamName = `${TABLE_NAME}Email`;
+  const userNameSearchParamName = `${TABLE_NAME}UserName`;
+  const statusSearchParamName = `${TABLE_NAME}Status`;
+  const contractorSearchParamName = `${TABLE_NAME}Contractor`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 5,
+    pageSize,
   };
   const userNameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
   const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
@@ -123,8 +130,8 @@ export default function UsersTable({ department }: Props) {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindUsersHttpControllerGetFindUsersParams = useMemo(
@@ -265,7 +272,16 @@ export default function UsersTable({ department }: Props) {
         },
       }),
     ],
-    [params, syncedParams]
+    [
+      emailSearchParamName,
+      pageIndexSearchParamName,
+      params.email,
+      params.status,
+      params.userName,
+      statusSearchParamName,
+      syncedParams,
+      userNameSearchParamName,
+    ]
   );
 
   const table = useReactTable({

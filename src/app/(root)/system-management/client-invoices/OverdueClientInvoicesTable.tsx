@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -46,6 +47,8 @@ const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
 
 const TABLE_NAME = "OverdueClientInvoices";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/client-invoices/OverdueClientInvoicesTable.tsx";
 
 export default function OverdueClientInvoicesTable() {
   const router = useRouter();
@@ -55,23 +58,25 @@ export default function OverdueClientInvoicesTable() {
 
   const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
-      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
-      : 10,
+    pageSize,
   };
+
   const orgNameSearchParam =
     searchParams.get(encodeURIComponent(orgNameSearchParamName)) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindOverdueInvoicePaginatedHttpControllerGetParams = useMemo(

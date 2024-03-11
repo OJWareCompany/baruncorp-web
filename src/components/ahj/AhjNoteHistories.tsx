@@ -13,9 +13,10 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { DialogProps } from "@radix-ui/react-dialog";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import Item from "../Item";
 import { Label } from "../ui/label";
 import PageLoading from "../PageLoading";
@@ -31,6 +32,7 @@ import {
 import {
   AhjNoteHistoryPaginatedResponseDto,
   AhjNoteHistoryResponseDto,
+  GeographyControllerGetFindNoteUpdateHistoryParams,
 } from "@/api/api-spec";
 import {
   Select,
@@ -55,6 +57,7 @@ import InputEditor from "@/components/editor/InputEditor";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEditorValue } from "@/lib/plate-utils";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<AhjNoteHistoryPaginatedResponseDto["items"][number]>();
@@ -72,6 +75,9 @@ const columns = [
   }),
 ];
 
+const TABLE_NAME = "AhjNoteHistories";
+const RELATIVE_PATH = "src/components/ahj/AhjNoteHistories.tsx";
+
 interface AhjNoteHistoriesTableProps {
   geoId: string;
   onRowClick: (updatedAt: string) => void;
@@ -81,27 +87,37 @@ function AhjNoteHistoriesTable({
   geoId,
   onRowClick,
 }: AhjNoteHistoriesTableProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
-      : 10,
+    pageSize,
   };
 
-  const { data, isLoading } = useAhjNoteHistoriesQuery(
-    {
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pagination,
+    updatePageSize: setPageSize,
+  });
+
+  const params: GeographyControllerGetFindNoteUpdateHistoryParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       geoId,
-    },
-    true
+    }),
+    [geoId, pagination.pageIndex, pagination.pageSize]
   );
+
+  const { data, isLoading } = useAhjNoteHistoriesQuery(params, true);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -109,17 +125,7 @@ function AhjNoteHistoriesTable({
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ updatedAt }) => updatedAt,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

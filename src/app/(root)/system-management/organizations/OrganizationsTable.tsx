@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -48,26 +49,32 @@ import useOnPaginationChange from "@/hook/useOnPaginationChange";
 const columnHelper =
   createColumnHelper<OrganizationPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Organizations";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/organizations/OrganizationsTable.tsx";
+
 export default function OrganizationsTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams>();
 
-  const emailSearchParamName = "Email";
-  const orgNameSearchParamName = "OrgName";
-  const addressSearchParamName = "Address";
-  const phoneNumberSearchParamName = "PhoneNumber";
-  const vendorSearchParamName = "Vendor";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const emailSearchParamName = `${TABLE_NAME}Email`;
+  const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
+  const addressSearchParamName = `${TABLE_NAME}Address`;
+  const phoneNumberSearchParamName = `${TABLE_NAME}PhoneNumber`;
+  const vendorSearchParamName = `${TABLE_NAME}Vendor`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const addressSearchParam = searchParams.get(addressSearchParamName) ?? "";
   const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
@@ -83,8 +90,8 @@ export default function OrganizationsTable() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindOrganizationPaginatedHttpControllerGetOrganizationPaginatedParams =
@@ -217,12 +224,18 @@ export default function OrganizationsTable() {
       }),
     ];
   }, [
+    addressSearchParamName,
+    emailSearchParamName,
+    orgNameSearchParamName,
+    pageIndexSearchParamName,
     params.email,
     params.fullAddress,
     params.isVendor,
     params.name,
     params.phoneNumber,
+    phoneNumberSearchParamName,
     syncedParams,
+    vendorSearchParamName,
   ]);
 
   const table = useReactTable({

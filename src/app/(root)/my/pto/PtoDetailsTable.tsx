@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 import { format } from "date-fns";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -46,9 +47,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<PtoDetailPaginatedResponseDto["items"][number]>();
+
+const TABLE_NAME = "PtoDetails";
+const RELATIVE_PATH = "src/app/(root)/my/pto/PtoDetailsTable.tsx";
 
 interface Props {
   userId: string;
@@ -61,18 +66,26 @@ export default function PtoDetailsTable({
   deletePto,
   modifyPto,
 }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
-      : 10,
+    pageSize,
   };
+
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pagination,
+    updatePageSize: setPageSize,
+  });
 
   const params: FindPtoDetailPaginatedHttpControllerGetParams = useMemo(
     () => ({
@@ -152,17 +165,7 @@ export default function PtoDetailsTable({
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

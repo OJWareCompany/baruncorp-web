@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -49,22 +50,28 @@ import {
 const columnHelper =
   createColumnHelper<UtilityPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Utilities";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/utilities/UtilitiesTable.tsx";
+
 export default function UtilitiesTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindUtilityPaginatedHttpControllerGetParams>();
 
-  const stateNameSearchParamName = "StateName";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const stateNameSearchParamName = `${TABLE_NAME}StateName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const stateNameSearchParamParseResult = StateNameEnum.safeParse(
     searchParams.get(stateNameSearchParamName)
@@ -75,8 +82,8 @@ export default function UtilitiesTable() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindUtilityPaginatedHttpControllerGetParams = useMemo(
@@ -131,7 +138,12 @@ export default function UtilitiesTable() {
         ),
       }),
     ],
-    [params.stateAbbreviation, syncedParams]
+    [
+      pageIndexSearchParamName,
+      params.stateAbbreviation,
+      stateNameSearchParamName,
+      syncedParams,
+    ]
   );
 
   const table = useReactTable({

@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -70,11 +71,10 @@ import LoadingButton from "@/components/LoadingButton";
 const columnHelper =
   createColumnHelper<PtoPaginatedResponseDto["items"][number]>();
 
-const TABLE_NAME = "PTOs";
+const TABLE_NAME = "Ptos";
+const RELATIVE_PATH = "src/app/(root)/system-management/pto/PtosTable.tsx";
 
 export default function PtosTable() {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindPtoPaginatedHttpControllerGetParams>();
@@ -87,14 +87,16 @@ export default function PtosTable() {
   const userNameSearchParamName = `${TABLE_NAME}UserName`;
   const paidSearchParamName = `${TABLE_NAME}Paid`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
-      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
-      : 10,
+    pageSize,
   };
   const userNameSearchParam =
     searchParams.get(encodeURIComponent(userNameSearchParamName)) ?? "";
@@ -107,8 +109,8 @@ export default function PtosTable() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindPtoPaginatedHttpControllerGetParams = useMemo(

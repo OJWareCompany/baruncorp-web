@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -57,33 +58,35 @@ interface Props {
   modifyPto: (target: PtoDetailResponseDto) => void;
 }
 
-const TABLE_NAME = "PTODetails";
+const TABLE_NAME = "PtoDetails";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/pto/PtoDetailsTable.tsx";
 
 export default function PtoDetailsTable({ deletePto, modifyPto }: Props) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindPtoDetailPaginatedHttpControllerGetParams>();
 
   const userNameSearchParamName = `${TABLE_NAME}UserName`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
-      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
-      : 10,
+    pageSize,
   };
   const userNameSearchParam =
     searchParams.get(encodeURIComponent(userNameSearchParamName)) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindPtoDetailPaginatedHttpControllerGetParams = useMemo(

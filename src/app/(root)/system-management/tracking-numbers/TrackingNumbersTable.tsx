@@ -16,6 +16,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import Link from "next/link";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -80,24 +81,30 @@ const columns = [
   }),
 ];
 
+const TABLE_NAME = "TrackingNumbers";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/tracking-numbers/TrackingNumbersTable.tsx";
+
 export default function TrackingNumbersTable() {
   const searchParams = useSearchParams();
 
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindJobPaginatedHttpControllerFindJobParams = useMemo(

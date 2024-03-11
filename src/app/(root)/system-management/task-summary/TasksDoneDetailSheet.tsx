@@ -1,7 +1,6 @@
 "use client";
 import { DialogProps } from "@radix-ui/react-dialog";
 import {
-  PaginationState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -16,7 +15,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { SheetState } from "./PeriodSection";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { SheetState } from "./TasksDoneSection";
 import {
   Sheet,
   SheetContent,
@@ -56,6 +56,9 @@ const columns = [
   }),
 ];
 
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/task-summary/TasksDoneDetailSheet.tsx";
+
 interface Props extends DialogProps {
   state: SheetState;
   fromDate: string;
@@ -69,10 +72,12 @@ export default function TasksDoneDetailSheet({
   ...dialogProps
 }: Props) {
   const router = useRouter();
-  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
+  const [pageIndex, setPageIndex] = useState<number>(0);
 
   const pagination = useMemo(
     () => ({
@@ -100,7 +105,13 @@ export default function TasksDoneDetailSheet({
     columns,
     getCoreRowModel: getCoreRowModel(),
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      if (typeof updater === "function") {
+        const { pageIndex, pageSize } = updater(pagination);
+        setPageIndex(pageIndex);
+        setPageSize(pageSize);
+      }
+    },
     manualPagination: true,
     state: {
       pagination,
@@ -109,7 +120,7 @@ export default function TasksDoneDetailSheet({
 
   useEffect(() => {
     if (state.open) {
-      setPagination({ pageIndex: 0, pageSize: 10 });
+      setPageIndex(0);
     }
   }, [state.open]);
 

@@ -16,6 +16,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import ScheduleDialog from "./ScheduleDialog";
 import {
   FindSchedulePaginatedHttpControllerGetParams,
@@ -73,6 +74,10 @@ const times = [
 const columnHelper =
   createColumnHelper<SchedulePaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Schedules";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/schedule/SchedulesTable.tsx";
+
 interface InternalTableProps {
   modifySchedule: (initialValue: ScheduleResponseDto) => void;
 }
@@ -82,24 +87,26 @@ function InternalTable({ modifySchedule }: InternalTableProps) {
   const [syncedParams, setSyncedParams] =
     useState<FindSchedulePaginatedHttpControllerGetParams>();
 
-  const userNameSearchParamName = "UserName";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const userNameSearchParamName = `${TABLE_NAME}UserName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 5,
+    pageSize,
   };
 
   const nameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindSchedulePaginatedHttpControllerGetParams = useMemo(
@@ -201,7 +208,12 @@ function InternalTable({ modifySchedule }: InternalTableProps) {
         })
       ),
     ],
-    [params.userName, syncedParams]
+    [
+      pageIndexSearchParamName,
+      params.userName,
+      syncedParams,
+      userNameSearchParamName,
+    ]
   );
 
   const table = useReactTable({

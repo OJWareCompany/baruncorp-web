@@ -13,9 +13,10 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { DialogProps } from "@radix-ui/react-dialog";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import Item from "../Item";
 import { Label } from "../ui/label";
 import PageLoading from "../PageLoading";
@@ -30,6 +31,7 @@ import {
 import {
   ClientNoteDetail,
   ClientNotePaginatedResponseDto,
+  FindClientNotePaginatedHttpControllerGetParams,
 } from "@/api/api-spec";
 import {
   Select,
@@ -53,6 +55,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEditorValue } from "@/lib/plate-utils";
 import useClientNoteHistoriesQuery from "@/queries/useClientNoteHistoriesQuery";
 import useClientNoteQuery from "@/queries/useClientNoteQuery";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<ClientNotePaginatedResponseDto["items"][number]>();
@@ -70,6 +73,9 @@ const columns = [
   }),
 ];
 
+const TABLE_NAME = "ClientNoteHistories";
+const RELATIVE_PATH = "src/components/client-notes/ClientNoteHistories.tsx";
+
 interface ClientNoteHistoriesTableProps {
   organizationId: string;
   onRowClick: (id: string) => void;
@@ -79,27 +85,37 @@ function ClientNoteHistoriesTable({
   organizationId,
   onRowClick,
 }: ClientNoteHistoriesTableProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
-      : 10,
+    pageSize,
   };
 
-  const { data, isLoading } = useClientNoteHistoriesQuery(
-    {
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pagination,
+    updatePageSize: setPageSize,
+  });
+
+  const params: FindClientNotePaginatedHttpControllerGetParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       organizationId,
-    },
-    true
+    }),
+    [organizationId, pagination.pageIndex, pagination.pageSize]
   );
+
+  const { data, isLoading } = useClientNoteHistoriesQuery(params, true);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -107,17 +123,7 @@ function ClientNoteHistoriesTable({
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ updatedAt }) => updatedAt,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

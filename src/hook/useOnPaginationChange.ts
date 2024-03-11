@@ -3,14 +3,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface Props {
   pageIndexSearchParamName: string;
-  pageSizeSearchParamName: string;
   pagination: PaginationState;
+  updatePageSize: (newPageSize: number) => void;
 }
 
 export default function useOnPaginationChange({
   pageIndexSearchParamName,
-  pageSizeSearchParamName,
   pagination,
+  updatePageSize,
 }: Props): OnChangeFn<PaginationState> {
   const router = useRouter();
   const pathname = usePathname();
@@ -24,10 +24,7 @@ export default function useOnPaginationChange({
         encodeURIComponent(pageIndexSearchParamName),
         String(pageIndex)
       );
-      newSearchParams.set(
-        encodeURIComponent(pageSizeSearchParamName),
-        String(pageSize)
-      );
+      updatePageSize(pageSize);
       router.push(`${pathname}?${newSearchParams.toString()}`, {
         scroll: false,
       });

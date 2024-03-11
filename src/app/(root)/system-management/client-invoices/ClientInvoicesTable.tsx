@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -52,6 +53,8 @@ const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
 
 const TABLE_NAME = "ClientInvoices";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/client-invoices/ClientInvoicesTable.tsx";
 
 interface Props {
   type: "All" | InvoiceStatusEnum;
@@ -66,15 +69,16 @@ export default function ClientInvoicesTable({ type }: Props) {
   const orgNameSearchParamName = `${TABLE_NAME}${type}OrgName`;
   const invoiceStatusSearchParamName = `${TABLE_NAME}${type}InvoiceStatus`;
   const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}${type}PageSize`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}_${type}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
-      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
-      : 10,
+    pageSize,
   };
   const orgNameSearchParam =
     searchParams.get(encodeURIComponent(orgNameSearchParamName)) ?? "";
@@ -89,8 +93,8 @@ export default function ClientInvoicesTable({ type }: Props) {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindInvoicePaginatedHttpControllerGetParams = useMemo(

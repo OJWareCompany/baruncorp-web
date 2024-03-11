@@ -16,6 +16,7 @@ import { endOfDay, startOfMonth } from "date-fns";
 import { z } from "zod";
 import * as Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import TasksCompletedDatePicker from "./TasksCompletedDatePicker";
 import TasksCompletedDetailSheet from "./TasksCompletedDetailSheet";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -98,6 +99,10 @@ const TasksCompletedChart = memo(
 );
 TasksCompletedChart.displayName = "TasksCompletedChart";
 
+const TABLE_NAME = "TasksCompleted";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/performance-dashboard/TasksCompletedSection.tsx";
+
 export type SheetState = { open: false } | { open: true; userId: string };
 
 export default function TasksCompletedSection() {
@@ -106,18 +111,19 @@ export default function TasksCompletedSection() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const pageIndexSearchParamName = `PageIndex`;
-  const pageSizeSearchParamName = `PageSize`;
-  const fromDateSearchParamName = `FromDate`;
-  const toDateSearchParamName = `ToDate`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const fromDateSearchParamName = `${TABLE_NAME}FromDate`;
+  const toDateSearchParamName = `${TABLE_NAME}ToDate`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    50
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 50,
+    pageSize,
   };
 
   const currentDate = new Date();
@@ -154,8 +160,8 @@ export default function TasksCompletedSection() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindAssignedTaskSummaryTotalPaginatedHttpControllerGetParams =

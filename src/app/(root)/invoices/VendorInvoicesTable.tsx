@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 import { format } from "date-fns";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -42,6 +43,7 @@ import { formatInEST } from "@/lib/utils";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
 const TABLE_NAME = "VendorInvoices";
+const RELATIVE_PATH = "src/app/(root)/invoices/VendorInvoicesTable.tsx";
 
 const columnHelper =
   createColumnHelper<VendorInvoicePaginatedResponseDto["items"][number]>();
@@ -119,20 +121,22 @@ export default function VendorInvoicesTable({ organizationId }: Props) {
   const searchParams = useSearchParams();
 
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindVendorInvoicePaginatedHttpControllerGetParams = useMemo(

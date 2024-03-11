@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -48,26 +49,32 @@ import useOnPaginationChange from "@/hook/useOnPaginationChange";
 const columnHelper =
   createColumnHelper<ProjectPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Projects";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/projects/ProjectsTable.tsx";
+
 export default function ProjectsTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindProjectsHttpControllerFindUsersParams>();
 
-  const addressSearchParamName = "Address";
-  const orgNameSearchParamName = "OrgName";
-  const projectNumberSearchParamName = "ProjectNumber";
-  const propertyOwnerSearchParamName = "PropertyOwner";
-  const propertyTypeSearchParamName = "PropertyType";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const addressSearchParamName = `${TABLE_NAME}Address`;
+  const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
+  const projectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
+  const propertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+  const propertyTypeSearchParamName = `${TABLE_NAME}PropertyType`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const addressSearchParam = searchParams.get(addressSearchParamName) ?? "";
   const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
@@ -84,8 +91,8 @@ export default function ProjectsTable() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindProjectsHttpControllerFindUsersParams = useMemo(
@@ -212,7 +219,20 @@ export default function ProjectsTable() {
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],
-    [params, syncedParams]
+    [
+      addressSearchParamName,
+      orgNameSearchParamName,
+      pageIndexSearchParamName,
+      params.organizationName,
+      params.projectNumber,
+      params.projectPropertyOwner,
+      params.propertyFullAddress,
+      params.propertyType,
+      projectNumberSearchParamName,
+      propertyOwnerSearchParamName,
+      propertyTypeSearchParamName,
+      syncedParams,
+    ]
   );
 
   const table = useReactTable({

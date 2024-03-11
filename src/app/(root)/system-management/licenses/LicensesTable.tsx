@@ -13,7 +13,9 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -22,7 +24,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LicensePaginatedResponseDto } from "@/api/api-spec";
+import {
+  FindLicensePaginatedHttpControllerGetParams,
+  LicensePaginatedResponseDto,
+} from "@/api/api-spec";
 import {
   Select,
   SelectContent,
@@ -33,6 +38,7 @@ import {
 import { Button } from "@/components/ui/button";
 import useLicensesQuery from "@/queries/useLicensesQuery";
 import { LicenseTypeEnum } from "@/lib/constants";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<LicensePaginatedResponseDto["items"][number]>();
@@ -54,32 +60,47 @@ const columns = [
   }),
 ];
 
+const TABLE_NAME = "Licenses";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/licenses/LicensesTable.tsx";
+
 interface Props {
   type: LicenseTypeEnum;
 }
 
 export default function LicensesTable({ type }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}_${type}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get("pageIndex")
-      ? Number(searchParams.get("pageIndex"))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get("pageSize")
-      ? Number(searchParams.get("pageSize"))
-      : 10,
+    pageSize,
   };
 
-  const { data, isLoading } = useLicensesQuery(
-    {
+  const onPaginationChange = useOnPaginationChange({
+    pageIndexSearchParamName,
+    pagination,
+    updatePageSize: setPageSize,
+  });
+
+  const params: FindLicensePaginatedHttpControllerGetParams = useMemo(
+    () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       type,
-    },
-    true
+    }),
+    [pagination.pageIndex, pagination.pageSize, type]
   );
+
+  const { data, isLoading } = useLicensesQuery(params, true);
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -87,17 +108,7 @@ export default function LicensesTable({ type }: Props) {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ abbreviation }) => abbreviation,
     pageCount: data?.totalPage ?? -1,
-    onPaginationChange: (updater) => {
-      if (typeof updater === "function") {
-        const { pageIndex, pageSize } = updater(pagination);
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set("pageIndex", String(pageIndex));
-        newSearchParams.set("pageSize", String(pageSize));
-        router.replace(`${pathname}?${newSearchParams.toString()}`, {
-          scroll: false,
-        });
-      }
-    },
+    onPaginationChange,
     manualPagination: true,
     state: {
       pagination,

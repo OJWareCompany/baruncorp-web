@@ -16,6 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { z } from "zod";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -110,6 +111,8 @@ const columns = [
 ];
 
 const TABLE_NAME = "PTOAnnual";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/pto/PtoAnnualSection.tsx";
 
 export default function PtoAnnualSection() {
   const router = useRouter();
@@ -118,15 +121,16 @@ export default function PtoAnnualSection() {
 
   const targetYearSearchParamName = `${TABLE_NAME}TargetYear`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
-      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
-      : 10,
+    pageSize,
   };
 
   const currentYear = new Date().getFullYear();
@@ -148,8 +152,8 @@ export default function PtoAnnualSection() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindPtoAnnualPaginatedHttpControllerGetParams = useMemo(

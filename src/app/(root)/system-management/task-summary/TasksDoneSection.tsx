@@ -17,7 +17,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { endOfDay, startOfMonth } from "date-fns";
 import { z } from "zod";
-import PeriodDatePicker from "./PeriodDatePicker";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import TasksDoneDatePicker from "./TasksDoneDatePicker";
 import TasksDoneDetailSheet from "./TasksDoneDetailSheet";
 import {
   Table,
@@ -50,7 +51,9 @@ const columnHelper =
     AssignedTaskSummaryDonePaginatedResponseDto["items"][number]
   >();
 
-const TABLE_NAME = "Period";
+const TABLE_NAME = "TasksDone";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/task-summary/TasksDoneSection.tsx";
 
 export type SheetState =
   | { open: false }
@@ -60,7 +63,7 @@ export type SheetState =
       status: "Canceled" | "Completed";
     };
 
-export default function PeriodSection() {
+export default function TasksDoneSection() {
   const [sheetState, setSheetState] = useState<SheetState>({ open: false });
 
   const router = useRouter();
@@ -74,14 +77,16 @@ export default function PeriodSection() {
   const fromDateSearchParamName = `${TABLE_NAME}FromDate`;
   const toDateSearchParamName = `${TABLE_NAME}ToDate`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const nameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
   const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
@@ -120,8 +125,8 @@ export default function PeriodSection() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindAssignedTaskSummaryDonePaginatedHttpControllerGetParams =
@@ -263,7 +268,7 @@ export default function PeriodSection() {
       <CollapsibleSection
         title="Tasks Done"
         action={
-          <PeriodDatePicker
+          <TasksDoneDatePicker
             value={{ from: fromDateData, to: toDateData }}
             onChange={(newValue) => {
               const newSearchParams = new URLSearchParams(

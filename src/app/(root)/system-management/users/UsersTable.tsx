@@ -19,6 +19,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -72,6 +73,9 @@ import usePostInvitationsMutation from "@/mutations/usePostInvitationsMutation";
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Users";
+const RELATIVE_PATH = "src/app/(root)/system-management/users/UsersTable.tsx";
+
 export default function UsersTable() {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; email: string; organizationId: string }
@@ -88,20 +92,22 @@ export default function UsersTable() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const emailSearchParamName = "Email";
-  const userNameSearchParamName = "UserName";
-  const orgNameSearchParamName = "OrgName";
-  const contractorSearchParamName = "Contractor";
-  const statusSearchParamName = "Status";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const emailSearchParamName = `${TABLE_NAME}Email`;
+  const userNameSearchParamName = `${TABLE_NAME}UserName`;
+  const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
+  const contractorSearchParamName = `${TABLE_NAME}Contractor`;
+  const statusSearchParamName = `${TABLE_NAME}Status`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const emailSearchParam = searchParams.get(emailSearchParamName) ?? "";
   const nameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
@@ -121,8 +127,8 @@ export default function UsersTable() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindUsersHttpControllerGetFindUsersParams = useMemo(
@@ -303,7 +309,20 @@ export default function UsersTable() {
         },
       }),
     ];
-  }, [params, syncedParams]);
+  }, [
+    contractorSearchParamName,
+    emailSearchParamName,
+    orgNameSearchParamName,
+    pageIndexSearchParamName,
+    params.email,
+    params.isContractor,
+    params.organizationName,
+    params.status,
+    params.userName,
+    statusSearchParamName,
+    syncedParams,
+    userNameSearchParamName,
+  ]);
 
   const table = useReactTable({
     data: data?.items ?? [],

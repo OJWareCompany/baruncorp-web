@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -43,31 +44,37 @@ import useOnPaginationChange from "@/hook/useOnPaginationChange";
 const columnHelper =
   createColumnHelper<AhjNotePaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "AhjNotes";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/ahj-notes/AhjNotesTable.tsx";
+
 export default function AhjNotesTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<GeographyControllerGetFindNotesParams>();
 
-  const nameSearchParamName = "Name";
-  const fullNameSearchParamName = "FullName";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const nameSearchParamName = `${TABLE_NAME}Name`;
+  const fullNameSearchParamName = `${TABLE_NAME}FullName`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const fullNameSearchParam = searchParams.get(fullNameSearchParamName) ?? "";
   const nameSearchParam = searchParams.get(nameSearchParamName) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: GeographyControllerGetFindNotesParams = useMemo(
@@ -143,7 +150,14 @@ export default function AhjNotesTable() {
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
     ],
-    [params.fullAhjName, params.name, syncedParams]
+    [
+      fullNameSearchParamName,
+      nameSearchParamName,
+      pageIndexSearchParamName,
+      params.fullAhjName,
+      params.name,
+      syncedParams,
+    ]
   );
 
   const table = useReactTable({

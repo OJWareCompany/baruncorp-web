@@ -18,6 +18,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import EditCourierDialog from "./EditCourierDialog";
 import {
   Table,
@@ -66,6 +67,10 @@ import LoadingButton from "@/components/LoadingButton";
 const columnHelper =
   createColumnHelper<CouriersPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Couriers";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/couriers/CouriersTable.tsx";
+
 interface InternalTableProps {
   modifyCourier: (initialValue: CouriersResponseDto) => void;
   deleteCourier: (courierId: string) => void;
@@ -74,21 +79,23 @@ interface InternalTableProps {
 function InternalTable({ modifyCourier, deleteCourier }: InternalTableProps) {
   const searchParams = useSearchParams();
 
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindJobPaginatedHttpControllerFindJobParams = useMemo(

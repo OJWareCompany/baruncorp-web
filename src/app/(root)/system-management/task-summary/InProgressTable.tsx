@@ -15,6 +15,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import TasksInProgressDetailSheet from "./TasksInProgressDetailSheet";
 import {
   Table,
@@ -47,6 +48,8 @@ const columnHelper =
   >();
 
 const TABLE_NAME = "InProgress";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/task-summary/InProgressTable.tsx";
 
 export type SheetState =
   | { open: false }
@@ -65,22 +68,24 @@ export default function InProgressTable() {
   const userNameSearchParamName = `${TABLE_NAME}UserName`;
   const orgNameSearchParamName = `${TABLE_NAME}OrgName`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const nameSearchParam = searchParams.get(userNameSearchParamName) ?? "";
   const orgNameSearchParam = searchParams.get(orgNameSearchParamName) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindAssignedTaskSummaryInProgressPaginatedHttpControllerGetParams =

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -63,30 +64,35 @@ import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
 
+const TABLE_NAME = "Jobs";
+const RELATIVE_PATH = "src/app/(root)/system-management/jobs/JobsTable.tsx";
+
 export default function JobsTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindJobPaginatedHttpControllerFindJobParams>();
 
-  const jobStatusSearchParamName = "JobStatus";
-  const jobNameSearchParamName = "JobName";
-  const propertyTypeSearchParamName = "PropertyType";
-  const mountingTypeSearchParamName = "MountingType";
-  const expediteSearchParamName = "Expedite";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
-  const inReviewSearchParamName = "InReview";
-  const prioritySearchParamName = "Priority";
-  const projectNumberSearchParamName = "ProjectNumber";
-  const propertyOwnerSearchParamName = "PropertyOwner";
+  const jobStatusSearchParamName = `${TABLE_NAME}JobStatus`;
+  const jobNameSearchParamName = `${TABLE_NAME}JobName`;
+  const propertyTypeSearchParamName = `${TABLE_NAME}PropertyType`;
+  const mountingTypeSearchParamName = `${TABLE_NAME}MountingType`;
+  const expediteSearchParamName = `${TABLE_NAME}Expedite`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const inReviewSearchParamName = `${TABLE_NAME}InReview`;
+  const prioritySearchParamName = `${TABLE_NAME}Priority`;
+  const projectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
+  const propertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const jobNameSearchParam = searchParams.get(jobNameSearchParamName) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
@@ -132,8 +138,8 @@ export default function JobsTable() {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
   const columnVisibility = useJobsColumnVisibility();
 
@@ -424,6 +430,12 @@ export default function JobsTable() {
       }),
     ];
   }, [
+    expediteSearchParamName,
+    inReviewSearchParamName,
+    jobNameSearchParamName,
+    jobStatusSearchParamName,
+    mountingTypeSearchParamName,
+    pageIndexSearchParamName,
     params.inReview,
     params.isExpedited,
     params.jobName,
@@ -433,6 +445,10 @@ export default function JobsTable() {
     params.projectNumber,
     params.projectPropertyType,
     params.propertyOwner,
+    prioritySearchParamName,
+    projectNumberSearchParamName,
+    propertyOwnerSearchParamName,
+    propertyTypeSearchParamName,
     syncedParams,
   ]);
 

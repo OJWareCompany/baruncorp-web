@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -35,12 +36,16 @@ import {
   FindDepartmentPaginatedHttpControllerGetParams,
   DepartmentPaginatedResponseDto,
 } from "@/api/api-spec";
-import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import useDepartmentsQuery from "@/queries/useDepartmentsQuery";
 import SearchHeader from "@/components/table/SearchHeader";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 
 const columnHelper =
   createColumnHelper<DepartmentPaginatedResponseDto["items"][number]>();
+
+const TABLE_NAME = "Departments";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/departments/DepartmentsTable.tsx";
 
 export default function DepartmentsTable() {
   const router = useRouter();
@@ -48,23 +53,25 @@ export default function DepartmentsTable() {
   const [syncedParams, setSyncedParams] =
     useState<FindDepartmentPaginatedHttpControllerGetParams>();
 
-  const nameSearchParamName = "Name";
-  const pageIndexSearchParamName = "PageIndex";
-  const pageSizeSearchParamName = "PageSize";
+  const nameSearchParamName = `${TABLE_NAME}Name`;
+  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(pageIndexSearchParamName)
       ? Number(searchParams.get(pageIndexSearchParamName))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 10,
+    pageSize,
   };
   const nameSearchParam = searchParams.get(nameSearchParamName) ?? "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindDepartmentPaginatedHttpControllerGetParams = useMemo(
@@ -102,7 +109,7 @@ export default function DepartmentsTable() {
         ),
       }),
     ],
-    [params.name, syncedParams]
+    [nameSearchParamName, pageIndexSearchParamName, params.name, syncedParams]
   );
 
   const table = useReactTable({

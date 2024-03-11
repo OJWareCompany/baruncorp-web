@@ -20,6 +20,7 @@ import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -73,6 +74,8 @@ interface Props {
 }
 
 const TABLE_NAME = "VendorCreditHistories";
+const RELATIVE_PATH =
+  "src/app/(root)/system-management/organizations/[organizationId]/VendorCreditsTable.tsx";
 
 export default function VendorCreditHistoriesTable({ organizationId }: Props) {
   const [alertDialogState, setAlertDialogState] = useState<
@@ -88,20 +91,22 @@ export default function VendorCreditHistoriesTable({ organizationId }: Props) {
   const { toast } = useToast();
 
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}PageSize`;
+
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}`,
+    10
+  );
   const pagination: PaginationState = {
-    pageIndex: searchParams.get(pageIndexSearchParamName)
-      ? Number(searchParams.get(pageIndexSearchParamName))
+    pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
+      ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(pageSizeSearchParamName)
-      ? Number(searchParams.get(pageSizeSearchParamName))
-      : 5,
+    pageSize,
   };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindVendorCreditTransactionPaginatedHttpControllerGetParams =

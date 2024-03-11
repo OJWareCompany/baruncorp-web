@@ -1,4 +1,4 @@
-import PeriodSection from "./PeriodSection";
+import TasksDoneSection from "./TasksDoneSection";
 import InProgressTable from "./InProgressTable";
 import PageHeader from "@/components/PageHeader";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -14,7 +14,7 @@ export default function Page() {
       <CollapsibleSection title="Current Tasks In Progress">
         <InProgressTable />
       </CollapsibleSection>
-      <PeriodSection />
+      <TasksDoneSection />
     </div>
   );
 }

@@ -17,7 +17,7 @@ interface Props {
   onChange: SelectRangeEventHandler;
 }
 
-const PeriodDatePicker = forwardRef<HTMLButtonElement, Props>(
+const TasksDoneDatePicker = forwardRef<HTMLButtonElement, Props>(
   ({ value, onChange }, ref) => {
     return (
       <div className="grid gap-2">
@@ -63,6 +63,6 @@ const PeriodDatePicker = forwardRef<HTMLButtonElement, Props>(
     );
   }
 );
-PeriodDatePicker.displayName = "PeriodDatePicker";
+TasksDoneDatePicker.displayName = "PeriodDatePicker";
 
-export default PeriodDatePicker;
+export default TasksDoneDatePicker;

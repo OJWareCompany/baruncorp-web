@@ -17,6 +17,7 @@ import {
 import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -52,6 +53,7 @@ const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
 
 const TABLE_NAME = "ClientInvoices";
+const RELATIVE_PATH = "src/app/(root)/invoices/ClientInvoicesTable.tsx";
 
 const StatusEnum = z.enum([
   InvoiceStatusEnum.Values.Issued,
@@ -73,15 +75,16 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
 
   const invoiceStatusSearchParamName = `${TABLE_NAME}${type}InvoiceStatus`;
   const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
-  const pageSizeSearchParamName = `${TABLE_NAME}${type}PageSize`;
 
+  const [pageSize, setPageSize] = useLocalStorage<number>(
+    `${RELATIVE_PATH}_${type}`,
+    10
+  );
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
       : 0,
-    pageSize: searchParams.get(encodeURIComponent(pageSizeSearchParamName))
-      ? Number(searchParams.get(encodeURIComponent(pageSizeSearchParamName)))
-      : 10,
+    pageSize,
   };
   const invoiceStatusSearchParamParseResult = StatusEnum.safeParse(
     searchParams.get(encodeURIComponent(invoiceStatusSearchParamName))
@@ -94,8 +97,8 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
-    pageSizeSearchParamName,
     pagination,
+    updatePageSize: setPageSize,
   });
 
   const params: FindInvoicePaginatedHttpControllerGetParams = useMemo(
