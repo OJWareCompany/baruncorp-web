@@ -110,7 +110,7 @@ export default function JobStatus({ job }: Props) {
       {(currentStatus.value === "Completed" ||
         currentStatus.value === "Canceled (Invoice)") && (
         <Button
-          size={"sm"}
+          size={"default"}
           variant={"outline"}
           onClick={() => {
             dispatch({
@@ -122,7 +122,7 @@ export default function JobStatus({ job }: Props) {
           }}
           className="shrink-0"
         >
-          <Mail className="mr-2 h-6 w-4" />
+          <Mail className="mr-2 h-4 w-4" />
           <span>Send Deliverables</span>
         </Button>
       )}
