@@ -23,11 +23,17 @@ export default function Page() {
           <CollapsibleSection title="Completed">
             <JobsTableForMember type="Completed" />
           </CollapsibleSection>
+          <CollapsibleSection title="Sent To Client">
+            <JobsTableForMember type="Sent To Client" />
+          </CollapsibleSection>
           <CollapsibleSection title="On Hold">
             <JobsTableForMember type="On Hold" />
           </CollapsibleSection>
           <CollapsibleSection title="Canceled">
             <JobsTableForMember type="Canceled" />
+          </CollapsibleSection>
+          <CollapsibleSection title="Canceled (Invoice)">
+            <JobsTableForMember type="Canceled (Invoice)" />
           </CollapsibleSection>
           <CollapsibleSection title="All">
             <JobsTableForMember type="All" />
@@ -51,11 +57,17 @@ export default function Page() {
         <CollapsibleSection title="Completed">
           <JobsTableForClient type="Completed" />
         </CollapsibleSection>
+        <CollapsibleSection title="Sent To Client">
+          <JobsTableForClient type="Sent To Client" />
+        </CollapsibleSection>
         <CollapsibleSection title="On Hold">
           <JobsTableForClient type="On Hold" />
         </CollapsibleSection>
         <CollapsibleSection title="Canceled">
           <JobsTableForClient type="Canceled" />
+        </CollapsibleSection>
+        <CollapsibleSection title="Canceled (Invoice)">
+          <JobsTableForClient type="Canceled (Invoice)" />
         </CollapsibleSection>
         <CollapsibleSection title="All">
           <JobsTableForClient type="All" />
