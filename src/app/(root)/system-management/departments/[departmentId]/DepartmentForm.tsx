@@ -42,6 +42,9 @@ const formSchema = z.object({
   editTask: z.boolean(),
   editLicense: z.boolean(),
   editPosition: z.boolean(),
+  sendDeliverables: z.boolean(),
+  editClientRole: z.boolean(),
+  editMemberRole: z.boolean(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
@@ -59,6 +62,9 @@ const getFieldValues = (department: DepartmentResponseDto): FieldValues => {
     editTask: department.editUserTask,
     editLicense: department.editUserLicense,
     editPosition: department.editUserPosition,
+    sendDeliverables: department.sendDeliverables,
+    editClientRole: department.editClientRole,
+    editMemberRole: department.editMemberRole,
   };
 };
 
@@ -91,7 +97,9 @@ export default function DepartmentForm({ department }: Props) {
       editUserTask: values.editTask,
       editUserLicense: values.editLicense,
       editUserPosition: values.editPosition,
-      sendDeliverables: false, // TODO
+      sendDeliverables: values.sendDeliverables,
+      editClientRole: values.editClientRole,
+      editMemberRole: values.editMemberRole,
     })
       .then(() => {
         toast({ title: "Success" });
@@ -369,6 +377,73 @@ export default function DepartmentForm({ department }: Props) {
                         </FormControl>
                         <FormLabel className="font-normal">
                           Can Edit Task
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="sendDeliverables"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row gap-3 items-center">
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              if (typeof newChecked === "boolean") {
+                                field.onChange(newChecked);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Can Send Deliverables
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="editClientRole"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row gap-3 items-center">
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              if (typeof newChecked === "boolean") {
+                                field.onChange(newChecked);
+                              }
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Can Edit Client Role
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="editMemberRole"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row gap-3 items-center">
+                        <FormControl>
+                          <Checkbox
+                            ref={field.ref}
+                            checked={field.value}
+                            onCheckedChange={(newChecked) => {
+                              if (typeof newChecked === "boolean") {
+                                field.onChange(newChecked);
+                              }
+                            }}
+                            disabled // 아직 사용되는 곳이 없어서 interface만 만들어놓고 disabled 처리하기로 이야기함
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Can Edit Member Role
                         </FormLabel>
                       </FormItem>
                     )}

@@ -490,6 +490,15 @@ export type UserStatusEnum = z.infer<typeof UserStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
+// "Client Company Employee" | "Client Company Manager"
+export const ClientUserRoleEnum = z.enum([
+  "Client Company Employee",
+  "Client Company Manager",
+]);
+export type ClientUserRoleEnum = z.infer<typeof ClientUserRoleEnum>;
+
+/* -------------------------------------------------------------------------- */
+
 // "Unissued" | "Issued" | "Paid"
 export const InvoiceStatusEnum = z.enum(["Unissued", "Issued", "Paid"]);
 // "Unissued" | "Issued" | "Paid" | ""

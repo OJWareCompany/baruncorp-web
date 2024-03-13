@@ -9,6 +9,7 @@ export interface ProfileData {
   isAdmin: boolean;
   isBarunCorpMember: boolean;
   isContractor: boolean;
+  isClientCompanyManager: boolean;
   authority: {
     canViewClientInvoice: boolean;
     canViewVendorInvoice: boolean;
@@ -19,6 +20,9 @@ export interface ProfileData {
     canEditTask: boolean;
     canEditLicense: boolean;
     canEditPosition: boolean;
+    canSendDeliverables: boolean;
+    canEditClientRole: boolean;
+    canEditMemberRole: boolean;
   };
 }
 
@@ -26,6 +30,7 @@ const ProfileContext = createContext<ProfileData>({
   isAdmin: false,
   isBarunCorpMember: false,
   isContractor: false,
+  isClientCompanyManager: false,
   authority: {
     canViewClientInvoice: false,
     canViewVendorInvoice: false,
@@ -36,6 +41,9 @@ const ProfileContext = createContext<ProfileData>({
     canEditTask: false,
     canEditLicense: false,
     canEditPosition: false,
+    canSendDeliverables: false,
+    canEditClientRole: false,
+    canEditMemberRole: false,
   },
 });
 
@@ -57,6 +65,7 @@ export default function ProfileProvider({ children }: Props) {
         isAdmin: false,
         isBarunCorpMember: false,
         isContractor: false,
+        isClientCompanyManager: false,
         authority: {
           canViewClientInvoice: false,
           canViewVendorInvoice: false,
@@ -67,6 +76,9 @@ export default function ProfileProvider({ children }: Props) {
           canEditTask: false,
           canEditLicense: false,
           canEditPosition: false,
+          canSendDeliverables: false,
+          canEditClientRole: false,
+          canEditMemberRole: false,
         },
       };
     }
@@ -78,6 +90,8 @@ export default function ProfileProvider({ children }: Props) {
     const isBarunCorpMember =
       organization.organizationType.toUpperCase() === "ADMINISTRATION";
     const isContractor = profile.isVendor;
+    const isClientCompanyManager =
+      profile.role.toUpperCase() === "CLIENT COMPANY MANAGER";
 
     // profile 받아왔는데, 소속된 department 없는 경우
     // 혹은 소속된 department가 있는데 department 받아오는 중
@@ -86,6 +100,7 @@ export default function ProfileProvider({ children }: Props) {
         isAdmin,
         isBarunCorpMember,
         isContractor,
+        isClientCompanyManager,
         authority: {
           canViewClientInvoice: false,
           canViewVendorInvoice: false,
@@ -96,6 +111,9 @@ export default function ProfileProvider({ children }: Props) {
           canEditTask: false,
           canEditLicense: false,
           canEditPosition: false,
+          canSendDeliverables: false,
+          canEditClientRole: false,
+          canEditMemberRole: false,
         },
       };
     }
@@ -105,6 +123,7 @@ export default function ProfileProvider({ children }: Props) {
       isAdmin,
       isBarunCorpMember,
       isContractor,
+      isClientCompanyManager,
       authority: {
         canViewClientInvoice: department.viewClientInvoice,
         canViewVendorInvoice: department.viewVendorInvoice,
@@ -115,6 +134,9 @@ export default function ProfileProvider({ children }: Props) {
         canEditTask: department.editUserTask,
         canEditLicense: department.editUserLicense,
         canEditPosition: department.editUserPosition,
+        canSendDeliverables: department.sendDeliverables,
+        canEditClientRole: department.editClientRole,
+        canEditMemberRole: department.editMemberRole,
       },
     };
   }, [department, organization, profile]);

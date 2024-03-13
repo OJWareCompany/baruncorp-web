@@ -8,6 +8,7 @@ import AvailableTasksTable from "./AvailableTasksTable";
 import PositionForm from "./PositionForm";
 import StatusSectionHeaderAction from "./StatusSectionHeaderAction";
 import DepartmentForm from "./DepartmentForm";
+import RoleForm from "./RoleForm";
 import PageHeader from "@/components/PageHeader";
 import useUserQuery from "@/queries/useUserQuery";
 import PageLoading from "@/components/PageLoading";
@@ -143,6 +144,12 @@ export default function UserDetailPage({ userId, pageType }: Props) {
             <DepartmentForm user={user} />
           </CollapsibleSection>
         )}
+        {!isTargetUserOrganizationBarunCorp &&
+          isSignedInUserBarunCorpMember && (
+            <CollapsibleSection title="Role">
+              <RoleForm user={user} />
+            </CollapsibleSection>
+          )}
         {(isTargetUserContractor || isTargetUserOrganizationBarunCorp) && (
           <>
             <CollapsibleSection title="Position">

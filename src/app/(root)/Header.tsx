@@ -109,7 +109,8 @@ export default function Header() {
   const { data: profile } = useProfileQuery();
   const { data: department } = useDepartmentQuery(profile?.departmentId ?? "");
   const { isSelected: isExpanded } = useExpandContext();
-  const { isBarunCorpMember, isContractor } = useProfileContext();
+  const { isBarunCorpMember, isContractor, isClientCompanyManager } =
+    useProfileContext();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white">
@@ -181,15 +182,17 @@ export default function Header() {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Link href="/invoices" legacyBehavior passHref>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      Invoices
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
+                {(isBarunCorpMember || isClientCompanyManager) && (
+                  <NavigationMenuItem>
+                    <Link href="/invoices" legacyBehavior passHref>
+                      <NavigationMenuLink
+                        className={navigationMenuTriggerStyle()}
+                      >
+                        Invoices
+                      </NavigationMenuLink>
+                    </Link>
+                  </NavigationMenuItem>
+                )}
               </NavigationMenuList>
             </NavigationMenu>
           </nav>
