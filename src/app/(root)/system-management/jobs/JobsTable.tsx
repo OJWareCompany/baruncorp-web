@@ -324,7 +324,7 @@ export default function JobsTable() {
                 <Button
                   size={"default"}
                   variant={"outline"}
-                  className="ml-5 "
+                  className="ml-5 px-2 font-normal h-8 text-xs"
                   onClick={(event) => {
                     event.stopPropagation();
                     setAlertDialogState({ open: true, jobId: row.id });

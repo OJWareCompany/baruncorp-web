@@ -114,7 +114,7 @@ export default function JobStatus({ job }: Props) {
           variant={"outline"}
           onClick={() => {
             dispatch({
-              type: "PATCH_JOB_STATUS",
+              type: "UPDATE_JOB_STATUS",
               jobId: job.id,
               projectId: job.projectId,
               status: "Sent To Client",
