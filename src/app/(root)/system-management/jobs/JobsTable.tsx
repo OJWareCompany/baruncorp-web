@@ -16,6 +16,8 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   Table,
   TableBody,
@@ -32,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import useJobsQuery from "@/queries/useJobsQuery";
+import useJobsQuery, { getJobsQueryKey } from "@/queries/useJobsQuery";
 import {
   FindJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
@@ -60,6 +62,17 @@ import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalIn
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
+import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import LoadingButton from "@/components/LoadingButton";
+import { toast } from "@/components/ui/use-toast";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -72,6 +85,16 @@ export default function JobsTable() {
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindJobPaginatedHttpControllerFindJobParams>();
+
+  const [alertDialogState, setAlertDialogState] = useState<
+    { open: false } | { open: true; jobId: string }
+  >({ open: false });
+
+  const {
+    mutateAsync: patchSendDeliverablesMutationAsync,
+    isPending: isPatchSendDeliverablesMutationPending,
+  } = usePatchJobSendMutation();
+  const queryClient = useQueryClient();
 
   const jobStatusSearchParamName = `${TABLE_NAME}JobStatus`;
   const jobNameSearchParamName = `${TABLE_NAME}JobName`;
@@ -286,14 +309,30 @@ export default function JobsTable() {
             }
           />
         ),
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const value = getValue();
           const status = jobStatuses[value];
 
           return (
-            <div className={`flex items-center`}>
-              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-              <span className="whitespace-nowrap">{status.value}</span>
+            <div className="flex">
+              <div className={`flex items-center`}>
+                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+                <span className="whitespace-nowrap">{status.value}</span>
+              </div>
+              {(status.value === "Completed" ||
+                status.value === "Canceled (Invoice)") && (
+                <Button
+                  size={"default"}
+                  variant={"outline"}
+                  className="ml-5 "
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setAlertDialogState({ open: true, jobId: row.id });
+                  }}
+                >
+                  <span>Send Deliverables</span>
+                </Button>
+              )}
             </div>
           );
         },
@@ -600,6 +639,70 @@ export default function JobsTable() {
           </div>
         </div>
       </div>
+      <AlertDialog
+        open={alertDialogState.open}
+        onOpenChange={(newOpen) => {
+          if (newOpen) {
+            return;
+          }
+
+          setAlertDialogState({ open: newOpen });
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <LoadingButton
+              isLoading={isPatchSendDeliverablesMutationPending}
+              onClick={() => {
+                if (!alertDialogState.open) {
+                  return;
+                }
+                patchSendDeliverablesMutationAsync({
+                  jobId: alertDialogState.jobId,
+                })
+                  .then(() => {
+                    toast({ title: "Success" });
+                    queryClient.invalidateQueries({
+                      queryKey: getJobsQueryKey({}),
+                    });
+                    setAlertDialogState({ open: false });
+                  })
+                  .catch((error: AxiosError<ErrorResponseData>) => {
+                    switch (error.response?.status) {
+                      case 400:
+                        if (error.response.data.errorCode.includes("20809")) {
+                          toast({
+                            title: "Job is already sent to client.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                    }
+
+                    if (
+                      error.response &&
+                      error.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: error.response.data.message,
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                  });
+              }}
+            >
+              Continue
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
