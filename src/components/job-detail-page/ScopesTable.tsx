@@ -7,7 +7,7 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ChevronDown,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import AssigneeField from "./AssigneeField";
 import OrderedServiceStatusField from "./OrderedServiceStatusField";
+import ReasonDialog from "./ReasonDialog";
 import PriceField from "@/components/field/PriceField";
 import {
   Table,
@@ -31,7 +32,6 @@ import { Button } from "@/components/ui/button";
 import {
   AssignedTaskStatusEnum,
   BARUNCORP_ORGANIZATION_ID,
-  JobStatusEnum,
   OrderedServiceStatusEnum,
   assignedTaskStatuses,
 } from "@/lib/constants";
@@ -67,6 +67,10 @@ interface Data {
 
 const columnHelper = createColumnHelper<Data>();
 
+export type ReasonDialogState =
+  | { open: false }
+  | { open: true; assignedTaskId: string };
+
 interface Props {
   job: JobResponseDto;
   project: ProjectResponseDto;
@@ -75,6 +79,16 @@ interface Props {
 
 export default function ScopesTable({ job, project, pageType }: Props) {
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [reasonDialogState, setReasonDialogState] = useState<ReasonDialogState>(
+    { open: false }
+  );
+
+  const openReasonDialog = useCallback((assignedTaskId: string) => {
+    setReasonDialogState({
+      open: true,
+      assignedTaskId,
+    });
+  }, []);
 
   const {
     isBarunCorpMember,
@@ -426,10 +440,11 @@ export default function ScopesTable({ job, project, pageType }: Props) {
             <AssigneeField
               assignedTaskId={row.id}
               userId={value ?? ""}
-              status={row.original.status as JobStatusEnum}
+              status={row.original.status as AssignedTaskStatusEnum}
               jobId={job.id}
               projectId={job.projectId}
               pageType={pageType}
+              openReasonDialog={openReasonDialog}
             />
           );
         },
@@ -442,6 +457,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
       job.projectId,
       isBarunCorpMember,
       pageType,
+      openReasonDialog,
     ]
   );
 
@@ -465,48 +481,68 @@ export default function ScopesTable({ job, project, pageType }: Props) {
   });
 
   return (
-    <div className="rounded-md border overflow-hidden">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className={cn(row.depth > 0 && "bg-muted/50")}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+    <>
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className={cn(row.depth > 0 && "bg-muted/50")}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <ReasonDialog
+        reasonDialogState={reasonDialogState}
+        onOpenChange={(newOpen) => {
+          if (newOpen) {
+            return;
+          }
+
+          setReasonDialogState({ open: newOpen });
+        }}
+        jobId={job.id}
+        projectId={project.projectId}
+      />
+    </>
   );
 }

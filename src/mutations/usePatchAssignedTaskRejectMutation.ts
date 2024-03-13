@@ -3,15 +3,15 @@ import { AxiosError } from "axios";
 import useApi from "@/hook/useApi";
 import { RejectAssignedTaskRequestDto } from "@/api/api-spec";
 
-const usePatchAssignedTaskRejectMutation = (assignedTaskId: string) => {
+interface Variables extends RejectAssignedTaskRequestDto {
+  assignedTaskId: string;
+}
+
+const usePatchAssignedTaskRejectMutation = () => {
   const api = useApi();
 
-  return useMutation<
-    void,
-    AxiosError<ErrorResponseData>,
-    RejectAssignedTaskRequestDto
-  >({
-    mutationFn: (reqData) => {
+  return useMutation<void, AxiosError<ErrorResponseData>, Variables>({
+    mutationFn: ({ assignedTaskId, ...reqData }) => {
       return api.assignedTasks
         .rejectAssignedTaskHttpControllerPatch(assignedTaskId, reqData)
         .then(({ data: resData }) => resData);

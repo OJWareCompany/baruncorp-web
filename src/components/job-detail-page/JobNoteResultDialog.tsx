@@ -3,7 +3,7 @@ import { DialogProps } from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
-import { DialogState } from "./JobNoteForm";
+import { JobNoteResultDialogState } from "./JobNoteForm";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +20,12 @@ import { getJobNotesQueryKey } from "@/queries/useJobNotesQuery";
 
 interface Props extends DialogProps {
   onOpenChange: (open: boolean) => void;
-  state: DialogState;
+  jobNoteResultDialogState: JobNoteResultDialogState;
   onSuccess: () => void;
 }
 
 export default function JobNoteResultDialog({
-  state,
+  jobNoteResultDialogState,
   onSuccess,
   ...dialogProps
 }: Props) {
@@ -60,7 +60,7 @@ export default function JobNoteResultDialog({
     });
 
   useEffect(() => {
-    if (!state.open) {
+    if (!jobNoteResultDialogState.open) {
       setPostJobNoteProgress({
         value: 0,
         error: false,
@@ -73,13 +73,16 @@ export default function JobNoteResultDialog({
     }
 
     postJobNoteMutateAsync({
-      ...state.requestData,
-      files: state.requestData.type === "RFI" ? state.requestData.files : [],
+      ...jobNoteResultDialogState.requestData,
+      files:
+        jobNoteResultDialogState.requestData.type === "RFI"
+          ? jobNoteResultDialogState.requestData.files
+          : [],
     })
       .then(({ id, jobNoteFolderId, jobNoteNumber }) => {
         onSuccess();
         postJobNoteFilesMutateAsync({
-          files: state.requestData.files,
+          files: jobNoteResultDialogState.requestData.files,
           jobNoteId: id,
           jobNoteNumber,
           jobNotesFolderId: jobNoteFolderId ?? "",
@@ -94,7 +97,9 @@ export default function JobNoteResultDialog({
           })
           .finally(() => {
             queryClient.invalidateQueries({
-              queryKey: getJobNotesQueryKey(state.requestData.jobId),
+              queryKey: getJobNotesQueryKey(
+                jobNoteResultDialogState.requestData.jobId
+              ),
             });
           });
       })
@@ -119,13 +124,13 @@ export default function JobNoteResultDialog({
     postJobNoteFilesMutateAsync,
     postJobNoteMutateAsync,
     queryClient,
-    state,
+    jobNoteResultDialogState,
   ]);
 
   return (
     <Dialog
       {...dialogProps}
-      open={state.open}
+      open={jobNoteResultDialogState.open}
       onOpenChange={(newOpen) => {
         if (
           postJobNoteProgress.value !== 100 ||
@@ -145,25 +150,26 @@ export default function JobNoteResultDialog({
             uploading.
           </DialogDescription>
         </DialogHeader>
-        {state.open && state.requestData.type === "RFI" && (
-          <div className="flex flex-col gap-1">
-            <Progress value={postJobNoteProgress.value} />
-            <p
-              className={cn(
-                "text-xs text-muted-foreground text-center",
-                postJobNoteProgress.error && "text-destructive"
-              )}
-            >
-              {postJobNoteProgress.value !== 100
-                ? "Preparing to send email..."
-                : postJobNoteProgress.error
-                ? "Failed to send email"
-                : !isPostJobNoteMutationSuccess
-                ? "Please wait for the email to be sent... It may take up to 3 minutes"
-                : "Completed to send email"}
-            </p>
-          </div>
-        )}
+        {jobNoteResultDialogState.open &&
+          jobNoteResultDialogState.requestData.type === "RFI" && (
+            <div className="flex flex-col gap-1">
+              <Progress value={postJobNoteProgress.value} />
+              <p
+                className={cn(
+                  "text-xs text-muted-foreground text-center",
+                  postJobNoteProgress.error && "text-destructive"
+                )}
+              >
+                {postJobNoteProgress.value !== 100
+                  ? "Preparing to send email..."
+                  : postJobNoteProgress.error
+                  ? "Failed to send email"
+                  : !isPostJobNoteMutationSuccess
+                  ? "Please wait for the email to be sent... It may take up to 3 minutes"
+                  : "Completed to send email"}
+              </p>
+            </div>
+          )}
         <div className="flex flex-col gap-1">
           <Progress value={postJobNoteFilesProgress.value} />
           <p

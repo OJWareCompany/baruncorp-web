@@ -2819,6 +2819,8 @@ export interface CreateDepartmentRequestDto {
   editUserLicense: boolean;
   /** @default false */
   editUserPosition: boolean;
+  /** @default false */
+  sendDeliverables: boolean;
 }
 
 export interface UpdateDepartmentRequestDto {
@@ -2842,6 +2844,8 @@ export interface UpdateDepartmentRequestDto {
   editUserLicense: boolean;
   /** @default false */
   editUserPosition: boolean;
+  /** @default false */
+  sendDeliverables: boolean;
 }
 
 export interface DepartmentResponseDto {
@@ -2857,6 +2861,7 @@ export interface DepartmentResponseDto {
   editUserTask: boolean;
   editUserLicense: boolean;
   editUserPosition: boolean;
+  sendDeliverables: boolean;
 }
 
 export interface DepartmentPaginatedResponseDto {
@@ -5503,6 +5508,70 @@ export class Api<
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name BackToNotStartedAssignedTaskHttpControllerBackToNotStarted
+     * @request PATCH:/assigned-tasks/{assignedTaskId}/back-to-not-started
+     */
+    backToNotStartedAssignedTaskHttpControllerBackToNotStarted: (
+      assignedTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/assigned-tasks/${assignedTaskId}/back-to-not-started`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CancelAssignedTaskHttpControllerCancel
+     * @request PATCH:/assigned-tasks/{assignedTaskId}/cancel
+     */
+    cancelAssignedTaskHttpControllerCancel: (
+      assignedTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/assigned-tasks/${assignedTaskId}/cancel`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name HoldAssignedTaskHttpControllerHold
+     * @request PATCH:/assigned-tasks/{assignedTaskId}/hold
+     */
+    holdAssignedTaskHttpControllerHold: (
+      assignedTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/assigned-tasks/${assignedTaskId}/hold`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateStatusToInProgressAssignedTaskHttpControllerHold
+     * @request PATCH:/assigned-tasks/{assignedTaskId}/update-to-in-progress
+     */
+    updateStatusToInProgressAssignedTaskHttpControllerHold: (
+      assignedTaskId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/assigned-tasks/${assignedTaskId}/update-to-in-progress`,
+        method: "PATCH",
         ...params,
       }),
   };

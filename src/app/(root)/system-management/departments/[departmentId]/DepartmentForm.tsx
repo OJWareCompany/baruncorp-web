@@ -91,6 +91,7 @@ export default function DepartmentForm({ department }: Props) {
       editUserTask: values.editTask,
       editUserLicense: values.editLicense,
       editUserPosition: values.editPosition,
+      sendDeliverables: false, // TODO
     })
       .then(() => {
         toast({ title: "Success" });

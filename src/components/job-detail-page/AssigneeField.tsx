@@ -1,16 +1,17 @@
 import AssigneeAction from "./AssigneeAction";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import AssigneeCombobox from "@/components/combobox/AssigneeCombobox";
-import { JobStatusEnum } from "@/lib/constants";
+import { AssignedTaskStatusEnum } from "@/lib/constants";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
 interface Props {
   assignedTaskId: string;
   userId: string;
-  status: JobStatusEnum;
+  status: AssignedTaskStatusEnum;
   jobId: string;
   projectId: string;
   pageType: JobDetailPageType;
+  openReasonDialog: (assignedTaskId: string) => void;
 }
 
 export default function AssigneeField({
@@ -20,6 +21,7 @@ export default function AssigneeField({
   jobId,
   projectId,
   pageType,
+  openReasonDialog,
 }: Props) {
   const dispatch = useAlertDialogDataDispatch();
 
@@ -40,7 +42,7 @@ export default function AssigneeField({
         userId={userId}
         onUserIdChange={(newUserId) => {
           dispatch({
-            type: "ASSIGN",
+            type: "ASSIGN_TASK",
             assignedTaskId,
             jobId,
             projectId,
@@ -54,18 +56,16 @@ export default function AssigneeField({
           !isBarunCorpMember
         }
       />
-      {isWorker &&
-        userId !== "" &&
-        status !== "Completed" &&
-        status !== "Canceled" &&
-        status !== "On Hold" && (
-          <AssigneeAction
-            assignedTaskId={assignedTaskId}
-            jobId={jobId}
-            projectId={projectId}
-            userId={userId}
-          />
-        )}
+      {isWorker && (
+        <AssigneeAction
+          assignedTaskId={assignedTaskId}
+          jobId={jobId}
+          projectId={projectId}
+          userId={userId}
+          status={status}
+          openReasonDialog={openReasonDialog}
+        />
+      )}
     </div>
   );
 }

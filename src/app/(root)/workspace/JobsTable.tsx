@@ -13,7 +13,7 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {
@@ -73,7 +73,6 @@ interface Props {
 
 export default function JobsTable({ type }: Props) {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindMyJobPaginatedHttpControllerFindJobParams>();

@@ -24,6 +24,10 @@ import LoadingButton from "@/components/LoadingButton";
 import useDeleteTrackingNumberMutation from "@/mutations/useDeleteTrackingNumberMutation";
 import { getTrackingNumbersQueryKey } from "@/queries/useTrackingNumbersQuery";
 import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
+import usePatchAssignedTaskHoldMutation from "@/mutations/usePatchAssignedTaskHoldMutation";
+import usePatchAssignedTaskNotStartedMutation from "@/mutations/usePatchAssignedTaskNotStartedMutation";
+import usePatchAssignedTaskInProgressMutation from "@/mutations/usePatchAssignedTaskInProgressMutation";
+import usePatchAssignedTaskCancelMutation from "@/mutations/usePatchAssignedTaskCancelMutation";
 
 type AlertDialogData =
   | {
@@ -46,8 +50,15 @@ type AlertDialogData =
     }
   | {
       open: true;
-      type: "ASSIGN";
+      type: "ASSIGN_TASK";
       userId: string;
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      open: true;
+      type: "UNASSIGN_TASK";
       assignedTaskId: string;
       jobId: string;
       projectId: string;
@@ -61,7 +72,28 @@ type AlertDialogData =
     }
   | {
       open: true;
-      type: "UNASSIGN";
+      type: "UPDATE_TASK_TO_HOLD";
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      open: true;
+      type: "UPDATE_TASK_TO_NOT_STARTED";
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      open: true;
+      type: "UPDATE_TASK_TO_IN_PROGRESS";
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      open: true;
+      type: "UPDATE_TASK_TO_CANCEL";
       assignedTaskId: string;
       jobId: string;
       projectId: string;
@@ -88,8 +120,14 @@ type Action =
       orderedServiceId: string;
     }
   | {
-      type: "ASSIGN";
+      type: "ASSIGN_TASK";
       userId: string;
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      type: "UNASSIGN_TASK";
       assignedTaskId: string;
       jobId: string;
       projectId: string;
@@ -101,7 +139,25 @@ type Action =
       projectId: string;
     }
   | {
-      type: "UNASSIGN";
+      type: "UPDATE_TASK_TO_HOLD";
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      type: "UPDATE_TASK_TO_NOT_STARTED";
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      type: "UPDATE_TASK_TO_IN_PROGRESS";
+      assignedTaskId: string;
+      jobId: string;
+      projectId: string;
+    }
+  | {
+      type: "UPDATE_TASK_TO_CANCEL";
       assignedTaskId: string;
       jobId: string;
       projectId: string;
@@ -132,7 +188,13 @@ function alertDialogDataReducer(
         ...action,
       };
     }
-    case "ASSIGN": {
+    case "ASSIGN_TASK": {
+      return {
+        open: true,
+        ...action,
+      };
+    }
+    case "UNASSIGN_TASK": {
       return {
         open: true,
         ...action,
@@ -144,7 +206,25 @@ function alertDialogDataReducer(
         ...action,
       };
     }
-    case "UNASSIGN": {
+    case "UPDATE_TASK_TO_HOLD": {
+      return {
+        open: true,
+        ...action,
+      };
+    }
+    case "UPDATE_TASK_TO_NOT_STARTED": {
+      return {
+        open: true,
+        ...action,
+      };
+    }
+    case "UPDATE_TASK_TO_IN_PROGRESS": {
+      return {
+        open: true,
+        ...action,
+      };
+    }
+    case "UPDATE_TASK_TO_CANCEL": {
       return {
         open: true,
         ...action,
@@ -201,13 +281,29 @@ export default function AlertDialogDataProvider({ children }: Props) {
     isPending: isPatchAssignMutationPending,
   } = usePatchAssignMutation();
   const {
+    mutateAsync: patchAssignedTaskUnassignMutateAsync,
+    isPending: isPatchAssignedTaskUnassignMutationPending,
+  } = usePatchAssignedTaskUnassignMutation();
+  const {
     mutateAsync: patchAssignedTaskCompleteMutateAsync,
     isPending: isPatchAssignedTaskCompleteMutationPending,
   } = usePatchAssignedTaskCompleteMutation();
   const {
-    mutateAsync: patchAssignedTaskUnassignMutateAsync,
-    isPending: isPatchAssignedTaskUnassignMutationPending,
-  } = usePatchAssignedTaskUnassignMutation();
+    mutateAsync: patchAssignedTaskHoldMutateAsync,
+    isPending: isPatchAssignedTaskHoldMutationPending,
+  } = usePatchAssignedTaskHoldMutation();
+  const {
+    mutateAsync: patchAssignedTaskNotStartedMutateAsync,
+    isPending: isPatchAssignedTaskNotStartedMutationPending,
+  } = usePatchAssignedTaskNotStartedMutation();
+  const {
+    mutateAsync: patchAssignedTaskInProgressMutateAsync,
+    isPending: isPatchAssignedTaskInProgressMutationPending,
+  } = usePatchAssignedTaskInProgressMutation();
+  const {
+    mutateAsync: patchAssignedTaskCancelMutateAsync,
+    isPending: isPatchAssignedTaskCancelMutationPending,
+  } = usePatchAssignedTaskCancelMutation();
   const {
     mutateAsync: deleteTrackingNumberMutateAsync,
     isPending: isDeleteTrackingNumberMutationPending,
@@ -218,8 +314,12 @@ export default function AlertDialogDataProvider({ children }: Props) {
     isPatchJobSendMutationPending ||
     isPatchOrderedServiceStatusMutationPending ||
     isPatchAssignMutationPending ||
-    isPatchAssignedTaskCompleteMutationPending ||
     isPatchAssignedTaskUnassignMutationPending ||
+    isPatchAssignedTaskCompleteMutationPending ||
+    isPatchAssignedTaskHoldMutationPending ||
+    isPatchAssignedTaskNotStartedMutationPending ||
+    isPatchAssignedTaskInProgressMutationPending ||
+    isPatchAssignedTaskCancelMutationPending ||
     isDeleteTrackingNumberMutationPending;
 
   return (
@@ -385,7 +485,7 @@ export default function AlertDialogDataProvider({ children }: Props) {
                     });
                 }
 
-                if (alertDialogData.type === "ASSIGN") {
+                if (alertDialogData.type === "ASSIGN_TASK") {
                   const { jobId, projectId, assignedTaskId, userId } =
                     alertDialogData;
 
@@ -393,6 +493,39 @@ export default function AlertDialogDataProvider({ children }: Props) {
                     assignedTaskId,
                     assigneeId: userId,
                   })
+                    .then(() => {
+                      toast({ title: "Success" });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobQueryKey(jobId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getProjectQueryKey(projectId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
+                      });
+                      dispatch({ type: "CLOSE" });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }
+
+                if (alertDialogData.type === "UNASSIGN_TASK") {
+                  const { jobId, projectId, assignedTaskId } = alertDialogData;
+
+                  patchAssignedTaskUnassignMutateAsync({ assignedTaskId })
                     .then(() => {
                       toast({ title: "Success" });
                       queryClient.invalidateQueries({
@@ -455,10 +588,109 @@ export default function AlertDialogDataProvider({ children }: Props) {
                     });
                 }
 
-                if (alertDialogData.type === "UNASSIGN") {
+                if (alertDialogData.type === "UPDATE_TASK_TO_HOLD") {
                   const { jobId, projectId, assignedTaskId } = alertDialogData;
 
-                  patchAssignedTaskUnassignMutateAsync({ assignedTaskId })
+                  patchAssignedTaskHoldMutateAsync({ assignedTaskId })
+                    .then(() => {
+                      toast({ title: "Success" });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobQueryKey(jobId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getProjectQueryKey(projectId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
+                      });
+                      dispatch({ type: "CLOSE" });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }
+
+                if (alertDialogData.type === "UPDATE_TASK_TO_NOT_STARTED") {
+                  const { jobId, projectId, assignedTaskId } = alertDialogData;
+
+                  patchAssignedTaskNotStartedMutateAsync({ assignedTaskId })
+                    .then(() => {
+                      toast({ title: "Success" });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobQueryKey(jobId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getProjectQueryKey(projectId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
+                      });
+                      dispatch({ type: "CLOSE" });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }
+
+                if (alertDialogData.type === "UPDATE_TASK_TO_IN_PROGRESS") {
+                  const { jobId, projectId, assignedTaskId } = alertDialogData;
+
+                  patchAssignedTaskInProgressMutateAsync({ assignedTaskId })
+                    .then(() => {
+                      toast({ title: "Success" });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobQueryKey(jobId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getProjectQueryKey(projectId),
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getJobHistoriesQueryKey({ jobId }),
+                      });
+                      dispatch({ type: "CLOSE" });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }
+
+                if (alertDialogData.type === "UPDATE_TASK_TO_CANCEL") {
+                  const { jobId, projectId, assignedTaskId } = alertDialogData;
+
+                  patchAssignedTaskCancelMutateAsync({ assignedTaskId })
                     .then(() => {
                       toast({ title: "Success" });
                       queryClient.invalidateQueries({

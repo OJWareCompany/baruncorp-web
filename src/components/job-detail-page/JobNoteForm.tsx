@@ -61,7 +61,7 @@ const formSchema = z.object({
 
 type FieldValues = z.infer<typeof formSchema>;
 
-export type DialogState =
+export type JobNoteResultDialogState =
   | { open: false }
   | { open: true; requestData: CreateJobNoteRequestDto };
 
@@ -70,7 +70,10 @@ interface Props {
 }
 
 export default function JobNoteForm({ job }: Props) {
-  const [dialogState, setDialogState] = useState<DialogState>({ open: false });
+  const [jobNoteResultDialogState, setJobNoteResultDialogState] =
+    useState<JobNoteResultDialogState>({
+      open: false,
+    });
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -122,7 +125,7 @@ export default function JobNoteForm({ job }: Props) {
 
     if (values.files.length !== 0) {
       // file 있는 경우
-      setDialogState({ open: true, requestData });
+      setJobNoteResultDialogState({ open: true, requestData });
       return;
     } else {
       // file 없는 경우
@@ -207,13 +210,13 @@ export default function JobNoteForm({ job }: Props) {
         </form>
       </Form>
       <JobNoteResultDialog
-        state={dialogState}
+        jobNoteResultDialogState={jobNoteResultDialogState}
         onOpenChange={(newOpen) => {
           if (newOpen) {
             return;
           }
 
-          setDialogState({ open: newOpen });
+          setJobNoteResultDialogState({ open: newOpen });
         }}
         onSuccess={handleResultDialogSuccess}
       />
