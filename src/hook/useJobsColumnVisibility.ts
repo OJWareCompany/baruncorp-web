@@ -16,9 +16,12 @@ export default function useJobsColumnVisibility(
   return {
     inReview: isBarunCorpMember || isContractor,
     priority: isBarunCorpMember || isContractor,
-    sendDeliverables:
-      (isBarunCorpMember && type === "Completed") ||
-      type === "Canceled (Invoice)" ||
-      type === "All",
+    sendDeliverables: isBarunCorpMember
+      ? type === "Completed"
+        ? true
+        : type === "Canceled (Invoice)" || type === "All"
+        ? true
+        : false
+      : false,
   };
 }
