@@ -314,11 +314,9 @@ export default function JobsTable() {
           const status = jobStatuses[value];
 
           return (
-            <div className="flex">
-              <div className={`flex items-center`}>
-                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-                <span className="whitespace-nowrap">{status.value}</span>
-              </div>
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
             </div>
           );
         },
