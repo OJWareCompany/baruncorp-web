@@ -172,9 +172,7 @@ export default function JobsTableForMember({ type }: Props) {
     pagination,
     updatePageSize: setPageSize,
   });
-  const columnVisibility = useJobsColumnVisibility(
-    "All" || "Completed" || "Canceled (Invoice)"
-  );
+  const columnVisibility = useJobsColumnVisibility(type);
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({

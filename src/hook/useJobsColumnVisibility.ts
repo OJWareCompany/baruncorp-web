@@ -7,6 +7,12 @@ export default function useJobsColumnVisibility(
 ): VisibilityState {
   const { isBarunCorpMember, isContractor } = useProfileContext();
 
+  if (!type) {
+    return {
+      sendDeliverables: true,
+    };
+  }
+
   return {
     inReview: isBarunCorpMember || isContractor,
     priority: isBarunCorpMember || isContractor,
