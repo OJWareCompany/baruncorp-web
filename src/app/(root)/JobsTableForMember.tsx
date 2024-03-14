@@ -16,13 +16,13 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogTitle,
-} from "@radix-ui/react-alert-dialog";
-import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -172,7 +172,9 @@ export default function JobsTableForMember({ type }: Props) {
     pagination,
     updatePageSize: setPageSize,
   });
-  const columnVisibility = useJobsColumnVisibility();
+  const columnVisibility = useJobsColumnVisibility(
+    "All" || "Completed" || "Canceled (Invoice)"
+  );
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -228,7 +230,6 @@ export default function JobsTableForMember({ type }: Props) {
       setSyncedParams(params);
     }
   }, [isFetching, params]);
-
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("isExpedited", {
@@ -331,20 +332,19 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.display({
-        id: "actions",
+        id: "sendDeliverables",
         cell: ({ row }) => {
           const value = row.original.jobStatus;
           const status = jobStatuses[value];
-
-          row.original.jobStatus;
-
-          return (
-            (status.value === "Completed" ||
-              status.value === "Canceled (Invoice)") && (
+          if (
+            status.value === "Completed" ||
+            status.value === "Canceled (Invoice)"
+          ) {
+            return (
               <Button
                 size={"default"}
                 variant={"outline"}
-                className="ml-5 px-2 font-normal h-8 text-xs"
+                className="-ml-[9px] px-2 font-normal h-8 text-xs"
                 onClick={(event) => {
                   event.stopPropagation();
                   setAlertDialogState({ open: true, jobId: row.id });
@@ -352,8 +352,8 @@ export default function JobsTableForMember({ type }: Props) {
               >
                 <span>Send Deliverables</span>
               </Button>
-            )
-          );
+            );
+          }
         },
       }),
       columnHelper.accessor("assignedTasks", {

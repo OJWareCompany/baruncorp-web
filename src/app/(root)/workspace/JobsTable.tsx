@@ -174,7 +174,7 @@ export default function JobsTable({ type }: Props) {
     pagination,
     updatePageSize: setPageSize,
   });
-  const columnVisibility = useJobsColumnVisibility();
+  const columnVisibility = useJobsColumnVisibility(type);
 
   const params: FindMyJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -318,7 +318,7 @@ export default function JobsTable({ type }: Props) {
             defaultValue={type === "All" ? null : type}
           />
         ),
-        cell: ({ getValue, row }) => {
+        cell: ({ getValue }) => {
           const value = getValue();
           const status = jobStatuses[value];
 
@@ -333,20 +333,19 @@ export default function JobsTable({ type }: Props) {
         },
       }),
       columnHelper.display({
-        id: "actions",
+        id: "sendDeliverables",
         cell: ({ row }) => {
           const value = row.original.jobStatus;
           const status = jobStatuses[value];
-
-          row.original.jobStatus;
-
-          return (
-            (status.value === "Completed" ||
-              status.value === "Canceled (Invoice)") && (
+          if (
+            status.value === "Completed" ||
+            status.value === "Canceled (Invoice)"
+          ) {
+            return (
               <Button
                 size={"default"}
                 variant={"outline"}
-                className="ml-5 px-2 font-normal h-8 text-xs"
+                className="-ml-[9px] px-2 font-normal h-8 text-xs"
                 onClick={(event) => {
                   event.stopPropagation();
                   setAlertDialogState({ open: true, jobId: row.id });
@@ -354,8 +353,8 @@ export default function JobsTable({ type }: Props) {
               >
                 <span>Send Deliverables</span>
               </Button>
-            )
-          );
+            );
+          }
         },
       }),
       columnHelper.accessor("assignedTasks", {
