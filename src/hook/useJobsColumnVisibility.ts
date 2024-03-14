@@ -10,18 +10,30 @@ export default function useJobsColumnVisibility(
   if (!type) {
     return {
       sendDeliverables: true,
+      inReview: isBarunCorpMember || isContractor,
+      priority: isBarunCorpMember || isContractor,
+    };
+  }
+
+  if (type === "Completed") {
+    return {
+      sendDeliverables: isBarunCorpMember ? true : false,
+      inReview: isBarunCorpMember || isContractor,
+      priority: isBarunCorpMember || isContractor,
+    };
+  }
+
+  if (type === "Canceled (Invoice)" || type === "All") {
+    return {
+      sendDeliverables: isBarunCorpMember ? true : false,
+      inReview: isBarunCorpMember || isContractor,
+      priority: isBarunCorpMember || isContractor,
     };
   }
 
   return {
+    sendDeliverables: false,
     inReview: isBarunCorpMember || isContractor,
     priority: isBarunCorpMember || isContractor,
-    sendDeliverables: isBarunCorpMember
-      ? type === "Completed"
-        ? true
-        : type === "Canceled (Invoice)" || type === "All"
-        ? true
-        : false
-      : false,
   };
 }
