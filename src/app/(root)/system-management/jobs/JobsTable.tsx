@@ -90,7 +90,9 @@ export default function JobsTable() {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
   >({ open: false });
+    
   const { isBarunCorpMember } = useProfileContext();
+
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
     isPending: isPatchSendDeliverablesMutationPending,
@@ -310,14 +312,30 @@ export default function JobsTable() {
             }
           />
         ),
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const value = getValue();
           const status = jobStatuses[value];
 
           return (
-            <div className={`flex items-center`}>
-              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-              <span className="whitespace-nowrap">{status.value}</span>
+            <div className="flex">
+              <div className={`flex items-center`}>
+                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+                <span className="whitespace-nowrap">{status.value}</span>
+              </div>
+              {(status.value === "Completed" ||
+                status.value === "Canceled (Invoice)") && (
+                <Button
+                  size={"default"}
+                  variant={"outline"}
+                  className="ml-5 "
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setAlertDialogState({ open: true, jobId: row.id });
+                  }}
+                >
+                  <span>Send Deliverables</span>
+                </Button>
+              )}
             </div>
           );
         },

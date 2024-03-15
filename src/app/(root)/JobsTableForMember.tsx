@@ -25,6 +25,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogTitle,
+} from "@radix-ui/react-alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import {
   Table,
   TableBody,
   TableCell,
@@ -97,7 +104,7 @@ export default function JobsTableForMember({ type }: Props) {
   >({ open: false });
 
   const { isBarunCorpMember } = useProfileContext();
-
+  
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
     isPending: isPatchSendDeliverablesMutationPending,
@@ -318,14 +325,30 @@ export default function JobsTableForMember({ type }: Props) {
             defaultValue={type === "All" ? null : type}
           />
         ),
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const value = getValue();
           const status = jobStatuses[value];
 
           return (
-            <div className={`flex items-center`}>
-              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-              <span className="whitespace-nowrap">{status.value}</span>
+            <div className="flex">
+              <div className={`flex items-center`}>
+                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+                <span className="whitespace-nowrap">{status.value}</span>
+              </div>
+              {(status.value === "Completed" ||
+                status.value === "Canceled (Invoice)") && (
+                <Button
+                  size={"default"}
+                  variant={"outline"}
+                  className="ml-5 "
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setAlertDialogState({ open: true, jobId: row.id });
+                  }}
+                >
+                  <span>Send Deliverables</span>
+                </Button>
+              )}
             </div>
           );
         },
@@ -510,6 +533,7 @@ export default function JobsTableForMember({ type }: Props) {
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
   ]);
+
   let sendDeliverables = false;
 
   if (
