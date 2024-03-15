@@ -504,7 +504,6 @@ export default function JobsTable({ type }: Props) {
       jobNameSearchParamName,
       jobStatusSearchParamName,
       type,
-      isBarunCorpMember,
       propertyTypeSearchParamName,
       mountingTypeSearchParamName,
       projectNumberSearchParamName,
