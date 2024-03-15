@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useProfileContext } from "./ProfileProvider";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -94,6 +95,8 @@ export default function JobsTableForMember({ type }: Props) {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
   >({ open: false });
+
+  const { isBarunCorpMember } = useProfileContext();
 
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
@@ -172,7 +175,7 @@ export default function JobsTableForMember({ type }: Props) {
     pagination,
     updatePageSize: setPageSize,
   });
-  const columnVisibility = useJobsColumnVisibility(type);
+  const columnVisibility = useJobsColumnVisibility();
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -507,6 +510,16 @@ export default function JobsTableForMember({ type }: Props) {
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
   ]);
+  let sendDeliverables = false;
+
+  if (
+    type === "Completed" ||
+    type === "Canceled (Invoice)" ||
+    (type === "All" && isBarunCorpMember)
+  ) {
+    sendDeliverables = true;
+  }
+
   const table = useReactTable({
     data: data?.items ?? [],
     columns,
@@ -517,7 +530,10 @@ export default function JobsTableForMember({ type }: Props) {
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility,
+      columnVisibility: {
+        ...columnVisibility,
+        sendDeliverables,
+      },
     },
   });
 

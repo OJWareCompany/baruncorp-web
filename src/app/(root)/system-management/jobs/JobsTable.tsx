@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useProfileContext } from "../../ProfileProvider";
 import {
   Table,
   TableBody,
@@ -89,7 +90,7 @@ export default function JobsTable() {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
   >({ open: false });
-
+  const { isBarunCorpMember } = useProfileContext();
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
     isPending: isPatchSendDeliverablesMutationPending,
@@ -500,6 +501,14 @@ export default function JobsTable() {
     syncedParams,
   ]);
 
+  let sendDeliverables = false;
+
+  if (
+    (jobStatuses["Completed"] || jobStatuses["Canceled (Invoice)"]) &&
+    isBarunCorpMember
+  ) {
+    sendDeliverables = true;
+  }
   const table = useReactTable({
     data: data?.items ?? [],
     columns,
@@ -510,7 +519,10 @@ export default function JobsTable() {
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility,
+      columnVisibility: {
+        ...columnVisibility,
+        sendDeliverables,
+      },
     },
   });
 

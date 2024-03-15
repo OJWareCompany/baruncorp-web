@@ -174,7 +174,7 @@ export default function JobsTable({ type }: Props) {
     pagination,
     updatePageSize: setPageSize,
   });
-  const columnVisibility = useJobsColumnVisibility(type);
+  const columnVisibility = useJobsColumnVisibility();
 
   const params: FindMyJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -510,6 +510,15 @@ export default function JobsTable({ type }: Props) {
       propertyOwnerSearchParamName,
     ]
   );
+  let sendDeliverables = false;
+
+  if (
+    type === "Completed" ||
+    type === "Canceled (Invoice)" ||
+    (type === "All" && isBarunCorpMember)
+  ) {
+    sendDeliverables = true;
+  }
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -521,7 +530,10 @@ export default function JobsTable({ type }: Props) {
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility,
+      columnVisibility: {
+        ...columnVisibility,
+        sendDeliverables,
+      },
     },
   });
 
