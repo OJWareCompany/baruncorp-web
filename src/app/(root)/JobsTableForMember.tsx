@@ -16,6 +16,14 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useProfileContext } from "./ProfileProvider";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -95,6 +103,8 @@ export default function JobsTableForMember({ type }: Props) {
     { open: false } | { open: true; jobId: string }
   >({ open: false });
 
+  const { isBarunCorpMember } = useProfileContext();
+  
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
     isPending: isPatchSendDeliverablesMutationPending,
@@ -228,7 +238,6 @@ export default function JobsTableForMember({ type }: Props) {
       setSyncedParams(params);
     }
   }, [isFetching, params]);
-
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("isExpedited", {
@@ -342,6 +351,31 @@ export default function JobsTableForMember({ type }: Props) {
               )}
             </div>
           );
+        },
+      }),
+      columnHelper.display({
+        id: "sendDeliverables",
+        cell: ({ row }) => {
+          const value = row.original.jobStatus;
+          const status = jobStatuses[value];
+          if (
+            status.value === "Completed" ||
+            status.value === "Canceled (Invoice)"
+          ) {
+            return (
+              <Button
+                size={"default"}
+                variant={"outline"}
+                className="-ml-[9px] px-2 font-normal h-8 text-xs"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setAlertDialogState({ open: true, jobId: row.id });
+                }}
+              >
+                <span>Send Deliverables</span>
+              </Button>
+            );
+          }
         },
       }),
       columnHelper.accessor("assignedTasks", {
@@ -499,6 +533,16 @@ export default function JobsTableForMember({ type }: Props) {
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
   ]);
+
+  let sendDeliverables = false;
+
+  if (
+    isBarunCorpMember &&
+    (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
+  ) {
+    sendDeliverables = true;
+  }
+
   const table = useReactTable({
     data: data?.items ?? [],
     columns,
@@ -509,7 +553,10 @@ export default function JobsTableForMember({ type }: Props) {
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility,
+      columnVisibility: {
+        ...columnVisibility,
+        sendDeliverables,
+      },
     },
   });
 

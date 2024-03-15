@@ -347,6 +347,31 @@ export default function JobsTable({ type }: Props) {
           );
         },
       }),
+      columnHelper.display({
+        id: "sendDeliverables",
+        cell: ({ row }) => {
+          const value = row.original.jobStatus;
+          const status = jobStatuses[value];
+          if (
+            status.value === "Completed" ||
+            status.value === "Canceled (Invoice)"
+          ) {
+            return (
+              <Button
+                size={"default"}
+                variant={"outline"}
+                className="-ml-[9px] px-2 font-normal h-8 text-xs"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setAlertDialogState({ open: true, jobId: row.id });
+                }}
+              >
+                <span>Send Deliverables</span>
+              </Button>
+            );
+          }
+        },
+      }),
       columnHelper.accessor("assignedTasks", {
         header: "Tasks",
         cell: ({ getValue }) => <TasksBadge tasks={getValue()} />,
@@ -503,6 +528,14 @@ export default function JobsTable({ type }: Props) {
       propertyOwnerSearchParamName,
     ]
   );
+  let sendDeliverables = false;
+
+  if (
+    isBarunCorpMember &&
+    (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
+  ) {
+    sendDeliverables = true;
+  }
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -514,7 +547,10 @@ export default function JobsTable({ type }: Props) {
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility,
+      columnVisibility: {
+        ...columnVisibility,
+        sendDeliverables,
+      },
     },
   });
 

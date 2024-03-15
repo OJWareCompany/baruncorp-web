@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useProfileContext } from "../../ProfileProvider";
 import {
   Table,
   TableBody,
@@ -89,6 +90,8 @@ export default function JobsTable() {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
   >({ open: false });
+    
+  const { isBarunCorpMember } = useProfileContext();
 
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
@@ -335,6 +338,31 @@ export default function JobsTable() {
               )}
             </div>
           );
+        },
+      }),
+      columnHelper.display({
+        id: "sendDeliverables",
+        cell: ({ row }) => {
+          const value = row.original.jobStatus;
+          const status = jobStatuses[value];
+          if (
+            status.value === "Completed" ||
+            status.value === "Canceled (Invoice)"
+          ) {
+            return (
+              <Button
+                size={"default"}
+                variant={"outline"}
+                className="-ml-[9px] px-2 font-normal h-8 text-xs"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setAlertDialogState({ open: true, jobId: row.id });
+                }}
+              >
+                <span>Send Deliverables</span>
+              </Button>
+            );
+          }
         },
       }),
       columnHelper.accessor("assignedTasks", {
