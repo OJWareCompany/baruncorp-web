@@ -501,14 +501,6 @@ export default function JobsTable() {
     syncedParams,
   ]);
 
-  let sendDeliverables = false;
-
-  if (
-    (jobStatuses["Completed"] || jobStatuses["Canceled (Invoice)"]) &&
-    isBarunCorpMember
-  ) {
-    sendDeliverables = true;
-  }
   const table = useReactTable({
     data: data?.items ?? [],
     columns,
@@ -519,10 +511,7 @@ export default function JobsTable() {
     manualPagination: true,
     state: {
       pagination,
-      columnVisibility: {
-        ...columnVisibility,
-        sendDeliverables,
-      },
+      columnVisibility,
     },
   });
 

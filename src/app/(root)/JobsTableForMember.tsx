@@ -513,9 +513,8 @@ export default function JobsTableForMember({ type }: Props) {
   let sendDeliverables = false;
 
   if (
-    type === "Completed" ||
-    type === "Canceled (Invoice)" ||
-    (type === "All" && isBarunCorpMember)
+    isBarunCorpMember &&
+    (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
   ) {
     sendDeliverables = true;
   }
