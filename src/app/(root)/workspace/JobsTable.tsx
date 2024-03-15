@@ -323,26 +323,9 @@ export default function JobsTable({ type }: Props) {
           const status = jobStatuses[value];
 
           return (
-            <div className="flex">
-              <div className={`flex items-center`}>
-                <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-                <span className="whitespace-nowrap">{status.value}</span>
-              </div>
-              {(status.value === "Completed" ||
-                status.value === "Canceled (Invoice)" ||
-                isBarunCorpMember) && (
-                <Button
-                  size={"default"}
-                  variant={"outline"}
-                  className="ml-5 "
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setAlertDialogState({ open: true, jobId: row.id });
-                  }}
-                >
-                  <span>Send Deliverables</span>
-                </Button>
-              )}
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
             </div>
           );
         },
