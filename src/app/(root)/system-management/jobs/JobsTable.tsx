@@ -91,7 +91,9 @@ export default function JobsTable() {
     { open: false } | { open: true; jobId: string }
   >({ open: false });
 
-  const { isBarunCorpMember } = useProfileContext();
+  const {
+    authority: { canSendDeliverables },
+  } = useProfileContext();
 
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
@@ -330,8 +332,9 @@ export default function JobsTable() {
           const value = row.original.jobStatus;
           const status = jobStatuses[value];
           if (
-            status.value === "Completed" ||
-            status.value === "Canceled (Invoice)"
+            canSendDeliverables &&
+            (status.value === "Completed" ||
+              status.value === "Canceled (Invoice)")
           ) {
             return (
               <Button
