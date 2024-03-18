@@ -30,7 +30,10 @@ export default function JobStatus({ job }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const currentStatus = jobStatuses[job.jobStatus];
   const dispatch = useAlertDialogDataDispatch();
-  const { isBarunCorpMember } = useProfileContext();
+  const {
+    isBarunCorpMember,
+    authority: { canSendDeliverables },
+  } = useProfileContext();
 
   if (!isBarunCorpMember) {
     return (
@@ -107,25 +110,26 @@ export default function JobStatus({ job }: Props) {
           </Command>
         </PopoverContent>
       </Popover>
-      {(currentStatus.value === "Completed" ||
-        currentStatus.value === "Canceled (Invoice)") && (
-        <Button
-          size={"default"}
-          variant={"outline"}
-          onClick={() => {
-            dispatch({
-              type: "UPDATE_JOB_STATUS",
-              jobId: job.id,
-              projectId: job.projectId,
-              status: "Sent To Client",
-            });
-          }}
-          className="shrink-0"
-        >
-          <Mail className="mr-2 h-4 w-4" />
-          <span>Send Deliverables</span>
-        </Button>
-      )}
+      {canSendDeliverables &&
+        (currentStatus.value === "Completed" ||
+          currentStatus.value === "Canceled (Invoice)") && (
+          <Button
+            size={"default"}
+            variant={"outline"}
+            onClick={() => {
+              dispatch({
+                type: "UPDATE_JOB_STATUS",
+                jobId: job.id,
+                projectId: job.projectId,
+                status: "Sent To Client",
+              });
+            }}
+            className="shrink-0"
+          >
+            <Mail className="mr-2 h-4 w-4" />
+            <span>Send Deliverables</span>
+          </Button>
+        )}
     </div>
   );
 }

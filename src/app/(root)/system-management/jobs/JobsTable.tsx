@@ -504,6 +504,7 @@ export default function JobsTable() {
     propertyOwnerSearchParamName,
     propertyTypeSearchParamName,
     syncedParams,
+    canSendDeliverables,
   ]);
 
   const table = useReactTable({
