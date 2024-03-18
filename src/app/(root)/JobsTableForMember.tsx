@@ -96,7 +96,10 @@ export default function JobsTableForMember({ type }: Props) {
     { open: false } | { open: true; jobId: string }
   >({ open: false });
 
-  const { isBarunCorpMember } = useProfileContext();
+  const {
+    isBarunCorpMember,
+    authority: { canSendDeliverables },
+  } = useProfileContext();
 
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
@@ -336,8 +339,9 @@ export default function JobsTableForMember({ type }: Props) {
           const value = row.original.jobStatus;
           const status = jobStatuses[value];
           if (
-            status.value === "Completed" ||
-            status.value === "Canceled (Invoice)"
+            canSendDeliverables &&
+            (status.value === "Completed" ||
+              status.value === "Canceled (Invoice)")
           ) {
             return (
               <Button
@@ -515,6 +519,7 @@ export default function JobsTableForMember({ type }: Props) {
 
   if (
     isBarunCorpMember &&
+    canSendDeliverables &&
     (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
   ) {
     sendDeliverables = true;
