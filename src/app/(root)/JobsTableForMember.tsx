@@ -513,6 +513,7 @@ export default function JobsTableForMember({ type }: Props) {
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
+    canSendDeliverables,
   ]);
 
   let sendDeliverables = false;
