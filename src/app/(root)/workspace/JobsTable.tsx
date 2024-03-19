@@ -337,6 +337,7 @@ export default function JobsTable({ type }: Props) {
         id: "sendDeliverables",
         cell: ({ row }) => {
           const value = row.original.jobStatus;
+          const dateSentToClient = row.original.dateSentToClient;
           const status = jobStatuses[value];
           if (
             canSendDeliverables &&
@@ -347,13 +348,21 @@ export default function JobsTable({ type }: Props) {
               <Button
                 size={"default"}
                 variant={"outline"}
-                className="-ml-[9px] px-2 font-normal h-8 text-xs"
+                className={`-ml-[9px] px-2 font-normal h-8 text-xs ${
+                  dateSentToClient !== null
+                    ? "bg-gray-200 text-gray-600"
+                    : "px-4"
+                }`}
                 onClick={(event) => {
                   event.stopPropagation();
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
               >
-                <span>Send Deliverables</span>
+                {dateSentToClient !== null ? (
+                  <span>Resend Deliverables</span>
+                ) : (
+                  <span>Send Deliverables</span>
+                )}
               </Button>
             );
           }

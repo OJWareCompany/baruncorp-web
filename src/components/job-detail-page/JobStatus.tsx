@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useState } from "react";
-import { Check, ChevronsUpDown, Mail } from "lucide-react";
+import { Check, ChevronsUpDown, Mail, Send } from "lucide-react";
 import { useAlertDialogDataDispatch } from "./AlertDialogDataProvider";
 import { JobResponseDto } from "@/api/api-spec";
 import {
@@ -30,6 +30,7 @@ export default function JobStatus({ job }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const currentStatus = jobStatuses[job.jobStatus];
   const dispatch = useAlertDialogDataDispatch();
+  const againSendDeliverables = job.dateSentToClient;
   const {
     isBarunCorpMember,
     authority: { canSendDeliverables },
@@ -126,8 +127,17 @@ export default function JobStatus({ job }: Props) {
             }}
             className="shrink-0"
           >
-            <Mail className="mr-2 h-4 w-4" />
-            <span>Send Deliverables</span>
+            {againSendDeliverables !== null ? (
+              <>
+                <Send className="mr-2 h-4 w-4" />
+                <span>Resend Deliverables</span>
+              </>
+            ) : (
+              <>
+                <Mail className="mr-2 h-4 w-4" />
+                <span>Send Deliverables</span>
+              </>
+            )}
           </Button>
         )}
     </div>
