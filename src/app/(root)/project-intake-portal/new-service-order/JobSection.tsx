@@ -300,6 +300,7 @@ function JobSectionWithData({
       files: [],
     },
   });
+  const { formState } = useForm();
 
   const {
     fields: emailAddressesToReceiveDeliverablesFields,
@@ -342,6 +343,22 @@ function JobSectionWithData({
       ),
     [services.items]
   );
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (form.formState.isDirty) {
+        e.preventDefault();
+        e.returnValue = window.alert(
+          "There is changed data, are you sure you want to leave the page?"
+        );
+      }
+    };
+
+    window.onbeforeunload = handleBeforeUnload;
+    return () => {
+      window.onbeforeunload = null;
+    };
+  }, [form.formState.isDirty]);
 
   useEffect(() => {
     if (user) {
