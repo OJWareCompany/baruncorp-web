@@ -19,6 +19,7 @@ import {
 import { TaskPaginatedResponseFields } from "@/api/api-spec";
 import useTasksQuery from "@/queries/useTasksQuery";
 import { Badge } from "@/components/ui/badge";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper = createColumnHelper<TaskPaginatedResponseFields>();
 
@@ -111,8 +112,9 @@ export default function TasksTable() {
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <NewTabTableRow
                 key={row.id}
+                href={`/system-management/tasks/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
                   router.push(`/system-management/tasks/${row.id}`);
@@ -124,7 +126,7 @@ export default function TasksTable() {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-              </TableRow>
+              </NewTabTableRow>
             ))
           )}
         </TableBody>

@@ -69,6 +69,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import usePostInvitationsMutation from "@/mutations/usePostInvitationsMutation";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -378,8 +379,9 @@ export default function UsersTable() {
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
+                  <NewTabTableRow
                     key={row.id}
+                    href={`/system-management/users/${row.id}`}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
                       router.push(`/system-management/users/${row.id}`);
@@ -394,7 +396,7 @@ export default function UsersTable() {
                         )}
                       </TableCell>
                     ))}
-                  </TableRow>
+                  </NewTabTableRow>
                 ))
               )}
             </TableBody>

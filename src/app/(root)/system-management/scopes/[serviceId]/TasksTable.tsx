@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ServiceResponseDto } from "@/api/api-spec";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<ServiceResponseDto["relatedTasks"][number]>();
@@ -68,8 +69,9 @@ export default function TasksTable({ service }: Props) {
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <NewTabTableRow
                 key={row.id}
+                href={`/system-management/tasks/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
                   router.push(`/system-management/tasks/${row.id}`);
@@ -81,7 +83,7 @@ export default function TasksTable({ service }: Props) {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-              </TableRow>
+              </NewTabTableRow>
             ))
           )}
         </TableBody>

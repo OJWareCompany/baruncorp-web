@@ -33,6 +33,7 @@ import { getTaskQueryKey } from "@/queries/useTaskQuery";
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<TaskResponseDto["prerequisiteTask"][number]>();
@@ -132,8 +133,9 @@ export default function PrerequisiteTasksTable({ task }: Props) {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/tasks/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/tasks/${row.id}`);
@@ -148,7 +150,7 @@ export default function PrerequisiteTasksTable({ task }: Props) {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

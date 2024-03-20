@@ -42,6 +42,7 @@ import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { formatInEST } from "@/lib/utils";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<VendorInvoicePaginatedResponseDto["items"][number]>();
@@ -233,8 +234,9 @@ export default function VendorInvoicesTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/vendor-invoices/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/vendor-invoices/${row.id}`);
@@ -249,7 +251,7 @@ export default function VendorInvoicesTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

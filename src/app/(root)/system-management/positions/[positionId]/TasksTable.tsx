@@ -42,6 +42,7 @@ import usePatchPositionTaskMutation from "@/mutations/usePatchPositionTaskMutati
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper = createColumnHelper<PositionResponseDto["tasks"][number]>();
 
@@ -209,8 +210,9 @@ export default function TasksTable({ position }: Props) {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/tasks/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/tasks/${row.id}`);
@@ -225,7 +227,7 @@ export default function TasksTable({ position }: Props) {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

@@ -74,6 +74,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -570,8 +571,9 @@ export default function JobsTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/jobs/${row.id}`);
@@ -586,7 +588,7 @@ export default function JobsTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

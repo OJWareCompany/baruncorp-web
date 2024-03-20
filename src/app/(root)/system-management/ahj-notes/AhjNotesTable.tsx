@@ -40,6 +40,7 @@ import { formatInEST } from "@/lib/utils";
 import useAhjNotesQuery from "@/queries/useAhjNotesQuery";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<AhjNotePaginatedResponseDto["items"][number]>();
@@ -213,8 +214,9 @@ export default function AhjNotesTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/ahj-notes/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/ahj-notes/${row.id}`);
@@ -229,7 +231,7 @@ export default function AhjNotesTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>
