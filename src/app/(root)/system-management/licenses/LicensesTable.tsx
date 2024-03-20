@@ -39,6 +39,7 @@ import { Button } from "@/components/ui/button";
 import useLicensesQuery from "@/queries/useLicensesQuery";
 import { LicenseTypeEnum } from "@/lib/constants";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<LicensePaginatedResponseDto["items"][number]>();
@@ -155,8 +156,9 @@ export default function LicensesTable({ type }: Props) {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/licenses/${type}/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(
@@ -173,7 +175,7 @@ export default function LicensesTable({ type }: Props) {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import NewTabTableRow from "../table/NewTabTableRow";
 import {
   Table,
   TableBody,
@@ -159,8 +160,9 @@ export default function LicensesTable({
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
+                  <NewTabTableRow
                     key={row.id}
+                    href={`/system-management/licenses/${row.original.type}/${row.original.abbreviation}`}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
                       if (isBarunCorpMember) {
@@ -179,7 +181,7 @@ export default function LicensesTable({
                         )}
                       </TableCell>
                     ))}
-                  </TableRow>
+                  </NewTabTableRow>
                 ))
               )}
             </TableBody>

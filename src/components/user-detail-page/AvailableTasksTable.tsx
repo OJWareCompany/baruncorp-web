@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import NewTabTableRow from "../table/NewTabTableRow";
 import {
   Table,
   TableBody,
@@ -227,8 +228,9 @@ export default function AvailableTasksTable({
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
+                  <NewTabTableRow
                     key={row.id}
+                    href={`/system-management/tasks/${row.id}`}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
                       if (isBarunCorpMember) {
@@ -245,7 +247,7 @@ export default function AvailableTasksTable({
                         )}
                       </TableCell>
                     ))}
-                  </TableRow>
+                  </NewTabTableRow>
                 ))
               )}
             </TableBody>

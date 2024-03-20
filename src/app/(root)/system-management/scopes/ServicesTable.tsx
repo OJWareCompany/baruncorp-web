@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { ServiceResponseDto } from "@/api/api-spec";
 import useServicesQuery from "@/queries/useServicesQuery";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper = createColumnHelper<ServiceResponseDto>();
 
@@ -79,8 +80,9 @@ export default function ServicesTable() {
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <NewTabTableRow
                 key={row.id}
+                href={`/system-management/scopes/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
                   router.push(`/system-management/scopes/${row.id}`);
@@ -92,7 +94,7 @@ export default function ServicesTable() {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-              </TableRow>
+              </NewTabTableRow>
             ))
           )}
         </TableBody>

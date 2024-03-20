@@ -60,6 +60,7 @@ import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalIn
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -508,7 +509,8 @@ export default function JobsTableForClient({ type }: Props) {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
+                  href={`/jobs/${row.id}`}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
@@ -524,7 +526,7 @@ export default function JobsTableForClient({ type }: Props) {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

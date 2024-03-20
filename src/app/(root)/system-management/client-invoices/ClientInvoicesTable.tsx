@@ -48,6 +48,7 @@ import EnumHeader from "@/components/table/EnumHeader";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -269,8 +270,9 @@ export default function ClientInvoicesTable({ type }: Props) {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/client-invoices/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/client-invoices/${row.id}`);
@@ -285,7 +287,7 @@ export default function ClientInvoicesTable({ type }: Props) {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

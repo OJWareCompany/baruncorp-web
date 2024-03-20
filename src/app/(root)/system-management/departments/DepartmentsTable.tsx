@@ -39,6 +39,7 @@ import {
 import useDepartmentsQuery from "@/queries/useDepartmentsQuery";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<DepartmentPaginatedResponseDto["items"][number]>();
@@ -165,8 +166,9 @@ export default function DepartmentsTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/departments/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/departments/${row.id}`);
@@ -181,7 +183,7 @@ export default function DepartmentsTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

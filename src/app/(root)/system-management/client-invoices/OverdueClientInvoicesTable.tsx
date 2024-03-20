@@ -42,6 +42,7 @@ import { invoiceStatuses } from "@/lib/constants";
 import useOverdueClientInvoicesQuery from "@/queries/useOverdueClientInvoicesQuery";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -222,8 +223,9 @@ export default function OverdueClientInvoicesTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/client-invoices/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/client-invoices/${row.id}`);
@@ -238,7 +240,7 @@ export default function OverdueClientInvoicesTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

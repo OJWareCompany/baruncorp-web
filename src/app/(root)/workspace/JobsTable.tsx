@@ -74,6 +74,7 @@ import {
 import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -591,13 +592,13 @@ export default function JobsTable({ type }: Props) {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/workspace/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/workspace/jobs/${row.id}`);
                   }}
-                  className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -607,7 +608,7 @@ export default function JobsTable({ type }: Props) {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

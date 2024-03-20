@@ -21,6 +21,7 @@ import {
   OrganizationResponseDto,
 } from "@/api/api-spec";
 import useCustomPricingsQuery from "@/queries/useCustomPricingsQuery";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<CustomPricingPaginatedResponseDto["items"][number]>();
@@ -86,8 +87,9 @@ export default function CustomPricingsTable({ organization }: Props) {
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <NewTabTableRow
                 key={row.id}
+                href={`/system-management/organizations/${organization.id}/custom-pricings/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
                   router.push(
@@ -101,7 +103,7 @@ export default function CustomPricingsTable({ organization }: Props) {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-              </TableRow>
+              </NewTabTableRow>
             ))
           )}
         </TableBody>

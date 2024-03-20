@@ -46,6 +46,7 @@ import {
   abbreviationStateNameMap,
   stateNameAbbreviationMap,
 } from "@/lib/constants";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<UtilityPaginatedResponseDto["items"][number]>();
@@ -199,8 +200,9 @@ export default function UtilitiesTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/utilities/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/utilities/${row.id}`);
@@ -215,7 +217,7 @@ export default function UtilitiesTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>
