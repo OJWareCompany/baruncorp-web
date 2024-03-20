@@ -66,6 +66,7 @@ import LoadingButton from "@/components/LoadingButton";
 import usePostDepartmentRemoveUserMutation from "@/mutations/usePostDepartmentRemoveUserMutation";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -341,8 +342,9 @@ export default function UsersTable({ department }: Props) {
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
+                  <NewTabTableRow
                     key={row.id}
+                    href={`/system-management/users/${row.id}`}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => {
                       router.push(`/system-management/users/${row.id}`);
@@ -357,7 +359,7 @@ export default function UsersTable({ department }: Props) {
                         )}
                       </TableCell>
                     ))}
-                  </TableRow>
+                  </NewTabTableRow>
                 ))
               )}
             </TableBody>

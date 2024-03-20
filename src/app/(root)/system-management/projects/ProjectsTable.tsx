@@ -45,6 +45,7 @@ import {
 import useProjectsQuery from "@/queries/useProjectsQuery";
 import EnumHeader from "@/components/table/EnumHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<ProjectPaginatedResponseDto["items"][number]>();
@@ -288,8 +289,9 @@ export default function ProjectsTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/projects/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/projects/${row.id}`);
@@ -304,7 +306,7 @@ export default function ProjectsTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

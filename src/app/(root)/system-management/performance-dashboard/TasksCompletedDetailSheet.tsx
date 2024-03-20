@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import useAssignedTasksSummaryDetailsQuery from "@/queries/useAssignedTasksSummaryDetailsQuery";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<
@@ -169,15 +170,15 @@ export default function TasksCompletedDetailSheet({
                   </TableRow>
                 ) : (
                   table.getRowModel().rows.map((row) => (
-                    <TableRow
+                    <NewTabTableRow
                       key={row.id}
+                      href={`/system-management/jobs/${row.original.jobId}`}
                       data-state={row.getIsSelected() && "selected"}
                       onClick={() => {
                         router.push(
                           `/system-management/jobs/${row.original.jobId}`
                         );
                       }}
-                      className="cursor-pointer"
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
@@ -187,7 +188,7 @@ export default function TasksCompletedDetailSheet({
                           )}
                         </TableCell>
                       ))}
-                    </TableRow>
+                    </NewTabTableRow>
                   ))
                 )}
               </TableBody>

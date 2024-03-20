@@ -45,6 +45,7 @@ import {
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<OrganizationPaginatedResponseDto["items"][number]>();
@@ -291,8 +292,9 @@ export default function OrganizationsTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow
+                <NewTabTableRow
                   key={row.id}
+                  href={`/system-management/organizations/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   onClick={() => {
                     router.push(`/system-management/organizations/${row.id}`);
@@ -307,7 +309,7 @@ export default function OrganizationsTable() {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
+                </NewTabTableRow>
               ))
             )}
           </TableBody>

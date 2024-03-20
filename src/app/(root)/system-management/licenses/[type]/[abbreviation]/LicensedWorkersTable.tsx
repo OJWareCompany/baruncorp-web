@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { formatInEST } from "@/lib/utils";
 import { LicenseResponseDto } from "@/api/api-spec";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<LicenseResponseDto["workers"][number]>();
@@ -83,8 +84,9 @@ export default function LicensesTable({ license }: Props) {
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <NewTabTableRow
                 key={row.id}
+                href={`/system-management/users/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
                   router.push(`/system-management/users/${row.id}`);
@@ -96,7 +98,7 @@ export default function LicensesTable({ license }: Props) {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-              </TableRow>
+              </NewTabTableRow>
             ))
           )}
         </TableBody>

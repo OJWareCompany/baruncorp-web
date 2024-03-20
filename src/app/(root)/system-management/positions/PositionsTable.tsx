@@ -19,6 +19,7 @@ import {
 import { PositionPaginatedResponseDto } from "@/api/api-spec";
 import usePositionsQuery from "@/queries/usePositionsQuery";
 import { Badge } from "@/components/ui/badge";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
 
 const columnHelper =
   createColumnHelper<PositionPaginatedResponseDto["items"][number]>();
@@ -95,8 +96,9 @@ export default function PositionsTable() {
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <NewTabTableRow
                 key={row.id}
+                href={`/system-management/positions/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
                   router.push(`/system-management/positions/${row.id}`);
@@ -108,7 +110,7 @@ export default function PositionsTable() {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-              </TableRow>
+              </NewTabTableRow>
             ))
           )}
         </TableBody>

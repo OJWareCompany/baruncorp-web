@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { Badge } from "../ui/badge";
+import NewTabTableRow from "../table/NewTabTableRow";
 import {
   Table,
   TableBody,
@@ -180,8 +181,9 @@ export default function JobsRelatedToProjectTable({
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <NewTabTableRow
                 key={row.id}
+                href={getJobDetailUrl({ pageType, jobId: row.id })}
                 data-state={row.getIsSelected() && "selected"}
                 onClick={() => {
                   router.push(getJobDetailUrl({ pageType, jobId: row.id }));
@@ -193,7 +195,7 @@ export default function JobsRelatedToProjectTable({
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-              </TableRow>
+              </NewTabTableRow>
             ))
           )}
         </TableBody>
