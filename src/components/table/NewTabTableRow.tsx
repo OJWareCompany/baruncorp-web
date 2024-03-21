@@ -21,7 +21,7 @@ const NewTabTableRow: React.FC<NewTabTableRowProps> = ({
   return (
     <Link
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted table-row cursor-pointer",
+        "border-b last:border-0 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted table-row cursor-pointer",
         className
       )}
       href={href}
