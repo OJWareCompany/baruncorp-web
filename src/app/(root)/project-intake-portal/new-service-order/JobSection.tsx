@@ -344,19 +344,6 @@ function JobSectionWithData({
   );
 
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (form.formState.isDirty || window.onbeforeunload) {
-        e.preventDefault();
-      }
-    };
-
-    window.onbeforeunload = handleBeforeUnload;
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [form.formState.isDirty]);
-
-  useEffect(() => {
     if (user) {
       form.setValue(
         "clientUser.emailAddressesToReceiveDeliverables",
