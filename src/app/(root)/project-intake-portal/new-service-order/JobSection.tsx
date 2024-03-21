@@ -300,7 +300,6 @@ function JobSectionWithData({
       files: [],
     },
   });
-  const { formState } = useForm();
 
   const {
     fields: emailAddressesToReceiveDeliverablesFields,
@@ -346,11 +345,8 @@ function JobSectionWithData({
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (form.formState.isDirty) {
+      if (form.formState.isDirty || window.onbeforeunload) {
         e.preventDefault();
-        e.returnValue = window.alert(
-          "There is changed data, are you sure you want to leave the page?"
-        );
       }
     };
 
