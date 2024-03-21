@@ -348,7 +348,7 @@ export default function JobsTable() {
                     : "px-4"
                 }`}
                 onClick={(event) => {
-                  event.stopPropagation();
+                  event.preventDefault();
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
               >
@@ -575,9 +575,6 @@ export default function JobsTable() {
                   key={row.id}
                   href={`/system-management/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/jobs/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

@@ -91,11 +91,6 @@ export default function ExpensePricingsTable({ organization }: Props) {
                 key={row.id}
                 href={`/system-management/organizations/${organization.id}/expense-pricings/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => {
-                  router.push(
-                    `/system-management/organizations/${organization.id}/expense-pricings/${row.id}`
-                  );
-                }}
                 className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (

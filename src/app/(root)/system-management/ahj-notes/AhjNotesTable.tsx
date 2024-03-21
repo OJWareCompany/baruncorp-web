@@ -218,9 +218,6 @@ export default function AhjNotesTable() {
                   key={row.id}
                   href={`/system-management/ahj-notes/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/ahj-notes/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

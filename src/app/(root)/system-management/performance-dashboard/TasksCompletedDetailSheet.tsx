@@ -174,11 +174,6 @@ export default function TasksCompletedDetailSheet({
                       key={row.id}
                       href={`/system-management/jobs/${row.original.jobId}`}
                       data-state={row.getIsSelected() && "selected"}
-                      onClick={() => {
-                        router.push(
-                          `/system-management/jobs/${row.original.jobId}`
-                        );
-                      }}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>

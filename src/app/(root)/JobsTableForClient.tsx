@@ -513,9 +513,6 @@ export default function JobsTableForClient({ type }: Props) {
                   href={`/jobs/${row.id}`}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/jobs/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

@@ -160,11 +160,6 @@ export default function LicensesTable({ type }: Props) {
                   key={row.id}
                   href={`/system-management/licenses/${type}/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(
-                      `/system-management/licenses/${type}/${row.id}`
-                    );
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

@@ -355,7 +355,7 @@ export default function JobsTableForMember({ type }: Props) {
                     : "px-4"
                 }`}
                 onClick={(event) => {
-                  event.stopPropagation();
+                  event.preventDefault();
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
               >
@@ -599,9 +599,6 @@ export default function JobsTableForMember({ type }: Props) {
                   key={row.id}
                   href={`/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/jobs/${row.id}`);
-                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

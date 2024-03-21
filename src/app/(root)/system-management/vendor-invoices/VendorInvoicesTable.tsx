@@ -238,9 +238,6 @@ export default function VendorInvoicesTable() {
                   key={row.id}
                   href={`/system-management/vendor-invoices/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/vendor-invoices/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

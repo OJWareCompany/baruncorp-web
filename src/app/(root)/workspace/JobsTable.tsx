@@ -355,7 +355,7 @@ export default function JobsTable({ type }: Props) {
                     : "px-4"
                 }`}
                 onClick={(event) => {
-                  event.stopPropagation();
+                  event.preventDefault();
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
               >
@@ -596,9 +596,6 @@ export default function JobsTable({ type }: Props) {
                   key={row.id}
                   href={`/workspace/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/workspace/jobs/${row.id}`);
-                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
