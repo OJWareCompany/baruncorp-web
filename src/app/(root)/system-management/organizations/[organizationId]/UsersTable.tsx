@@ -405,7 +405,7 @@ export default function UsersTable({ organization }: Props) {
                     key={row.id}
                     href={`/system-management/users/${row.id}`}
                     data-state={row.getIsSelected() && "selected"}
-                    wwclassName="cursor-pointer"
+                    className="cursor-pointer"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
