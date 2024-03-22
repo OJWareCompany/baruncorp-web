@@ -60,7 +60,7 @@ export default function ProjectSection() {
             (isProjectQueryLoading || project == null ? (
               <PageLoading isPageHeaderPlaceholder={false} />
             ) : (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <ItemsContainer>
                   <Item>
                     <Label>Property Address</Label>
@@ -98,7 +98,7 @@ export default function ProjectSection() {
                     )}
                   </Item>
                 </ItemsContainer>
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <Minimap
                     longitude={project.propertyAddress.coordinates[0]}
                     latitude={project.propertyAddress.coordinates[1]}

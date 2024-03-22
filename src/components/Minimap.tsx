@@ -29,7 +29,11 @@ export default function Minimap({ longitude, latitude }: Props) {
       mapboxAccessToken={process.env.NEXT_PUBLIC_MAP_API_KEY}
       {...viewState}
       onMove={(event) => setViewState(event.viewState)}
-      style={{ width: "100%", height: "100%", borderRadius: "6px" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        borderRadius: "6px",
+      }}
       mapStyle="mapbox://styles/mapbox/satellite-v9"
       key={String(isExpanded)} // expand toggle state가 바뀜에 따라 map을 재렌더링
     >
