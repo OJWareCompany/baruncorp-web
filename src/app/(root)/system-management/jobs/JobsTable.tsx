@@ -75,6 +75,7 @@ import {
 import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import NameSearch from "@/components/table/NameSearch";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -533,6 +534,14 @@ export default function JobsTable() {
 
   return (
     <div className="space-y-2">
+      <NameSearch
+        buttonText="Name Search"
+        searchParamName={jobNameSearchParamName}
+        pageIndexSearchParamName={pageIndexSearchParamName}
+        isLoading={
+          syncedParams != null && params.jobName !== syncedParams.jobName
+        }
+      />
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
