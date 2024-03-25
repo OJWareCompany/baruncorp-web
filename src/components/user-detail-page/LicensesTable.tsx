@@ -162,15 +162,12 @@ export default function LicensesTable({
                 table.getRowModel().rows.map((row) => (
                   <NewTabTableRow
                     key={row.id}
-                    href={`/system-management/licenses/${row.original.type}/${row.original.abbreviation}`}
+                    href={
+                      isBarunCorpMember
+                        ? `/system-management/licenses/${row.original.type}/${row.original.abbreviation}`
+                        : ""
+                    }
                     data-state={row.getIsSelected() && "selected"}
-                    onClick={() => {
-                      if (isBarunCorpMember) {
-                        router.push(
-                          `/system-management/licenses/${row.original.type}/${row.original.abbreviation}`
-                        );
-                      }
-                    }}
                     className={cn(isBarunCorpMember && "cursor-pointer")}
                   >
                     {row.getVisibleCells().map((cell) => (

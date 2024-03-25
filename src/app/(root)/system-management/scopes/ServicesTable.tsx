@@ -84,9 +84,6 @@ export default function ServicesTable() {
                 key={row.id}
                 href={`/system-management/scopes/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => {
-                  router.push(`/system-management/scopes/${row.id}`);
-                }}
                 className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (

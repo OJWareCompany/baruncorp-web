@@ -100,9 +100,6 @@ export default function PositionsTable() {
                 key={row.id}
                 href={`/system-management/positions/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => {
-                  router.push(`/system-management/positions/${row.id}`);
-                }}
                 className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (

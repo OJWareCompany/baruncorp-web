@@ -75,6 +75,7 @@ import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import NameSearch from "@/components/table/NameSearch";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -355,7 +356,7 @@ export default function JobsTable({ type }: Props) {
                     : "px-4"
                 }`}
                 onClick={(event) => {
-                  event.stopPropagation();
+                  event.preventDefault();
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
               >
@@ -554,6 +555,14 @@ export default function JobsTable({ type }: Props) {
 
   return (
     <div className="space-y-2">
+      <NameSearch
+        buttonText="Name Search"
+        searchParamName={jobNameSearchParamName}
+        pageIndexSearchParamName={pageIndexSearchParamName}
+        isLoading={
+          syncedParams != null && params.jobName !== syncedParams.jobName
+        }
+      />
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
@@ -596,9 +605,6 @@ export default function JobsTable({ type }: Props) {
                   key={row.id}
                   href={`/workspace/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/workspace/jobs/${row.id}`);
-                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

@@ -274,9 +274,6 @@ export default function ClientInvoicesTable({ type }: Props) {
                   key={row.id}
                   href={`/system-management/client-invoices/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/client-invoices/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

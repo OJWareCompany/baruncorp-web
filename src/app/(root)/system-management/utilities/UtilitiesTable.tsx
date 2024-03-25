@@ -204,9 +204,6 @@ export default function UtilitiesTable() {
                   key={row.id}
                   href={`/system-management/utilities/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/utilities/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

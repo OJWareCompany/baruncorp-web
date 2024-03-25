@@ -293,9 +293,6 @@ export default function ProjectsTable() {
                   key={row.id}
                   href={`/system-management/projects/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/projects/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

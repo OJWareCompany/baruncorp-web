@@ -214,9 +214,6 @@ export default function TasksTable({ position }: Props) {
                   key={row.id}
                   href={`/system-management/tasks/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/tasks/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

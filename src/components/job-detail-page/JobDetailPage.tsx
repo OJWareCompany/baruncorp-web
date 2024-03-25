@@ -212,7 +212,7 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
             </CollapsibleSection>
           )}
           {isWorker && (
-            <CollapsibleSection title="History">
+            <CollapsibleSection title="History" isInitiallyCollapsed={true}>
               <HistoryTable job={job} />
             </CollapsibleSection>
           )}

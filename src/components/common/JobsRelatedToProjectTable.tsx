@@ -185,9 +185,6 @@ export default function JobsRelatedToProjectTable({
                 key={row.id}
                 href={getJobDetailUrl({ pageType, jobId: row.id })}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => {
-                  router.push(getJobDetailUrl({ pageType, jobId: row.id }));
-                }}
                 className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (

@@ -170,9 +170,6 @@ export default function DepartmentsTable() {
                   key={row.id}
                   href={`/system-management/departments/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/departments/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

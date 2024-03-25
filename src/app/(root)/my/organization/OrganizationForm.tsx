@@ -28,7 +28,7 @@ export default function OrganizationForm({ organization }: Props) {
           <Input value={organization.phoneNumber ?? "-"} disabled />
         </Item>
       </RowItemsContainer>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col gap-2">
           <Item>
             <Label>Address</Label>
@@ -64,7 +64,7 @@ export default function OrganizationForm({ organization }: Props) {
             />
           </Item>
         </div>
-        <div className="col-span-2">
+        <div className="col-span-1">
           <Minimap
             longitude={organization.address.coordinates[0]}
             latitude={organization.address.coordinates[1]}

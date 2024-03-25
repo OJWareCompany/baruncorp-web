@@ -91,11 +91,6 @@ export default function CustomPricingsTable({ organization }: Props) {
                 key={row.id}
                 href={`/system-management/organizations/${organization.id}/custom-pricings/${row.id}`}
                 data-state={row.getIsSelected() && "selected"}
-                onClick={() => {
-                  router.push(
-                    `/system-management/organizations/${organization.id}/custom-pricings/${row.id}`
-                  );
-                }}
                 className="cursor-pointer"
               >
                 {row.getVisibleCells().map((cell) => (

@@ -7,11 +7,16 @@ interface Props {
   title: string;
   children: ReactNode;
   action?: ReactNode;
+  isInitiallyCollapsed?: boolean;
 }
 
-export default function CollapsibleSection({ title, children, action }: Props) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
+export default function CollapsibleSection({
+  title,
+  children,
+  action,
+  isInitiallyCollapsed,
+}: Props) {
+  const [isCollapsed, setIsCollapsed] = useState(isInitiallyCollapsed);
   return (
     <section className="space-y-2">
       <div className="flex items-center justify-between">

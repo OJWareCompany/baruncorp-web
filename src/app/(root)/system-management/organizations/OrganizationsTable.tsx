@@ -296,9 +296,6 @@ export default function OrganizationsTable() {
                   key={row.id}
                   href={`/system-management/organizations/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => {
-                    router.push(`/system-management/organizations/${row.id}`);
-                  }}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (

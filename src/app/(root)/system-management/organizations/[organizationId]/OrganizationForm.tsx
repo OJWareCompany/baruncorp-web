@@ -314,7 +314,7 @@ export default function OrganizationForm({ organization }: Props) {
           name="address"
           render={({ field }) => (
             <div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col gap-2">
                   <FormItem>
                     <FormLabel required>Address</FormLabel>
@@ -369,7 +369,7 @@ export default function OrganizationForm({ organization }: Props) {
                     />
                   </FormItem>
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-1">
                   <Minimap
                     longitude={field.value.coordinates[0]}
                     latitude={field.value.coordinates[1]}

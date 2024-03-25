@@ -230,13 +230,12 @@ export default function AvailableTasksTable({
                 table.getRowModel().rows.map((row) => (
                   <NewTabTableRow
                     key={row.id}
-                    href={`/system-management/tasks/${row.id}`}
+                    href={
+                      isBarunCorpMember
+                        ? `/system-management/tasks/${row.id}`
+                        : ""
+                    }
                     data-state={row.getIsSelected() && "selected"}
-                    onClick={() => {
-                      if (isBarunCorpMember) {
-                        router.push(`/system-management/tasks/${row.id}`);
-                      }
-                    }}
                     className={cn(isBarunCorpMember && "cursor-pointer")}
                   >
                     {row.getVisibleCells().map((cell) => (
