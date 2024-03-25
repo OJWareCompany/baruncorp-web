@@ -1,22 +1,14 @@
-import { useState } from "react";
+import React, { useState, KeyboardEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  Command,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
+import { XIcon } from "lucide-react";
+import { Command, CommandInput, CommandItem } from "@/components/ui/command";
 
 interface Props {
-  buttonText: string;
-  isLoading: boolean | undefined;
   searchParamName: string;
   pageIndexSearchParamName: string;
 }
 
 export default function NameSearch({
-  buttonText,
-  isLoading = false,
   searchParamName,
   pageIndexSearchParamName,
 }: Props) {
@@ -27,55 +19,41 @@ export default function NameSearch({
     searchParams.get(encodeURIComponent(searchParamName)) ?? "";
   const [value, setValue] = useState(searchParam);
 
-  const isFiltered = searchParam !== "";
+  const handleEnterKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.set(encodeURIComponent(searchParamName), value);
+      newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+      router.push(`${pathname}?${newSearchParams.toString()}`, {
+        scroll: false,
+      });
+    }
+  };
 
   return (
     <Command shouldFilter={false} className="grid grid-cols-2 pb-2">
       <CommandInput
         value={value}
         onValueChange={setValue}
-        className="border col-span-1 text-indent-6 pl-6 -ml-8"
+        className="border col-span-1 pl-7 -ml-8"
+        onKeyDown={handleEnterKeyPress}
       />
-      <CommandGroup className="grid-item col-start-2 w-1/4">
-        <CommandItem
-          onSelect={() => {
-            const newSearchParams = new URLSearchParams(
-              searchParams.toString()
-            );
-            newSearchParams.set(encodeURIComponent(searchParamName), value);
-            newSearchParams.set(
-              encodeURIComponent(pageIndexSearchParamName),
-              "0"
-            );
-            router.push(`${pathname}?${newSearchParams.toString()}`, {
-              scroll: false,
-            });
-          }}
-          className="justify-center border "
-        >
-          Search
-        </CommandItem>
-        {isFiltered && (
-          <CommandItem
-            onSelect={() => {
-              const newSearchParams = new URLSearchParams(
-                searchParams.toString()
-              );
-              newSearchParams.delete(encodeURIComponent(searchParamName));
-              newSearchParams.set(
-                encodeURIComponent(pageIndexSearchParamName),
-                "0"
-              );
-              router.push(`${pathname}?${newSearchParams.toString()}`, {
-                scroll: false,
-              });
-            }}
-            className="justify-center border"
-          >
-            Reset
-          </CommandItem>
-        )}
-      </CommandGroup>
+      <CommandItem
+        onSelect={() => {
+          const newSearchParams = new URLSearchParams(searchParams.toString());
+          newSearchParams.delete(encodeURIComponent(searchParamName));
+          newSearchParams.set(
+            encodeURIComponent(pageIndexSearchParamName),
+            "0"
+          );
+          router.push(`${pathname}?${newSearchParams.toString()}`, {
+            scroll: false,
+          });
+        }}
+        className="w-10 h-10 px-1 py-1 justify-center -ml-16 "
+      >
+        <XIcon className="w-5 h-5 hover:bg-gray-100 hover:text-gray-700" />
+      </CommandItem>
     </Command>
   );
 }
