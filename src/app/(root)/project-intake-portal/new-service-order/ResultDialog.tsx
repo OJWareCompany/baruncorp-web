@@ -1,7 +1,8 @@
 "use client";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Socket, io } from "socket.io-client";
 import { useProfileContext } from "../../ProfileProvider";
 import { ResultDialogState } from "./JobSection";
 import {
@@ -35,7 +36,7 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
     error: false,
   });
 
-  const { mutateAsync: postJobNoteFilesMutateAsync } = usePostJobFilesMutation({
+  const { mutateAsync: postJobFilesMutateAsync } = usePostJobFilesMutation({
     onUploadProgress: (axiosProgressEvent) => {
       setPostJobFilesProgress({
         value: (axiosProgressEvent?.progress ?? 0) * 100,
@@ -44,20 +45,35 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
     },
   });
 
-  useEffect(() => {
-    if (!state.open) {
-      setPostJobFilesProgress({
-        value: 0,
-        error: false,
-      });
+  const socketRef = useRef<Socket>();
+  const [myOrder, setMyOrder] = useState<number | null>(null);
+  const [activeFileUpload, setActiveFileUpload] = useState(false);
+
+  const myOrderListener = ({ myOrder }: { myOrder: number }) => {
+    setMyOrder(myOrder);
+  };
+
+  const activeFileUploadListener = async ({
+    fileUploadId,
+  }: {
+    fileUploadId: string;
+  }) => {
+    if (
+      !state.open ||
+      state.files.length === 0 ||
+      job == null ||
+      job.jobFolderId == null
+    ) {
       return;
     }
 
-    if (state.files.length === 0 || job == null || job.jobFolderId == null) {
-      return;
-    }
+    setActiveFileUpload(true);
 
-    postJobNoteFilesMutateAsync({
+    socketRef.current?.off("my-order", myOrderListener);
+    socketRef.current?.off("active-file-upload", activeFileUploadListener);
+
+    await postJobFilesMutateAsync({
+      fileUploadId,
       files: state.files,
       jobFolderId: job.jobFolderId,
     }).catch(() => {
@@ -67,7 +83,45 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
         variant: "destructive",
       });
     });
-  }, [job, postJobNoteFilesMutateAsync, state]);
+
+    socketRef.current?.disconnect();
+    socketRef.current = undefined;
+  };
+
+  useEffect(() => {
+    if (
+      !state.open ||
+      state.files.length === 0 ||
+      job == null ||
+      job.jobFolderId == null
+    ) {
+      setPostJobFilesProgress({
+        value: 0,
+        error: false,
+      });
+      return;
+    }
+    if (socketRef.current) {
+      return;
+    }
+
+    socketRef.current = io(
+      `${process.env.NEXT_PUBLIC_FILE_API_URL}?room=file-upload`,
+      {
+        autoConnect: false,
+      }
+    );
+
+    socketRef.current.connect();
+    socketRef.current.on("my-order", myOrderListener);
+    socketRef.current.on("active-file-upload", activeFileUploadListener);
+  }, [activeFileUploadListener, job, postJobFilesMutateAsync, state]);
+
+  useEffect(() => {
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, []);
 
   return (
     <Dialog
@@ -82,29 +136,41 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
       }}
     >
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Order Completed</DialogTitle>
+        <DialogHeader className="flex flex-direction">
+          {activeFileUpload ? (
+            <DialogTitle>Uploading...</DialogTitle>
+          ) : (
+            <DialogTitle>
+              My Waiting Order : {myOrder ?? "Getting my-order"}
+            </DialogTitle>
+          )}
           <DialogDescription>
-            {state.open && state.files.length !== 0
-              ? "It may take some time for files to appear in Google Drive after uploading."
-              : "You can place more orders or go to the details page for your order details."}
+            {activeFileUpload
+              ? state.open && state.files.length !== 0
+                ? "It may take some time for files to appear in Google Drive after uploading."
+                : "You can place more orders or go to the details page for your order details."
+              : "Waiting for the order to be placed. Once the order is complete, file upload will begin."}
           </DialogDescription>
         </DialogHeader>
         {state.open && state.files.length !== 0 && (
           <div className="flex flex-col gap-1">
-            <Progress value={postJobFilesProgress.value} />
-            <p
+            {activeFileUpload ? (
+              <Progress value={postJobFilesProgress.value} />
+            ) : null}
+            <span
               className={cn(
-                "text-xs text-muted-foreground text-center",
+                "text-sm text-muted-foreground text-center",
                 postJobFilesProgress.error && "text-destructive"
               )}
             >
-              {postJobFilesProgress.value !== 100
-                ? "Please wait for the file to upload..."
-                : postJobFilesProgress.error
-                ? "Failed to upload file"
-                : "Completed to upload file"}
-            </p>
+              {activeFileUpload
+                ? postJobFilesProgress.value !== 100
+                  ? "Please wait for the file to upload..."
+                  : postJobFilesProgress.error
+                  ? "Failed to upload file"
+                  : "Completed to upload file"
+                : "Please wait for your order to arrive..."}
+            </span>
           </div>
         )}
         <DialogFooter>
