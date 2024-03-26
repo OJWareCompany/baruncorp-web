@@ -248,17 +248,13 @@ export default function UsersTable({ department }: Props) {
         cell: ({ row }) => {
           return (
             <div className="text-right">
-              <div
-                className="inline-flex"
-                onClick={(event) => {
-                  event.stopPropagation();
-                }}
-              >
+              <div className="inline-flex">
                 <Button
-                  variant={"ghost"}
                   size={"icon"}
+                  variant={"ghost"}
                   className="h-8 w-8"
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.preventDefault();
                     setAlertDialogState({
                       open: true,
                       userId: row.id,
