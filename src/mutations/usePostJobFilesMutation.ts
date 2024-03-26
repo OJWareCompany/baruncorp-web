@@ -4,7 +4,6 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 interface Variables {
   files: File[];
   jobFolderId: string;
-  fileUploadId: string;
 }
 
 const usePostJobFilesMutation = (axiosRequestConfig: AxiosRequestConfig) => {
@@ -16,7 +15,7 @@ const usePostJobFilesMutation = (axiosRequestConfig: AxiosRequestConfig) => {
       }
       formData.append("jobFolderId", variables.jobFolderId);
 
-      const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobFiles?fileUploadId=${variables.fileUploadId}`;
+      const url = `${process.env.NEXT_PUBLIC_FILE_API_URL}/filesystem/jobFiles`;
       return axios.post(url, formData, axiosRequestConfig);
     },
   });
