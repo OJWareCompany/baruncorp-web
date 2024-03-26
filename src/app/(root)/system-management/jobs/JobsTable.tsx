@@ -76,6 +76,7 @@ import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import NameSearch from "@/components/table/NameSearch";
+import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -340,7 +341,7 @@ export default function JobsTable() {
               status.value === "Canceled (Invoice)")
           ) {
             return (
-              <Button
+              <InTableButton
                 size={"default"}
                 variant={"outline"}
                 className={`-ml-[9px] px-2 font-normal h-8 text-xs ${
@@ -348,8 +349,7 @@ export default function JobsTable() {
                     ? "bg-gray-200 text-gray-600"
                     : "px-4"
                 }`}
-                onClick={(event) => {
-                  event.preventDefault();
+                onClick={() => {
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
               >
@@ -358,7 +358,7 @@ export default function JobsTable() {
                 ) : (
                   <span>Send Deliverables</span>
                 )}
-              </Button>
+              </InTableButton>
             );
           }
         },

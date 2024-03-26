@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Button } from "@/components/ui/button";
 import { PositionResponseDto } from "@/api/api-spec";
 import {
   Table,
@@ -43,6 +42,7 @@ import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper = createColumnHelper<PositionResponseDto["tasks"][number]>();
 
@@ -138,7 +138,7 @@ export default function TasksTable({ position }: Props) {
                   event.stopPropagation();
                 }}
               >
-                <Button
+                <InTableButton
                   variant={"ghost"}
                   size={"icon"}
                   className="h-8 w-8"
@@ -150,7 +150,7 @@ export default function TasksTable({ position }: Props) {
                   }}
                 >
                   <X className="w-3 h-3" />
-                </Button>
+                </InTableButton>
               </div>
             </div>
           );

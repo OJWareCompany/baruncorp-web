@@ -203,7 +203,7 @@ export default function ProjectForm({ project, pageType }: Props) {
           )}
         />
         <RowItemsContainer>
-          {isBarunCorpMember && (
+          {isBarunCorpMember ? (
             <FormField
               control={form.control}
               name="propertyType"
@@ -230,37 +230,38 @@ export default function ProjectForm({ project, pageType }: Props) {
                 </FormItem>
               )}
             />
+          ) : (
+            <FormField
+              control={form.control}
+              name="propertyType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Property Type</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled
+                    >
+                      <SelectTrigger ref={field.ref}>
+                        <SelectValue placeholder="Select a property type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {PropertyTypeEnum.options.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
-          <FormField
-            control={form.control}
-            name="propertyType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>Property Type</FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled
-                  >
-                    <SelectTrigger ref={field.ref}>
-                      <SelectValue placeholder="Select a property type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {PropertyTypeEnum.options.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="propertyOwner"

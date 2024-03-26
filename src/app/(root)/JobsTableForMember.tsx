@@ -77,7 +77,8 @@ import LoadingButton from "@/components/LoadingButton";
 import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
-import MultiSearchBar from "@/components/table/NameSearch";
+import NameSearch from "@/components/table/NameSearch";
+import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -347,7 +348,7 @@ export default function JobsTableForMember({ type }: Props) {
               status.value === "Canceled (Invoice)")
           ) {
             return (
-              <Button
+              <InTableButton
                 size={"default"}
                 variant={"outline"}
                 className={`-ml-[9px] px-2 font-normal h-8 text-xs ${
@@ -355,8 +356,7 @@ export default function JobsTableForMember({ type }: Props) {
                     ? "bg-gray-200 text-gray-600"
                     : "px-4"
                 }`}
-                onClick={(event) => {
-                  event.preventDefault();
+                onClick={() => {
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
               >
@@ -367,7 +367,7 @@ export default function JobsTableForMember({ type }: Props) {
                 ) : (
                   <span>Send Deliverables</span>
                 )}
-              </Button>
+              </InTableButton>
             );
           }
         },
@@ -558,9 +558,13 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <MultiSearchBar
+      <NameSearch
+        buttonText="Name Search"
         searchParamName={jobNameSearchParamName}
         pageIndexSearchParamName={pageIndexSearchParamName}
+        isLoading={
+          syncedParams != null && params.jobName !== syncedParams.jobName
+        }
       />
       <div className="rounded-md border overflow-hidden">
         <Table>

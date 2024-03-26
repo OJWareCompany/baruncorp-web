@@ -19,7 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TaskResponseDto } from "@/api/api-spec";
-import { Button } from "@/components/ui/button";
 import useDeletePrerequisiteTaskMutation from "@/mutations/useDeletePrerequisiteTaskMutation";
 import {
   AlertDialog,
@@ -34,6 +33,7 @@ import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper =
   createColumnHelper<TaskResponseDto["prerequisiteTask"][number]>();
@@ -70,7 +70,7 @@ export default function PrerequisiteTasksTable({ task }: Props) {
                   event.stopPropagation();
                 }}
               >
-                <Button
+                <InTableButton
                   variant={"ghost"}
                   size={"icon"}
                   className="h-8 w-8"
@@ -79,7 +79,7 @@ export default function PrerequisiteTasksTable({ task }: Props) {
                   }}
                 >
                   <X className="w-3 h-3" />
-                </Button>
+                </InTableButton>
               </div>
             </div>
           );

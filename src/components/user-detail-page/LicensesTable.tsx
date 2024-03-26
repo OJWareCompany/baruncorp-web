@@ -11,6 +11,7 @@ import { X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import NewTabTableRow from "../table/NewTabTableRow";
+import { InTableButton } from "../ui/intablebutton";
 import {
   Table,
   TableBody,
@@ -29,7 +30,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import useDeleteUserLicenseMutation from "@/mutations/useDeleteUserLicenseMutation";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import { useToast } from "@/components/ui/use-toast";
@@ -92,7 +92,7 @@ export default function LicensesTable({
                   event.stopPropagation();
                 }}
               >
-                <Button
+                <InTableButton
                   variant={"ghost"}
                   size={"icon"}
                   className="h-8 w-8"
@@ -105,7 +105,7 @@ export default function LicensesTable({
                   }}
                 >
                   <X className="w-3 h-3" />
-                </Button>
+                </InTableButton>
               </div>
             </div>
           );

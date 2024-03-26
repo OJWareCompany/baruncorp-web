@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import NewTabTableRow from "../table/NewTabTableRow";
+import { InTableButton } from "../ui/intablebutton";
 import {
   Table,
   TableBody,
@@ -20,7 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -160,7 +160,7 @@ export default function AvailableTasksTable({
                   event.stopPropagation();
                 }}
               >
-                <Button
+                <InTableButton
                   variant={"ghost"}
                   size={"icon"}
                   className="h-8 w-8"
@@ -169,7 +169,7 @@ export default function AvailableTasksTable({
                   }}
                 >
                   <X className="w-3 h-3" />
-                </Button>
+                </InTableButton>
               </div>
             </div>
           );

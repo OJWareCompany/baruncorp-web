@@ -27,13 +27,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import useDeletePositionUserMutation from "@/mutations/useDeletePositionUserMutation";
 import { getPositionQueryKey } from "@/queries/usePositionQuery";
 import LoadingButton from "@/components/LoadingButton";
 import { useToast } from "@/components/ui/use-toast";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper =
   createColumnHelper<PositionResponseDto["workers"][number]>();
@@ -73,7 +73,7 @@ export default function WorkersTable({ position }: Props) {
                   event.stopPropagation();
                 }}
               >
-                <Button
+                <InTableButton
                   variant={"ghost"}
                   size={"icon"}
                   className="h-8 w-8"
@@ -82,7 +82,7 @@ export default function WorkersTable({ position }: Props) {
                   }}
                 >
                   <X className="w-3 h-3" />
-                </Button>
+                </InTableButton>
               </div>
             </div>
           );

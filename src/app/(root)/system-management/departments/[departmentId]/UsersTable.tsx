@@ -67,6 +67,7 @@ import usePostDepartmentRemoveUserMutation from "@/mutations/usePostDepartmentRe
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -248,15 +249,10 @@ export default function UsersTable({ department }: Props) {
         cell: ({ row }) => {
           return (
             <div className="text-right">
-              <div
-                className="inline-flex"
-                onClick={(event) => {
-                  event.stopPropagation();
-                }}
-              >
-                <Button
-                  variant={"ghost"}
+              <div className="inline-flex">
+                <InTableButton
                   size={"icon"}
+                  variant={"ghost"}
                   className="h-8 w-8"
                   onClick={() => {
                     setAlertDialogState({
@@ -266,7 +262,7 @@ export default function UsersTable({ department }: Props) {
                   }}
                 >
                   <X className="w-3 h-3" />
-                </Button>
+                </InTableButton>
               </div>
             </div>
           );
