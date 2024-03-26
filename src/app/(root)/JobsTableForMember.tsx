@@ -559,11 +559,7 @@ export default function JobsTableForMember({ type }: Props) {
   return (
     <div className="space-y-2">
       <MultiSearchBar
-        searchParamName={
-          jobNameSearchParamName ||
-          projectNumberSearchParam ||
-          propertyOwnerSearchParam
-        }
+        searchParamName={jobNameSearchParamName}
         pageIndexSearchParamName={pageIndexSearchParamName}
       />
       <div className="rounded-md border overflow-hidden">
