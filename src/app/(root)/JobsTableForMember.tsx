@@ -78,6 +78,7 @@ import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
+import NameSearch from "@/components/table/NameSearch";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -557,6 +558,10 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
+      <NameSearch
+        searchParamName={jobNameSearchParamName}
+        pageIndexSearchParamName={pageIndexSearchParamName}
+      />
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
