@@ -75,7 +75,6 @@ import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
 import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
-import NameSearch from "@/components/table/NameSearch";
 import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper =
@@ -555,10 +554,6 @@ export default function JobsTable({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <NameSearch
-        searchParamName={jobNameSearchParamName}
-        pageIndexSearchParamName={pageIndexSearchParamName}
-      />
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
