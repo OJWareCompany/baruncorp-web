@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, MouseEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { Command, CommandInput, CommandItem } from "@/components/ui/command";
@@ -21,8 +21,9 @@ export default function NameSearch({
 
   const handleEnterKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
+      const trimmedValue = value.trim();
       const newSearchParams = new URLSearchParams(searchParams.toString());
-      newSearchParams.set(encodeURIComponent(searchParamName), value);
+      newSearchParams.set(encodeURIComponent(searchParamName), trimmedValue);
       newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
       router.push(`${pathname}?${newSearchParams.toString()}`, {
         scroll: false,
@@ -40,6 +41,9 @@ export default function NameSearch({
     });
   };
 
+  const stopPropagation = (event: MouseEvent<HTMLDivElement>) => {
+    event.stopPropagation(); // 이벤트 전파 중지
+  };
   return (
     <div className="flex items-center space-x-2">
       <Command shouldFilter={false} className="grid grid-cols-2 pb-2">
@@ -52,7 +56,8 @@ export default function NameSearch({
         />
         <CommandItem
           onSelect={clearInput}
-          className="w-6 h-6 justify-center -ml-16 cursor-pointer p-0 mt-2"
+          className="w-5 h-5 justify-center -ml-16 cursor-pointer p-0 mt-3"
+          onClick={stopPropagation}
         >
           <X className="w-5 h-5 hover:bg-gray-100 hover:text-gray-700" />
         </CommandItem>
