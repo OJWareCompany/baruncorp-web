@@ -72,6 +72,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import LoadingButton from "@/components/LoadingButton";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import { InTableButton } from "@/components/ui/intablebutton";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -298,9 +299,13 @@ export default function UsersTable({ organization }: Props) {
               >
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"} className="h-8 w-8">
+                    <InTableButton
+                      variant={"ghost"}
+                      size={"icon"}
+                      className="h-8 w-8"
+                    >
                       <MoreHorizontal className="w-3 h-3" />
-                    </Button>
+                    </InTableButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
