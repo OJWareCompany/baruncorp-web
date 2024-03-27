@@ -354,7 +354,7 @@ export default function JobsTable({ type }: Props) {
                 className={`-ml-[9px] px-2 font-normal h-8 text-xs ${
                   dateSentToClient !== null
                     ? "bg-gray-200 text-gray-600"
-                    : "px-4"
+                    : "px-4 bg-blue-400 text-white"
                 }`}
                 onClick={() => {
                   setAlertDialogState({ open: true, jobId: row.id });
