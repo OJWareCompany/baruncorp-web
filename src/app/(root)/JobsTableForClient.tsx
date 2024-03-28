@@ -61,6 +61,7 @@ import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
+import NameSearch from "@/components/table/NameSearch";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -471,6 +472,10 @@ export default function JobsTableForClient({ type }: Props) {
 
   return (
     <div className="space-y-2">
+      <NameSearch
+        searchParamName={jobNameSearchParamName}
+        pageIndexSearchParamName={pageIndexSearchParamName}
+      />
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
