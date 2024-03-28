@@ -45,6 +45,7 @@ import {
   JobPaginatedResponseDto,
 } from "@/api/api-spec";
 import {
+  InTableButtonStyles,
   JobPriorityEnum,
   JobStatusEnum,
   MountingTypeEnum,
@@ -351,11 +352,7 @@ export default function JobsTableForMember({ type }: Props) {
               <InTableButton
                 size={"default"}
                 variant={"outline"}
-                className={`-ml-[9px] px-2 font-normal h-8 text-xs ${
-                  dateSentToClient !== null
-                    ? "bg-gray-200 text-gray-600"
-                    : "px-4 bg-blue-500 text-white"
-                }`}
+                className={InTableButtonStyles(dateSentToClient)}
                 onClick={() => {
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}

@@ -76,6 +76,15 @@ export const jobStatuses: Record<
   },
 };
 
+export const InTableButtonStyles = (dateSentToClient: string | null) => {
+  const buttonClass = `-ml-[9px] px-2 font-normal h-8 text-xs ${
+    dateSentToClient !== null
+      ? "bg-gray-200 text-gray-600"
+      : "px-4 bg-blue-500 text-white"
+  }`;
+  return buttonClass;
+};
+
 export const orderedServiceStatuses: Record<
   OrderedServiceStatusEnum,
   {
