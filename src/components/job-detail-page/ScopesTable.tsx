@@ -7,7 +7,7 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ChevronDown,
@@ -88,6 +88,10 @@ export default function ScopesTable({ job, project, pageType }: Props) {
       open: true,
       assignedTaskId,
     });
+  }, []);
+
+  useEffect(() => {
+    table.toggleAllRowsExpanded(true);
   }, []);
 
   const {

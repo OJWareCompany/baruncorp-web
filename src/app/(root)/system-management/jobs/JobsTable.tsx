@@ -42,6 +42,7 @@ import {
 } from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  InTableButtonStyles,
   JobPriorityEnum,
   JobStatusEnum,
   MountingTypeEnum,
@@ -344,11 +345,7 @@ export default function JobsTable() {
               <InTableButton
                 size={"default"}
                 variant={"outline"}
-                className={`-ml-[9px] px-2 font-normal h-8 text-xs ${
-                  dateSentToClient !== null
-                    ? "bg-gray-200 text-gray-600"
-                    : "px-4"
-                }`}
+                className={InTableButtonStyles(dateSentToClient)}
                 onClick={() => {
                   setAlertDialogState({ open: true, jobId: row.id });
                 }}
