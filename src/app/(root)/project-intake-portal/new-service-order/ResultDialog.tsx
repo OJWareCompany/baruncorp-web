@@ -3,7 +3,6 @@ import { DialogProps } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Socket, io } from "socket.io-client";
-import { useProfileContext } from "../../ProfileProvider";
 import { ResultDialogState } from "./JobSection";
 import {
   Dialog,
@@ -27,7 +26,6 @@ interface Props extends DialogProps {
 }
 
 export default function ResultDialog({ state, ...dialogProps }: Props) {
-  const { isBarunCorpMember } = useProfileContext();
   const router = useRouter();
   const { data: job } = useJobQuery(state.open ? state.jobId : "");
 
@@ -101,6 +99,7 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
       });
       return;
     }
+
     if (socketRef.current) {
       return;
     }
@@ -115,7 +114,7 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
     socketRef.current.connect();
     socketRef.current.on("my-order", myOrderListener);
     socketRef.current.on("active-file-upload", activeFileUploadListener);
-  }, [activeFileUploadListener, job, postJobFilesMutateAsync, state]);
+  }, [job, postJobFilesMutateAsync, state]);
 
   useEffect(() => {
     return () => {
@@ -138,10 +137,14 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
       <DialogContent>
         <DialogHeader className="flex flex-direction">
           {activeFileUpload ? (
-            <DialogTitle>Uploading...</DialogTitle>
+            postJobFilesProgress.value === 100 ? (
+              <DialogTitle>Order Completed</DialogTitle>
+            ) : (
+              <DialogTitle>Uploading...</DialogTitle>
+            )
           ) : (
             <DialogTitle>
-              My Waiting Order : {myOrder ?? "Getting my-order"}
+              My Waiting Order : {myOrder ?? "Getting my-order"}{" "}
             </DialogTitle>
           )}
           <DialogDescription>
