@@ -124,7 +124,7 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
 
   const {
     isBarunCorpMember,
-    authority: { canViewScopePrice },
+    authority: { canViewScopePrice, canViewTaskCost },
   } = useProfileContext();
   const isHome = useMemo(() => pageType === "HOME", [pageType]);
 
@@ -211,7 +211,7 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
               <TrackingNumbersTable job={job} pageType={pageType} />
             </CollapsibleSection>
           )}
-          {isWorker && (
+          {isWorker && canViewScopePrice && canViewTaskCost && (
             <CollapsibleSection title="History" isInitiallyCollapsed={true}>
               <HistoryTable job={job} />
             </CollapsibleSection>
