@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { PlateEditor, Value, createPlateEditor } from "@udecode/plate-common";
 import { serializeHtml } from "@udecode/plate-serializer-html";
+import { usePathname } from "next/navigation";
 import JobNoteResultDialog from "./JobNoteResultDialog";
 import {
   Form,
@@ -86,7 +87,7 @@ export default function JobNoteForm({ job }: Props) {
   const { toast } = useToast();
   const editorRef = useRef<PlateEditor<Value>>(null);
   const [toggleState, setToggleState] = useState(false);
-
+  const pathname = usePathname();
   useEffect(() => {
     if (
       form.formState.isSubmitSuccessful &&
@@ -103,6 +104,7 @@ export default function JobNoteForm({ job }: Props) {
 
   async function onSubmit(values: FieldValues) {
     const trimmedContent = trimValue(values.content);
+    const fullUrl = `https://localhost:3000${pathname}`;
     const emails = findAllEmails(trimmedContent);
     const hasMention = emails.length !== 0;
     let emailBody: string | undefined = undefined;
@@ -111,9 +113,12 @@ export default function JobNoteForm({ job }: Props) {
         nodes: trimmedContent,
       })
         .split('<div class="slate-p"></div>')
-        .filter((value) => value !== "")
-        .join("<br />");
+        .filter((value) => value !== " ")
+        .join("<br/>");
+
+      emailBody += "\n" + fullUrl;
     }
+
     const requestData: CreateJobNoteRequestDto = {
       jobId: job.id,
       content: JSON.stringify(trimmedContent),
