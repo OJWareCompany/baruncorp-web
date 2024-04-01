@@ -104,7 +104,7 @@ export default function JobNoteForm({ job }: Props) {
 
   async function onSubmit(values: FieldValues) {
     const trimmedContent = trimValue(values.content);
-    const fullUrl = `https://localhost:3000${pathname}`;
+    const fullUrl = `https://baruncorp-web.vercel.app${pathname}`;
     const emails = findAllEmails(trimmedContent);
     const hasMention = emails.length !== 0;
     let emailBody: string | undefined = undefined;
@@ -115,6 +115,11 @@ export default function JobNoteForm({ job }: Props) {
         .split('<div class="slate-p"></div>')
         .filter((value) => value !== " ")
         .join("<br/>");
+
+      emailBody = emailBody.replace(
+        /<div class="slate-mention"/g,
+        '<div class="slate-mention" style="display: inline;"'
+      );
 
       emailBody += "\n" + fullUrl;
     }
@@ -167,6 +172,39 @@ export default function JobNoteForm({ job }: Props) {
 
   return (
     <>
+      {/* <div class="slate-p">
+        Hi,{" "}
+        <div
+          class="slate-mention inline"
+          data-slate-value="yo chan jung"
+          contentEditable="false"
+        >
+          yo chan jung
+        </div>{" "}
+        , can you please review the planset and let us know if this is good to
+        go?{" "}
+      </div>
+      <div class="slate-p">
+        Please relay any feedback to{" "}
+        <div
+          class="slate-mention inline"
+          data-slate-value="yo chan jung"
+          contentEditable="false"
+        >
+          yo chan jung
+        </div>{" "}
+        <div
+          class="slate-mention inline"
+          data-slate-value="yo chan jung"
+          contentEditable="false"
+        >
+          yo chan jung
+        </div>{" "}
+      </div>
+      <div class="slate-p">
+        Project Teamand Marina Remezova this is for visibility.
+      </div>
+      https://localhost:3000/jobs/dd58b811-e3e9-41e8-877e-843c37341726 */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
