@@ -147,31 +147,35 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
                   : ""
                 : "Order completed, but please wait a moment for file upload." // 순서 있을때
             }
+            <br />
+            <span className="text-muted-foreground text-bold text-gray-700 font-medium">
+              {activeFileUpload
+                ? ""
+                : "Your turn for file upload:" +
+                  (myOrder ?? "Getting my-order...")}
+            </span>
           </DialogDescription>
         </DialogHeader>
         {state.open && state.files.length !== 0 && (
           <div className="flex flex-col gap-1">
-            {activeFileUpload ? (
+            {postJobFilesProgress.value !== 100 && myOrder == 0 && (
               <Progress value={postJobFilesProgress.value} />
-            ) : null}
+            )}
             <span
               className={cn(
                 "text-sm text-muted-foreground text-center",
                 postJobFilesProgress.error && "text-destructive"
               )}
             >
-              {
-                activeFileUpload
-                  ? myOrder === 0 // 순서가 없으며 0번일 때
+              {activeFileUpload
+                ? myOrder === 0
+                  ? postJobFilesProgress.value !== 100 // 업로드 중일 때
                     ? "Please wait for the file to upload..."
-                    : postJobFilesProgress.value !== 100 // 업로드 중일 때
-                    ? "File upload will begin soon."
-                    : postJobFilesProgress.error // 실패시
-                    ? "Fㄹ"
+                    : postJobFilesProgress.error
+                    ? "Failed to upload file. Please try again." // 실패시
                     : "Completed to upload file" // 성공시
-                  : "Your turn for file upload: " +
-                    (myOrder ?? "Getting my-order...") // 순서 있을 때
-              }
+                  : "File upload will begin soon." // 순서가 없으며 0번일 때
+                : ""}
             </span>
           </div>
         )}
