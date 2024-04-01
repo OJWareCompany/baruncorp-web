@@ -136,23 +136,17 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
     >
       <DialogContent>
         <DialogHeader className="flex flex-direction">
-          {activeFileUpload ? (
-            postJobFilesProgress.value === 100 ? (
-              <DialogTitle>Order Completed</DialogTitle>
-            ) : (
-              <DialogTitle>Uploading...</DialogTitle>
-            )
-          ) : (
-            <DialogTitle>
-              My Waiting Order : {myOrder ?? "Getting my-order"}{" "}
-            </DialogTitle>
-          )}
+          <DialogTitle>Order Completed</DialogTitle>
           <DialogDescription>
-            {activeFileUpload
-              ? state.open && state.files.length !== 0
-                ? "It may take some time for files to appear in Google Drive after uploading."
-                : "You can place more orders or go to the details page for your order details."
-              : "Waiting for the order to be placed. Once the order is complete, file upload will begin."}
+            {
+              activeFileUpload
+                ? state.open && state.files.length !== 0
+                  ? postJobFilesProgress.value === 100
+                    ? "You can place more orders or go to the details page for your order details." // 업로드가 끝나면
+                    : "It may take some time for files to appear in Google Drive after uploading." // 업로드 중 일때
+                  : ""
+                : "Order completed, but please wait a moment for file upload." // 순서 있을때
+            }
           </DialogDescription>
         </DialogHeader>
         {state.open && state.files.length !== 0 && (
@@ -166,13 +160,18 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
                 postJobFilesProgress.error && "text-destructive"
               )}
             >
-              {activeFileUpload
-                ? postJobFilesProgress.value !== 100
-                  ? "Please wait for the file to upload..."
-                  : postJobFilesProgress.error
-                  ? "Failed to upload file"
-                  : "Completed to upload file"
-                : "Please wait for your order to arrive..."}
+              {
+                activeFileUpload
+                  ? myOrder === 0 // 순서가 없으며 0번일 때
+                    ? "Please wait for the file to upload..."
+                    : postJobFilesProgress.value !== 100 // 업로드 중일 때
+                    ? "File upload will begin soon."
+                    : postJobFilesProgress.error // 실패시
+                    ? "Fㄹ"
+                    : "Completed to upload file" // 성공시
+                  : "Your turn for file upload: " +
+                    (myOrder ?? "Getting my-order...") // 순서 있을 때
+              }
             </span>
           </div>
         )}
