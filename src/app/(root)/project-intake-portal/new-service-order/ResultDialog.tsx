@@ -1,8 +1,8 @@
 "use client";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useProfileContext } from "../../ProfileProvider";
+import { useEffect, useRef, useState } from "react";
+import { Socket, io } from "socket.io-client";
 import { ResultDialogState } from "./JobSection";
 import {
   Dialog,
@@ -26,7 +26,6 @@ interface Props extends DialogProps {
 }
 
 export default function ResultDialog({ state, ...dialogProps }: Props) {
-  const { isBarunCorpMember } = useProfileContext();
   const router = useRouter();
   const { data: job } = useJobQuery(state.open ? state.jobId : "");
 
@@ -35,7 +34,7 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
     error: false,
   });
 
-  const { mutateAsync: postJobNoteFilesMutateAsync } = usePostJobFilesMutation({
+  const { mutateAsync: postJobFilesMutateAsync } = usePostJobFilesMutation({
     onUploadProgress: (axiosProgressEvent) => {
       setPostJobFilesProgress({
         value: (axiosProgressEvent?.progress ?? 0) * 100,
@@ -44,20 +43,35 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
     },
   });
 
-  useEffect(() => {
-    if (!state.open) {
-      setPostJobFilesProgress({
-        value: 0,
-        error: false,
-      });
+  const socketRef = useRef<Socket>();
+  const [myOrder, setMyOrder] = useState<number | null>(null);
+  const [activeFileUpload, setActiveFileUpload] = useState(false);
+
+  const myOrderListener = ({ myOrder }: { myOrder: number }) => {
+    setMyOrder(myOrder);
+  };
+
+  const activeFileUploadListener = async ({
+    fileUploadId,
+  }: {
+    fileUploadId: string;
+  }) => {
+    if (
+      !state.open ||
+      state.files.length === 0 ||
+      job == null ||
+      job.jobFolderId == null
+    ) {
       return;
     }
 
-    if (state.files.length === 0 || job == null || job.jobFolderId == null) {
-      return;
-    }
+    setActiveFileUpload(true);
 
-    postJobNoteFilesMutateAsync({
+    socketRef.current?.off("my-order", myOrderListener);
+    socketRef.current?.off("active-file-upload", activeFileUploadListener);
+
+    await postJobFilesMutateAsync({
+      fileUploadId,
       files: state.files,
       jobFolderId: job.jobFolderId,
     }).catch(() => {
@@ -67,7 +81,46 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
         variant: "destructive",
       });
     });
-  }, [job, postJobNoteFilesMutateAsync, state]);
+
+    socketRef.current?.disconnect();
+    socketRef.current = undefined;
+  };
+
+  useEffect(() => {
+    if (
+      !state.open ||
+      state.files.length === 0 ||
+      job == null ||
+      job.jobFolderId == null
+    ) {
+      setPostJobFilesProgress({
+        value: 0,
+        error: false,
+      });
+      return;
+    }
+
+    if (socketRef.current) {
+      return;
+    }
+
+    socketRef.current = io(
+      `${process.env.NEXT_PUBLIC_FILE_API_URL}?room=file-upload`,
+      {
+        autoConnect: false,
+      }
+    );
+
+    socketRef.current.connect();
+    socketRef.current.on("my-order", myOrderListener);
+    socketRef.current.on("active-file-upload", activeFileUploadListener);
+  }, [job, postJobFilesMutateAsync, state]);
+
+  useEffect(() => {
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, []);
 
   return (
     <Dialog
@@ -82,29 +135,56 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
       }}
     >
       <DialogContent>
-        <DialogHeader>
+        <DialogHeader className="flex flex-direction">
           <DialogTitle>Order Completed</DialogTitle>
           <DialogDescription>
-            {state.open && state.files.length !== 0
+            {activeFileUpload
+              ? state.open && state.files.length !== 0
+                ? postJobFilesProgress.value === 100
+                  ? "You can place more orders or go to the details page for your order details." // 업로드가 끝나면
+                  : "It may take some time for files to appear in Google Drive after uploading." // 업로드 중 일때
+                : ""
+              : myOrder === 0
               ? "It may take some time for files to appear in Google Drive after uploading."
-              : "You can place more orders or go to the details page for your order details."}
+              : "Order completed, but please wait a moment for file upload."}
+            <br />
+            <span className="text-muted-foreground text-bold text-gray-700 font-medium">
+              {myOrder === 0
+                ? ""
+                : activeFileUpload
+                ? ""
+                : myOrder === 0
+                ? ""
+                : "Your turn for file upload: " +
+                  (myOrder ?? "Getting my-order...")}
+            </span>
           </DialogDescription>
         </DialogHeader>
         {state.open && state.files.length !== 0 && (
           <div className="flex flex-col gap-1">
-            <Progress value={postJobFilesProgress.value} />
-            <p
+            {myOrder === 0 ? (
+              <Progress value={postJobFilesProgress.value} />
+            ) : (
+              activeFileUpload && (
+                <Progress value={postJobFilesProgress.value} />
+              )
+            )}
+            <span
               className={cn(
-                "text-xs text-muted-foreground text-center",
+                "text-sm text-muted-foreground text-center",
                 postJobFilesProgress.error && "text-destructive"
               )}
             >
-              {postJobFilesProgress.value !== 100
-                ? "Please wait for the file to upload..."
-                : postJobFilesProgress.error
-                ? "Failed to upload file"
-                : "Completed to upload file"}
-            </p>
+              {
+                activeFileUpload
+                  ? postJobFilesProgress.value !== 100 // 업로드 중일 때
+                    ? "Please wait for the file to upload..."
+                    : postJobFilesProgress.error
+                    ? "Failed to upload file. Please try again." // 실패시
+                    : "Completed to upload file" // 성공시
+                  : "File upload will begin soon." // 순서가 없으며 0번일 때
+              }
+            </span>
           </div>
         )}
         <DialogFooter>
