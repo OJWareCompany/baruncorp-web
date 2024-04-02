@@ -138,28 +138,36 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
         <DialogHeader className="flex flex-direction">
           <DialogTitle>Order Completed</DialogTitle>
           <DialogDescription>
-            {
-              activeFileUpload
-                ? state.open && state.files.length !== 0
-                  ? postJobFilesProgress.value === 100
-                    ? "You can place more orders or go to the details page for your order details." // 업로드가 끝나면
-                    : "It may take some time for files to appear in Google Drive after uploading." // 업로드 중 일때
-                  : ""
-                : "Order completed, but please wait a moment for file upload." // 순서 있을때
-            }
+            {activeFileUpload
+              ? state.open && state.files.length !== 0
+                ? postJobFilesProgress.value === 100
+                  ? "You can place more orders or go to the details page for your order details." // 업로드가 끝나면
+                  : "It may take some time for files to appear in Google Drive after uploading." // 업로드 중 일때
+                : ""
+              : myOrder === 0
+              ? "It may take some time for files to appear in Google Drive after uploading."
+              : "Order completed, but please wait a moment for file upload."}
             <br />
             <span className="text-muted-foreground text-bold text-gray-700 font-medium">
-              {activeFileUpload
+              {myOrder === 0
                 ? ""
-                : "Your turn for file upload:" +
+                : activeFileUpload
+                ? ""
+                : myOrder === 0
+                ? ""
+                : "Your turn for file upload: " +
                   (myOrder ?? "Getting my-order...")}
             </span>
           </DialogDescription>
         </DialogHeader>
         {state.open && state.files.length !== 0 && (
           <div className="flex flex-col gap-1">
-            {postJobFilesProgress.value !== 100 && myOrder == 0 && (
+            {myOrder === 0 ? (
               <Progress value={postJobFilesProgress.value} />
+            ) : (
+              activeFileUpload && (
+                <Progress value={postJobFilesProgress.value} />
+              )
             )}
             <span
               className={cn(
@@ -167,15 +175,15 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
                 postJobFilesProgress.error && "text-destructive"
               )}
             >
-              {activeFileUpload
-                ? myOrder === 0
+              {
+                activeFileUpload
                   ? postJobFilesProgress.value !== 100 // 업로드 중일 때
                     ? "Please wait for the file to upload..."
                     : postJobFilesProgress.error
                     ? "Failed to upload file. Please try again." // 실패시
                     : "Completed to upload file" // 성공시
                   : "File upload will begin soon." // 순서가 없으며 0번일 때
-                : ""}
+              }
             </span>
           </div>
         )}
