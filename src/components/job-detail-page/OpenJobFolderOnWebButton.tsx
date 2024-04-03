@@ -27,7 +27,13 @@ export default function OpenJobFolderOnWebButton({ job }: Props) {
 
   return (
     <a href={job.shareLink} target="_blank" rel="noopener noreferrer">
-      <Button size={"sm"} variant={"outline"}>
+      <Button
+        size={"sm"}
+        variant={"outline"}
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
         <FolderOpen className="mr-2 h-4 w-4" />
         <span>Open Folder on Web</span>
       </Button>

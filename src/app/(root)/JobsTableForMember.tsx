@@ -80,6 +80,12 @@ import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
 import NameSearch from "@/components/table/NameSearch";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -276,6 +282,36 @@ export default function JobsTableForMember({ type }: Props) {
             <Checkbox checked={getValue()} />
           </div>
         ),
+      }),
+      columnHelper.accessor("jobFolderId", {
+        header: "Google Drive",
+        cell: ({ row }) => {
+          const job = row.original;
+          const project = row.original;
+          return (
+            <div
+              className="flex"
+              onClick={(event) => {
+                event.preventDefault();
+              }}
+            >
+              <Popover>
+                <PopoverTrigger>
+                  <Button
+                    size={"sm"}
+                    variant={"outline"}
+                    className="-ml-2 focus-visible:ring-0 text-xs h-8 px-2"
+                  >
+                    Google Drive
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-auto" align="start">
+                  <OpenJobFolderOnWebButton job={job} />
+                </PopoverContent>
+              </Popover>
+            </div>
+          );
+        },
       }),
       columnHelper.accessor("priority", {
         header: () => (
