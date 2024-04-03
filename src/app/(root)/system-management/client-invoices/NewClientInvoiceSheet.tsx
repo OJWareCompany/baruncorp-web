@@ -342,7 +342,7 @@ export default function NewClientInvoiceSheet() {
                       />
                     </Item>
                     <Item>
-                      <Label>Discount</Label>
+                      <Label>Volume Tier Discount</Label>
                       <AffixInput
                         prefixElement={
                           <span className="text-muted-foreground">$</span>
@@ -352,7 +352,7 @@ export default function NewClientInvoiceSheet() {
                       />
                     </Item>
                     <Item>
-                      <Label>Total</Label>
+                      <Label>Balance Due</Label>
                       <AffixInput
                         prefixElement={
                           <span className="text-muted-foreground">$</span>
