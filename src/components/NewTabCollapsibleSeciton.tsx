@@ -2,6 +2,7 @@
 import { ChevronDown } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
+import NewTabToggle from "@/app/(root)/NewTabToggle";
 
 interface Props {
   title: string;
@@ -10,7 +11,7 @@ interface Props {
   isInitiallyCollapsed?: boolean;
 }
 
-export default function CollapsibleSection({
+export default function NewTabCollapsibleSection({
   title,
   children,
   action,
@@ -34,6 +35,7 @@ export default function CollapsibleSection({
             )}
           />
           <h2 className="h4">{title}</h2>
+          <NewTabToggle href={title} />
         </div>
         {action}
       </div>
