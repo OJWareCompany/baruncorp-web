@@ -51,7 +51,7 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
   if (isWorker) {
     return (
       <div className="flex gap-2">
-        <OpenJobFolderOnWebButton job={job} />
+        <OpenJobFolderOnWebButton job={job} title="Open Folder on Web" />
         <OpenJobFolderOnDesktopButton job={job} project={project} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
