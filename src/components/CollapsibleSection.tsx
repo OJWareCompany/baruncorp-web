@@ -2,6 +2,7 @@
 import { ChevronDown } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
+import NewTabToggle from "@/app/(root)/NewTabToggle";
 
 interface Props {
   title: string;
@@ -22,7 +23,8 @@ export default function CollapsibleSection({
       <div className="flex items-center justify-between">
         <div
           className="inline-flex items-center cursor-pointer gap-1"
-          onClick={() => {
+          onClick={(event) => {
+            event.stopPropagation();
             setIsCollapsed((prev) => !prev);
           }}
         >
@@ -33,6 +35,7 @@ export default function CollapsibleSection({
             )}
           />
           <h2 className="h4">{title}</h2>
+          <NewTabToggle href={title} />
         </div>
         {action}
       </div>

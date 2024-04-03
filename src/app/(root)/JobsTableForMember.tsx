@@ -555,10 +555,12 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <NameSearch
-        searchParamName={jobNameSearchParamName}
-        pageIndexSearchParamName={pageIndexSearchParamName}
-      />
+      <div className="">
+        <NameSearch
+          searchParamName={jobNameSearchParamName}
+          pageIndexSearchParamName={pageIndexSearchParamName}
+        />
+      </div>
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
