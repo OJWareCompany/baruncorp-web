@@ -80,6 +80,7 @@ import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
 import NameSearch from "@/components/table/NameSearch";
+import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -102,6 +103,7 @@ export default function JobsTableForMember({ type }: Props) {
 
   const {
     isBarunCorpMember,
+    isContractor,
     authority: { canSendDeliverables },
   } = useProfileContext();
 
@@ -276,6 +278,26 @@ export default function JobsTableForMember({ type }: Props) {
             <Checkbox checked={getValue()} />
           </div>
         ),
+      }),
+      columnHelper.accessor("jobFolderId", {
+        header: "Google Drive",
+        cell: ({ row }) => {
+          const job = row.original;
+          return (
+            <div
+              className="flex"
+              onClick={(event) => {
+                event.preventDefault();
+              }}
+            >
+              <OpenJobFolderOnWebButton
+                job={job}
+                title="Google Drive"
+                className="-ml-3 text-xs h-8 px-2"
+              />
+            </div>
+          );
+        },
       }),
       columnHelper.accessor("priority", {
         header: () => (
@@ -555,10 +577,12 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <NameSearch
-        searchParamName={jobNameSearchParamName}
-        pageIndexSearchParamName={pageIndexSearchParamName}
-      />
+      <div className="">
+        <NameSearch
+          searchParamName={jobNameSearchParamName}
+          pageIndexSearchParamName={pageIndexSearchParamName}
+        />
+      </div>
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>

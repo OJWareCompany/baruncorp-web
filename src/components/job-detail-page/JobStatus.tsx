@@ -29,8 +29,8 @@ interface Props {
 export default function JobStatus({ job }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const currentStatus = jobStatuses[job.jobStatus];
+  const isSendToClient = job.dateSentToClient !== null;
   const dispatch = useAlertDialogDataDispatch();
-  const againSendDeliverables = job.dateSentToClient;
   const {
     isBarunCorpMember,
     authority: { canSendDeliverables },
@@ -113,7 +113,8 @@ export default function JobStatus({ job }: Props) {
       </Popover>
       {canSendDeliverables &&
         (currentStatus.value === "Completed" ||
-          currentStatus.value === "Canceled (Invoice)") && (
+          currentStatus.value === "Canceled (Invoice)" ||
+          currentStatus.value === "Sent To Client") && (
           <Button
             size={"default"}
             variant={"outline"}
@@ -127,7 +128,7 @@ export default function JobStatus({ job }: Props) {
             }}
             className="shrink-0"
           >
-            {againSendDeliverables !== null ? (
+            {isSendToClient ? (
               <>
                 <Send className="mr-2 h-4 w-4" />
                 <span>Resend Deliverables</span>

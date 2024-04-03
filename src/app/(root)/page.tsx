@@ -2,8 +2,8 @@
 import JobsTableForClient from "./JobsTableForClient";
 import { useProfileContext } from "./ProfileProvider";
 import JobsTableForMember from "./JobsTableForMember";
-import CollapsibleSection from "@/components/CollapsibleSection";
 import PageHeader from "@/components/PageHeader";
+import NewTabCollapsibleSection from "@/components/NewTabCollapsibleSeciton";
 
 export default function Page() {
   const { isBarunCorpMember } = useProfileContext();
@@ -14,30 +14,30 @@ export default function Page() {
       <div className="space-y-4">
         <PageHeader items={[{ href: "/", name: "Home" }]} />
         <div className="space-y-6">
-          <CollapsibleSection title="Not Started">
+          <NewTabCollapsibleSection title="Not Started">
             <JobsTableForMember type="Not Started" />
-          </CollapsibleSection>
-          <CollapsibleSection title="In Progress">
+          </NewTabCollapsibleSection>
+          <NewTabCollapsibleSection title="In Progress">
             <JobsTableForMember type="In Progress" />
-          </CollapsibleSection>
-          <CollapsibleSection title="Completed">
+          </NewTabCollapsibleSection>
+          <NewTabCollapsibleSection title="Completed">
             <JobsTableForMember type="Completed" />
-          </CollapsibleSection>
-          <CollapsibleSection title="Sent To Client">
+          </NewTabCollapsibleSection>
+          <NewTabCollapsibleSection title="Sent To Client">
             <JobsTableForMember type="Sent To Client" />
-          </CollapsibleSection>
-          <CollapsibleSection title="On Hold">
+          </NewTabCollapsibleSection>
+          <NewTabCollapsibleSection title="On Hold">
             <JobsTableForMember type="On Hold" />
-          </CollapsibleSection>
-          <CollapsibleSection title="Canceled">
+          </NewTabCollapsibleSection>
+          <NewTabCollapsibleSection title="Canceled">
             <JobsTableForMember type="Canceled" />
-          </CollapsibleSection>
-          <CollapsibleSection title="Canceled (Invoice)">
+          </NewTabCollapsibleSection>
+          <NewTabCollapsibleSection title="Canceled (Invoice)">
             <JobsTableForMember type="Canceled (Invoice)" />
-          </CollapsibleSection>
-          <CollapsibleSection title="All">
+          </NewTabCollapsibleSection>
+          <NewTabCollapsibleSection title="All">
             <JobsTableForMember type="All" />
-          </CollapsibleSection>
+          </NewTabCollapsibleSection>
         </div>
       </div>
     );
@@ -48,30 +48,30 @@ export default function Page() {
     <div className="space-y-4">
       <PageHeader items={[{ href: "/", name: "Home" }]} />
       <div className="space-y-6">
-        <CollapsibleSection title="Not Started">
+        <NewTabCollapsibleSection title="Not Started">
           <JobsTableForClient type="Not Started" />
-        </CollapsibleSection>
-        <CollapsibleSection title="In Progress">
+        </NewTabCollapsibleSection>
+        <NewTabCollapsibleSection title="In Progress">
           <JobsTableForClient type="In Progress" />
-        </CollapsibleSection>
-        <CollapsibleSection title="Completed">
+        </NewTabCollapsibleSection>
+        <NewTabCollapsibleSection title="Completed">
           <JobsTableForClient type="Completed" />
-        </CollapsibleSection>
-        <CollapsibleSection title="Sent To Client">
+        </NewTabCollapsibleSection>
+        <NewTabCollapsibleSection title="Sent To Client">
           <JobsTableForClient type="Sent To Client" />
-        </CollapsibleSection>
-        <CollapsibleSection title="On Hold">
+        </NewTabCollapsibleSection>
+        <NewTabCollapsibleSection title="On Hold">
           <JobsTableForClient type="On Hold" />
-        </CollapsibleSection>
-        <CollapsibleSection title="Canceled">
+        </NewTabCollapsibleSection>
+        <NewTabCollapsibleSection title="Canceled">
           <JobsTableForClient type="Canceled" />
-        </CollapsibleSection>
-        <CollapsibleSection title="Canceled (Invoice)">
+        </NewTabCollapsibleSection>
+        <NewTabCollapsibleSection title="Canceled (Invoice)">
           <JobsTableForClient type="Canceled (Invoice)" />
-        </CollapsibleSection>
-        <CollapsibleSection title="All">
+        </NewTabCollapsibleSection>
+        <NewTabCollapsibleSection title="All">
           <JobsTableForClient type="All" />
-        </CollapsibleSection>
+        </NewTabCollapsibleSection>
       </div>
     </div>
   );
