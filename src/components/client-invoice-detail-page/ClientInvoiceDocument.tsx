@@ -191,13 +191,13 @@ export default function ClientInvoiceDocument({
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              <Text>Discount</Text>
+              <Text>Volume Tier Discount</Text>
               <Text>${clientInvoice.discount}</Text>
             </View>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              <Text>Total</Text>
+              <Text>Balance Due</Text>
               <Text>${clientInvoice.total}</Text>
             </View>
           </View>

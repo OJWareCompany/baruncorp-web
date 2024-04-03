@@ -81,10 +81,10 @@ const columns = [
     header: "Subtotal",
   }),
   columnHelper.accessor((row) => `$${row.discount}`, {
-    header: "Discount",
+    header: "Volume Tier Discount",
   }),
   columnHelper.accessor((row) => `$${row.total}`, {
-    header: "Total",
+    header: "Balance due",
   }),
   columnHelper.accessor("notesToClient", {
     header: "Notes",

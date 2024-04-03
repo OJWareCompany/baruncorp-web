@@ -237,7 +237,7 @@ export default function JobsTable({ clientInvoice, pageType }: Props) {
           />
         </Item>
         <Item>
-          <Label>Discount</Label>
+          <Label>Volume Tier Discount</Label>
           <AffixInput
             prefixElement={<span className="text-muted-foreground">$</span>}
             value={
@@ -247,7 +247,7 @@ export default function JobsTable({ clientInvoice, pageType }: Props) {
           />
         </Item>
         <Item>
-          <Label>Total</Label>
+          <Label>Balance Due</Label>
           <AffixInput
             prefixElement={<span className="text-muted-foreground">$</span>}
             value={String(clientInvoice.total)}
