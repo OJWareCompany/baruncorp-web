@@ -223,6 +223,14 @@ export interface ChangeUserRoleRequestDto {
     | "Viewer";
 }
 
+export interface JoinOrganizationRequestDto {
+  /**
+   * @format date-time
+   * @default "2023-09-04"
+   */
+  dateOfJoining?: string | null;
+}
+
 export interface AddressDto {
   /** @default "3480 Northwest 33rd Court" */
   street1: string;
@@ -255,6 +263,7 @@ export interface OrganizationResponseDto {
   numberOfFreeRevisionCount: number | null;
   isVendor: boolean;
   isDelinquent: boolean;
+  isTieredDiscount: boolean;
   invoiceRecipientEmail: string | null;
 }
 
@@ -344,6 +353,8 @@ export interface CreateJobRequestDto {
   structuralUpgradeNote: string | null;
   /** @example "Ground Mount" */
   mountingType: "Roof Mount" | "Ground Mount";
+  /** @default "Medium" */
+  priority?: "Immediate" | "High" | "Medium" | "Low";
   /** @default "Self" */
   loadCalcOrigin: "Self" | "Client Provided";
   /** @default [{"serviceId":"e5d81943-3fef-416d-a85b-addb8be296c0","description":""},{"serviceId":"99ff64ee-fe47-4235-a026-db197628d077","description":""},{"serviceId":"5c29f1ae-d50b-4400-a6fb-b1a2c87126e9","description":""},{"serviceId":"2a2a256b-57a5-46f5-8cfb-1855cc29238a","description":"This is not on the menu."}] */
@@ -371,6 +382,8 @@ export interface UpdateJobRequestDto {
   /** @default 300.1 */
   systemSize: number | null;
   structuralUpgradeNote: string | null;
+  /** @default "Medium" */
+  priority: "Immediate" | "High" | "Medium" | "Low";
   /** @default "Self" */
   loadCalcOrigin: "Self" | "Client Provided";
   mailingAddressForWetStamp: AddressDto | null;
@@ -387,8 +400,6 @@ export interface UpdateJobRequestDto {
   /** @example "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   inReview: boolean;
-  /** @default "Medium" */
-  priority: "Immediate" | "High" | "Medium" | "Low";
 }
 
 export interface UpdateJobStatusRequestDto {
@@ -438,6 +449,7 @@ export interface AssignedTaskResponseDto {
   createdAt: string | null;
   duration: number | null;
   cost: number | null;
+  isManualCost: boolean;
   prerequisiteTasks: PrerequisiteTaskVO[];
 }
 
@@ -550,6 +562,8 @@ export interface JobResponseDto {
   inReview: boolean;
   /** @example "High" */
   priority: "Immediate" | "High" | "Medium" | "Low";
+  /** @example 2 */
+  priorityLevel: 1 | 2 | 3 | 4;
   jobName: string;
   propertyOwner: string;
   projectNumber: string | null;
@@ -1039,8 +1053,11 @@ export interface InvoiceResponseDto {
   updatedAt: string;
   servicePeriodDate: string;
   subtotal: number;
-  discount: number | null;
+  volumeTierDiscount: number | null;
   total: number;
+  balanceDue: number;
+  amountPaid: number;
+  appliedCredit: number;
   clientOrganization: InvoiceClientOrganization;
   lineItems: JobResponseDto[];
   payments: InvoicePayments[];
@@ -2362,6 +2379,10 @@ export interface VendorInvoiceLineItemResponse {
   serviceName: string;
   serviceId: string;
   orderedServiceId: string;
+  /** @example "High" */
+  priority: "Immediate" | "High" | "Medium" | "Low";
+  /** @example 2 */
+  priorityLevel: 1 | 2 | 3 | 4;
   serviceDescription: string | null;
   taskExpenseTotal: number;
   isRevision: boolean;
@@ -4676,6 +4697,26 @@ export class Api<
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name JoinOrganizationHttpControllerPost
+     * @request POST:/users/{userId}/organizations/{organizationId}/join
+     */
+    joinOrganizationHttpControllerPost: (
+      userId: string,
+      organizationId: string,
+      data: JoinOrganizationRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/${userId}/organizations/${organizationId}/join`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
