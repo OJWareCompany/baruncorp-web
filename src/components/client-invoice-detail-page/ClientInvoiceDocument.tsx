@@ -192,13 +192,31 @@ export default function ClientInvoiceDocument({
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text>Volume Tier Discount</Text>
-              <Text>${clientInvoice.discount}</Text>
+              <Text>${clientInvoice.volumeTierDiscount}</Text>
+            </View>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <Text>Totoal</Text>
+              <Text>${clientInvoice.total}</Text>
+            </View>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <Text>Applied Credit</Text>
+              <Text>${clientInvoice.appliedCredit}</Text>
+            </View>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <Text>Amount Paid</Text>
+              <Text>${clientInvoice.amountPaid}</Text>
             </View>
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <Text>Balance Due</Text>
-              <Text>${clientInvoice.total}</Text>
+              <Text>${clientInvoice.balanceDue}</Text>
             </View>
           </View>
         </View>
