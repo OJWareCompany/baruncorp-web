@@ -83,6 +83,7 @@ const formSchema = z
     numberOfFreeRevisionCount: z.string().trim(),
     isVendor: z.boolean(),
     isDelinquent: z.boolean(),
+    isTieredDiscount: z.boolean(),
   })
   .superRefine((values, ctx) => {
     const { isSpecialRevisionPricing, numberOfFreeRevisionCount } = values;
@@ -134,6 +135,7 @@ function getFieldValues(organization: OrganizationResponseDto): FieldValues {
     ),
     isVendor: organization.isVendor,
     isDelinquent: organization.isDelinquent,
+    isTieredDiscount: organization.isTieredDiscount,
   };
 }
 
@@ -446,6 +448,25 @@ export default function OrganizationForm({ organization }: Props) {
             render={({ field }) => (
               <FormItem className="flex-row-reverse justify-end items-center gap-3">
                 <FormLabel>Delinquent</FormLabel>
+                <FormControl>
+                  <Checkbox
+                    ref={field.ref}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {organization.organizationType !== "administration" && (
+          <FormField
+            control={form.control}
+            name="isTieredDiscount"
+            render={({ field }) => (
+              <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                <FormLabel>Tiered Discount</FormLabel>
                 <FormControl>
                   <Checkbox
                     ref={field.ref}

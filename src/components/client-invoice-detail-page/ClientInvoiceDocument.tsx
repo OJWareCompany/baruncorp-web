@@ -182,18 +182,28 @@ export default function ClientInvoiceDocument({
             </View>
           </View>
           <View style={{ flex: 1 }}>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              <Text>Subtotal</Text>
-              <Text>${clientInvoice.subtotal}</Text>
-            </View>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              <Text>Volume Tier Discount</Text>
-              <Text>${clientInvoice.volumeTierDiscount}</Text>
-            </View>
+            {organization.isTieredDiscount && (
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Text>Subtotal</Text>
+                  <Text>${clientInvoice.subtotal}</Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Text>Volume Tier Discount</Text>
+                  <Text>${clientInvoice.volumeTierDiscount}</Text>
+                </View>
+              </>
+            )}
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
