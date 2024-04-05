@@ -241,8 +241,34 @@ export default function JobsTable({ clientInvoice, pageType }: Props) {
           <AffixInput
             prefixElement={<span className="text-muted-foreground">$</span>}
             value={
-              clientInvoice.discount ? String(clientInvoice.discount) : "-"
+              clientInvoice.volumeTierDiscount
+                ? String(clientInvoice.volumeTierDiscount)
+                : "-"
             }
+            readOnly
+          />
+        </Item>
+        <Item>
+          <Label>Total</Label>
+          <AffixInput
+            prefixElement={<span className="text-muted-foreground">$</span>}
+            value={String(clientInvoice.total)}
+            readOnly
+          />
+        </Item>
+        <Item>
+          <Label>Applied Credit</Label>
+          <AffixInput
+            prefixElement={<span className="text-muted-foreground">$</span>}
+            value={String(clientInvoice.appliedCredit)}
+            readOnly
+          />
+        </Item>
+        <Item>
+          <Label>Amount Paid</Label>
+          <AffixInput
+            prefixElement={<span className="text-muted-foreground">$</span>}
+            value={String(clientInvoice.amountPaid)}
             readOnly
           />
         </Item>
@@ -250,7 +276,7 @@ export default function JobsTable({ clientInvoice, pageType }: Props) {
           <Label>Balance Due</Label>
           <AffixInput
             prefixElement={<span className="text-muted-foreground">$</span>}
-            value={String(clientInvoice.total)}
+            value={String(clientInvoice.balanceDue)}
             readOnly
           />
         </Item>

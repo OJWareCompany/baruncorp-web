@@ -577,7 +577,7 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <div className="">
+      <div>
         <NameSearch
           searchParamName={jobNameSearchParamName}
           pageIndexSearchParamName={pageIndexSearchParamName}

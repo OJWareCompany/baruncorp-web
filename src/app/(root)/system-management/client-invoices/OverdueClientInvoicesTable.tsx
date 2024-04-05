@@ -151,10 +151,19 @@ export default function OverdueClientInvoicesTable() {
       columnHelper.accessor((row) => `$${row.subtotal}`, {
         header: "Subtotal",
       }),
-      columnHelper.accessor((row) => `$${row.discount}`, {
+      columnHelper.accessor((row) => `$${row.volumeTierDiscount}`, {
         header: "Volume Tier Discount",
       }),
       columnHelper.accessor((row) => `$${row.total}`, {
+        header: "Total",
+      }),
+      columnHelper.accessor((row) => `$${row.appliedCredit}`, {
+        header: "Applied Credit",
+      }),
+      columnHelper.accessor((row) => `$${row.amountPaid}`, {
+        header: "Amount Paid",
+      }),
+      columnHelper.accessor((row) => `$${row.balanceDue}`, {
         header: "Balance Due",
       }),
       columnHelper.accessor("createdAt", {
