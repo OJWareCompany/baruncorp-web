@@ -1,25 +1,21 @@
-// import { format } from "date-fns";
 // import { download, generateCsv, mkConfig } from "export-to-csv";
 // import { ArrowDownToLine } from "lucide-react";
 // import { useMemo } from "react";
-// import { getLineItemsTableExportDataFromLineItems } from "./JobsTable";
 // import { Button } from "@/components/ui/button";
-// import { InvoiceResponseDto } from "@/api/api-spec";
+// import { getItemsTableExportDataFromLineItems } from "@/app/(root)/JobsTableForMember";
+// import { JobPaginatedResponseDto } from "@/api/api-spec";
 
 // interface Props {
-//   clientInvoice: InvoiceResponseDto;
+//   jobsTable: JobPaginatedResponseDto;
 // }
 
-// export default function DownloadCSVButton({ clientInvoice }: Props) {
+// export default function DownloadCSVButton({ jobsTable }: Props) {
 //   const csvConfig = useMemo(() => {
 //     return mkConfig({
 //       useKeysAsHeaders: true,
-//       filename: `${clientInvoice.clientOrganization.name}, ${format(
-//         new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
-//         "MMM yyyy"
-//       )}`,
+//       filename: `${jobsTable.jobName}, `,
 //     });
-//   }, [clientInvoice.clientOrganization.name, clientInvoice.servicePeriodDate]);
+//   }, [jobsTable.jobName]);
 
 //   return (
 //     <Button
@@ -28,7 +24,7 @@
 //       className="h-[28px] text-xs px-2"
 //       onClick={() => {
 //         const csv = generateCsv(csvConfig)(
-//           getLineItemsTableExportDataFromLineItems(clientInvoice.lineItems)
+//           getItemsTableExportDataFromLineItems(jobsTable)
 //         );
 //         download(csvConfig)(csv);
 //       }}
