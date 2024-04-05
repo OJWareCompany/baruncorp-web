@@ -83,7 +83,6 @@ const formSchema = z
     numberOfFreeRevisionCount: z.string().trim(),
     isVendor: z.boolean(),
     isDelinquent: z.boolean(),
-    isTieredDiscount: z.boolean(),
   })
   .superRefine((values, ctx) => {
     const { isSpecialRevisionPricing, numberOfFreeRevisionCount } = values;
@@ -135,7 +134,6 @@ function getFieldValues(organization: OrganizationResponseDto): FieldValues {
     ),
     isVendor: organization.isVendor,
     isDelinquent: organization.isDelinquent,
-    isTieredDiscount: organization.isTieredDiscount,
   };
 }
 
@@ -460,7 +458,7 @@ export default function OrganizationForm({ organization }: Props) {
             )}
           />
         )}
-        {organization.organizationType !== "administration" && (
+        {/* {organization.organizationType !== "administration" && (
           <FormField
             control={form.control}
             name="isTieredDiscount"
@@ -478,7 +476,7 @@ export default function OrganizationForm({ organization }: Props) {
               </FormItem>
             )}
           />
-        )}
+        )} */}
         <LoadingButton
           type="submit"
           className="w-full"

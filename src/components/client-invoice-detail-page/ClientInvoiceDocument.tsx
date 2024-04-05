@@ -182,7 +182,7 @@ export default function ClientInvoiceDocument({
             </View>
           </View>
           <View style={{ flex: 1 }}>
-            {organization.isTieredDiscount && (
+            {organization.isTierDiscount && (
               <>
                 <View
                   style={{
