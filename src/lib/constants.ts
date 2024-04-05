@@ -271,6 +271,10 @@ export const jobPriorities: Record<
     value: "Immediate",
     color: "bg-red-500 hover:bg-red-500/80",
   },
+  None: {
+    value: "None",
+    color: "bg-gray-500 hover:bg-gray-500/80",
+  },
 };
 
 /**
@@ -521,8 +525,14 @@ export type InvoiceStatusEnum = z.infer<typeof InvoiceStatusEnum>;
 
 /* -------------------------------------------------------------------------- */
 
-// "Immediate" | "High" | "Medium" | "Low"
-export const JobPriorityEnum = z.enum(["Immediate", "High", "Medium", "Low"]);
+// "Immediate" | "High" | "Medium" | "Low" | "None"
+export const JobPriorityEnum = z.enum([
+  "Immediate",
+  "High",
+  "Medium",
+  "Low",
+  "None",
+]);
 // "Immediate" | "High" | "Medium" | "Low" | ""
 export const JobPriorityEnumWithEmptyString = JobPriorityEnum.or(z.literal(""));
 // "Immediate" | "High" | "Medium" | "Low" | "" => "Immediate" | "High" | "Medium" | "Low" | null

@@ -263,7 +263,7 @@ export interface OrganizationResponseDto {
   numberOfFreeRevisionCount: number | null;
   isVendor: boolean;
   isDelinquent: boolean;
-  isTieredDiscount: boolean;
+  isTierDiscount: boolean;
   invoiceRecipientEmail: string | null;
 }
 
@@ -281,6 +281,7 @@ export interface OrganizationPaginatedResponseFields {
   isDelinquent: boolean;
   numberOfFreeRevisionCount: number | null;
   isVendor: boolean;
+  isTierDiscount: boolean;
 }
 
 export interface OrganizationPaginatedResponseDto {
@@ -354,7 +355,7 @@ export interface CreateJobRequestDto {
   /** @example "Ground Mount" */
   mountingType: "Roof Mount" | "Ground Mount";
   /** @default "Medium" */
-  priority?: "Immediate" | "High" | "Medium" | "Low";
+  priority?: "Immediate" | "High" | "Medium" | "Low" | "None";
   /** @default "Self" */
   loadCalcOrigin: "Self" | "Client Provided";
   /** @default [{"serviceId":"e5d81943-3fef-416d-a85b-addb8be296c0","description":""},{"serviceId":"99ff64ee-fe47-4235-a026-db197628d077","description":""},{"serviceId":"5c29f1ae-d50b-4400-a6fb-b1a2c87126e9","description":""},{"serviceId":"2a2a256b-57a5-46f5-8cfb-1855cc29238a","description":"This is not on the menu."}] */
@@ -383,7 +384,7 @@ export interface UpdateJobRequestDto {
   systemSize: number | null;
   structuralUpgradeNote: string | null;
   /** @default "Medium" */
-  priority: "Immediate" | "High" | "Medium" | "Low";
+  priority: "Immediate" | "High" | "Medium" | "Low" | "None";
   /** @default "Self" */
   loadCalcOrigin: "Self" | "Client Provided";
   mailingAddressForWetStamp: AddressDto | null;
@@ -561,9 +562,9 @@ export interface JobResponseDto {
   /** @example true */
   inReview: boolean;
   /** @example "High" */
-  priority: "Immediate" | "High" | "Medium" | "Low";
+  priority: "Immediate" | "High" | "Medium" | "Low" | "None";
   /** @example 2 */
-  priorityLevel: 1 | 2 | 3 | 4;
+  priorityLevel: 1 | 2 | 3 | 4 | 5;
   jobName: string;
   propertyOwner: string;
   projectNumber: string | null;
@@ -2380,9 +2381,9 @@ export interface VendorInvoiceLineItemResponse {
   serviceId: string;
   orderedServiceId: string;
   /** @example "High" */
-  priority: "Immediate" | "High" | "Medium" | "Low";
+  priority: "Immediate" | "High" | "Medium" | "Low" | "None";
   /** @example 2 */
-  priorityLevel: 1 | 2 | 3 | 4;
+  priorityLevel: 1 | 2 | 3 | 4 | 5;
   serviceDescription: string | null;
   taskExpenseTotal: number;
   isRevision: boolean;
@@ -3074,7 +3075,7 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
   /** @default false */
   inReview?: boolean | null;
   /** @default "Medium" */
-  priority?: "Immediate" | "High" | "Medium" | "Low" | null;
+  priority?: "Immediate" | "High" | "Medium" | "Low" | "None" | null;
   /**
    * Using LIKE (중간 값 검색)
    * @default ""
@@ -3129,7 +3130,7 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
   /** @default false */
   inReview?: boolean | null;
   /** @default "Medium" */
-  priority?: "Immediate" | "High" | "Medium" | "Low" | null;
+  priority?: "Immediate" | "High" | "Medium" | "Low" | "None" | null;
   /**
    * Using LIKE (중간 값 검색)
    * @default ""
@@ -3206,7 +3207,7 @@ export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
   /** @default false */
   inReview?: boolean | null;
   /** @default "Medium" */
-  priority?: "Immediate" | "High" | "Medium" | "Low" | null;
+  priority?: "Immediate" | "High" | "Medium" | "Low" | "None" | null;
   /**
    * Using LIKE (중간 값 검색)
    * @default ""
