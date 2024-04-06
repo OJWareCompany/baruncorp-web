@@ -48,6 +48,9 @@ import {
 import EnumHeader from "@/components/table/EnumHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
+import useOrganizationQuery from "@/queries/useOrganizationQuery";
+import useNotFound from "@/hook/useNotFound";
+import PageLoading from "@/components/PageLoading";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
@@ -72,6 +75,12 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindInvoicePaginatedHttpControllerGetParams>();
+
+  const {
+    data: organization,
+    isLoading: isOrganizationQueryLoading,
+    error: organizationQueryError,
+  } = useOrganizationQuery(organizationId);
 
   const invoiceStatusSearchParamName = `${TABLE_NAME}${type}InvoiceStatus`;
   const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
@@ -170,12 +179,16 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
         header: "Due Date",
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
-      columnHelper.accessor((row) => `$${row.subtotal}`, {
-        header: "Subtotal",
-      }),
-      columnHelper.accessor((row) => `$${row.volumeTierDiscount}`, {
-        header: "Volume Tier Discount",
-      }),
+      ...(organization?.isTierDiscount
+        ? [
+            columnHelper.accessor((row) => `$${row.subtotal}`, {
+              header: "Subtotal",
+            }),
+            columnHelper.accessor((row) => `$${row.volumeTierDiscount}`, {
+              header: "Volume Tier Discount",
+            }),
+          ]
+        : []),
       columnHelper.accessor((row) => `$${row.total}`, {
         header: "Total",
       }),
@@ -227,6 +240,11 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
     },
   });
 
+  useNotFound(organizationQueryError);
+
+  if (isOrganizationQueryLoading || organization == null) {
+    return <PageLoading />;
+  }
   return (
     <div className="space-y-2">
       <div className="rounded-md border overflow-hidden">
