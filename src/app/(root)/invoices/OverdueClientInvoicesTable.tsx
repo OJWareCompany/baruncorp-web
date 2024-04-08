@@ -14,9 +14,9 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { format } from "date-fns";
 import { useMemo } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -37,81 +37,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { formatInEST } from "@/lib/utils";
-import { invoiceStatuses } from "@/lib/constants";
 import useOverdueClientInvoicesQuery from "@/queries/useOverdueClientInvoicesQuery";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import useOrganizationQuery from "@/queries/useOrganizationQuery";
+import { formatInEST } from "@/lib/utils";
+import { invoiceStatuses } from "@/lib/constants";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
-
-const columns = [
-  columnHelper.accessor("servicePeriodDate", {
-    header: "Service Period Month",
-    cell: ({ getValue }) =>
-      format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
-  }),
-  columnHelper.accessor("status", {
-    header: "Status",
-    cell: ({ getValue }) => {
-      const value = getValue();
-      const status = invoiceStatuses[value];
-
-      return (
-        <div className={`flex items-center`}>
-          <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-          <span className="whitespace-nowrap">{status.value}</span>
-        </div>
-      );
-    },
-  }),
-  columnHelper.accessor("invoiceDate", {
-    header: "Invoice Date",
-    cell: ({ getValue }) => formatInEST(getValue()),
-  }),
-  columnHelper.accessor("terms", {
-    header: "Terms",
-  }),
-  columnHelper.accessor("dueDate", {
-    header: "Due Date",
-    cell: ({ getValue }) => formatInEST(getValue()),
-  }),
-  columnHelper.accessor((row) => `$${row.subtotal}`, {
-    header: "Subtotal",
-  }),
-  columnHelper.accessor((row) => `$${row.volumeTierDiscount}`, {
-    header: "Volume Tier Discount",
-  }),
-  columnHelper.accessor((row) => `$${row.total}`, {
-    header: "Total",
-  }),
-  columnHelper.accessor((row) => `$${row.appliedCredit}`, {
-    header: "Applied Credit",
-  }),
-  columnHelper.accessor((row) => `$${row.amountPaid}`, {
-    header: "Amount Paid",
-  }),
-  columnHelper.accessor((row) => `$${row.balanceDue}`, {
-    header: "Balance Due",
-  }),
-  columnHelper.accessor("notesToClient", {
-    header: "Notes",
-    cell: ({ getValue }) => {
-      const value = getValue();
-
-      if (value == null) {
-        return <p className="text-muted-foreground">-</p>;
-      }
-
-      return <InvoiceNotesHoverCard value={value} />;
-    },
-  }),
-  columnHelper.accessor("createdAt", {
-    header: "Date Created",
-    cell: ({ getValue }) => formatInEST(getValue()),
-  }),
-];
 
 const TABLE_NAME = "OverdueClientInvoices";
 const RELATIVE_PATH = "src/app/(root)/invoices/OverdueClientInvoicesTable.tsx";
@@ -123,6 +57,8 @@ interface Props {
 export default function OverdueClientInvoicesTable({ organizationId }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const { data: organization } = useOrganizationQuery(organizationId);
 
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
 
@@ -153,6 +89,77 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
   );
 
   const { data, isLoading } = useOverdueClientInvoicesQuery(params, true);
+
+  const columns = [
+    columnHelper.accessor("servicePeriodDate", {
+      header: "Service Period Month",
+      cell: ({ getValue }) =>
+        format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+    }),
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: ({ getValue }) => {
+        const value = getValue();
+        const status = invoiceStatuses[value];
+
+        return (
+          <div className={`flex items-center`}>
+            <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+            <span className="whitespace-nowrap">{status.value}</span>
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor("invoiceDate", {
+      header: "Invoice Date",
+      cell: ({ getValue }) => formatInEST(getValue()),
+    }),
+    columnHelper.accessor("terms", {
+      header: "Terms",
+    }),
+    columnHelper.accessor("dueDate", {
+      header: "Due Date",
+      cell: ({ getValue }) => formatInEST(getValue()),
+    }),
+    ...(organization?.isTierDiscount
+      ? [
+          columnHelper.accessor((row) => `$${row.subtotal}`, {
+            header: "Subtotal",
+          }),
+          columnHelper.accessor((row) => `$${row.volumeTierDiscount}`, {
+            header: "Volume Tier Discount",
+          }),
+        ]
+      : []),
+    columnHelper.accessor((row) => `$${row.total}`, {
+      header: "Total",
+    }),
+    columnHelper.accessor((row) => `$${row.appliedCredit}`, {
+      header: "Applied Credit",
+    }),
+    columnHelper.accessor((row) => `$${row.amountPaid}`, {
+      header: "Amount Paid",
+    }),
+    columnHelper.accessor((row) => `$${row.balanceDue}`, {
+      header: "Balance Due",
+    }),
+    columnHelper.accessor("notesToClient", {
+      header: "Notes",
+      cell: ({ getValue }) => {
+        const value = getValue();
+
+        if (value == null) {
+          return <p className="text-muted-foreground">-</p>;
+        }
+
+        return <InvoiceNotesHoverCard value={value} />;
+      },
+    }),
+    columnHelper.accessor("createdAt", {
+      header: "Date Created",
+      cell: ({ getValue }) => formatInEST(getValue()),
+    }),
+  ];
 
   const table = useReactTable({
     data: data?.items ?? [],
