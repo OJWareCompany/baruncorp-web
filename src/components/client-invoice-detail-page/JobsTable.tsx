@@ -256,6 +256,8 @@ export default function JobsTable({ clientInvoice, pageType }: Props) {
             readOnly
           />
         </Item>
+      </RowItemsContainer>
+      <RowItemsContainer className="my-1">
         <Item>
           <Label>Applied Credit</Label>
           <AffixInput

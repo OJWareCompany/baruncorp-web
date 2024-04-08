@@ -464,7 +464,6 @@ export default function OrganizationForm({ organization }: Props) {
           <FormField
             control={form.control}
             name="isTierDiscount"
-            disabled
             render={({ field }) => (
               <FormItem className="flex-row-reverse justify-end items-center gap-3">
                 <FormLabel>Tiered Discount</FormLabel>
