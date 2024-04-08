@@ -7,6 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
+import TierDiscountRowItemsContainer from "../TierDiscountRowItemsContainer";
 import {
   Table,
   TableBody,
@@ -23,6 +24,7 @@ import { AffixInput } from "@/components/AffixInput";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatInEST } from "@/lib/utils";
+import useOrganizationQuery from "@/queries/useOrganizationQuery";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["lineItems"][number]>();
@@ -224,65 +226,102 @@ export default function JobsTable({ clientInvoice, pageType }: Props) {
     getCoreRowModel: getCoreRowModel(),
     getRowId: ({ id }) => id,
   });
-
+  const { data: organization } = useOrganizationQuery(
+    clientInvoice.clientOrganization.id
+  );
   return (
     <div className="flex flex-col gap-2">
-      <RowItemsContainer>
-        <Item>
-          <Label>Subtotal</Label>
-          <AffixInput
-            prefixElement={<span className="text-muted-foreground">$</span>}
-            value={String(clientInvoice.subtotal)}
-            readOnly
-          />
-        </Item>
-        <Item>
-          <Label>Volume Tier Discount</Label>
-          <AffixInput
-            prefixElement={<span className="text-muted-foreground">$</span>}
-            value={
-              clientInvoice.volumeTierDiscount
-                ? String(clientInvoice.volumeTierDiscount)
-                : "-"
-            }
-            readOnly
-          />
-        </Item>
-        <Item>
-          <Label>Total</Label>
-          <AffixInput
-            prefixElement={<span className="text-muted-foreground">$</span>}
-            value={String(clientInvoice.total)}
-            readOnly
-          />
-        </Item>
-      </RowItemsContainer>
-      <RowItemsContainer className="my-1">
-        <Item>
-          <Label>Applied Credit</Label>
-          <AffixInput
-            prefixElement={<span className="text-muted-foreground">$</span>}
-            value={String(clientInvoice.appliedCredit)}
-            readOnly
-          />
-        </Item>
-        <Item>
-          <Label>Amount Paid</Label>
-          <AffixInput
-            prefixElement={<span className="text-muted-foreground">$</span>}
-            value={String(clientInvoice.amountPaid)}
-            readOnly
-          />
-        </Item>
-        <Item>
-          <Label>Balance Due</Label>
-          <AffixInput
-            prefixElement={<span className="text-muted-foreground">$</span>}
-            value={String(clientInvoice.balanceDue)}
-            readOnly
-          />
-        </Item>
-      </RowItemsContainer>
+      {organization?.isTierDiscount ? (
+        <TierDiscountRowItemsContainer className="my-1">
+          <Item>
+            <Label>Subtotal</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.subtotal)}
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Volume Tier Discount</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={
+                clientInvoice.volumeTierDiscount
+                  ? String(clientInvoice.volumeTierDiscount)
+                  : "-"
+              }
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Total</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.total)}
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Applied Credit</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.appliedCredit)}
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Amount Paid</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.amountPaid)}
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Balance Due</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.balanceDue)}
+              readOnly
+            />
+          </Item>
+        </TierDiscountRowItemsContainer>
+      ) : (
+        <RowItemsContainer>
+          <Item>
+            <Label>Total</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.total)}
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Applied Credit</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.appliedCredit)}
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Amount Paid</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.amountPaid)}
+              readOnly
+            />
+          </Item>
+          <Item>
+            <Label>Balance Due</Label>
+            <AffixInput
+              prefixElement={<span className="text-muted-foreground">$</span>}
+              value={String(clientInvoice.balanceDue)}
+              readOnly
+            />
+          </Item>
+        </RowItemsContainer>
+      )}
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
