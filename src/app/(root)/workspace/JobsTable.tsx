@@ -359,19 +359,22 @@ export default function JobsTable({ type }: Props) {
         ),
       }),
       columnHelper.accessor("jobStatus", {
-        header: () => (
-          <EnumHeader
-            buttonText="Status"
-            searchParamName={jobStatusSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={JobStatusEnum}
-            isLoading={
-              syncedParams != null &&
-              params.jobStatus !== syncedParams.jobStatus
-            }
-            defaultValue={type === "All" ? null : type}
-          />
-        ),
+        header: () =>
+          type !== "All" ? (
+            "Status"
+          ) : (
+            <EnumHeader
+              buttonText="Status"
+              searchParamName={jobStatusSearchParamName}
+              pageIndexSearchParamName={pageIndexSearchParamName}
+              zodEnum={JobStatusEnum}
+              isLoading={
+                syncedParams != null &&
+                params.jobStatus !== syncedParams.jobStatus
+              }
+              defaultValue={type === "All" ? null : type}
+            />
+          ),
         cell: ({ getValue, row }) => {
           const value = getValue();
           const status = jobStatuses[value];
