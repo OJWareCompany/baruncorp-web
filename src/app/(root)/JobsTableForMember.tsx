@@ -107,6 +107,7 @@ interface ItemTableExportData {
   "Mounting Type": string;
   "Project Number": string;
   "Property Owner": string;
+  "Client User": string;
   "Date Received": string;
   "Date Due": string;
   "Date Completed/Canceled": string;
@@ -128,6 +129,7 @@ export function getItemsTableExportDataFromLineItems(
     "Mounting Type": value.mountingType,
     "Project Number": value.projectNumber ?? "",
     "Property Owner": value.propertyOwner,
+    "Client User": value.clientInfo.clientUserName,
     "Date Received": formatInEST(value.receivedAt),
     "Date Due": value.dueDate ? formatInEST(value.dueDate) : "-",
     "Date Completed/Canceled": value.completedCancelledDate
