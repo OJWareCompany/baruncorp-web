@@ -114,6 +114,12 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
       header: "Invoice Date",
       cell: ({ getValue }) => formatInEST(getValue()),
     }),
+    columnHelper.accessor(() => `${organization?.invoiceRecipientEmail}`, {
+      header: "Invoice Recipient Email",
+    }),
+    columnHelper.accessor(() => `${organization?.phoneNumber}`, {
+      header: "Phone Number",
+    }),
     columnHelper.accessor("terms", {
       header: "Terms",
     }),
