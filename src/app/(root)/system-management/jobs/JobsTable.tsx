@@ -79,6 +79,7 @@ import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
 import NameSearch from "@/components/table/NameSearch";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
+import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -617,6 +618,9 @@ export default function JobsTable() {
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
+            {table.getRowModel().rows.length === 0 ? null : (
+              <DownloadCSVButton data={data} className="mr-2" />
+            )}
             <p className="text-sm font-medium">Rows per page</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}

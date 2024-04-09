@@ -43,6 +43,7 @@ import { Button } from "@/components/ui/button";
 import {
   FindMyOrderedJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
+  JobResponseDto,
 } from "@/api/api-spec";
 import {
   InTableButtonStyles,
@@ -81,6 +82,7 @@ import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
 import NameSearch from "@/components/table/NameSearch";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
+import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -92,6 +94,52 @@ interface Props {
   type: "All" | JobStatusEnum;
 }
 
+interface ItemTableExportData {
+  [index: string]: unknown;
+  Expedite: boolean;
+  "In ReView": boolean;
+  Priority: string;
+  Organization: string;
+  Name: string;
+  Status: string;
+  Tasks: number;
+  "Property Type": string;
+  "Mounting Type": string;
+  "Project Number": string;
+  "Property Owner": string;
+  "Client User": string;
+  "Date Received": string;
+  "Date Due": string;
+  "Date Completed/Canceled": string;
+  "Date Sent to Client": string;
+}
+
+export function getItemsTableExportDataFromLineItems(
+  items: JobResponseDto[]
+): ItemTableExportData[] {
+  return items.map<ItemTableExportData>((value, index) => ({
+    Expedite: value.isExpedited,
+    "In ReView": value.inReview,
+    Priority: jobPriorities[value.priority].value,
+    Organization: value.clientInfo.clientOrganizationName,
+    Name: value.jobName,
+    Status: jobStatuses[value.jobStatus].value,
+    Tasks: value.assignedTasks.length,
+    "Property Type": value.projectPropertyType,
+    "Mounting Type": value.mountingType,
+    "Project Number": value.projectNumber ?? "",
+    "Property Owner": value.propertyOwner,
+    "Client User": value.clientInfo.clientUserName,
+    "Date Received": formatInEST(value.receivedAt),
+    "Date Due": value.dueDate ? formatInEST(value.dueDate) : "-",
+    "Date Completed/Canceled": value.completedCancelledDate
+      ? formatInEST(value.completedCancelledDate)
+      : "-",
+    "Date Sent to Client": value.dateSentToClient
+      ? formatInEST(value.dateSentToClient)
+      : "-",
+  }));
+}
 export default function JobsTableForMember({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,7 +151,6 @@ export default function JobsTableForMember({ type }: Props) {
 
   const {
     isBarunCorpMember,
-    isContractor,
     authority: { canSendDeliverables },
   } = useProfileContext();
 
@@ -646,6 +693,9 @@ export default function JobsTableForMember({ type }: Props) {
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
+            {table.getRowModel().rows.length === 0 ? null : (
+              <DownloadCSVButton data={data} className="mr-2" />
+            )}
             <p className="text-sm font-medium">Rows per page</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
