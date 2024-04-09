@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { Checkbox } from "../ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -31,6 +32,7 @@ const formSchema = z
   .object({
     scopeId: z.string().trim().min(1, { message: "Scope is required" }),
     description: z.string().trim(),
+    isRevision: z.boolean(),
   })
   .superRefine((values, ctx) => {
     const { scopeId, description } = values;
@@ -65,6 +67,7 @@ export default function NewScopeForm({
     defaultValues: {
       scopeId: "",
       description: "",
+      isRevision: false,
     },
   });
   const watchScopeId = form.watch("scopeId");
@@ -94,6 +97,7 @@ export default function NewScopeForm({
         description: transformStringIntoNullableString.parse(
           values.description
         ),
+        isRevision: values.isRevision,
       })
       .then(() => {
         queryClient.invalidateQueries({ queryKey: getJobQueryKey(job.id) });
@@ -161,6 +165,25 @@ export default function NewScopeForm({
                 <FormLabel required>Description</FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {watchScopeId === OTHER_SERVICE_ID && (
+          <FormField
+            control={form.control}
+            name="isRevision"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Is Revision</FormLabel>
+                <FormControl>
+                  <Checkbox
+                    ref={field.ref}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
