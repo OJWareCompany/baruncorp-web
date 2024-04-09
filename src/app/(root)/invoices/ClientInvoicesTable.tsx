@@ -175,9 +175,6 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
       columnHelper.accessor(() => `${organization?.invoiceRecipientEmail}`, {
         header: "Invoice Recipient Email",
       }),
-      columnHelper.accessor(() => `${organization?.phoneNumber}`, {
-        header: "Phone Number",
-      }),
       columnHelper.accessor("terms", {
         header: "Terms",
       }),

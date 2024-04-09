@@ -46,6 +46,7 @@ import usePatchClientInvoiceMutation from "@/mutations/usePatchClientInvoiceMuta
 import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import useOrganizationQuery from "@/queries/useOrganizationQuery";
 
 const formSchema = z.object({
   organization: z
@@ -56,24 +57,12 @@ const formSchema = z.object({
     required_error: "A date of birth is required.",
   }),
   terms: TermsEnum,
+  invoiceRecipientEmail: z.string().email(),
   servicePeriodMonth: z
     .string()
     .datetime({ message: "Service Period Month is required" }),
   notes: z.string().trim(),
 });
-
-type FieldValues = z.infer<typeof formSchema>;
-
-function getFieldValues(clientInvoice: InvoiceResponseDto): FieldValues {
-  return {
-    organization: clientInvoice.clientOrganization.name,
-    invoiceDate: new Date(clientInvoice.invoiceDate),
-    terms: String(clientInvoice.terms) as z.infer<typeof TermsEnum>,
-    servicePeriodMonth: clientInvoice.servicePeriodDate,
-    notes: transformNullishStringIntoString.parse(clientInvoice.notesToClient),
-  };
-}
-
 interface Props {
   clientInvoice: InvoiceResponseDto;
 }
@@ -81,6 +70,24 @@ interface Props {
 export default function ClientInvoiceForm({ clientInvoice }: Props) {
   const { isBarunCorpMember } = useProfileContext();
 
+  const { data: organization } = useOrganizationQuery(
+    clientInvoice.clientOrganization.id
+  );
+
+  type FieldValues = z.infer<typeof formSchema>;
+
+  function getFieldValues(clientInvoice: InvoiceResponseDto): FieldValues {
+    return {
+      organization: clientInvoice.clientOrganization.name,
+      invoiceDate: new Date(clientInvoice.invoiceDate),
+      terms: String(clientInvoice.terms) as z.infer<typeof TermsEnum>,
+      servicePeriodMonth: clientInvoice.servicePeriodDate,
+      notes: transformNullishStringIntoString.parse(
+        clientInvoice.notesToClient
+      ),
+      invoiceRecipientEmail: organization?.invoiceRecipientEmail ?? "",
+    };
+  }
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(clientInvoice),
@@ -133,6 +140,19 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>Organization</FormLabel>
+                <FormControl>
+                  <Input value={field.value} disabled />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="invoiceRecipientEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Invoice Recipient Email</FormLabel>
                 <FormControl>
                   <Input value={field.value} disabled />
                 </FormControl>
