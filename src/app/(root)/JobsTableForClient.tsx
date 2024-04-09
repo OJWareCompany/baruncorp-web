@@ -473,7 +473,11 @@ export default function JobsTableForClient({ type }: Props) {
   return (
     <div className="space-y-2">
       <NameSearch
-        searchParamName={jobNameSearchParamName}
+        searchParamOptions={{
+          jobNameSearchParamName: jobNameSearchParamName,
+          projectNumberSearchParamName: projectNumberSearchParamName,
+          propertyOwnerSearchParamName: propertyOwnerSearchParamName,
+        }}
         pageIndexSearchParamName={pageIndexSearchParamName}
       />
       <div className="rounded-md border overflow-hidden">

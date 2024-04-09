@@ -103,7 +103,6 @@ export default function JobsTableForMember({ type }: Props) {
 
   const {
     isBarunCorpMember,
-    isContractor,
     authority: { canSendDeliverables },
   } = useProfileContext();
 
@@ -579,7 +578,6 @@ export default function JobsTableForMember({ type }: Props) {
     <div className="space-y-2">
       <div>
         <NameSearch
-          // searchParamName={jobNameSearchParamName}
           searchParamOptions={{
             jobNameSearchParamName: jobNameSearchParamName,
             projectNumberSearchParamName: projectNumberSearchParamName,
