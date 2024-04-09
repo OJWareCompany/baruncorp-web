@@ -579,7 +579,12 @@ export default function JobsTableForMember({ type }: Props) {
     <div className="space-y-2">
       <div>
         <NameSearch
-          searchParamName={jobNameSearchParamName}
+          // searchParamName={jobNameSearchParamName}
+          searchParamOptions={{
+            jobNameSearchParamName: jobNameSearchParamName,
+            projectNumberSearchParamName: projectNumberSearchParamName,
+            propertyOwnerSearchParamName: propertyOwnerSearchParamName,
+          }}
           pageIndexSearchParamName={pageIndexSearchParamName}
         />
       </div>
