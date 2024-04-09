@@ -13,7 +13,7 @@ interface Props {
 
 export default function DownloadCSVButton({ data, className }: Props) {
   const csvConfig = useMemo(() => {
-    const filename = data?.items[0]?.jobStatus ?? "";
+    const filename = data?.items?.[0]?.jobStatus || "All";
     return mkConfig({
       useKeysAsHeaders: true,
       filename: `${filename}`,
