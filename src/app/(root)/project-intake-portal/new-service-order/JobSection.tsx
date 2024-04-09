@@ -136,6 +136,7 @@ function JobSectionWithData({
               description: z.string().trim(),
             })
           ),
+          isRevision: z.boolean(),
           loadCalcOrigin: LoadCalcOriginEnum,
           typeOfWetStamp: z.array(
             z.object({
@@ -281,6 +282,7 @@ function JobSectionWithData({
       mountingType: "Roof Mount",
       services: [],
       descriptionForOtherServices: [{ description: "" }],
+      isRevision: false,
       loadCalcOrigin: "Self",
       numberOfWetStamp: "",
       mailingAddress: {
@@ -429,6 +431,7 @@ function JobSectionWithData({
               .filter((value) => value.serviceId === OTHER_SERVICE_ID)
               .map((value) => ({ description: value.description ?? "" }))
         : [{ description: "" }],
+      isRevision: false,
       loadCalcOrigin: "Self",
       numberOfWetStamp: "",
       mailingAddress: {
@@ -461,12 +464,14 @@ function JobSectionWithData({
       description: "Creating related folders in Google Drive",
     });
     const serviceIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[] = [];
+
     for (const service of values.services) {
       if (service.id === OTHER_SERVICE_ID) {
-        for (const descriptionForOtherService of values.descriptionForOtherServices) {
+        for (const otherServiceDescription of values.descriptionForOtherServices) {
           serviceIds.push({
             serviceId: service.id,
-            description: descriptionForOtherService.description,
+            description: otherServiceDescription.description,
+            isRevision: values.isRevision,
           });
         }
       } else {
@@ -476,6 +481,7 @@ function JobSectionWithData({
         });
       }
     }
+
     if (isWetStampChecked) {
       for (const wetStampService of values.typeOfWetStamp) {
         serviceIds.push({
@@ -977,6 +983,27 @@ function JobSectionWithData({
                       >
                         Add Other Scope
                       </Button>
+                    </FormItem>
+                  )}
+                />
+              )}
+              {watchServices.find(
+                (service) => service.id === otherService?.id
+              ) && (
+                <FormField
+                  control={form.control}
+                  name="isRevision"
+                  render={({ field }) => (
+                    <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                      <FormLabel>Tiered Discount</FormLabel>
+                      <FormControl>
+                        <Checkbox
+                          ref={field.ref}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
