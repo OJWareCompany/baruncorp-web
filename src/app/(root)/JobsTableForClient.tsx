@@ -56,7 +56,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SearchHeader from "@/components/table/SearchHeader";
 import TasksBadge from "@/components/badge/TasksBadge";
 import { formatInEST } from "@/lib/utils";
-import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
@@ -381,18 +380,6 @@ export default function JobsTableForClient({ type }: Props) {
           }
 
           return value;
-        },
-      }),
-      columnHelper.accessor("additionalInformationFromClient", {
-        header: "Additional Information",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return <AdditionalInformationHoverCard value={value} />;
         },
       }),
       columnHelper.accessor("receivedAt", {
