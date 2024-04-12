@@ -642,7 +642,7 @@ export default function JobsTable({ type }: Props) {
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
             {table.getRowModel().rows.length === 0 ? null : (
-              <DownloadCSVButton data={data} className="mr-2" />
+              <DownloadCSVButton data={data} type={type} className="mr-2" />
             )}
             <p className="text-sm font-medium">Rows per page</p>
             <Select

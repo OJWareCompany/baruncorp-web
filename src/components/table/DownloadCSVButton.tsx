@@ -9,16 +9,17 @@ import { cn } from "@/lib/utils";
 interface Props {
   data?: JobPaginatedResponseDto;
   className?: string;
+  type?: string;
 }
 
-export default function DownloadCSVButton({ data, className }: Props) {
+export default function DownloadCSVButton({ data, className, type }: Props) {
   const csvConfig = useMemo(() => {
-    const filename = data?.items?.[0]?.jobStatus || "All";
+    const filename = type || "All";
     return mkConfig({
       useKeysAsHeaders: true,
       filename: `${filename}`,
     });
-  }, [data?.items]);
+  }, [type]);
 
   return (
     <Button
