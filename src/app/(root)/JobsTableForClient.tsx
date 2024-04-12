@@ -62,6 +62,7 @@ import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import NameSearch from "@/components/table/NameSearch";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
+import TextCopyButton from "@/components/ui/incopybutton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -276,6 +277,13 @@ export default function JobsTableForClient({ type }: Props) {
             }
           />
         ),
+      }),
+      columnHelper.display({
+        id: "copyJobId",
+        cell: ({ row }) => {
+          const value = row.original.jobName;
+          return <TextCopyButton JobId={value} />;
+        },
       }),
       columnHelper.accessor("jobStatus", {
         header: () =>

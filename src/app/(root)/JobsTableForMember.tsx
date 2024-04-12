@@ -82,6 +82,7 @@ import { InTableButton } from "@/components/ui/intablebutton";
 import NameSearch from "@/components/table/NameSearch";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
+import TextCopyButton from "@/components/ui/incopybutton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -376,6 +377,13 @@ export default function JobsTableForMember({ type }: Props) {
             }
           />
         ),
+      }),
+      columnHelper.display({
+        id: "copyJobId",
+        cell: ({ row }) => {
+          const value = row.original.jobName;
+          return <TextCopyButton JobId={value} />;
+        },
       }),
       columnHelper.accessor("jobStatus", {
         header: () =>
