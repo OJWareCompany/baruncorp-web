@@ -146,17 +146,19 @@ export default function ResultDialog({ state, ...dialogProps }: Props) {
                 : ""
               : myOrder === 0
               ? "It may take some time for files to appear in Google Drive after uploading."
-              : "Order completed, but please wait a moment for file upload."}
+              : "Order completed, but please wait a moment for file upload."
+              ? "You can place more orders or go to the details page for your order details."
+              : ""}
             <br />
             <span className="text-muted-foreground text-bold text-gray-700 font-medium">
-              {myOrder === 0
+              {activeFileUpload
                 ? ""
-                : activeFileUpload
-                ? ""
-                : myOrder === 0
+                : myOrder === 0 && state.open && state.files.length !== 0
                 ? ""
                 : "Your turn for file upload: " +
-                  (myOrder ?? "Getting my-order...")}
+                  (myOrder ?? "Getting my-order...")
+                ? ""
+                : ""}
             </span>
           </DialogDescription>
         </DialogHeader>
