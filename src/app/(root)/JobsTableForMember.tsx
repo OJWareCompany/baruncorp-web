@@ -65,7 +65,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SearchHeader from "@/components/table/SearchHeader";
 import TasksBadge from "@/components/badge/TasksBadge";
 import { formatInEST } from "@/lib/utils";
-import AdditionalInformationHoverCard from "@/components/hover-card/AdditionalInformationHoverCard";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
@@ -83,6 +82,7 @@ import { InTableButton } from "@/components/ui/intablebutton";
 import NameSearch from "@/components/table/NameSearch";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
+import TextCopyButton from "@/components/ui/incopybutton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -107,7 +107,6 @@ interface ItemTableExportData {
   "Mounting Type": string;
   "Project Number": string;
   "Property Owner": string;
-  "Client User": string;
   "Date Received": string;
   "Date Due": string;
   "Date Completed/Canceled": string;
@@ -129,7 +128,6 @@ export function getItemsTableExportDataFromLineItems(
     "Mounting Type": value.mountingType,
     "Project Number": value.projectNumber ?? "",
     "Property Owner": value.propertyOwner,
-    "Client User": value.clientInfo.clientUserName,
     "Date Received": formatInEST(value.receivedAt),
     "Date Due": value.dueDate ? formatInEST(value.dueDate) : "-",
     "Date Completed/Canceled": value.completedCancelledDate
@@ -380,6 +378,13 @@ export default function JobsTableForMember({ type }: Props) {
           />
         ),
       }),
+      columnHelper.display({
+        id: "copyJobId",
+        cell: ({ row }) => {
+          const value = row.original.jobName;
+          return <TextCopyButton JobId={value} />;
+        },
+      }),
       columnHelper.accessor("jobStatus", {
         header: () =>
           type !== "All" ? (
@@ -516,21 +521,6 @@ export default function JobsTableForMember({ type }: Props) {
 
           return value;
         },
-      }),
-      columnHelper.accessor("additionalInformationFromClient", {
-        header: "Additional Information",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return <AdditionalInformationHoverCard value={value} />;
-        },
-      }),
-      columnHelper.accessor("clientInfo.clientUserName", {
-        header: "Client User",
       }),
       columnHelper.accessor("receivedAt", {
         header: "Date Received",
