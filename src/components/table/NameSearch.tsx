@@ -27,7 +27,7 @@ export default function NameSearch({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [selectedOption, setSelectedOption] = useState<string>("jobName");
+  const [selectedOption, setSelectedOption] = useState<string>("JobName");
   const [value, setValue] = useState("");
 
   const handleOptionChange = (selectedValue: string) => {
@@ -38,14 +38,16 @@ export default function NameSearch({
   const handleEnterKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       const trimmedValue = value.trim();
-      const searchParamName =
-        selectedOption === "Job Name"
-          ? searchParamOptions.jobNameSearchParamName
-          : selectedOption === "Project Number"
-          ? searchParamOptions.projectNumberSearchParamName
-          : searchParamOptions.propertyOwnerSearchParamName;
+      let searchParam = "";
+      if (selectedOption === "JobName") {
+        searchParam = searchParamOptions.jobNameSearchParamName;
+      } else if (selectedOption === "ProjectNumber") {
+        searchParam = searchParamOptions.projectNumberSearchParamName;
+      } else if (selectedOption === "PropertyOwner") {
+        searchParam = searchParamOptions.propertyOwnerSearchParamName;
+      }
       const newSearchParams = new URLSearchParams(searchParams.toString());
-      newSearchParams.set(encodeURIComponent(searchParamName), trimmedValue);
+      newSearchParams.set(encodeURIComponent(searchParam), trimmedValue);
       newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
       router.push(`${pathname}?${newSearchParams.toString()}`, {
         scroll: false,
@@ -55,18 +57,18 @@ export default function NameSearch({
 
   const clearInput = () => {
     setValue("");
-    setSelectedOption("Job Name");
-    const searchParamName =
-      selectedOption === "Job Name"
-        ? searchParamOptions.jobNameSearchParamName
-        : selectedOption === "Project Number"
-        ? searchParamOptions.projectNumberSearchParamName
-        : searchParamOptions.propertyOwnerSearchParamName;
-
+    setSelectedOption("JobName");
+    let searchParam = "";
+    if (selectedOption === "JobName") {
+      searchParam = searchParamOptions.jobNameSearchParamName;
+    } else if (selectedOption === "ProjectNumber") {
+      searchParam = searchParamOptions.projectNumberSearchParamName;
+    } else if (selectedOption === "PropertyOwner") {
+      searchParam = searchParamOptions.propertyOwnerSearchParamName;
+    }
     const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.delete(encodeURIComponent(searchParamName));
+    newSearchParams.delete(encodeURIComponent(searchParam));
     newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
-    console.log("New Search Params:", newSearchParams.toString());
     router.push(`${pathname}?${newSearchParams.toString()}`, {
       scroll: false,
     });
@@ -85,20 +87,20 @@ export default function NameSearch({
         <SelectContent>
           <SelectGroup>
             <SelectItem
-              value="jobName"
-              onClick={() => handleOptionChange("jobName")}
+              value="JobName"
+              onClick={() => handleOptionChange("JobName")}
             >
               Job Name
             </SelectItem>
             <SelectItem
-              value="projectNumber"
-              onClick={() => handleOptionChange("projectNumber")}
+              value="ProjectNumber"
+              onClick={() => handleOptionChange("ProjectNumber")}
             >
               Project Number
             </SelectItem>
             <SelectItem
-              value="propertyOwner"
-              onClick={() => handleOptionChange("propertyOwner")}
+              value="PropertyOwner"
+              onClick={() => handleOptionChange("PropertyOwner")}
             >
               Property Owner
             </SelectItem>
