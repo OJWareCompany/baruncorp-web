@@ -256,7 +256,6 @@ export default function JobsTableForMember({ type }: Props) {
     () => ({
       page: pagination.pageIndex + 1 || globalPagination.pageIndex + 1,
       limit: pagination.pageSize || globalPagination.pageSize,
-
       jobName: jobNameSearchParam || globalJobNameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
