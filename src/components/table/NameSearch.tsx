@@ -80,30 +80,15 @@ export default function NameSearch({
 
   return (
     <div className="flex items-center space-x-2">
-      <Select>
+      <Select onValueChange={setSelectedOption}>
         <SelectTrigger className="w-[180px] mb-1 h-11 focus-visible:ring-0">
           <SelectValue placeholder={selectedOption} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem
-              value="JobName"
-              onClick={() => handleOptionChange("JobName")}
-            >
-              Job Name
-            </SelectItem>
-            <SelectItem
-              value="ProjectNumber"
-              onClick={() => handleOptionChange("ProjectNumber")}
-            >
-              Project Number
-            </SelectItem>
-            <SelectItem
-              value="PropertyOwner"
-              onClick={() => handleOptionChange("PropertyOwner")}
-            >
-              Property Owner
-            </SelectItem>
+            <SelectItem value="JobName">Job Name</SelectItem>
+            <SelectItem value="ProjectNumber">Project Number</SelectItem>
+            <SelectItem value="PropertyOwner">Property Owner</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
