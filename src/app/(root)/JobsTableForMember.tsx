@@ -124,7 +124,7 @@ export default function JobsTableForMember({ type }: Props) {
   const globalJobNameSearchParamName = `${TABLE_NAME}JobName`;
   const globalProjectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
   const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
-  // const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -188,16 +188,16 @@ export default function JobsTableForMember({ type }: Props) {
   const globalPropertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(globalPropertyOwnerSearchParamName)) ??
     "";
-  // const globalPagination: PaginationState = {
-  //   pageIndex: searchParams.get(
-  //     encodeURIComponent(globalPageIndexSearchParamName)
-  //   )
-  //     ? Number(
-  //         searchParams.get(encodeURIComponent(globalPageIndexSearchParamName))
-  //       )
-  //     : 0,
-  //   pageSize,
-  // };
+  const globalPagination: PaginationState = {
+    pageIndex: searchParams.get(
+      encodeURIComponent(globalPageIndexSearchParamName)
+    )
+      ? Number(
+          searchParams.get(encodeURIComponent(globalPageIndexSearchParamName))
+        )
+      : 0,
+    pageSize,
+  };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -208,8 +208,8 @@ export default function JobsTableForMember({ type }: Props) {
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
+      page: pagination.pageIndex + 1 || globalPagination.pageIndex + 1,
+      limit: pagination.pageSize || globalPagination.pageSize,
       jobName: jobNameSearchParam || globalJobNameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
@@ -241,8 +241,8 @@ export default function JobsTableForMember({ type }: Props) {
     [
       pagination.pageIndex,
       pagination.pageSize,
-      // globalPagination.pageIndex,
-      // globalPagination.pageSize,
+      globalPagination.pageIndex,
+      globalPagination.pageSize,
       jobNameSearchParam,
       globalJobNameSearchParam,
       jobStatusSearchParam,
@@ -602,16 +602,6 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <div>
-        {/* <NameSearch
-          searchParamOptions={{
-            jobNameSearchParamName: globalJobNameSearchParamName,
-            projectNumberSearchParamName: globalProjectNumberSearchParamName,
-            propertyOwnerSearchParamName: globalPropertyOwnerSearchParamName,
-          }}
-          pageIndexSearchParamName={pageIndexSearchParamName}
-        /> */}
-      </div>
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>

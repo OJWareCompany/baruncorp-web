@@ -61,7 +61,6 @@ import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
-import NameSearch from "@/components/table/NameSearch";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -89,6 +88,10 @@ export default function JobsTableForClient({ type }: Props) {
   const prioritySearchParamName = `${TABLE_NAME}${type}Priority`;
   const projectNumberSearchParamName = `${TABLE_NAME}${type}ProjectNumber`;
   const propertyOwnerSearchParamName = `${TABLE_NAME}${type}PropertyOwner`;
+  const globalJobNameSearchParamName = `${TABLE_NAME}JobName`;
+  const globalProjectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
+  const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+  const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -144,6 +147,24 @@ export default function JobsTableForClient({ type }: Props) {
     searchParams.get(encodeURIComponent(projectNumberSearchParamName)) ?? "";
   const propertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
+  const globalJobNameSearchParam =
+    searchParams.get(encodeURIComponent(globalJobNameSearchParamName)) ?? "";
+  const globalProjectNumberSearchParam =
+    searchParams.get(encodeURIComponent(globalProjectNumberSearchParamName)) ??
+    "";
+  const globalPropertyOwnerSearchParam =
+    searchParams.get(encodeURIComponent(globalPropertyOwnerSearchParamName)) ??
+    "";
+  const globalPagination: PaginationState = {
+    pageIndex: searchParams.get(
+      encodeURIComponent(globalPageIndexSearchParamName)
+    )
+      ? Number(
+          searchParams.get(encodeURIComponent(globalPageIndexSearchParamName))
+        )
+      : 0,
+    pageSize,
+  };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -154,9 +175,9 @@ export default function JobsTableForClient({ type }: Props) {
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      jobName: jobNameSearchParam,
+      page: pagination.pageIndex + 1 || globalPagination.pageIndex + 1,
+      limit: pagination.pageSize || globalPagination.pageSize,
+      jobName: jobNameSearchParam || globalJobNameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -181,13 +202,16 @@ export default function JobsTableForClient({ type }: Props) {
         transformJobPriorityEnumWithEmptyStringIntoNullableJobPriorityEnum.parse(
           prioritySearchParam
         ),
-      projectNumber: projectNumberSearchParam,
-      propertyOwner: propertyOwnerSearchParam,
+      projectNumber: projectNumberSearchParam || globalProjectNumberSearchParam,
+      propertyOwner: propertyOwnerSearchParam || globalPropertyOwnerSearchParam,
     }),
     [
       pagination.pageIndex,
       pagination.pageSize,
+      globalPagination.pageIndex,
+      globalPagination.pageSize,
       jobNameSearchParam,
+      globalJobNameSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -195,7 +219,9 @@ export default function JobsTableForClient({ type }: Props) {
       inReviewSearchParam,
       prioritySearchParam,
       projectNumberSearchParam,
+      globalProjectNumberSearchParam,
       propertyOwnerSearchParam,
+      globalPropertyOwnerSearchParam,
     ]
   );
 
@@ -472,14 +498,6 @@ export default function JobsTableForClient({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <NameSearch
-        searchParamOptions={{
-          jobNameSearchParamName: jobNameSearchParamName,
-          projectNumberSearchParamName: projectNumberSearchParamName,
-          propertyOwnerSearchParamName: propertyOwnerSearchParamName,
-        }}
-        pageIndexSearchParamName={pageIndexSearchParamName}
-      />
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>

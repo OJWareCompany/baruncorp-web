@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, KeyboardEvent, MouseEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
@@ -29,11 +31,6 @@ export default function NameSearch({
   const searchParams = useSearchParams();
   const [selectedOption, setSelectedOption] = useState<string>("JobName");
   const [value, setValue] = useState("");
-
-  const handleOptionChange = (selectedValue: string) => {
-    setSelectedOption(selectedValue);
-    clearInput();
-  };
 
   const handleEnterKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
