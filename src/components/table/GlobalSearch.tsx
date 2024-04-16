@@ -73,11 +73,13 @@ export default function GlobalSearch({
   };
 
   const clearURL = () => {
-    const newSearchParams = new URLSearchParams();
-    newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
-    router.push(`${pathname}?${newSearchParams.toString()}`, {
-      scroll: false,
-    });
+    if (value === "") {
+      const newSearchParams = new URLSearchParams();
+      newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+      router.push(`${pathname}?${newSearchParams.toString()}`, {
+        scroll: false,
+      });
+    }
   };
 
   const stopPropagation = (event: MouseEvent<HTMLDivElement>) => {
