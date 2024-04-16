@@ -177,12 +177,17 @@ export default function NewScopeForm({
             name="isRevision"
             render={({ field }) => (
               <FormItem>
-                <FormLabel required>Is Revision</FormLabel>
+                <FormLabel>Is Revision</FormLabel>
                 <FormControl>
                   <Checkbox
                     ref={field.ref}
                     checked={field.value}
-                    onCheckedChange={field.onChange}
+                    onCheckedChange={(isChecked) => {
+                      field.onChange(isChecked);
+                      if (isChecked) {
+                        form.setValue("isRevision", true);
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -190,6 +195,32 @@ export default function NewScopeForm({
             )}
           />
         )}
+
+        {watchScopeId === OTHER_SERVICE_ID && (
+          <FormField
+            control={form.control}
+            name="isRevision"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>New</FormLabel>
+                <FormControl>
+                  <Checkbox
+                    ref={field.ref}
+                    checked={!field.value}
+                    onCheckedChange={(isChecked) => {
+                      field.onChange(!isChecked);
+                      if (isChecked) {
+                        form.setValue("isRevision", false);
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <LoadingButton
           type="submit"
           isLoading={form.formState.isSubmitting}

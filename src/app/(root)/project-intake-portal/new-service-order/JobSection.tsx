@@ -995,12 +995,43 @@ function JobSectionWithData({
                   name="isRevision"
                   render={({ field }) => (
                     <FormItem className="flex-row-reverse justify-end items-center gap-3">
-                      <FormLabel>Tiered Discount</FormLabel>
+                      <FormLabel>Is Revision</FormLabel>
                       <FormControl>
                         <Checkbox
                           ref={field.ref}
                           checked={field.value}
-                          onCheckedChange={field.onChange}
+                          onCheckedChange={(isChecked) => {
+                            field.onChange(isChecked);
+                            if (isChecked) {
+                              form.setValue("isRevision", true);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {watchServices.find(
+                (service) => service.id === otherService?.id
+              ) && (
+                <FormField
+                  control={form.control}
+                  name="isRevision"
+                  render={({ field }) => (
+                    <FormItem className="flex-row-reverse justify-end items-center gap-3">
+                      <FormLabel>New</FormLabel>
+                      <FormControl>
+                        <Checkbox
+                          ref={field.ref}
+                          checked={!field.value}
+                          onCheckedChange={(isChecked) => {
+                            field.onChange(!isChecked);
+                            if (isChecked) {
+                              form.setValue("isRevision", false);
+                            }
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
