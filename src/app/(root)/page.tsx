@@ -18,7 +18,7 @@ export default function Page() {
     const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
     const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
     return (
-      <div className="space-y-2">
+      <div className="space-y-4">
         <PageHeader items={[{ href: "/", name: "Home" }]} />
         <GlobalSearch
           searchParamOptions={{
