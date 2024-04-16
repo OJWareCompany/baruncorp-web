@@ -1112,6 +1112,14 @@ export interface ClientWithOutstandingBalancesPaginatedResponseDto {
   items: ClientWithOutstandingBalancesResponseDto[];
 }
 
+export interface ModifyPeriodMonthRequestDto {
+  /**
+   * @format date-time
+   * @default "2023-02"
+   */
+  serviceMonth: string;
+}
+
 export interface Tier {
   /** @default 0.01 */
   startingPoint: number;
@@ -1966,7 +1974,7 @@ export interface CreateOrderedServiceRequestDto {
   /** @default "" */
   description: string | null;
   /** @default "" */
-  isRevision?: boolean | null;
+  isRevision?: boolean;
 }
 
 export interface UpdateOrderedServiceRequestDto {
@@ -5867,6 +5875,26 @@ export class Api<
         method: "PATCH",
         body: data,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ModifyPeriodMonthHttpControllerPost
+     * @request PATCH:/invoices/{invoiceId}/service-period-month
+     */
+    modifyPeriodMonthHttpControllerPost: (
+      invoiceId: string,
+      data: ModifyPeriodMonthRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<IdResponse, any>({
+        path: `/invoices/${invoiceId}/service-period-month`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
   };
