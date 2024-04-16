@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, KeyboardEvent, MouseEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
@@ -70,6 +72,14 @@ export default function GlobalSearch({
     }
   };
 
+  const clearURL = () => {
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+    router.push(`${pathname}?${newSearchParams.toString()}`, {
+      scroll: false,
+    });
+  };
+
   const stopPropagation = (event: MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
   };
@@ -94,6 +104,7 @@ export default function GlobalSearch({
           onValueChange={handleInputChange}
           className="border col-span-1 pl-7 -ml-8"
           onKeyDown={handleEnterKeyPress}
+          onFocus={clearURL}
           placeholder={`Search by ${selectedOption}`}
         />
         <CommandItem
