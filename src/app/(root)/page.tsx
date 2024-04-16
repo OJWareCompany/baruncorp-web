@@ -1,18 +1,33 @@
 "use client";
 import JobsTableForClient from "./JobsTableForClient";
-import { useProfileContext } from "./ProfileProvider";
 import JobsTableForMember from "./JobsTableForMember";
+import { useProfileContext } from "./ProfileProvider";
 import PageHeader from "@/components/PageHeader";
 import NewTabCollapsibleSection from "@/components/NewTabCollapsibleSeciton";
+import GlobalSearch from "@/components/table/GlobalSearch";
 
 export default function Page() {
   const { isBarunCorpMember } = useProfileContext();
 
   // 멤버인 경우
   if (isBarunCorpMember) {
+    const TABLE_NAME = "JobsForMember";
+
+    const globalJobNameSearchParamName = `${TABLE_NAME}JobName`;
+    const globalProjectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
+    const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+    const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
     return (
       <div className="space-y-4">
         <PageHeader items={[{ href: "/", name: "Home" }]} />
+        <GlobalSearch
+          searchParamOptions={{
+            jobNameSearchParamName: globalJobNameSearchParamName,
+            projectNumberSearchParamName: globalProjectNumberSearchParamName,
+            propertyOwnerSearchParamName: globalPropertyOwnerSearchParamName,
+          }}
+          pageIndexSearchParamName={globalPageIndexSearchParamName}
+        />
         <div className="space-y-6">
           <NewTabCollapsibleSection title="Not Started">
             <JobsTableForMember type="Not Started" />
@@ -42,11 +57,24 @@ export default function Page() {
       </div>
     );
   }
+  const TABLE_NAME = "JobsForClient";
 
+  const globalJobNameSearchParamName = `${TABLE_NAME}JobName`;
+  const globalProjectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
+  const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+  const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
   // 클라이언트인 경우
   return (
     <div className="space-y-4">
       <PageHeader items={[{ href: "/", name: "Home" }]} />
+      <GlobalSearch
+        searchParamOptions={{
+          jobNameSearchParamName: globalJobNameSearchParamName,
+          projectNumberSearchParamName: globalProjectNumberSearchParamName,
+          propertyOwnerSearchParamName: globalPropertyOwnerSearchParamName,
+        }}
+        pageIndexSearchParamName={globalPageIndexSearchParamName}
+      />
       <div className="space-y-6">
         <NewTabCollapsibleSection title="Not Started">
           <JobsTableForClient type="Not Started" />

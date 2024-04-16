@@ -76,7 +76,6 @@ import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
-import NameSearch from "@/components/table/NameSearch";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
@@ -121,6 +120,10 @@ export default function JobsTable({ type }: Props) {
   const projectNumberSearchParamName = `${TABLE_NAME}${type}ProjectNumber`;
   const propertyOwnerSearchParamName = `${TABLE_NAME}${type}PropertyOwner`;
   const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
+  const globalJobNameSearchParamName = `${TABLE_NAME}JobName`;
+  const globalProjectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
+  const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+  const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -177,6 +180,24 @@ export default function JobsTable({ type }: Props) {
     searchParams.get(encodeURIComponent(projectNumberSearchParamName)) ?? "";
   const propertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
+  const globalJobNameSearchParam =
+    searchParams.get(encodeURIComponent(globalJobNameSearchParamName)) ?? "";
+  const globalProjectNumberSearchParam =
+    searchParams.get(encodeURIComponent(globalProjectNumberSearchParamName)) ??
+    "";
+  const globalPropertyOwnerSearchParam =
+    searchParams.get(encodeURIComponent(globalPropertyOwnerSearchParamName)) ??
+    "";
+  const globalPagination: PaginationState = {
+    pageIndex: searchParams.get(
+      encodeURIComponent(globalPageIndexSearchParamName)
+    )
+      ? Number(
+          searchParams.get(encodeURIComponent(globalPageIndexSearchParamName))
+        )
+      : 0,
+    pageSize,
+  };
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -187,9 +208,9 @@ export default function JobsTable({ type }: Props) {
 
   const params: FindMyJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
-      page: pagination.pageIndex + 1,
-      limit: pagination.pageSize,
-      jobName: jobNameSearchParam,
+      page: pagination.pageIndex + 1 || globalPagination.pageIndex + 1,
+      limit: pagination.pageSize || globalPagination.pageSize,
+      jobName: jobNameSearchParam || globalJobNameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -214,13 +235,16 @@ export default function JobsTable({ type }: Props) {
         transformJobPriorityEnumWithEmptyStringIntoNullableJobPriorityEnum.parse(
           prioritySearchParam
         ),
-      projectNumber: projectNumberSearchParam,
-      propertyOwner: propertyOwnerSearchParam,
+      projectNumber: projectNumberSearchParam || globalProjectNumberSearchParam,
+      propertyOwner: propertyOwnerSearchParam || globalPropertyOwnerSearchParam,
     }),
     [
       pagination.pageIndex,
       pagination.pageSize,
+      globalPagination.pageIndex,
+      globalPagination.pageSize,
       jobNameSearchParam,
+      globalJobNameSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -228,7 +252,9 @@ export default function JobsTable({ type }: Props) {
       inReviewSearchParam,
       prioritySearchParam,
       projectNumberSearchParam,
+      globalProjectNumberSearchParam,
       propertyOwnerSearchParam,
+      globalPropertyOwnerSearchParam,
     ]
   );
 
@@ -570,10 +596,6 @@ export default function JobsTable({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <NameSearch
-        searchParamName={jobNameSearchParamName}
-        pageIndexSearchParamName={pageIndexSearchParamName}
-      />
       <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>

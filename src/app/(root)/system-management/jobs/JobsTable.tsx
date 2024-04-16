@@ -76,10 +76,10 @@ import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
-import NameSearch from "@/components/table/NameSearch";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
+import GlobalSearch from "@/components/table/GlobalSearch";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -546,8 +546,12 @@ export default function JobsTable() {
 
   return (
     <div className="space-y-2">
-      <NameSearch
-        searchParamName={jobNameSearchParamName}
+      <GlobalSearch
+        searchParamOptions={{
+          jobNameSearchParamName: jobNameSearchParamName,
+          projectNumberSearchParamName: projectNumberSearchParamName,
+          propertyOwnerSearchParamName: propertyOwnerSearchParamName,
+        }}
         pageIndexSearchParamName={pageIndexSearchParamName}
       />
       <div className="rounded-md border overflow-hidden">
