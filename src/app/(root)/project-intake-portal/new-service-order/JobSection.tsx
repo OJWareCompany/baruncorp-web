@@ -995,45 +995,30 @@ function JobSectionWithData({
                   name="isRevision"
                   render={({ field }) => (
                     <FormItem className="flex-row-reverse justify-end items-center gap-3">
-                      <FormLabel>Is Revision</FormLabel>
-                      <FormControl>
-                        <Checkbox
-                          ref={field.ref}
-                          checked={field.value}
-                          onCheckedChange={(isChecked) => {
-                            field.onChange(isChecked);
-                            if (isChecked) {
-                              form.setValue("isRevision", true);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              {watchServices.find(
-                (service) => service.id === otherService?.id
-              ) && (
-                <FormField
-                  control={form.control}
-                  name="isRevision"
-                  render={({ field }) => (
-                    <FormItem className="flex-row-reverse justify-end items-center gap-3">
-                      <FormLabel>New</FormLabel>
-                      <FormControl>
-                        <Checkbox
-                          ref={field.ref}
-                          checked={!field.value}
-                          onCheckedChange={(isChecked) => {
-                            field.onChange(!isChecked);
-                            if (isChecked) {
-                              form.setValue("isRevision", false);
-                            }
-                          }}
-                        />
-                      </FormControl>
+                      <FormLabel required>Is Revision</FormLabel>
+                      <Select
+                        required
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          if (value === "Is Revision") {
+                            form.setValue("isRevision", true);
+                          } else if (value === "New") {
+                            form.setValue("isRevision", false);
+                          }
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Status for Other Scope" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Is Revision">
+                            Is Revision
+                          </SelectItem>
+                          <SelectItem value="New">New</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

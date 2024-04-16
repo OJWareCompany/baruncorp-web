@@ -4,7 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Checkbox } from "../ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -177,50 +183,33 @@ export default function NewScopeForm({
             name="isRevision"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Is Revision</FormLabel>
-                <FormControl>
-                  <Checkbox
-                    ref={field.ref}
-                    checked={field.value}
-                    onCheckedChange={(isChecked) => {
-                      field.onChange(isChecked);
-                      if (isChecked) {
-                        form.setValue("isRevision", true);
-                      }
-                    }}
-                  />
-                </FormControl>
+                <FormLabel required>Is Revision</FormLabel>
+                <Select
+                  required
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    if (value === "Is Revision") {
+                      form.setValue("isRevision", true);
+                    } else if (value === "New") {
+                      form.setValue("isRevision", false);
+                    }
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Status for Other Scope" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Is Revision">Is Revision</SelectItem>
+                    <SelectItem value="New">New</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
         )}
-
-        {watchScopeId === OTHER_SERVICE_ID && (
-          <FormField
-            control={form.control}
-            name="isRevision"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>New</FormLabel>
-                <FormControl>
-                  <Checkbox
-                    ref={field.ref}
-                    checked={!field.value}
-                    onCheckedChange={(isChecked) => {
-                      field.onChange(!isChecked);
-                      if (isChecked) {
-                        form.setValue("isRevision", false);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
         <LoadingButton
           type="submit"
           isLoading={form.formState.isSubmitting}
