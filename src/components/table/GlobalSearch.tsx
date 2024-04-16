@@ -43,12 +43,23 @@ export default function GlobalSearch({
       } else if (selectedOption === "PropertyOwner") {
         searchParam = searchParamOptions.propertyOwnerSearchParamName;
       }
-      const newSearchParams = new URLSearchParams(searchParams.toString());
-      newSearchParams.set(encodeURIComponent(searchParam), trimmedValue);
+
+      // URL 초기화
+      const newSearchParams = new URLSearchParams();
       newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
       router.push(`${pathname}?${newSearchParams.toString()}`, {
         scroll: false,
       });
+
+      // 검색 실행 로직
+      if (trimmedValue !== "") {
+        const searchParams = new URLSearchParams();
+        searchParams.set(encodeURIComponent(searchParam), trimmedValue);
+        searchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+        router.push(`${pathname}?${searchParams.toString()}`, {
+          scroll: false,
+        });
+      }
     }
   };
 
@@ -64,16 +75,6 @@ export default function GlobalSearch({
   const handleInputChange = (newValue: string) => {
     setValue(newValue);
     if (newValue === "") {
-      const newSearchParams = new URLSearchParams();
-      newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
-      router.push(`${pathname}?${newSearchParams.toString()}`, {
-        scroll: false,
-      });
-    }
-  };
-
-  const clearURL = () => {
-    if (value === "") {
       const newSearchParams = new URLSearchParams();
       newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
       router.push(`${pathname}?${newSearchParams.toString()}`, {
@@ -106,7 +107,6 @@ export default function GlobalSearch({
           onValueChange={handleInputChange}
           className="border col-span-1 pl-7 -ml-8"
           onKeyDown={handleEnterKeyPress}
-          onFocus={clearURL}
           placeholder={`Search by ${selectedOption}`}
         />
         <CommandItem
