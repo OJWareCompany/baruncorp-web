@@ -4,7 +4,7 @@ import { useProfileContext } from "../../ProfileProvider";
 import JobsTableForMember from "../../JobsTableForMember";
 import JobsTableForClient from "../../JobsTableForClient";
 import PageHeader from "@/components/PageHeader";
-import NameSearch from "@/components/table/NameSearch";
+import GlobalSearch from "@/components/table/GlobalSearch";
 
 export default function Page() {
   const { isBarunCorpMember } = useProfileContext();
@@ -21,7 +21,7 @@ export default function Page() {
         <PageHeader
           items={[{ href: "../cancled-invoice", name: "Canceled (Invoice)" }]}
         />
-        <NameSearch
+        <GlobalSearch
           searchParamOptions={{
             jobNameSearchParamName: jobNameSearchParamName,
             projectNumberSearchParamName: projectNumberSearchParamName,
@@ -47,7 +47,7 @@ export default function Page() {
       <PageHeader
         items={[{ href: "../cancled-invoice", name: "Canceled (Invoice)" }]}
       />
-      <NameSearch
+      <GlobalSearch
         searchParamOptions={{
           jobNameSearchParamName: jobNameSearchParamName,
           projectNumberSearchParamName: projectNumberSearchParamName,

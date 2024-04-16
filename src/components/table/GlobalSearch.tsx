@@ -22,7 +22,7 @@ interface Props {
   pageIndexSearchParamName: string;
 }
 
-export default function NameSearch({
+export default function GlobalSearch({
   searchParamOptions,
   pageIndexSearchParamName,
 }: Props) {
@@ -54,17 +54,7 @@ export default function NameSearch({
 
   const clearInput = () => {
     setValue("");
-    setSelectedOption("JobName");
-    let searchParam = "";
-    if (selectedOption === "JobName") {
-      searchParam = searchParamOptions.jobNameSearchParamName;
-    } else if (selectedOption === "ProjectNumber") {
-      searchParam = searchParamOptions.projectNumberSearchParamName;
-    } else if (selectedOption === "PropertyOwner") {
-      searchParam = searchParamOptions.propertyOwnerSearchParamName;
-    }
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    newSearchParams.delete(encodeURIComponent(searchParam));
+    const newSearchParams = new URLSearchParams();
     newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
     router.push(`${pathname}?${newSearchParams.toString()}`, {
       scroll: false,

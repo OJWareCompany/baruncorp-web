@@ -4,7 +4,7 @@ import JobsTableForMember from "./JobsTableForMember";
 import { useProfileContext } from "./ProfileProvider";
 import PageHeader from "@/components/PageHeader";
 import NewTabCollapsibleSection from "@/components/NewTabCollapsibleSeciton";
-import NameSearch from "@/components/table/NameSearch";
+import GlobalSearch from "@/components/table/GlobalSearch";
 
 export default function Page() {
   const { isBarunCorpMember } = useProfileContext();
@@ -20,7 +20,7 @@ export default function Page() {
     return (
       <div className="space-y-4">
         <PageHeader items={[{ href: "/", name: "Home" }]} />
-        <NameSearch
+        <GlobalSearch
           searchParamOptions={{
             jobNameSearchParamName: globalJobNameSearchParamName,
             projectNumberSearchParamName: globalProjectNumberSearchParamName,
@@ -67,7 +67,7 @@ export default function Page() {
   return (
     <div className="space-y-4">
       <PageHeader items={[{ href: "/", name: "Home" }]} />
-      <NameSearch
+      <GlobalSearch
         searchParamOptions={{
           jobNameSearchParamName: globalJobNameSearchParamName,
           projectNumberSearchParamName: globalProjectNumberSearchParamName,

@@ -4,7 +4,7 @@ import JobsTable from "./JobsTable";
 import SocketListener from "./SocketListener";
 import PageHeader from "@/components/PageHeader";
 import CollapsibleSection from "@/components/CollapsibleSection";
-import NameSearch from "@/components/table/NameSearch";
+import GlobalSearch from "@/components/table/GlobalSearch";
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -20,7 +20,7 @@ export default function Page() {
     <>
       <div className="space-y-4">
         <PageHeader items={[{ href: "/workspace", name: "Workspace" }]} />
-        <NameSearch
+        <GlobalSearch
           searchParamOptions={{
             jobNameSearchParamName: globalJobNameSearchParamName,
             projectNumberSearchParamName: globalProjectNumberSearchParamName,
