@@ -207,7 +207,7 @@ export default function ClientInvoiceDocument({
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              <Text>Totoal</Text>
+              <Text>Total</Text>
               <Text>${clientInvoice.total}</Text>
             </View>
             <View
