@@ -95,3 +95,15 @@ export function isMutableRefObject<T>(
 
   return true;
 }
+
+export function isValidServerErrorCode(errorCode: string | string[]): boolean {
+  // 파일 서버 에러 코드인 경우
+  if (errorCode instanceof String) return true;
+  // 바른코프 서버 에러 코드인 경우
+  if (
+    errorCode instanceof Array &&
+    errorCode.filter((value) => value != null).length !== 0
+  )
+    return true;
+  return false;
+}

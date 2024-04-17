@@ -8,7 +8,6 @@ interface ErrorResponseData {
 
 interface FileServerErrorResponseData {
   message: string;
-  statusCode: number;
   errorCode: string;
 }
 

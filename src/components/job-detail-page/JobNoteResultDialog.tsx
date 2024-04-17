@@ -91,7 +91,7 @@ export default function JobNoteResultDialog({
             setPostJobNoteFilesProgress({ value: 100, error: true });
 
             toast({
-              title: error.message,
+              title: error.response?.data.message,
               variant: "destructive",
             });
           })
