@@ -932,7 +932,7 @@ function JobSectionWithData({
                   </FormItem>
                 )}
               />
-              {watchServices.find(
+              {/* {watchServices.find(
                 (service) => service.id === otherService?.id
               ) && (
                 <FormField
@@ -966,7 +966,7 @@ function JobSectionWithData({
                     </FormItem>
                   )}
                 />
-              )}
+              )} */}
               {watchServices.find(
                 (service) => service.id === otherService?.id
               ) && (
