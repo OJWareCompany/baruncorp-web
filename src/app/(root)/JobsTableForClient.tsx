@@ -54,7 +54,6 @@ import {
 import EnumHeader from "@/components/table/EnumHeader";
 import { Checkbox } from "@/components/ui/checkbox";
 import SearchHeader from "@/components/table/SearchHeader";
-import TasksBadge from "@/components/badge/TasksBadge";
 import { formatInEST } from "@/lib/utils";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
@@ -316,7 +315,36 @@ export default function JobsTableForClient({ type }: Props) {
       }),
       columnHelper.accessor("assignedTasks", {
         header: "Tasks",
-        cell: ({ getValue }) => <TasksBadge tasks={getValue()} />,
+        cell: ({ getValue, row }) => {
+          const tasks = row.original.assignedTasks;
+          return (
+            <div>
+              {tasks.map((task) => {
+                const status = jobStatuses[task.status];
+
+                return (
+                  <Badge
+                    variant={"outline"}
+                    className="flex items-center py-1 "
+                    key={task.id}
+                  >
+                    {status && (
+                      <status.Icon
+                        className={`w-4 h-4 mr-2 flex-shrink-0 ${status.color}`}
+                      />
+                    )}
+                    <div className="flex flex-col">
+                      <p className="font-medium">{task.taskName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {task.assigneeName ?? "-"}
+                      </p>
+                    </div>
+                  </Badge>
+                );
+              })}
+            </div>
+          );
+        },
       }),
       columnHelper.accessor("projectPropertyType", {
         header: () => (

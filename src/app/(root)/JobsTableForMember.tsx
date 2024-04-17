@@ -455,8 +455,9 @@ export default function JobsTableForMember({ type }: Props) {
                 const status = jobStatuses[task.status];
 
                 return (
-                  <div
-                    className="flex items-center pl-2 pr-3 py-1.5 border-t first:border-0"
+                  <Badge
+                    variant={"outline"}
+                    className="flex items-center py-1 my-1"
                     key={task.id}
                   >
                     {status && (
@@ -470,7 +471,7 @@ export default function JobsTableForMember({ type }: Props) {
                         {task.assigneeName ?? "-"}
                       </p>
                     </div>
-                  </div>
+                  </Badge>
                 );
               })}
             </div>
