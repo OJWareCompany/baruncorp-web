@@ -11,7 +11,7 @@ import { SessionProvider } from "next-auth/react";
 import { isAxiosError } from "axios";
 import { KNOWN_ERROR, defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
-import { isError } from "@/lib/utils";
+import { isValidServerErrorCode, isError } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface Props {
@@ -76,10 +76,11 @@ export default function Providers({ children }: Props) {
             }
 
             if (
-              isAxiosError<ErrorResponseData>(error) &&
+              isAxiosError<FileServerErrorResponseData | ErrorResponseData>(
+                error
+              ) &&
               error.response &&
-              error.response.data.errorCode.filter((value) => value != null)
-                .length !== 0
+              isValidServerErrorCode(error.response.data.errorCode)
             ) {
               console.error("Error Code:", error.response.data.errorCode);
               return;
