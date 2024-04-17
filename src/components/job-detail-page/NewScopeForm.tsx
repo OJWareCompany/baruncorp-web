@@ -4,6 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -170,7 +177,7 @@ export default function NewScopeForm({
             )}
           />
         )}
-        {/* {watchScopeId === OTHER_SERVICE_ID && (
+        {watchScopeId === OTHER_SERVICE_ID && (
           <FormField
             control={form.control}
             name="isRevision"
@@ -202,7 +209,7 @@ export default function NewScopeForm({
               </FormItem>
             )}
           />
-        )} */}
+        )}
         <LoadingButton
           type="submit"
           isLoading={form.formState.isSubmitting}
