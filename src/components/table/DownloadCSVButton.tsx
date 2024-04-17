@@ -1,6 +1,7 @@
 import { download, generateCsv, mkConfig } from "export-to-csv";
 import { ArrowDownToLine } from "lucide-react";
 import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getItemsTableExportDataFromLineItems } from "@/app/(root)/JobsTableForMember";
 import { JobPaginatedResponseDto } from "@/api/api-spec";
@@ -13,13 +14,20 @@ interface Props {
 }
 
 export default function DownloadCSVButton({ data, className, type }: Props) {
+  const pathname = usePathname();
   const csvConfig = useMemo(() => {
-    const filename = type || "All";
+    const jobStatus = type || "All";
+    let pageName = pathname;
+    if (pathname === "/") {
+      pageName = "home";
+    } else if (pathname === "/system-management/jobs") {
+      pageName = "jobs";
+    }
     return mkConfig({
       useKeysAsHeaders: true,
-      filename: `${filename}`,
+      filename: `${pageName}-${jobStatus}`,
     });
-  }, [type]);
+  }, [pathname, type]);
 
   return (
     <Button

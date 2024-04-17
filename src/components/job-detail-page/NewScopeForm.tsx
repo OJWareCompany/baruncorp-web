@@ -201,7 +201,7 @@ export default function NewScopeForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Is Revision">Is Revision</SelectItem>
+                    <SelectItem value="Is Revision">Revision</SelectItem>
                     <SelectItem value="New">New</SelectItem>
                   </SelectContent>
                 </Select>

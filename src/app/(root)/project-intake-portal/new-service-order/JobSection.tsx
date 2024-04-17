@@ -937,6 +937,41 @@ function JobSectionWithData({
               ) && (
                 <FormField
                   control={form.control}
+                  name="isRevision"
+                  render={({ field }) => (
+                    <FormItem className="gap-3">
+                      <FormLabel required>Is Revision</FormLabel>
+                      <Select
+                        required
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          if (value === "Is Revision") {
+                            form.setValue("isRevision", true);
+                          } else if (value === "New") {
+                            form.setValue("isRevision", false);
+                          }
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Status for Other Scope" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Is Revision">Revision</SelectItem>
+                          <SelectItem value="New">New</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {watchServices.find(
+                (service) => service.id === otherService?.id
+              ) && (
+                <FormField
+                  control={form.control}
                   name="descriptionForOtherServices"
                   render={() => (
                     <FormItem>
@@ -983,43 +1018,6 @@ function JobSectionWithData({
                       >
                         Add Other Scope
                       </Button>
-                    </FormItem>
-                  )}
-                />
-              )}
-              {watchServices.find(
-                (service) => service.id === otherService?.id
-              ) && (
-                <FormField
-                  control={form.control}
-                  name="isRevision"
-                  render={({ field }) => (
-                    <FormItem className="flex-row-reverse justify-end items-center gap-3">
-                      <FormLabel required>Is Revision</FormLabel>
-                      <Select
-                        required
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          if (value === "Is Revision") {
-                            form.setValue("isRevision", true);
-                          } else if (value === "New") {
-                            form.setValue("isRevision", false);
-                          }
-                        }}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Status for Other Scope" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Is Revision">
-                            Is Revision
-                          </SelectItem>
-                          <SelectItem value="New">New</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
