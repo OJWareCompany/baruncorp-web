@@ -198,8 +198,14 @@ export default function JobNoteResultDialog({
         </div>
         <DialogFooter>
           <Button
+            className="px-8"
             onClick={() => {
               dialogProps.onOpenChange(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                dialogProps.onOpenChange(false);
+              }
             }}
             disabled={
               jobNoteResultDialogState.open &&
