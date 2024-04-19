@@ -84,6 +84,7 @@ import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolder
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
 import GlobalSearch from "@/components/table/GlobalSearch";
+// import SelectSortButton from "@/components/table/SelectSortButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -123,8 +124,6 @@ export default function JobsTable() {
   const prioritySearchParamName = `${TABLE_NAME}Priority`;
   const projectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
   const propertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
-  // const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
-  // const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}`,
@@ -136,6 +135,7 @@ export default function JobsTable() {
       : 0,
     pageSize,
   };
+
   const jobNameSearchParam = searchParams.get(jobNameSearchParamName) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
     searchParams.get(jobStatusSearchParamName)
@@ -229,14 +229,6 @@ export default function JobsTable() {
         ),
       projectNumber: projectNumberSearchParam,
       propertyOwner: propertyOwnerSearchParam,
-      // sortField:
-      //   transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum.parse(
-      //     sortFieldSearchParam
-      //   ),
-      // sortDirection:
-      //   transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum.parse(
-      //     sortDirectionSearchParam
-      //   ),
     }),
     [
       pagination.pageIndex,
@@ -250,8 +242,6 @@ export default function JobsTable() {
       prioritySearchParam,
       projectNumberSearchParam,
       propertyOwnerSearchParam,
-      // sortFieldSearchParam,
-      // sortDirectionSearchParam,
     ]
   );
 
@@ -671,11 +661,10 @@ export default function JobsTable() {
                           asc: <ChevronsUp className="h-4 w-4 ml-1.5" />,
                           desc: <ChevronsDown className="h-4 w-4 ml-1.5" />,
                         }[header.column.getIsSorted() as string] ?? null}
-                        {header.column.getIsSorted()
-                          ? ""
-                          : header.column.columnDef.enableSorting && (
-                              <ChevronsUpDown className="h-3 w-3 ml-1.5 mt-0.5" />
-                            )}
+                        {header.column.getCanSort() &&
+                        !header.column.getIsSorted() ? (
+                          <ChevronsUpDown className="h-3 w-3 ml-1.5 mt-0.5" />
+                        ) : null}
                       </div>
                     )}
                   </TableHead>

@@ -693,28 +693,40 @@ export type AutoAssignmentPropertyTypeEnum = z.infer<
   typeof AutoAssignmentPropertyTypeEnum
 >;
 
-// export const SortDirectionTypeEnum = z.enum(["asc", "desc"]);
-// export type SortDirectionTypeEnum = z.infer<typeof SortDirectionTypeEnum>;
+// // "asc" | "desc
+// export const SortDirectionTypeEnum = z.enum(["asc", "desc"], {
+//   errorMap: () => ({ message: "SortDirection Type is required" }),
+// });
 
+// // "asc" | "desc | ""
 // export const SortDirectionTypeEnumWithEmptyString = SortDirectionTypeEnum.or(
 //   z.literal("")
 // );
+
+// // "asc" | "desc | "" => "asc" | "desc | null
 // export const transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum =
 //   SortDirectionTypeEnumWithEmptyString.transform((v) => (v === "" ? null : v));
 
-// export const SortFieldTypeEnum = z.enum([
-//   "dateSentToClient",
-//   "completedCancelledDate",
-//   "dueDate",
-//   "createdAt",
-// ]);
-// export type SortFieldTypeEnum = z.infer<typeof SortFieldTypeEnum>;
+// export type SortDirectionTypeEnum = z.infer<typeof SortDirectionTypeEnum>;
 
+// // "dateSentToClient" | "completedCancelledDate" | "dueDate" | "createdAt"
+// export const SortFieldTypeEnum = z.enum(
+//   ["dateSentToClient", "completedCancelledDate", "dueDate", "createdAt"],
+//   {
+//     errorMap: () => ({ message: "SortField Type is required" }),
+//   }
+// );
+
+// // "dateSentToClient" | "completedCancelledDate" | "dueDate" | "createdAt" | ""
 // export const SortFieldTypeEnumWithEmptyString = SortFieldTypeEnum.or(
 //   z.literal("")
 // );
+
+// // "dateSentToClient" | "completedCancelledDate" | "dueDate" | "createdAt" | "" => "dateSentToClient" | "completedCancelledDate" | "dueDate" | "createdAt" | null
 // export const transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum =
 //   SortFieldTypeEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+
+// export type SortFieldTypeEnum = z.infer<typeof SortFieldTypeEnum>;
 /* -------------------------------------------------------------------------- */
 
 // "Self" | "Client Provided"
