@@ -61,8 +61,6 @@ import {
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
-  transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum,
-  transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import { formatInEST } from "@/lib/utils";
@@ -185,18 +183,19 @@ export default function JobsTable() {
   const propertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
 
-  const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
+  const sortDirectionSearchParamResult = SortFieldTypeEnum.safeParse(
     searchParams.get(sortDirectionSearchParamName)
   );
   const sortDirectionSearchParam = sortDirectionSearchParamResult.success
     ? sortDirectionSearchParamResult.data
-    : "";
+    : "asc";
+
   const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
     searchParams.get(sortFieldSearchParamName)
   );
   const sortFieldSearchParam = sortFieldSearchParamResult.success
     ? sortFieldSearchParamResult.data
-    : "";
+    : "dateSentToClient";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -236,14 +235,8 @@ export default function JobsTable() {
         ),
       projectNumber: projectNumberSearchParam,
       propertyOwner: propertyOwnerSearchParam,
-      sortDirection:
-        transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum.parse(
-          sortDirectionSearchParam
-        ),
-      sortField:
-        transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum.parse(
-          sortFieldSearchParam
-        ),
+      sortDirection: SortDirectionTypeEnum.parse(sortDirectionSearchParam),
+      sortField: SortFieldTypeEnum.parse(sortFieldSearchParam),
     }),
     [
       pagination.pageIndex,

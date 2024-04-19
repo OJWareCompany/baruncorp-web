@@ -56,8 +56,6 @@ import {
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
-  transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum,
-  transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import { formatInEST } from "@/lib/utils";
@@ -145,6 +143,7 @@ export default function JobsTable({ type }: Props) {
 
   const jobNameSearchParam =
     searchParams.get(encodeURIComponent(jobNameSearchParamName)) ?? "";
+
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
     searchParams.get(encodeURIComponent(jobStatusSearchParamName))
   );
@@ -205,18 +204,20 @@ export default function JobsTable({ type }: Props) {
       : 0,
     pageSize,
   };
-  const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
+
+  const sortDirectionSearchParamResult = SortFieldTypeEnum.safeParse(
     searchParams.get(sortDirectionSearchParamName)
   );
   const sortDirectionSearchParam = sortDirectionSearchParamResult.success
     ? sortDirectionSearchParamResult.data
-    : "";
+    : "asc";
+
   const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
     searchParams.get(sortFieldSearchParamName)
   );
   const sortFieldSearchParam = sortFieldSearchParamResult.success
     ? sortFieldSearchParamResult.data
-    : "";
+    : "dateSentToClient";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -256,14 +257,8 @@ export default function JobsTable({ type }: Props) {
         ),
       projectNumber: projectNumberSearchParam || globalProjectNumberSearchParam,
       propertyOwner: propertyOwnerSearchParam || globalPropertyOwnerSearchParam,
-      sortDirection:
-        transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum.parse(
-          sortDirectionSearchParam
-        ),
-      sortField:
-        transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum.parse(
-          sortFieldSearchParam
-        ),
+      sortDirection: SortDirectionTypeEnum.parse(sortDirectionSearchParam),
+      sortField: SortFieldTypeEnum.parse(sortFieldSearchParam),
     }),
     [
       pagination.pageIndex,
