@@ -693,6 +693,28 @@ export type AutoAssignmentPropertyTypeEnum = z.infer<
   typeof AutoAssignmentPropertyTypeEnum
 >;
 
+// export const SortDirectionTypeEnum = z.enum(["asc", "desc"]);
+// export type SortDirectionTypeEnum = z.infer<typeof SortDirectionTypeEnum>;
+
+// export const SortDirectionTypeEnumWithEmptyString = SortDirectionTypeEnum.or(
+//   z.literal("")
+// );
+// export const transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum =
+//   SortDirectionTypeEnumWithEmptyString.transform((v) => (v === "" ? null : v));
+
+// export const SortFieldTypeEnum = z.enum([
+//   "dateSentToClient",
+//   "completedCancelledDate",
+//   "dueDate",
+//   "createdAt",
+// ]);
+// export type SortFieldTypeEnum = z.infer<typeof SortFieldTypeEnum>;
+
+// export const SortFieldTypeEnumWithEmptyString = SortFieldTypeEnum.or(
+//   z.literal("")
+// );
+// export const transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum =
+//   SortFieldTypeEnumWithEmptyString.transform((v) => (v === "" ? null : v));
 /* -------------------------------------------------------------------------- */
 
 // "Self" | "Client Provided"
