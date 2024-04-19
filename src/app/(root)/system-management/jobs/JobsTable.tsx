@@ -52,6 +52,8 @@ import {
   JobStatusEnum,
   MountingTypeEnum,
   PropertyTypeEnum,
+  SortDirectionTypeEnum,
+  SortFieldTypeEnum,
   YesOrNoEnum,
   jobPriorities,
   jobStatuses,
@@ -59,11 +61,11 @@ import {
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
+  transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum,
+  transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import { formatInEST } from "@/lib/utils";
-import SearchHeader from "@/components/table/SearchHeader";
-import EnumHeader from "@/components/table/EnumHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
@@ -78,13 +80,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
-import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
-import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
+import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
+import EnumHeader from "@/components/table/EnumHeader";
+import SearchHeader from "@/components/table/SearchHeader";
 import GlobalSearch from "@/components/table/GlobalSearch";
-// import SelectSortButton from "@/components/table/SelectSortButton";
+import DownloadCSVButton from "@/components/table/DownloadCSVButton";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
+import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -124,6 +129,8 @@ export default function JobsTable() {
   const prioritySearchParamName = `${TABLE_NAME}Priority`;
   const projectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
   const propertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+  const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
+  const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}`,
@@ -177,19 +184,19 @@ export default function JobsTable() {
     searchParams.get(encodeURIComponent(projectNumberSearchParamName)) ?? "";
   const propertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
-  // const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
-  //   searchParams.get(sortFieldSearchParamName)
-  // );
-  // const sortFieldSearchParam = sortFieldSearchParamResult.success
-  //   ? sortFieldSearchParamResult.data
-  //   : "";
 
-  // const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
-  //   searchParams.get(sortDirectionSearchParamName)
-  // );
-  // const sortDirectionSearchParam = sortDirectionSearchParamResult.success
-  //   ? sortDirectionSearchParamResult.data
-  //   : "";
+  const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
+    searchParams.get(sortDirectionSearchParamName)
+  );
+  const sortDirectionSearchParam = sortDirectionSearchParamResult.success
+    ? sortDirectionSearchParamResult.data
+    : "";
+  const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
+    searchParams.get(sortFieldSearchParamName)
+  );
+  const sortFieldSearchParam = sortFieldSearchParamResult.success
+    ? sortFieldSearchParamResult.data
+    : "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -229,6 +236,14 @@ export default function JobsTable() {
         ),
       projectNumber: projectNumberSearchParam,
       propertyOwner: propertyOwnerSearchParam,
+      sortDirection:
+        transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum.parse(
+          sortDirectionSearchParam
+        ),
+      sortField:
+        transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum.parse(
+          sortFieldSearchParam
+        ),
     }),
     [
       pagination.pageIndex,
@@ -242,6 +257,8 @@ export default function JobsTable() {
       prioritySearchParam,
       projectNumberSearchParam,
       propertyOwnerSearchParam,
+      sortDirectionSearchParam,
+      sortFieldSearchParam,
     ]
   );
 
@@ -615,9 +632,6 @@ export default function JobsTable() {
     },
   });
 
-  //access sorting state from the table instance
-  console.log(table.getState().sorting);
-
   return (
     <div className="space-y-2">
       <GlobalSearch
@@ -739,6 +753,21 @@ export default function JobsTable() {
               </SelectContent>
             </Select>
           </div>
+          {table.getRowModel().rows.length === 0 ? null : (
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Sort Page</p>
+              <SortDirectionSelectButton
+                searchParamName={sortDirectionSearchParamName}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+                zodEnum={SortDirectionTypeEnum}
+              />
+              <SortFieldSelectButton
+                searchParamName={sortFieldSearchParamName}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+                zodEnum={SortFieldTypeEnum}
+              />
+            </div>
+          )}
           <div className="flex items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
