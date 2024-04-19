@@ -1,16 +1,21 @@
 "use client";
 import {
   PaginationState,
+  SortingState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronsDown,
   ChevronsLeft,
   ChevronsRight,
+  ChevronsUp,
+  ChevronsUpDown,
   Loader2,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -47,6 +52,8 @@ import {
   JobStatusEnum,
   MountingTypeEnum,
   PropertyTypeEnum,
+  SortDirectionTypeEnum,
+  SortFieldTypeEnum,
   YesOrNoEnum,
   jobPriorities,
   jobStatuses,
@@ -57,8 +64,6 @@ import {
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import { formatInEST } from "@/lib/utils";
-import SearchHeader from "@/components/table/SearchHeader";
-import EnumHeader from "@/components/table/EnumHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
@@ -73,12 +78,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import LoadingButton from "@/components/LoadingButton";
 import { toast } from "@/components/ui/use-toast";
-import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
-import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
+import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
+import EnumHeader from "@/components/table/EnumHeader";
+import SearchHeader from "@/components/table/SearchHeader";
 import GlobalSearch from "@/components/table/GlobalSearch";
+import DownloadCSVButton from "@/components/table/DownloadCSVButton";
+import NewTabTableRow from "@/components/table/NewTabTableRow";
+import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -91,6 +100,8 @@ export default function JobsTable() {
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<FindJobPaginatedHttpControllerFindJobParams>();
+
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
@@ -116,6 +127,8 @@ export default function JobsTable() {
   const prioritySearchParamName = `${TABLE_NAME}Priority`;
   const projectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
   const propertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
+  const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
+  const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}`,
@@ -127,6 +140,7 @@ export default function JobsTable() {
       : 0,
     pageSize,
   };
+
   const jobNameSearchParam = searchParams.get(jobNameSearchParamName) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
     searchParams.get(jobStatusSearchParamName)
@@ -169,6 +183,20 @@ export default function JobsTable() {
   const propertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
 
+  const sortDirectionSearchParamResult = SortFieldTypeEnum.safeParse(
+    searchParams.get(sortDirectionSearchParamName)
+  );
+  const sortDirectionSearchParam = sortDirectionSearchParamResult.success
+    ? sortDirectionSearchParamResult.data
+    : "asc";
+
+  const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
+    searchParams.get(sortFieldSearchParamName)
+  );
+  const sortFieldSearchParam = sortFieldSearchParamResult.success
+    ? sortFieldSearchParamResult.data
+    : "dateSentToClient";
+
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
     pagination,
@@ -207,6 +235,8 @@ export default function JobsTable() {
         ),
       projectNumber: projectNumberSearchParam,
       propertyOwner: propertyOwnerSearchParam,
+      sortDirection: SortDirectionTypeEnum.parse(sortDirectionSearchParam),
+      sortField: SortFieldTypeEnum.parse(sortFieldSearchParam),
     }),
     [
       pagination.pageIndex,
@@ -220,6 +250,8 @@ export default function JobsTable() {
       prioritySearchParam,
       projectNumberSearchParam,
       propertyOwnerSearchParam,
+      sortDirectionSearchParam,
+      sortFieldSearchParam,
     ]
   );
 
@@ -234,6 +266,7 @@ export default function JobsTable() {
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("isExpedited", {
+        enableSorting: false,
         header: () => (
           <EnumHeader
             buttonText="Expedite"
@@ -253,6 +286,7 @@ export default function JobsTable() {
         ),
       }),
       columnHelper.accessor("inReview", {
+        enableSorting: false,
         header: () => (
           <EnumHeader
             buttonText="In Review"
@@ -272,6 +306,7 @@ export default function JobsTable() {
       }),
       columnHelper.accessor("jobFolderId", {
         header: "Google Drive",
+        enableSorting: false,
         cell: ({ row }) => {
           const job = row.original;
           return (
@@ -291,6 +326,7 @@ export default function JobsTable() {
         },
       }),
       columnHelper.accessor("priority", {
+        enableSorting: false,
         header: () => (
           <EnumHeader
             buttonText="Priority"
@@ -311,8 +347,10 @@ export default function JobsTable() {
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
         header: "Organization",
+        enableSorting: false,
       }),
       columnHelper.accessor("jobName", {
+        enableSorting: false,
         header: () => {
           return (
             <SearchHeader
@@ -328,12 +366,14 @@ export default function JobsTable() {
       }),
       columnHelper.display({
         id: "copyJobId",
+        enableSorting: false,
         cell: ({ row }) => {
           const value = row.original.jobName;
           return <TextCopyButton JobId={value} />;
         },
       }),
       columnHelper.accessor("jobStatus", {
+        enableSorting: false,
         header: () => (
           <EnumHeader
             buttonText="Status"
@@ -360,6 +400,7 @@ export default function JobsTable() {
       }),
       columnHelper.display({
         id: "sendDeliverables",
+        enableSorting: false,
         cell: ({ row }) => {
           const value = row.original.jobStatus;
           const dateSentToClient = row.original.dateSentToClient;
@@ -390,6 +431,7 @@ export default function JobsTable() {
       }),
       columnHelper.accessor("assignedTasks", {
         header: "Tasks",
+        enableSorting: false,
         cell: ({ getValue, row }) => {
           const tasks = row.original.assignedTasks;
           return (
@@ -422,6 +464,7 @@ export default function JobsTable() {
         },
       }),
       columnHelper.accessor("projectPropertyType", {
+        enableSorting: false,
         header: () => (
           <EnumHeader
             buttonText="Property Type"
@@ -436,6 +479,7 @@ export default function JobsTable() {
         ),
       }),
       columnHelper.accessor("mountingType", {
+        enableSorting: false,
         header: () => (
           <EnumHeader
             buttonText="Mounting Type"
@@ -450,6 +494,7 @@ export default function JobsTable() {
         ),
       }),
       columnHelper.accessor("projectNumber", {
+        enableSorting: false,
         header: () => (
           <SearchHeader
             buttonText="Project Number"
@@ -472,6 +517,7 @@ export default function JobsTable() {
         },
       }),
       columnHelper.accessor("propertyOwner", {
+        enableSorting: false,
         header: () => (
           <SearchHeader
             buttonText="Property Owner"
@@ -495,10 +541,12 @@ export default function JobsTable() {
       }),
       columnHelper.accessor("receivedAt", {
         header: "Date Received",
+        enableSorting: false,
         cell: ({ getValue }) => formatInEST(getValue()),
       }),
       columnHelper.accessor("dueDate", {
         header: "Date Due",
+        enableSorting: true,
         cell: ({ getValue }) => {
           const value = getValue();
 
@@ -511,6 +559,7 @@ export default function JobsTable() {
       }),
       columnHelper.accessor("completedCancelledDate", {
         header: "Date Completed/Canceled",
+        enableSorting: true,
         cell: ({ getValue }) => {
           const value = getValue();
 
@@ -523,6 +572,7 @@ export default function JobsTable() {
       }),
       columnHelper.accessor("dateSentToClient", {
         header: "Date Sent to Client",
+        enableSorting: true,
         cell: ({ getValue }) => {
           const value = getValue();
 
@@ -562,11 +612,14 @@ export default function JobsTable() {
     data: data?.items ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
     onPaginationChange,
     manualPagination: true,
     state: {
+      sorting,
       pagination,
       columnVisibility,
     },
@@ -589,12 +642,38 @@ export default function JobsTable() {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
+                    {header.isPlaceholder ? null : (
+                      <div
+                        className={
+                          header.column.getCanSort()
+                            ? "cursor-pointer flex select-none gap-2"
+                            : ""
+                        }
+                        onClick={header.column.getToggleSortingHandler()}
+                        title={
+                          header.column.getCanSort()
+                            ? header.column.getNextSortingOrder() === "asc"
+                              ? "Sort ascending"
+                              : header.column.getNextSortingOrder() === "desc"
+                              ? "Sort descending"
+                              : "Clear sort"
+                            : undefined
+                        }
+                      >
+                        {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+                        {{
+                          asc: <ChevronsUp className="h-4 w-4 ml-1.5" />,
+                          desc: <ChevronsDown className="h-4 w-4 ml-1.5" />,
+                        }[header.column.getIsSorted() as string] ?? null}
+                        {header.column.getCanSort() &&
+                        !header.column.getIsSorted() ? (
+                          <ChevronsUpDown className="h-3 w-3 ml-1.5 mt-0.5" />
+                        ) : null}
+                      </div>
+                    )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -667,6 +746,21 @@ export default function JobsTable() {
               </SelectContent>
             </Select>
           </div>
+          {table.getRowModel().rows.length === 0 ? null : (
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Sort Page</p>
+              <SortDirectionSelectButton
+                searchParamName={sortDirectionSearchParamName}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+                zodEnum={SortDirectionTypeEnum}
+              />
+              <SortFieldSelectButton
+                searchParamName={sortFieldSearchParamName}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+                zodEnum={SortFieldTypeEnum}
+              />
+            </div>
+          )}
           <div className="flex items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}

@@ -51,6 +51,8 @@ import {
   JobStatusEnum,
   MountingTypeEnum,
   PropertyTypeEnum,
+  SortDirectionTypeEnum,
+  SortFieldTypeEnum,
   YesOrNoEnum,
   jobPriorities,
   jobStatuses,
@@ -58,6 +60,8 @@ import {
   transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum,
   transformMountingTypeEnumWithEmptyStringIntoNullableMountingTypeEnum,
   transformPropertyTypeEnumWithEmptyStringIntoNullablePropertyTypeEnum,
+  transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum,
+  transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import EnumHeader from "@/components/table/EnumHeader";
@@ -81,6 +85,8 @@ import { InTableButton } from "@/components/ui/intablebutton";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
+import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
+import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -170,6 +176,8 @@ export default function JobsTableForMember({ type }: Props) {
   const globalProjectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
   const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
   const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
+  const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -243,6 +251,18 @@ export default function JobsTableForMember({ type }: Props) {
       : 0,
     pageSize,
   };
+  const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
+    searchParams.get(sortDirectionSearchParamName)
+  );
+  const sortDirectionSearchParam = sortDirectionSearchParamResult.success
+    ? sortDirectionSearchParamResult.data
+    : "";
+  const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
+    searchParams.get(sortFieldSearchParamName)
+  );
+  const sortFieldSearchParam = sortFieldSearchParamResult.success
+    ? sortFieldSearchParamResult.data
+    : "";
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -282,6 +302,14 @@ export default function JobsTableForMember({ type }: Props) {
         ),
       projectNumber: projectNumberSearchParam || globalProjectNumberSearchParam,
       propertyOwner: propertyOwnerSearchParam || globalPropertyOwnerSearchParam,
+      sortDirection:
+        transformSortDirectionTypeEnumWithEmptyStringIntoNullableSortDirectionTypeEnum.parse(
+          sortDirectionSearchParam
+        ),
+      sortField:
+        transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum.parse(
+          sortFieldSearchParam
+        ),
     }),
     [
       pagination.pageIndex,
@@ -300,6 +328,8 @@ export default function JobsTableForMember({ type }: Props) {
       globalProjectNumberSearchParam,
       propertyOwnerSearchParam,
       globalPropertyOwnerSearchParam,
+      sortDirectionSearchParam,
+      sortFieldSearchParam,
     ]
   );
 
@@ -754,6 +784,21 @@ export default function JobsTableForMember({ type }: Props) {
               </SelectContent>
             </Select>
           </div>
+          {table.getRowModel().rows.length === 0 ? null : (
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Sort Page</p>
+              <SortDirectionSelectButton
+                searchParamName={sortDirectionSearchParamName}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+                zodEnum={SortDirectionTypeEnum}
+              />
+              <SortFieldSelectButton
+                searchParamName={sortFieldSearchParamName}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+                zodEnum={SortFieldTypeEnum}
+              />
+            </div>
+          )}
           <div className="flex items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
