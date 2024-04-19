@@ -3,11 +3,13 @@ import { DialogProps } from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "../ui/button";
 import { JobNoteResultDialogState } from "./JobNoteForm";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -144,10 +146,19 @@ export default function JobNoteResultDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Job Note</DialogTitle>
+          <DialogTitle>
+            {jobNoteResultDialogState.open &&
+            (postJobNoteProgress.value !== 100 ||
+              postJobNoteFilesProgress.value !== 100)
+              ? "Job Note"
+              : "Completed!"}
+          </DialogTitle>
           <DialogDescription>
-            It may take some time for files to appear in Google Drive after
-            uploading.
+            {jobNoteResultDialogState.open &&
+            (postJobNoteProgress.value !== 100 ||
+              postJobNoteFilesProgress.value !== 100)
+              ? " It may take some time for files to appear in Google Drive after uploading."
+              : "Both the job note file and mail have been sent successfully!"}
           </DialogDescription>
         </DialogHeader>
         {jobNoteResultDialogState.open &&
@@ -185,6 +196,26 @@ export default function JobNoteResultDialog({
               : "Completed to upload file"}
           </p>
         </div>
+        <DialogFooter>
+          <Button
+            className="px-8"
+            onClick={() => {
+              dialogProps.onOpenChange(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                dialogProps.onOpenChange(false);
+              }
+            }}
+            disabled={
+              jobNoteResultDialogState.open &&
+              (postJobNoteProgress.value !== 100 ||
+                postJobNoteFilesProgress.value !== 100)
+            }
+          >
+            OK
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
