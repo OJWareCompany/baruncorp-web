@@ -33,7 +33,17 @@ export default function SortFieldSelectButton<T extends EnumValues>({
     <Popover>
       <PopoverTrigger asChild>
         <Button size={"sm"} variant={"outline"} placeholder="Select Field">
-          {selectedOption === "" ? "Select Field" : selectedOption}
+          {selectedOption === ""
+            ? "Select Field"
+            : selectedOption === "dateSentToClient"
+            ? "Date Sent To Client"
+            : selectedOption === "completedCancelledDate"
+            ? "Completed/Cancelled Date"
+            : selectedOption === "dueDate"
+            ? "Due Date"
+            : selectedOption === "createdAt"
+            ? "Date Received"
+            : selectedOption}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-auto" align="start">
@@ -65,7 +75,15 @@ export default function SortFieldSelectButton<T extends EnumValues>({
                     setSelectedOption(value);
                   }}
                 >
-                  {value}
+                  {value === "dateSentToClient"
+                    ? "Date Sent To Client"
+                    : value === "completedCancelledDate"
+                    ? "Completed/Cancelled Date"
+                    : value === "dueDate"
+                    ? "Due Date"
+                    : value === "createdAt"
+                    ? "Date Received"
+                    : value}
                 </CommandItem>
               ))}
             </CommandGroup>

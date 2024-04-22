@@ -29,7 +29,7 @@ export default function GlobalSearch({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [selectedOption, setSelectedOption] = useState<string>("JobName");
+  const [selectedOption, setSelectedOption] = useState<string>("Job Name");
   const [value, setValue] = useState("");
 
   const handleEnterKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {

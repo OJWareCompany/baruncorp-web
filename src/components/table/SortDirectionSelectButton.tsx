@@ -33,7 +33,13 @@ export default function SortDirectionSelectButton<T extends EnumValues>({
     <Popover>
       <PopoverTrigger asChild>
         <Button size={"sm"} variant={"outline"}>
-          {selectedOption === "" ? "Select Direction" : selectedOption}
+          {selectedOption === ""
+            ? "Select Direction"
+            : selectedOption === "asc"
+            ? "Ascending"
+            : selectedOption === "desc"
+            ? "Descending"
+            : selectedOption}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-auto" align="start">
@@ -65,7 +71,11 @@ export default function SortDirectionSelectButton<T extends EnumValues>({
                     setSelectedOption(value);
                   }}
                 >
-                  {value}
+                  {value === "asc"
+                    ? "Ascending"
+                    : value === "desc"
+                    ? "Descending"
+                    : value}
                 </CommandItem>
               ))}
             </CommandGroup>
