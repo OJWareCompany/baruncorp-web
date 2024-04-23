@@ -967,7 +967,13 @@ function JobSectionWithData({
                                         }
                                       >
                                         <FormControl>
-                                          <SelectTrigger>
+                                          <SelectTrigger
+                                            className={
+                                              field.value == true
+                                                ? "gap-1"
+                                                : "gap-x-7"
+                                            }
+                                          >
                                             <SelectValue
                                               placeholder={
                                                 field.value === true
