@@ -205,7 +205,7 @@ export default function JobsTable({ type }: Props) {
     pageSize,
   };
 
-  const sortDirectionSearchParamResult = SortFieldTypeEnum.safeParse(
+  const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
     searchParams.get(sortDirectionSearchParamName)
   );
   const sortDirectionSearchParam = sortDirectionSearchParamResult.success

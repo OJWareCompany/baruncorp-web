@@ -183,7 +183,7 @@ export default function JobsTable() {
   const propertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(propertyOwnerSearchParamName)) ?? "";
 
-  const sortDirectionSearchParamResult = SortFieldTypeEnum.safeParse(
+  const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
     searchParams.get(sortDirectionSearchParamName)
   );
   const sortDirectionSearchParam = sortDirectionSearchParamResult.success
