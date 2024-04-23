@@ -130,7 +130,7 @@ function JobSectionWithData({
           descriptionForOtherServices: z.array(
             z.object({
               description: z.string().trim(),
-              isRevision: z.boolean(),
+              isRevision: z.boolean().nullable(),
             })
           ),
           loadCalcOrigin: LoadCalcOriginEnum,
@@ -183,11 +183,18 @@ function JobSectionWithData({
           }
           for (const index in descriptionForOtherServices) {
             const { description } = descriptionForOtherServices[index];
+            const { isRevision } = descriptionForOtherServices[index];
             if (description.length === 0) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: "Description for Other Service is required",
                 path: [`descriptionForOtherServices.${index}.description`],
+              });
+            } else if (isRevision === null) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Revision for Other Service is required",
+                path: [`descriptionForOtherServices.${index}.isRevision`],
               });
             }
           }
@@ -408,14 +415,14 @@ function JobSectionWithData({
         ? recentJob.orderedServices.findIndex(
             (value) => value.serviceId === OTHER_SERVICE_ID
           ) === -1
-          ? [{ description: "", isRevision: false }]
+          ? [{ description: "", isRevision: null }]
           : recentJob.orderedServices
               .filter((value) => value.serviceId === OTHER_SERVICE_ID)
               .map((value) => ({
                 description: value.description ?? "",
-                isRevision: value.isRevision ?? false,
+                isRevision: value.isRevision ?? null,
               }))
-        : [{ description: "", isRevision: false }],
+        : [{ description: "", isRevision: null }],
       loadCalcOrigin: "Self",
       numberOfWetStamp: "",
       mailingAddress: {
@@ -453,7 +460,7 @@ function JobSectionWithData({
           serviceIds.push({
             serviceId: service.id,
             description: descriptionForOtherService.description,
-            isRevision: descriptionForOtherService.isRevision,
+            isRevision: descriptionForOtherService.isRevision ?? undefined,
           });
         }
       } else {
@@ -562,21 +569,6 @@ function JobSectionWithData({
       form.trigger("services");
     }
   }, [form, isWetStampChecked]);
-
-  const [selectedValues, setSelectedValues] = useState<(string | undefined)[]>(
-    []
-  );
-
-  const handleSelectChange = (index: number, value: string) => {
-    const newSelectedValues = [...selectedValues];
-    newSelectedValues[index] = value;
-    setSelectedValues(newSelectedValues);
-    if (value === "Is Revision") {
-      form.setValue(`descriptionForOtherServices.${index}.isRevision`, true);
-    } else if (value === "New") {
-      form.setValue(`descriptionForOtherServices.${index}.isRevision`, false);
-    }
-  };
 
   return (
     <>
@@ -960,27 +952,36 @@ function JobSectionWithData({
                                         defaultValue={
                                           field.value === true
                                             ? "Is Revision"
-                                            : "New"
+                                            : field.value === false
+                                            ? "New"
+                                            : ""
                                         }
-                                        onValueChange={(value) =>
-                                          handleSelectChange(index, value)
-                                        }
+                                        onValueChange={(value) => {
+                                          field.onChange(value);
+                                          if (value === "Is Revision") {
+                                            form.setValue(
+                                              `descriptionForOtherServices.${index}.isRevision`,
+                                              true
+                                            );
+                                          } else if (value === "New") {
+                                            form.setValue(
+                                              `descriptionForOtherServices.${index}.isRevision`,
+                                              false
+                                            );
+                                          }
+                                        }}
                                       >
                                         <FormControl>
                                           <SelectTrigger
                                             className={
-                                              field.value == true
-                                                ? "gap-1"
-                                                : "gap-x-7"
+                                              field.value === true
+                                                ? "gap-6"
+                                                : field.value === false
+                                                ? "gap-x-12"
+                                                : "text-xs font-normal whitespace-nowrap gap-1"
                                             }
                                           >
-                                            <SelectValue
-                                              placeholder={
-                                                field.value === true
-                                                  ? "Is Revision"
-                                                  : "New"
-                                              }
-                                            />
+                                            <SelectValue placeholder="Select Option" />
                                           </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -1018,7 +1019,7 @@ function JobSectionWithData({
                         onClick={() => {
                           appendOtherService({
                             description: "",
-                            isRevision: false,
+                            isRevision: null,
                           });
                         }}
                         type="button"
