@@ -77,17 +77,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 export type ResultDialogState =
   | { open: false }
   | { open: true; jobId: string; files: File[] };
-
 interface JobSectionWithDataProps {
   project: ProjectResponseDto;
   organization: OrganizationResponseDto;
   services: ServicePaginatedResponseDto;
 }
-
 function JobSectionWithData({
   project,
   organization,
@@ -103,7 +100,6 @@ function JobSectionWithData({
   );
   const { isBarunCorpMember } = useProfileContext();
   const { selectedOrganizationId } = useNewServiceOrderData();
-
   const formSchema = useMemo(
     () =>
       z
@@ -134,9 +130,9 @@ function JobSectionWithData({
           descriptionForOtherServices: z.array(
             z.object({
               description: z.string().trim(),
+              isRevision: z.boolean(),
             })
           ),
-          isRevision: z.boolean(),
           loadCalcOrigin: LoadCalcOriginEnum,
           typeOfWetStamp: z.array(
             z.object({
@@ -166,7 +162,6 @@ function JobSectionWithData({
               });
               return;
             }
-
             for (let i = 0; i < files.length; i++) {
               if (files[i].size > 100000000) {
                 ctx.addIssue({
@@ -186,7 +181,6 @@ function JobSectionWithData({
           ) {
             return;
           }
-
           for (const index in descriptionForOtherServices) {
             const { description } = descriptionForOtherServices[index];
             if (description.length === 0) {
@@ -213,7 +207,6 @@ function JobSectionWithData({
           if (!isWetStampChecked) {
             return;
           }
-
           if (typeOfWetStamp.length === 0) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -228,7 +221,6 @@ function JobSectionWithData({
           if (!isWetStampChecked) {
             return;
           }
-
           if (numberOfWetStamp.length === 0) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -243,7 +235,6 @@ function JobSectionWithData({
           if (!isWetStampChecked) {
             return;
           }
-
           if (mailingAddress.fullAddress.length === 0) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -268,9 +259,7 @@ function JobSectionWithData({
         }),
     [project.propertyType, isWetStampChecked]
   );
-
   type FieldValues = z.infer<typeof formSchema>;
-
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -281,8 +270,7 @@ function JobSectionWithData({
       systemSize: "",
       mountingType: "Roof Mount",
       services: [],
-      descriptionForOtherServices: [{ description: "" }],
-      isRevision: false,
+      descriptionForOtherServices: [{ description: "", isRevision: false }],
       loadCalcOrigin: "Self",
       numberOfWetStamp: "",
       mailingAddress: {
@@ -302,7 +290,6 @@ function JobSectionWithData({
       files: [],
     },
   });
-
   const {
     fields: emailAddressesToReceiveDeliverablesFields,
     append: appendEmailAddressToReceiveDeliverables,
@@ -319,13 +306,10 @@ function JobSectionWithData({
     control: form.control,
     name: "descriptionForOtherServices",
   });
-
   const watchClientUserId = form.watch("clientUser.id");
   const watchServices = form.watch("services");
   const watchTypeOfWetStamp = form.watch("typeOfWetStamp");
-
   const { data: user } = useUserQuery(watchClientUserId);
-
   const otherService = useMemo(
     () => services.items.find((value) => value.id === OTHER_SERVICE_ID),
     [services.items]
@@ -344,7 +328,6 @@ function JobSectionWithData({
       ),
     [services.items]
   );
-
   useEffect(() => {
     if (user) {
       form.setValue(
@@ -354,7 +337,6 @@ function JobSectionWithData({
       form.trigger("clientUser.emailAddressesToReceiveDeliverables");
     }
   }, [form, user]);
-
   useEffect(() => {
     const {
       systemSize,
@@ -363,12 +345,10 @@ function JobSectionWithData({
       hasHistoryStructuralPEStamp,
       jobs,
     } = project;
-
     let recentJob;
     if (jobs.length > 0) {
       recentJob = jobs[0];
     }
-
     const hasElectricalWetStampService =
       recentJob?.orderedServices.find(
         (value) => value.serviceId === ELECTRICAL_WET_STAMP_SERVICE_ID
@@ -377,11 +357,9 @@ function JobSectionWithData({
       recentJob?.orderedServices.find(
         (value) => value.serviceId === STRUCTURAL_WET_STAMP_SERVICE_ID
       ) !== undefined;
-
     if (hasElectricalWetStampService || hasStructuralWetStampService) {
       setIsWetStampChecked(true);
     }
-
     const typeOfWetStamp: {
       id: string;
       description: string | null;
@@ -421,17 +399,23 @@ function JobSectionWithData({
                 value.serviceId !== STRUCTURAL_WET_STAMP_SERVICE_ID
             )
             .map((value) => ({ id: value.serviceId, description: null }))
+            .reduce((prev, curr) => {
+              if (!prev.find((value) => value.id === curr.id)) prev.push(curr);
+              return prev;
+            }, [] as { id: string; description: null }[])
         : [],
       descriptionForOtherServices: recentJob
         ? recentJob.orderedServices.findIndex(
             (value) => value.serviceId === OTHER_SERVICE_ID
           ) === -1
-          ? [{ description: "" }]
+          ? [{ description: "", isRevision: false }]
           : recentJob.orderedServices
               .filter((value) => value.serviceId === OTHER_SERVICE_ID)
-              .map((value) => ({ description: value.description ?? "" }))
-        : [{ description: "" }],
-      isRevision: false,
+              .map((value) => ({
+                description: value.description ?? "",
+                isRevision: value.isRevision ?? false,
+              }))
+        : [{ description: "", isRevision: false }],
       loadCalcOrigin: "Self",
       numberOfWetStamp: "",
       mailingAddress: {
@@ -457,21 +441,19 @@ function JobSectionWithData({
     project,
     session?.id,
   ]);
-
   async function onSubmit(values: FieldValues) {
     toast({
       title: "Please wait a minute",
       description: "Creating related folders in Google Drive",
     });
     const serviceIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[] = [];
-
     for (const service of values.services) {
       if (service.id === OTHER_SERVICE_ID) {
-        for (const otherServiceDescription of values.descriptionForOtherServices) {
+        for (const descriptionForOtherService of values.descriptionForOtherServices) {
           serviceIds.push({
             serviceId: service.id,
-            description: otherServiceDescription.description,
-            isRevision: values.isRevision,
+            description: descriptionForOtherService.description,
+            isRevision: descriptionForOtherService.isRevision,
           });
         }
       } else {
@@ -568,7 +550,6 @@ function JobSectionWithData({
         }
       });
   }
-
   /**
    * 다음의 이유로 작성한 코드입니다.
    * 1. services를 빈 채로 submit한다.
@@ -581,6 +562,21 @@ function JobSectionWithData({
       form.trigger("services");
     }
   }, [form, isWetStampChecked]);
+
+  const [selectedValues, setSelectedValues] = useState<(string | undefined)[]>(
+    []
+  );
+
+  const handleSelectChange = (index: number, value: string) => {
+    const newSelectedValues = [...selectedValues];
+    newSelectedValues[index] = value;
+    setSelectedValues(newSelectedValues);
+    if (value === "Is Revision") {
+      form.setValue(`descriptionForOtherServices.${index}.isRevision`, true);
+    } else if (value === "New") {
+      form.setValue(`descriptionForOtherServices.${index}.isRevision`, false);
+    }
+  };
 
   return (
     <>
@@ -838,7 +834,6 @@ function JobSectionWithData({
                                             break;
                                         }
                                       }
-
                                       if (newChecked) {
                                         field.onChange([
                                           ...field.value,
@@ -937,41 +932,6 @@ function JobSectionWithData({
               ) && (
                 <FormField
                   control={form.control}
-                  name="isRevision"
-                  render={({ field }) => (
-                    <FormItem className="gap-3">
-                      <FormLabel required>Is Revision</FormLabel>
-                      <Select
-                        required
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          if (value === "Is Revision") {
-                            form.setValue("isRevision", true);
-                          } else if (value === "New") {
-                            form.setValue("isRevision", false);
-                          }
-                        }}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Status for Other Scope" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Is Revision">Revision</SelectItem>
-                          <SelectItem value="New">New</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              {watchServices.find(
-                (service) => service.id === otherService?.id
-              ) && (
-                <FormField
-                  control={form.control}
                   name="descriptionForOtherServices"
                   render={() => (
                     <FormItem>
@@ -990,18 +950,62 @@ function JobSectionWithData({
                                     placeholder={`Other Scope ${index + 1}`}
                                   />
                                 </FormControl>
-                                {index !== 0 && (
-                                  <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="flex-shrink-0"
-                                    onClick={() => {
-                                      removeOtherService(index);
-                                    }}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                )}
+                                <FormField
+                                  control={form.control}
+                                  name={`descriptionForOtherServices.${index}.isRevision`}
+                                  render={({ field }) => (
+                                    <FormItem className="gap-3">
+                                      <Select
+                                        required
+                                        defaultValue={
+                                          field.value === true
+                                            ? "Is Revision"
+                                            : "New"
+                                        }
+                                        onValueChange={(value) =>
+                                          handleSelectChange(index, value)
+                                        }
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger
+                                            className={
+                                              field.value == true
+                                                ? "gap-1"
+                                                : "gap-x-7"
+                                            }
+                                          >
+                                            <SelectValue
+                                              placeholder={
+                                                field.value === true
+                                                  ? "Is Revision"
+                                                  : "New"
+                                              }
+                                            />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="Is Revision">
+                                            Revision
+                                          </SelectItem>
+                                          <SelectItem value="New">
+                                            New
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <Button
+                                  variant={"outline"}
+                                  size={"icon"}
+                                  className="flex-shrink-0"
+                                  onClick={() => {
+                                    removeOtherService(index);
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
                               </div>
                               <FormMessage />
                             </FormItem>
@@ -1012,7 +1016,10 @@ function JobSectionWithData({
                         variant={"outline"}
                         className="w-full"
                         onClick={() => {
-                          appendOtherService({ description: "" });
+                          appendOtherService({
+                            description: "",
+                            isRevision: false,
+                          });
                         }}
                         type="button"
                       >
@@ -1347,7 +1354,6 @@ function JobSectionWithData({
           if (newOpen) {
             return;
           }
-
           dispatch({ type: "RESET" });
           setResultDialogState({ open: newOpen });
         }}
@@ -1355,7 +1361,6 @@ function JobSectionWithData({
     </>
   );
 }
-
 export default function JobSection() {
   const { selectedOrganizationId, selectedProjectId } =
     useNewServiceOrderData();
@@ -1367,7 +1372,6 @@ export default function JobSection() {
     useServicesQuery({
       limit: Number.MAX_SAFE_INTEGER,
     });
-
   if (
     project == null ||
     isProjectQueryLoading ||
@@ -1378,7 +1382,6 @@ export default function JobSection() {
   ) {
     return;
   }
-
   return (
     <JobSectionWithData
       project={project}
