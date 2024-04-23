@@ -18,7 +18,7 @@ import {
   ChevronsUpDown,
   Loader2,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useQueryClient } from "@tanstack/react-query";
@@ -98,6 +98,7 @@ const RELATIVE_PATH = "src/app/(root)/system-management/jobs/JobsTable.tsx";
 export default function JobsTable() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [syncedParams, setSyncedParams] =
     useState<FindJobPaginatedHttpControllerFindJobParams>();
 
@@ -759,16 +760,32 @@ export default function JobsTable() {
           {table.getRowModel().rows.length === 0 ? null : (
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium">Sort Page</p>
-              <SortDirectionSelectButton
-                searchParamName={sortDirectionSearchParamName}
-                pageIndexSearchParamName={pageIndexSearchParamName}
-                zodEnum={SortDirectionTypeEnum}
-              />
               <SortFieldSelectButton
                 searchParamName={sortFieldSearchParamName}
                 pageIndexSearchParamName={pageIndexSearchParamName}
                 zodEnum={SortFieldTypeEnum}
               />
+              <SortDirectionSelectButton
+                searchParamName={sortDirectionSearchParamName}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+                zodEnum={SortDirectionTypeEnum}
+              />
+              <Button
+                size={"sm"}
+                variant={"outline"}
+                onClick={() => {
+                  const newSearchParams = new URLSearchParams();
+                  newSearchParams.set(
+                    encodeURIComponent(pageIndexSearchParamName),
+                    "0"
+                  );
+                  router.push(`${pathname}?${newSearchParams.toString()}`, {
+                    scroll: false,
+                  });
+                }}
+              >
+                Reset
+              </Button>
             </div>
           )}
           <div className="flex items-center justify-center text-sm font-medium">
