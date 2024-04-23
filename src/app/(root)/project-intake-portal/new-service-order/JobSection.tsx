@@ -970,15 +970,9 @@ function JobSectionWithData({
                                           <SelectTrigger>
                                             <SelectValue
                                               placeholder={
-                                                field.value === undefined
-                                                  ? "Select Revision"
-                                                  : field.value
-                                                  ? false
-                                                    ? "Is Revision"
-                                                    : field.value
-                                                    ? true
-                                                    : "new"
-                                                  : "Select Revision"
+                                                field.value === true
+                                                  ? "Is Revision"
+                                                  : "New"
                                               }
                                             />
                                           </SelectTrigger>
@@ -996,18 +990,16 @@ function JobSectionWithData({
                                     </FormItem>
                                   )}
                                 />
-                                {index !== 0 && (
-                                  <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="flex-shrink-0"
-                                    onClick={() => {
-                                      removeOtherService(index);
-                                    }}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                )}
+                                <Button
+                                  variant={"outline"}
+                                  size={"icon"}
+                                  className="flex-shrink-0"
+                                  onClick={() => {
+                                    removeOtherService(index);
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
                               </div>
                               <FormMessage />
                             </FormItem>
