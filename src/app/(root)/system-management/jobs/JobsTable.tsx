@@ -188,14 +188,24 @@ export default function JobsTable() {
   );
   const sortDirectionSearchParam = sortDirectionSearchParamResult.success
     ? sortDirectionSearchParamResult.data
-    : "asc";
+    : undefined;
 
   const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
     searchParams.get(sortFieldSearchParamName)
   );
   const sortFieldSearchParam = sortFieldSearchParamResult.success
     ? sortFieldSearchParamResult.data
-    : "dateSentToClient";
+    : undefined;
+
+  const sortDirection =
+    sortDirectionSearchParam !== undefined
+      ? SortDirectionTypeEnum.parse(sortDirectionSearchParam)
+      : undefined;
+
+  const sortField =
+    sortFieldSearchParam !== undefined
+      ? SortFieldTypeEnum.parse(sortFieldSearchParam)
+      : undefined;
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -235,8 +245,8 @@ export default function JobsTable() {
         ),
       projectNumber: projectNumberSearchParam,
       propertyOwner: propertyOwnerSearchParam,
-      sortDirection: SortDirectionTypeEnum.parse(sortDirectionSearchParam),
-      sortField: SortFieldTypeEnum.parse(sortFieldSearchParam),
+      sortDirection,
+      sortField,
     }),
     [
       pagination.pageIndex,
@@ -250,8 +260,8 @@ export default function JobsTable() {
       prioritySearchParam,
       projectNumberSearchParam,
       propertyOwnerSearchParam,
-      sortDirectionSearchParam,
-      sortFieldSearchParam,
+      sortDirection,
+      sortField,
     ]
   );
 
