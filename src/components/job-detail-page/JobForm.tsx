@@ -679,6 +679,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
+                        disabled
                       >
                         <SelectTrigger ref={field.ref}>
                           <SelectValue placeholder="Select a priority" />
