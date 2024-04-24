@@ -171,7 +171,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
               <FormItem>
                 <FormLabel required>Invoice Recipient Email</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>
