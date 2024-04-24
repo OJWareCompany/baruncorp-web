@@ -5,7 +5,7 @@ import { z } from "zod";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import ServicePeriodMonthSelect from "../combobox/ServicePeriodMonthSelect";
 import {
   Form,
   FormControl,
@@ -15,11 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { InvoiceResponseDto } from "@/api/api-spec";
-import {
-  TermsEnum,
-  transformNullishStringIntoString,
-  transformStringIntoNullableString,
-} from "@/lib/constants";
+import { TermsEnum, transformNullishStringIntoString } from "@/lib/constants";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import {
   Popover,
@@ -47,6 +43,7 @@ import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
+import useClientsToInvoiceQuery from "@/queries/useClientsToInvoiceQuery";
 
 const formSchema = z.object({
   organization: z
@@ -63,7 +60,6 @@ const formSchema = z.object({
     .datetime({ message: "Service Period Month is required" }),
   notes: z.string().trim(),
 });
-
 interface Props {
   clientInvoice: InvoiceResponseDto;
 }
@@ -73,6 +69,12 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
 
   const { data: organization } = useOrganizationQuery(
     clientInvoice.clientOrganization.id
+  );
+
+  const { data: dateData } = useClientsToInvoiceQuery();
+
+  const dateSort = dateData?.clientToInvoices.find(
+    (value) => value.id === clientInvoice.clientOrganization.id
   );
 
   type FieldValues = z.infer<typeof formSchema>;
@@ -89,45 +91,52 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
       invoiceRecipientEmail: organization?.invoiceRecipientEmail ?? "",
     };
   }
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(clientInvoice),
   });
+
   const watchInvoiceDate = form.watch("invoiceDate");
   const watchTerms = form.watch("terms");
+
   const { mutateAsync: patchClientInvoiceMutateAsync } =
     usePatchClientInvoiceMutation(clientInvoice.id);
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
   useEffect(() => {
     form.reset(getFieldValues(clientInvoice));
   }, [clientInvoice, form]);
+
   async function onSubmit(values: FieldValues) {
-    await patchClientInvoiceMutateAsync({
-      invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
-      notesToClient: transformStringIntoNullableString.parse(values.notes),
-      terms: Number(values.terms) as 21 | 30 | 60,
-    })
-      .then(() => {
-        toast({ title: "Success" });
-        queryClient.invalidateQueries({
-          queryKey: getClientInvoiceQueryKey(clientInvoice.id),
-        });
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
-        ) {
-          toast({
-            title: error.response.data.message,
-            variant: "destructive",
-          });
-          return;
-        }
+    try {
+      await patchClientInvoiceMutateAsync({
+        invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
+        notesToClient: transformNullishStringIntoString.parse(values.notes),
+        terms: Number(values.terms) as 21 | 30 | 60,
       });
+
+      toast({ title: "Success" });
+      queryClient.invalidateQueries({
+        queryKey: getClientInvoiceQueryKey(clientInvoice.id),
+      });
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data.errorCode.filter((value: null) => value != null)
+          .length !== 0
+      ) {
+        toast({
+          title: error.response.data.message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -152,7 +161,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
               <FormItem>
                 <FormLabel required>Invoice Recipient Email</FormLabel>
                 <FormControl>
-                  <Input value={field.value} disabled />
+                  <Input {...field} disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -165,13 +174,21 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
               <FormItem>
                 <FormLabel required>Service Period Month</FormLabel>
                 <FormControl>
-                  <Input
-                    value={format(
-                      new Date(field.value.slice(0, 7)),
-                      "MMM yyyy"
-                    )}
-                    disabled
-                  />
+                  {dateSort === undefined ? (
+                    <Input
+                      value={format(
+                        new Date(field.value.slice(0, 7)),
+                        "MMM yyyy"
+                      )}
+                      disabled
+                    />
+                  ) : (
+                    <ServicePeriodMonthSelect
+                      clientInvoiceId={clientInvoice.id}
+                      organizationId={clientInvoice.clientOrganization.id}
+                      servicePeriodMonth={field.value}
+                    />
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -213,6 +230,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                         if (day == null) {
                           return;
                         }
+
                         field.onChange(day);
                       }}
                       initialFocus
