@@ -43,7 +43,6 @@ import { getClientInvoiceQueryKey } from "@/queries/useClientInvoiceQuery";
 import { useToast } from "@/components/ui/use-toast";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
-import usePatchClientInvoiceServiceMonthMutation from "@/mutations/usePatchClientInvoiceServiceMonthMutation";
 import useClientsToInvoiceQuery from "@/queries/useClientsToInvoiceQuery";
 
 const formSchema = z.object({
@@ -104,8 +103,6 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
   const { mutateAsync: patchClientInvoiceMutateAsync } =
     usePatchClientInvoiceMutation(clientInvoice.id);
 
-  const { mutateAsync: patchClientInvoiceServiceMonthMutationAsync } =
-    usePatchClientInvoiceServiceMonthMutation(clientInvoice.id);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -119,13 +116,6 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
         invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
         notesToClient: transformNullishStringIntoString.parse(values.notes),
         terms: Number(values.terms) as 21 | 30 | 60,
-      });
-
-      await patchClientInvoiceServiceMonthMutationAsync({
-        serviceMonth: format(
-          new Date(values.servicePeriodMonth.slice(0, 7)),
-          "yyyy-MM"
-        ),
       });
 
       toast({ title: "Success" });
@@ -194,9 +184,9 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                     />
                   ) : (
                     <ServicePeriodMonthSelect
+                      clientInvoiceId={clientInvoice.id}
                       organizationId={clientInvoice.clientOrganization.id}
                       servicePeriodMonth={field.value}
-                      onServicePeriodMonthChange={field.onChange}
                     />
                   )}
                 </FormControl>
