@@ -26,21 +26,20 @@ const ServicePeriodMonthSelect = ({
   const organization = organizations?.clientToInvoices.find(
     (value) => value.id === organizationId
   );
+  const defaultPeriodMonth = format(new Date(servicePeriodMonth), "MMM yyyy");
 
   return (
     <Select onValueChange={onServicePeriodMonthChange}>
       <SelectTrigger>
-        <SelectValue placeholder="Select a month" />
+        <SelectValue placeholder={defaultPeriodMonth} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {organization?.date
-            .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
-            .map((value) => (
-              <SelectItem key={value} value={value}>
-                {format(new Date(value.slice(0, 7)), "MMM yyyy")}
-              </SelectItem>
-            ))}
+          {organization?.date.map((value) => (
+            <SelectItem key={value} value={value}>
+              {format(new Date(value.slice(0, 7)), "MMM yyyy")}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>
