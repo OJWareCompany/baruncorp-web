@@ -35,8 +35,10 @@ export default function GlobalSearch({
   const handleEnterKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       const trimmedValue = value.trim();
-      let searchParam = "";
-      if (selectedOption === "JobName") {
+      let searchParam = searchParamOptions.jobNameSearchParamName;
+      if (selectedOption === "") {
+        searchParam = searchParamOptions.jobNameSearchParamName;
+      } else if (selectedOption === "JobName") {
         searchParam = searchParamOptions.jobNameSearchParamName;
       } else if (selectedOption === "ProjectNumber") {
         searchParam = searchParamOptions.projectNumberSearchParamName;
