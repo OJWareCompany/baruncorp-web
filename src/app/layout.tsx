@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 import Providers from "./Providers";
 import { Toaster } from "@/components/Toaster";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -30,6 +31,7 @@ export default function RootLayout({
       </Script>
       <body className={`${inter.className} w-full`}>
         <Providers>{children}</Providers>
+        <Analytics />
         <Toaster />
         <noscript
           dangerouslySetInnerHTML={{
