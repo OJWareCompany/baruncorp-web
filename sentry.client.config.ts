@@ -33,6 +33,8 @@ if (process.env.NODE_ENV === "production") {
         colorScheme: "light",
         isNameRequired: true,
         isEmailRequired: true,
+        messagePlaceholder:
+          "what's the bug?                                           Your session will record your screen for about 5 minutes before submitting a bug, so please try to reproduce the behavior",
       }),
     ],
   });
