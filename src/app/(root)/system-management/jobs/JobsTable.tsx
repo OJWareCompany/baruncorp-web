@@ -1,7 +1,6 @@
 "use client";
 import {
   PaginationState,
-  SortingState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -11,11 +10,8 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  ChevronsDown,
   ChevronsLeft,
   ChevronsRight,
-  ChevronsUp,
-  ChevronsUpDown,
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -101,8 +97,6 @@ export default function JobsTable() {
   const pathname = usePathname();
   const [syncedParams, setSyncedParams] =
     useState<FindJobPaginatedHttpControllerFindJobParams>();
-
-  const [sorting, setSorting] = useState<SortingState>([]);
 
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
@@ -624,13 +618,11 @@ export default function JobsTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onSortingChange: setSorting,
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
     onPaginationChange,
     manualPagination: true,
     state: {
-      sorting,
       pagination,
       columnVisibility,
     },
@@ -653,38 +645,12 @@ export default function JobsTable() {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : (
-                      <div
-                        className={
-                          header.column.getCanSort()
-                            ? "cursor-pointer flex select-none gap-2"
-                            : ""
-                        }
-                        onClick={header.column.getToggleSortingHandler()}
-                        title={
-                          header.column.getCanSort()
-                            ? header.column.getNextSortingOrder() === "asc"
-                              ? "Sort ascending"
-                              : header.column.getNextSortingOrder() === "desc"
-                              ? "Sort descending"
-                              : "Clear sort"
-                            : undefined
-                        }
-                      >
-                        {flexRender(
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                        {{
-                          asc: <ChevronsUp className="h-4 w-4 ml-1.5" />,
-                          desc: <ChevronsDown className="h-4 w-4 ml-1.5" />,
-                        }[header.column.getIsSorted() as string] ?? null}
-                        {header.column.getCanSort() &&
-                        !header.column.getIsSorted() ? (
-                          <ChevronsUpDown className="h-3 w-3 ml-1.5 mt-0.5" />
-                        ) : null}
-                      </div>
-                    )}
                   </TableHead>
                 ))}
               </TableRow>
