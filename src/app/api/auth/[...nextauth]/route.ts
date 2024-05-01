@@ -66,13 +66,16 @@ const authOptions: NextAuthOptions = {
           },
         })
         .then(() => null)
-        .catch((error: AxiosError<ErrorResponseData>) => error);
+        .catch((error: AxiosError<ErrorResponseData>) => {
+          console.error(error);
+          return error;
+        });
 
       if (accessTokenError == null) {
         return token;
       }
 
-      if (!accessTokenError.response?.data.errorCode.includes("10005")) {
+      if (!accessTokenError.response?.data?.errorCode?.includes("10005")) {
         return { ...token, authError: "UNKNOWN_ERROR" };
       }
 
@@ -86,13 +89,16 @@ const authOptions: NextAuthOptions = {
           token.accessToken = data.accessToken;
           return null;
         })
-        .catch((error: AxiosError<ErrorResponseData>) => error);
+        .catch((error: AxiosError<ErrorResponseData>) => {
+          console.error(error);
+          return error;
+        });
 
       if (refreshTokenError == null) {
         return token;
       }
 
-      if (!refreshTokenError.response?.data.errorCode.includes("10006")) {
+      if (!refreshTokenError.response?.data?.errorCode?.includes("10006")) {
         return { ...token, authError: "UNKNOWN_ERROR" };
       }
 

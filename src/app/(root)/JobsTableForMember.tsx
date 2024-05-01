@@ -190,7 +190,6 @@ export default function JobsTableForMember({ type }: Props) {
       : 0,
     pageSize,
   };
-
   const jobNameSearchParam =
     searchParams.get(encodeURIComponent(jobNameSearchParamName)) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
