@@ -38,10 +38,7 @@ const useApi = () => {
             });
           }
         }
-
-        return Promise.reject(
-          new Error("Authentication Error", { cause: "AUTH_ERROR" })
-        );
+        return Promise.reject(new Error("Authentication Error"));
       }
     );
 

@@ -2,7 +2,6 @@
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
 import PageLoading from "@/components/PageLoading";
@@ -16,40 +15,38 @@ export default function Authenticate({ children }: Props) {
   const { data: session, status } = useSession();
   const { toast } = useToast();
   const isSignOutTriggeredRef = useRef(false);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (
-      session == null ||
-      session.authError == null ||
-      isSignOutTriggeredRef.current
-    ) {
-      return;
-    }
-
-    const { authError } = session;
-
-    switch (authError) {
-      case "REFRESH_TOKEN_ERROR":
+    console.log("session", session);
+    console.log("status", status);
+    console.log("Access Token", session?.accessToken);
+    if (status === "authenticated") {
+      if (
+        session?.authError === "REFRESH_TOKEN_ERROR" &&
+        !isSignOutTriggeredRef.current
+      ) {
         toast({
           title: "Please sign-in again",
           variant: "destructive",
         });
-        break;
-      case "UNKNOWN_ERROR":
+        isSignOutTriggeredRef.current = true;
+        signOut({ redirect: false, callbackUrl: "/signin" });
+      } else if (session?.authError === "UNKNOWN_ERROR") {
         toast(defaultErrorToast);
-        break;
+      }
     }
-
-    isSignOutTriggeredRef.current = true; // authError로 로그아웃이 되었을 때, signOut이 trigger 되었다는 값을 기억하게 해서 여러 번 이 코드가 실행되지 않도록 함
-    signOut({ redirect: false });
-  }, [queryClient, session, status, toast]);
+  }, [session, isSignOutTriggeredRef, toast, status]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/signin");
     }
   }, [router, status]);
+
+  if (session && status !== "authenticated") {
+    signOut({ redirect: false, callbackUrl: "/signin" });
+    return null;
+  }
 
   if (status === "loading" || status === "unauthenticated") {
     return <PageLoading isPageHeaderPlaceholder={false} />;
