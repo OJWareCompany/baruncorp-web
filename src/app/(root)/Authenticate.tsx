@@ -17,9 +17,6 @@ export default function Authenticate({ children }: Props) {
   const isSignOutTriggeredRef = useRef(false);
 
   useEffect(() => {
-    console.log("session", session);
-    console.log("status", status);
-    console.log("Access Token", session?.accessToken);
     if (status === "authenticated") {
       if (
         session?.authError === "REFRESH_TOKEN_ERROR" &&
