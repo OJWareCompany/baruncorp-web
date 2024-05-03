@@ -47,6 +47,9 @@ const ServicePeriodMonthByOrganizationSelect = forwardRef<
               <SelectItem key={value} value={value}>
                 {/* {format(new Date(value.slice(0, 7)), "MMM yyyy")} */}
                 {`${value}  //  ${formatInESTAsMMMYYYY(value)}`}
+                {/* {`${value}  //  ${formatInESTAsMMMYYYY(
+                  new Date(value.slice(0, 7))
+                )}`} */}
                 {/* {formatInESTAsMMMYYYY(value)} */}
               </SelectItem>
             ))}
