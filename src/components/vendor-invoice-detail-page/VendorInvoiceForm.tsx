@@ -27,7 +27,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import {
+  cn,
+  formatInESTAsMMMYYYY,
+  getISOStringForStartOfDayInUTC,
+} from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -147,13 +151,7 @@ export default function VendorInvoiceForm({ vendorInvoice }: Props) {
               <FormItem>
                 <FormLabel required>Service Period Month</FormLabel>
                 <FormControl>
-                  <Input
-                    value={format(
-                      new Date(field.value.slice(0, 7)),
-                      "MMM yyyy"
-                    )}
-                    disabled
-                  />
+                  <Input value={formatInESTAsMMMYYYY(field.value)} disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -45,12 +45,7 @@ const ServicePeriodMonthByOrganizationSelect = forwardRef<
             .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
             .map((value) => (
               <SelectItem key={value} value={value}>
-                {/* {format(new Date(value.slice(0, 7)), "MMM yyyy")} */}
-                {`${value}  //  ${formatInESTAsMMMYYYY(value)}`}
-                {/* {`${value}  //  ${formatInESTAsMMMYYYY(
-                  new Date(value.slice(0, 7))
-                )}`} */}
-                {/* {formatInESTAsMMMYYYY(value)} */}
+                {formatInESTAsMMMYYYY(value)}
               </SelectItem>
             ))}
         </SelectGroup>
