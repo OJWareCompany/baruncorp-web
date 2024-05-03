@@ -204,7 +204,9 @@ export default function NewClientInvoiceSheet() {
                     name="servicePeriodMonth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel required>Service Period Month</FormLabel>
+                        <FormLabel required>
+                          Service Period Month Sangwon
+                        </FormLabel>
                         <FormControl>
                           <ServicePeriodMonthByOrganizationSelect
                             organizationId={watchOrganizationId}
