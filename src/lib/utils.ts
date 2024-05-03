@@ -48,6 +48,10 @@ export function formatInEST(date: Date | string) {
   return formatInTimeZone(date, "America/New_York", "MM-dd-yyyy, p");
 }
 
+export function formatInESTAsMMMYYYY(date: Date | string) {
+  return formatInTimeZone(date, "America/New_York", "MMM yyyy");
+}
+
 export function getISOStringForStartOfDayInUTC(date: Date) {
   return zonedTimeToUtc(startOfDay(date), "Etc/UTC").toISOString();
 }

@@ -1,6 +1,5 @@
 "use client";
 import { forwardRef } from "react";
-import { format } from "date-fns";
 import useClientsToInvoiceQuery from "@/queries/useClientsToInvoiceQuery";
 import {
   Select,
@@ -10,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatInESTAsMMMYYYY } from "@/lib/utils";
 
 interface Props {
   organizationId: string;
@@ -45,7 +45,9 @@ const ServicePeriodMonthByOrganizationSelect = forwardRef<
             .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
             .map((value) => (
               <SelectItem key={value} value={value}>
-                {format(new Date(value.slice(0, 7)), "MMM yyyy")}
+                {/* {format(new Date(value.slice(0, 7)), "MMM yyyy")} */}
+                {`${value}  //  ${formatInESTAsMMMYYYY(value)}`}
+                {/* {formatInESTAsMMMYYYY(value)} */}
               </SelectItem>
             ))}
         </SelectGroup>
