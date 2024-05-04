@@ -52,6 +52,10 @@ export function formatInESTAsMMMYYYY(date: Date | string) {
   return formatInTimeZone(date, "America/New_York", "MMM yyyy");
 }
 
+export function formatInUTCAsMMMYYYY(date: Date | string) {
+  return formatInTimeZone(date, "Etc/UTC", "MMM yyyy");
+}
+
 export function formatInUTCAsMMddyyyy(date: Date | string) {
   return formatInTimeZone(date, "Etc/UTC", "MM-dd-yyyy");
 }

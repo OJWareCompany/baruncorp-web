@@ -29,7 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   cn,
-  formatInESTAsMMMYYYY,
+  formatInUTCAsMMMYYYY,
   formatInUTCAsMMddyyyy,
   getISOStringForStartOfDayInUTC,
 } from "@/lib/utils";
@@ -152,7 +152,7 @@ export default function VendorInvoiceForm({ vendorInvoice }: Props) {
               <FormItem>
                 <FormLabel required>Service Period Month</FormLabel>
                 <FormControl>
-                  <Input value={formatInESTAsMMMYYYY(field.value)} disabled />
+                  <Input value={formatInUTCAsMMMYYYY(field.value)} disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>

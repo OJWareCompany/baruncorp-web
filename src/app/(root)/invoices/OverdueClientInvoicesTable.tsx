@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -40,7 +39,11 @@ import { Button } from "@/components/ui/button";
 import useOverdueClientInvoicesQuery from "@/queries/useOverdueClientInvoicesQuery";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
-import { formatInEST } from "@/lib/utils";
+import {
+  formatInEST,
+  formatInUTCAsMMMYYYY,
+  formatInUTCAsMMddyyyy,
+} from "@/lib/utils";
 import { invoiceStatuses } from "@/lib/constants";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
@@ -93,8 +96,7 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
   const columns = [
     columnHelper.accessor("servicePeriodDate", {
       header: "Service Period Month",
-      cell: ({ getValue }) =>
-        format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+      cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
     }),
     columnHelper.accessor("status", {
       header: "Status",
@@ -112,7 +114,7 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
     }),
     columnHelper.accessor("invoiceDate", {
       header: "Invoice Date",
-      cell: ({ getValue }) => formatInEST(getValue()),
+      cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
     }),
     columnHelper.accessor(() => `${organization?.invoiceRecipientEmail}`, {
       header: "Invoice Recipient Email",
@@ -122,7 +124,7 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
     }),
     columnHelper.accessor("dueDate", {
       header: "Due Date",
-      cell: ({ getValue }) => formatInEST(getValue()),
+      cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
     }),
     ...(organization?.isTierDiscount
       ? [

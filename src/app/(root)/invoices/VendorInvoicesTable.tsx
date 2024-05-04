@@ -15,7 +15,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { useMemo } from "react";
-import { format } from "date-fns";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
@@ -39,7 +38,11 @@ import {
 import { Button } from "@/components/ui/button";
 import useVendorInvoicesQuery from "@/queries/useVendorInvoicesQuery";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import { formatInEST } from "@/lib/utils";
+import {
+  formatInEST,
+  formatInUTCAsMMMYYYY,
+  formatInUTCAsMMddyyyy,
+} from "@/lib/utils";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 
 const TABLE_NAME = "VendorInvoices";
@@ -51,12 +54,11 @@ const columnHelper =
 const columns = [
   columnHelper.accessor("serviceMonth", {
     header: "Service Period Month",
-    cell: ({ getValue }) =>
-      format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+    cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
   }),
   columnHelper.accessor("invoiceDate", {
     header: "Invoice Date",
-    cell: ({ getValue }) => formatInEST(getValue()),
+    cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
   }),
   columnHelper.accessor("terms", {
     header: "Terms",
@@ -70,7 +72,7 @@ const columns = [
         return <p className="text-muted-foreground">-</p>;
       }
 
-      return formatInEST(value);
+      return formatInUTCAsMMddyyyy(value);
     },
   }),
   columnHelper.accessor((row) => `$${row.subTotal}`, {

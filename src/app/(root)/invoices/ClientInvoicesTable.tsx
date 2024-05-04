@@ -14,7 +14,6 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { useLocalStorage } from "@uidotdev/usehooks";
@@ -38,7 +37,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { formatInEST } from "@/lib/utils";
+import {
+  formatInEST,
+  formatInUTCAsMMMYYYY,
+  formatInUTCAsMMddyyyy,
+} from "@/lib/utils";
 import useClientInvoicesQuery from "@/queries/useClientInvoicesQuery";
 import {
   InvoiceStatusEnum,
@@ -140,8 +143,7 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
     () => [
       columnHelper.accessor("servicePeriodDate", {
         header: "Service Period Month",
-        cell: ({ getValue }) =>
-          format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+        cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
       }),
       columnHelper.accessor("status", {
         header: () => (
@@ -170,7 +172,7 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
       }),
       columnHelper.accessor("invoiceDate", {
         header: "Invoice Date",
-        cell: ({ getValue }) => formatInEST(getValue()),
+        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
       }),
       columnHelper.accessor(() => `${organization?.invoiceRecipientEmail}`, {
         header: "Invoice Recipient Email",
@@ -180,7 +182,7 @@ export default function ClientInvoicesTable({ type, organizationId }: Props) {
       }),
       columnHelper.accessor("dueDate", {
         header: "Due Date",
-        cell: ({ getValue }) => formatInEST(getValue()),
+        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
       }),
       ...(organization?.isTierDiscount
         ? [

@@ -14,7 +14,6 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { format } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {
@@ -37,7 +36,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { formatInEST } from "@/lib/utils";
+import {
+  formatInEST,
+  formatInUTCAsMMMYYYY,
+  formatInUTCAsMMddyyyy,
+} from "@/lib/utils";
 import { invoiceStatuses } from "@/lib/constants";
 import useOverdueClientInvoicesQuery from "@/queries/useOverdueClientInvoicesQuery";
 import SearchHeader from "@/components/table/SearchHeader";
@@ -117,8 +120,7 @@ export default function OverdueClientInvoicesTable() {
       }),
       columnHelper.accessor("servicePeriodDate", {
         header: "Service Period Month",
-        cell: ({ getValue }) =>
-          format(new Date(getValue().slice(0, 7)), "MMM yyyy"),
+        cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
       }),
       columnHelper.accessor("status", {
         header: "Status",
@@ -136,14 +138,14 @@ export default function OverdueClientInvoicesTable() {
       }),
       columnHelper.accessor("invoiceDate", {
         header: "Invoice Date",
-        cell: ({ getValue }) => formatInEST(getValue()),
+        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
       }),
       columnHelper.accessor("terms", {
         header: "Terms",
       }),
       columnHelper.accessor("dueDate", {
         header: "Due Date",
-        cell: ({ getValue }) => formatInEST(getValue()),
+        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
       }),
       columnHelper.accessor("notesToClient", {
         header: "Notes to Client",
