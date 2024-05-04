@@ -189,7 +189,7 @@ export default function VendorInvoiceForm({ vendorInvoice }: Props) {
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value}
+                      selected={new Date(formatInUTCAsMMddyyyy(field.value))}
                       onSelect={(day) => {
                         if (day == null) {
                           return;
