@@ -12,6 +12,7 @@ import {
   OrganizationResponseDto,
   ServicePaginatedResponseDto,
 } from "@/api/api-spec";
+import { formatInUTCAsMMddyyyy } from "@/lib/utils";
 
 Font.registerHyphenationCallback((word) => [word]);
 
@@ -69,15 +70,11 @@ export default function ClientInvoiceDocument({
           <View>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Invoice Date: </Text>
-              <Text>
-                {format(new Date(clientInvoice.invoiceDate), "MM-dd-yyyy")}
-              </Text>
+              <Text>{formatInUTCAsMMddyyyy(clientInvoice.invoiceDate)}</Text>
             </View>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Due Date: </Text>
-              <Text>
-                {format(new Date(clientInvoice.dueDate), "MM-dd-yyyy")}
-              </Text>
+              <Text>{formatInUTCAsMMddyyyy(clientInvoice.dueDate)}</Text>
             </View>
           </View>
         </View>

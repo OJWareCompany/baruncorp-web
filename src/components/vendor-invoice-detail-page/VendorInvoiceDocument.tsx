@@ -12,6 +12,7 @@ import {
   VendorInvoiceLineItemResponse,
   VendorInvoiceResponseDto,
 } from "@/api/api-spec";
+import { formatInUTCAsMMddyyyy } from "@/lib/utils";
 
 Font.registerHyphenationCallback((word) => [word]);
 
@@ -69,15 +70,13 @@ export default function VendorInvoiceDocument({
           <View>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Invoice Date: </Text>
-              <Text>
-                {format(new Date(vendorInvoice.invoiceDate), "MM-dd-yyyy")}
-              </Text>
+              <Text>{formatInUTCAsMMddyyyy(vendorInvoice.invoiceDate)}</Text>
             </View>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.bold}>Due Date: </Text>
               <Text>
                 {vendorInvoice.dueDate
-                  ? format(new Date(vendorInvoice.dueDate), "MM-dd-yyyy")
+                  ? formatInUTCAsMMddyyyy(vendorInvoice.dueDate)
                   : "-"}
               </Text>
             </View>
