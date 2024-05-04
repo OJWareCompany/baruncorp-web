@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { addDays, format } from "date-fns";
+import { addDays } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import {
   cn,
   formatInESTAsMMMYYYY,
+  formatInUTCAsMMddyyyy,
   getISOStringForStartOfDayInUTC,
 } from "@/lib/utils";
 import {
@@ -195,7 +196,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                         disabled={!isBarunCorpMember}
                       >
                         {field.value ? (
-                          format(field.value, "MM-dd-yyyy")
+                          formatInUTCAsMMddyyyy(field.value)
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -254,9 +255,8 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
           <Item>
             <Label>Due Date</Label>
             <Input
-              value={format(
-                addDays(watchInvoiceDate, Number(watchTerms)),
-                "MM-dd-yyyy"
+              value={formatInUTCAsMMddyyyy(
+                addDays(watchInvoiceDate, Number(watchTerms))
               )}
               disabled
             />
