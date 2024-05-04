@@ -1,5 +1,4 @@
 "use client";
-import { format } from "date-fns";
 import React from "react";
 import VendorInvoiceForm from "./VendorInvoiceForm";
 import PaymentsTable from "./PaymentsTable";
@@ -13,6 +12,7 @@ import useNotFound from "@/hook/useNotFound";
 import CollapsibleSection from "@/components/CollapsibleSection";
 import { VendorInvoiceResponseDto } from "@/api/api-spec";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import { formatInUTCAsMMMYYYY } from "@/lib/utils";
 
 function getPageHeader({
   pageType,
@@ -36,9 +36,8 @@ function getPageHeader({
             },
             {
               href: `/invoices/vendor/${vendorInvoice.id}}`,
-              name: `${vendorInvoice.organizationName}, ${format(
-                new Date(vendorInvoice.serviceMonth.slice(0, 7)),
-                "MMM yyyy"
+              name: `${vendorInvoice.organizationName}, ${formatInUTCAsMMMYYYY(
+                vendorInvoice.serviceMonth
               )}`,
             },
           ]}
@@ -55,9 +54,8 @@ function getPageHeader({
             },
             {
               href: `/system-management/vendor-invoices/${vendorInvoice.id}}`,
-              name: `${vendorInvoice.organizationName}, ${format(
-                new Date(vendorInvoice.serviceMonth.slice(0, 7)),
-                "MMM yyyy"
+              name: `${vendorInvoice.organizationName}, ${formatInUTCAsMMMYYYY(
+                vendorInvoice.serviceMonth
               )}`,
             },
           ]}

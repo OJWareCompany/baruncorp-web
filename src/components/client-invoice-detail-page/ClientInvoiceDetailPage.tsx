@@ -1,5 +1,4 @@
 "use client";
-import { format } from "date-fns";
 import React from "react";
 import ClientInvoiceForm from "./ClientInvoiceForm";
 import ClientInvoiceStatus from "./ClientInvoiceStatus";
@@ -22,6 +21,7 @@ import {
   ServicePaginatedResponseDto,
 } from "@/api/api-spec";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import { formatInUTCAsMMMYYYY } from "@/lib/utils";
 
 function getPageHeader({
   pageType,
@@ -49,10 +49,9 @@ function getPageHeader({
             },
             {
               href: `/invoices/client/${clientInvoice.id}}`,
-              name: `${clientInvoice.clientOrganization.name}, ${format(
-                new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
-                "MMM yyyy"
-              )}`,
+              name: `${
+                clientInvoice.clientOrganization.name
+              }, ${formatInUTCAsMMMYYYY(clientInvoice.servicePeriodDate)}`,
             },
           ]}
           action={
@@ -74,10 +73,9 @@ function getPageHeader({
             },
             {
               href: `/system-management/client-invoices/${clientInvoice.id}}`,
-              name: `${clientInvoice.clientOrganization.name}, ${format(
-                new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
-                "MMM yyyy"
-              )}`,
+              name: `${
+                clientInvoice.clientOrganization.name
+              }, ${formatInUTCAsMMMYYYY(clientInvoice.servicePeriodDate)}`,
             },
           ]}
           action={

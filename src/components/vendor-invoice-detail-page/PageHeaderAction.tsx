@@ -1,12 +1,12 @@
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ArrowDownToLine, Loader2 } from "lucide-react";
 import React from "react";
-import { format } from "date-fns";
 import VendorInvoiceDocument from "./VendorInvoiceDocument";
 import { Button } from "@/components/ui/button";
 import { VendorInvoiceResponseDto } from "@/api/api-spec";
 import useVendorInvoiceLineItemsQuery from "@/queries/useVendorInvoiceLineItemsQuery";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
+import { formatInUTCAsMMMYYYY } from "@/lib/utils";
 
 interface Props {
   vendorInvoice: VendorInvoiceResponseDto;
@@ -50,9 +50,10 @@ Props) {
           organization={organization}
         />
       }
-      fileName={`[Barun Corp] ${vendorInvoice.organizationName}, ${format(
-        new Date(vendorInvoice.serviceMonth.slice(0, 7)),
-        "MMM yyyy"
+      fileName={`[Barun Corp] ${
+        vendorInvoice.organizationName
+      }, ${formatInUTCAsMMMYYYY(
+        vendorInvoice.serviceMonth
       )}, Vendor Invoice.pdf`}
       className="inline-flex"
     >

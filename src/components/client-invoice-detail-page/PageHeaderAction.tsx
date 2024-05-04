@@ -1,7 +1,6 @@
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ArrowDownToLine } from "lucide-react";
 import React from "react";
-import { format } from "date-fns";
 import ClientInvoiceDocument from "./ClientInvoiceDocument";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +8,7 @@ import {
   OrganizationResponseDto,
   ServicePaginatedResponseDto,
 } from "@/api/api-spec";
+import { formatInUTCAsMMMYYYY } from "@/lib/utils";
 
 interface Props {
   clientInvoice: InvoiceResponseDto;
@@ -32,9 +32,8 @@ export default function PageHeaderAction({
       }
       fileName={`[Barun Corp] ${
         clientInvoice.clientOrganization.name
-      }, ${format(
-        new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
-        "MMM yyyy"
+      }, ${formatInUTCAsMMMYYYY(
+        clientInvoice.servicePeriodDate
       )}, Client Invoice.pdf`}
       className="inline-flex"
     >
