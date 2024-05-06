@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { useProfileContext } from "./ProfileProvider";
 import { useToast } from "@/components/ui/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
@@ -23,8 +24,10 @@ import useHandsStatusQuery, {
   getHandsStatusQueryKey,
 } from "@/queries/useHandsStatusQuery";
 import usePostUserHandsDownMutation from "@/mutations/usePostUserHandsDownMutation";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function User() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const { data: user, isSuccess: isProfileQuerySuccess } = useProfileQuery();
@@ -34,6 +37,7 @@ export default function User() {
   const queryClient = useQueryClient();
   const [date, setDate] = useState<Date>();
   const { isBarunCorpMember } = useProfileContext();
+  const { setAuthStatus } = useAuthStore();
 
   const handleSignOutButtonClick = () => {
     if (handStatus != null && handStatus.status) {
@@ -58,8 +62,11 @@ export default function User() {
         });
     }
 
-    signOut({ redirect: false });
-    toast({ title: "Sign-out success" });
+    signOut({ redirect: false }).then(() => {
+      setAuthStatus("unauthenticated");
+      toast({ title: "Sign-out success" });
+      router.push("/signin");
+    });
   };
 
   useEffect(() => {

@@ -55,10 +55,12 @@ const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ trigger, user, token }) {
+      // console.info(`jwt callback trigger ${trigger}`)
       if (trigger === "signIn") {
         return { ...user };
       }
 
+      // console.info(`Call API Get Auth Me`)
       const accessTokenError = await api.auth
         .authenticationControllerGetMe({
           headers: {
@@ -67,18 +69,22 @@ const authOptions: NextAuthOptions = {
         })
         .then(() => null)
         .catch((error: AxiosError<ErrorResponseData>) => {
-          console.error(error);
+          // .catch((error: any) => {
+          // console.info(`[Error] API Get Auth Me: ${error.response ? `${error.config.method} ${error.config.url} ${error.status} ${error.statusText}` : error}`)
           return error;
         });
 
       if (accessTokenError == null) {
+        // console.info(`accessTokenError is null`)
         return token;
       }
 
       if (!accessTokenError.response?.data?.errorCode?.includes("10005")) {
-        return { ...token, authError: "UNKNOWN_ERROR" };
+        // console.info(`accessTokenError is not 10005, => authError is ACCESS_TOKEN_EXPIRED_ERROR`)
+        return { ...token, authError: "ACCESS_TOKEN_EXPIRED_ERROR" };
       }
 
+      // console.info(`Call API Get Refresh Token`)
       const refreshTokenError = await api.auth
         .authenticationControllerGetRefresh({
           headers: {
@@ -90,19 +96,24 @@ const authOptions: NextAuthOptions = {
           return null;
         })
         .catch((error: AxiosError<ErrorResponseData>) => {
-          console.error(error);
+          // .catch((error: any) => {
+          //   console.info(`[Error] API Get Refresh Token: ${error.response ? `${error.config.method} ${error.config.url} ${error.status} ${error.statusText}` : error}`)
           return error;
         });
 
       if (refreshTokenError == null) {
+        // console.info(`refreshTokenError is null`)
         return token;
       }
 
-      if (!refreshTokenError.response?.data?.errorCode?.includes("10006")) {
-        return { ...token, authError: "UNKNOWN_ERROR" };
-      }
+      // console.info(`#### refreshTokenError.response?.data.errorCode #### ${refreshTokenError.response?.data.errorCode}`)
 
-      return { ...token, authError: "REFRESH_TOKEN_ERROR" };
+      if (!refreshTokenError.response?.data?.errorCode?.includes("10006")) {
+        // console.info(`refreshTokenError is not 10006, => authError is REFRESH_TOKEN_UNKNOWN_ERROR, ${refreshTokenError.response?.data?.errorCode}`)
+        return { ...token, authError: "REFRESH_TOKEN_UNKNOWN_ERROR" };
+      }
+      // console.info(`refreshTokenError is 10006, => authError is REFRESH_TOKEN_EXPIRED_ERROR`)
+      return { ...token, authError: "REFRESH_TOKEN_EXPIRED_ERROR" };
     },
     async session({ session, token }) {
       const { accessToken, email, id, organizationId, authError } = token;

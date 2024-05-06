@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -269,6 +269,9 @@ dependencies:
   zod:
     specifier: 3.21.4
     version: 3.21.4
+  zustand:
+    specifier: ^4.5.2
+    version: 4.5.2(@types/react@18.2.8)(react@18.2.0)
 
 devDependencies:
   '@commitlint/cli':
@@ -6675,6 +6678,8 @@ packages:
     peerDependenciesMeta:
       '@next/font':
         optional: true
+      '@storybook/addon-actions':
+        optional: true
       typescript:
         optional: true
       webpack:
@@ -7747,8 +7752,8 @@ packages:
       slate-hyperscript: 0.100.0(slate@0.101.5)
       slate-react: 0.101.5(react-dom@18.2.0)(react@18.2.0)(slate@0.101.5)
       use-deep-compare: 1.2.1(react@18.2.0)
-      zustand: 4.5.0(@types/react@18.2.8)(react@18.2.0)
-      zustand-x: 3.0.2(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)(zustand@4.5.0)
+      zustand: 4.5.2(@types/react@18.2.8)(react@18.2.0)
+      zustand-x: 3.0.2(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)(zustand@4.5.2)
     transitivePeerDependencies:
       - '@types/react'
       - immer
@@ -16970,7 +16975,7 @@ packages:
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
 
-  /zustand-x@3.0.2(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)(zustand@4.5.0):
+  /zustand-x@3.0.2(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)(zustand@4.5.2):
     resolution: {integrity: sha512-tb4qMWbmgrWEdemb+LlrJiHI1ZMxwlQNz7jDHN5iA/vmU8xlpAX80MQZ2FNLP2KejBFEnsA1RWRAO/0D5O0rPw==}
     peerDependencies:
       zustand: '>=4.3.9'
@@ -16978,7 +16983,7 @@ packages:
       immer: 10.0.3
       lodash.mapvalues: 4.6.0
       react-tracked: 1.7.11(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)
-      zustand: 4.5.0(@types/react@18.2.8)(react@18.2.0)
+      zustand: 4.5.2(@types/react@18.2.8)(react@18.2.0)
     transitivePeerDependencies:
       - react
       - react-dom
@@ -16986,8 +16991,8 @@ packages:
       - scheduler
     dev: false
 
-  /zustand@4.5.0(@types/react@18.2.8)(react@18.2.0):
-    resolution: {integrity: sha512-zlVFqS5TQ21nwijjhJlx4f9iGrXSL0o/+Dpy4txAP22miJ8Ti6c1Ol1RLNN98BMib83lmDH/2KmLwaNXpjrO1A==}
+  /zustand@4.5.2(@types/react@18.2.8)(react@18.2.0):
+    resolution: {integrity: sha512-2cN1tPkDVkwCy5ickKrI7vijSjPksFRfqS6237NzT0vqSsztTNnQdHw9mmN7uBdk3gceVXU0a+21jFzFzAc9+g==}
     engines: {node: '>=12.7.0'}
     peerDependencies:
       '@types/react': '>=16.8'

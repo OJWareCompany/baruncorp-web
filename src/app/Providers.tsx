@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactNode, useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { isAxiosError } from "axios";
+import InitializeAuthStatus from "./(root)/InitializeAuthStatus";
 import { KNOWN_ERROR, defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
 import { isValidServerErrorCode, isError } from "@/lib/utils";
@@ -46,7 +47,16 @@ export default function Providers({ children }: Props) {
         queryCache: new QueryCache({
           onError: async (error) => {
             console.error(error);
-            if (isError(error) && error.cause === "AUTH_ERROR") {
+            /**
+             * axios(useApi)로 부터 넘어온 에러가 TOKEN_UPDATE_FAILED 혹은 UNAUTHENTICATED_STATUS 라면 얼리 리턴
+             * 근데 여기 안걸리는 것 같은데?? 이상하다...
+             * @TODO 의미 없는 코드인지 확인 필요
+             */
+            if (
+              isError(error) &&
+              (error.cause === "TOKEN_UPDATE_FAILED" ||
+                error.cause === "UNAUTHENTICATED_STATUS")
+            ) {
               return;
             }
 
@@ -71,7 +81,16 @@ export default function Providers({ children }: Props) {
         mutationCache: new MutationCache({
           onError: async (error) => {
             console.error(error);
-            if (isError(error) && error.cause === "AUTH_ERROR") {
+            /**
+             * axios(useApi)로 부터 넘어온 에러가 TOKEN_UPDATE_FAILED 혹은 UNAUTHENTICATED_STATUS 라면 얼리 리턴
+             * 근데 여기 안걸리는 것 같은데?? 이상하다...
+             * @TODO 의미 없는 코드인지 확인 필요
+             */
+            if (
+              isError(error) &&
+              (error.cause === "TOKEN_UPDATE_FAILED" ||
+                error.cause === "UNAUTHENTICATED_STATUS")
+            ) {
               return;
             }
 
@@ -85,7 +104,6 @@ export default function Providers({ children }: Props) {
               console.error("Error Code:", error.response.data.errorCode);
               return;
             }
-
             toast(defaultErrorToast);
           },
         }),
@@ -97,6 +115,7 @@ export default function Providers({ children }: Props) {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>{children}</TooltipProvider>
         <ReactQueryDevtools initialIsOpen={true} />
+        <InitializeAuthStatus />
       </QueryClientProvider>
     </SessionProvider>
   );

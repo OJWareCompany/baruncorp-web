@@ -20,6 +20,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import LoadingButton from "@/components/LoadingButton";
 import { defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const formSchema = z.object({
   email: z
@@ -47,6 +48,7 @@ export default function Page() {
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { setAuthStatus } = useAuthStore();
 
   useEffect(() => {
     // 이 페이지에 처음 진입할 때 cache를 지움
@@ -78,6 +80,7 @@ export default function Page() {
     const { error } = signInResponse;
     if (error == null) {
       toast({ title: "Sign-in success" });
+      setAuthStatus("authenticated");
       router.push("/");
       return;
     }
