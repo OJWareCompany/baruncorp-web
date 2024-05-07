@@ -27,7 +27,7 @@ export default function Authenticate({ children }: Props) {
 
     /**
      * - triggeredAuthError is false: authError가 발생하지 않은 상태
-     * - authStatus is authenticated: logout 되지 않은 상태
+     * - authStatus is authenticated: logout 되지 않은 상태 (logout 상태면 unauthenticated 임)
      * 즉 첫 번째 authError가 발생하고 아직 logout 되지 않은 상태일 때 실행됨
      */
     if (!triggeredAuthError && authStatus !== "unauthenticated") {
