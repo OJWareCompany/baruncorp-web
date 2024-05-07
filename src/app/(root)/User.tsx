@@ -1,12 +1,10 @@
 "use client";
 import { Building, Clock, LogOut, Palmtree, User2 } from "lucide-react";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
 import { useProfileContext } from "./ProfileProvider";
 import { useToast } from "@/components/ui/use-toast";
 import useProfileQuery from "@/queries/useProfileQuery";
@@ -24,10 +22,10 @@ import useHandsStatusQuery, {
   getHandsStatusQueryKey,
 } from "@/queries/useHandsStatusQuery";
 import usePostUserHandsDownMutation from "@/mutations/usePostUserHandsDownMutation";
-import { useAuthStore } from "@/store/useAuthStore";
+import useAuthenticatationUpdate from "@/hook/useAuthenticatationUpdate";
 
 export default function User() {
-  const router = useRouter();
+  const { logout } = useAuthenticatationUpdate();
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const { data: user, isSuccess: isProfileQuerySuccess } = useProfileQuery();
@@ -37,7 +35,6 @@ export default function User() {
   const queryClient = useQueryClient();
   const [date, setDate] = useState<Date>();
   const { isBarunCorpMember } = useProfileContext();
-  const { setAuthStatus } = useAuthStore();
 
   const handleSignOutButtonClick = () => {
     if (handStatus != null && handStatus.status) {
@@ -62,11 +59,7 @@ export default function User() {
         });
     }
 
-    signOut({ redirect: false }).then(() => {
-      setAuthStatus("unauthenticated");
-      toast({ title: "Sign-out success" });
-      router.push("/signin");
-    });
+    logout();
   };
 
   useEffect(() => {

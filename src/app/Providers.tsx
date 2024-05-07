@@ -48,15 +48,16 @@ export default function Providers({ children }: Props) {
           onError: async (error) => {
             console.error(error);
             /**
-             * axios(useApi)로 부터 넘어온 에러가 TOKEN_UPDATE_FAILED 혹은 UNAUTHENTICATED_STATUS 라면 얼리 리턴
-             * 근데 여기 안걸리는 것 같은데?? 이상하다...
-             * @TODO 의미 없는 코드인지 확인 필요
+             * 이 조건에 걸리는 애들은 전부 Authentication Error
+             * 아래 로직으로 흘려보내지 않는 이유는 세션 만료 되면서 'Please sign-in again' 메시지를 띄워줄 것이기 때문
              */
             if (
               isError(error) &&
               (error.cause === "TOKEN_UPDATE_FAILED" ||
-                error.cause === "UNAUTHENTICATED_STATUS")
+                error.cause === "UNAUTHENTICATED_STATUS" ||
+                error.cause === "UNKNOWN_AUTH_ERROR")
             ) {
+              // console.info(`queryCache.onError.cause: ${error.cause}`);
               return;
             }
 
@@ -82,15 +83,16 @@ export default function Providers({ children }: Props) {
           onError: async (error) => {
             console.error(error);
             /**
-             * axios(useApi)로 부터 넘어온 에러가 TOKEN_UPDATE_FAILED 혹은 UNAUTHENTICATED_STATUS 라면 얼리 리턴
-             * 근데 여기 안걸리는 것 같은데?? 이상하다...
-             * @TODO 의미 없는 코드인지 확인 필요
+             * 이 조건에 걸리는 애들은 전부 Authentication Error
+             * 아래 로직으로 흘려보내지 않는 이유는 세션 만료 되면서 'Please sign-in again' 메시지를 띄워줄 것이기 때문
              */
             if (
               isError(error) &&
               (error.cause === "TOKEN_UPDATE_FAILED" ||
-                error.cause === "UNAUTHENTICATED_STATUS")
+                error.cause === "UNAUTHENTICATED_STATUS" ||
+                error.cause === "UNKNOWN_AUTH_ERROR")
             ) {
+              // console.info(`mutationCache.onError.cause: ${error.cause}`);
               return;
             }
 

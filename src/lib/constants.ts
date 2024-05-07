@@ -769,6 +769,22 @@ export const toTwoDecimalRegExp = new RegExp(/^\d+(\.\d{0,2})?$/);
 export const toOneDecimalRegExp = new RegExp(/^\d+(\.\d{0,1})?$/);
 export const digitRegExp = new RegExp(/^\d+$/);
 
+/**
+ * /users/f70aab35-7822-4d85-b8f9-f88cca3bb631dd/invitations
+ * /users/f70aab35-7822-f9-f884d85-b8cca3bb6fsdf/invitations
+ * /users/f70aab35-7zdfsdfwefsdccca3bb6fsdfgsdfd/invitations
+ */
+export const userInvitationUrlRegExp = new RegExp(
+  /^\/users\/[a-zA-Z0-9-]+\/invitations$/
+);
+
+/**
+ * /sign-up/f70aab35-7822-4d85-b8f9-f88cca3bb631
+ * /sign-up/f70aab35-7822-f9-f884d85-b8cca3bb6fs
+ * /sign-up/f70aab35-7zdfsdfwefsdccca3bb6fsdfads
+ */
+export const signUpUrlRegExp = new RegExp(/^\/sign-up\/[a-zA-Z0-9-]+$/);
+
 /* -------------------------------------------------------------------------- */
 
 export const BARUNCORP_ORGANIZATION_ID = "ed26f353-09e8-4bb3-81a9-6df25c4540a0";

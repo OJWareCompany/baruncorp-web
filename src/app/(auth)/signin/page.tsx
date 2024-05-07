@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DefaultValues, useForm } from "react-hook-form";
 import * as z from "zod";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -21,6 +20,7 @@ import LoadingButton from "@/components/LoadingButton";
 import { defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthStore } from "@/store/useAuthStore";
+import useAuthenticatationUpdate from "@/hook/useAuthenticatationUpdate";
 
 const formSchema = z.object({
   email: z
@@ -49,6 +49,7 @@ export default function Page() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setAuthStatus } = useAuthStore();
+  const { login } = useAuthenticatationUpdate();
 
   useEffect(() => {
     // 이 페이지에 처음 진입할 때 cache를 지움
@@ -66,11 +67,7 @@ export default function Page() {
 
   async function onSubmit(values: FieldValues) {
     const { email, password } = values;
-    const signInResponse = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    const signInResponse = await login({ email, password });
 
     if (signInResponse == null) {
       toast(defaultErrorToast);

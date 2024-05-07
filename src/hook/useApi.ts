@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { isAxiosError } from "axios";
 import api from "@/api";
 import { useAuthStore } from "@/store/useAuthStore";
+import { signUpUrlRegExp, userInvitationUrlRegExp } from "@/lib/constants";
 
 const useApi = () => {
   const { data: session, update, status } = useSession();
@@ -12,6 +13,13 @@ const useApi = () => {
 
   useEffect(() => {
     const requestIntercept = api.instance.interceptors.request.use((config) => {
+      const requestUrl = config?.url;
+      if (!requestUrl) {
+        return Promise.reject(
+          new Error("Request Error", { cause: "INVALID_REQUEST_URL" })
+        );
+      }
+
       /**
        * Request가 들어왔는데 Access Token 혹은 Refresh Token이 모두 만료된 경우 API 요청을 못하도록 Block
        * - triggeredAuthError
@@ -24,10 +32,13 @@ const useApi = () => {
        *  - 로그아웃된 상태
        */
       if (
-        triggeredAuthError ||
-        status === "unauthenticated" ||
-        authStatus === "unauthenticated"
+        (triggeredAuthError ||
+          status === "unauthenticated" ||
+          authStatus === "unauthenticated") &&
+        !signUpUrlRegExp.test(requestUrl) &&
+        !userInvitationUrlRegExp.test(requestUrl)
       ) {
+        console.info(`requestUrl: ${requestUrl}`);
         // console.info(`Promise.reject(new Error('Authentication Error', { cause: 'UNAUTHENTICATED_STATUS' }));`)
         // console.info(`triggeredAuthError: ${triggeredAuthError}`)
         // console.info(`status: ${status}`)
@@ -73,9 +84,9 @@ const useApi = () => {
         // console.info(error)
 
         if (error.response?.data.errorCode.includes("10005")) {
-          const newSession = await update();
+          const newSession = await update(); // jwt callback 호출 -> session이 변경되기 때문에 Authenticate 컴포넌트 리렌더링
           if (newSession != null && newSession.authError == null) {
-            // console.info('Token Update Success...!!!')
+            console.info("Token Update Success...!!!");
             return api.instance({
               ...error.config,
               headers: {
@@ -83,12 +94,20 @@ const useApi = () => {
               },
             });
           }
-          // console.info(`Token Update Failed...!!!`)
+          console.info(
+            `Token Update Failed Because of ${newSession?.authError}...!!!`
+          );
+          console.info(
+            `Reject AuthenticationError (cause: TOKEN_UPDATE_FAILED)`
+          );
+          return Promise.reject(
+            new Error("Authentication Error", { cause: "TOKEN_UPDATE_FAILED" })
+          );
         }
 
-        // console.info(`Promise.reject(new Error("Authentication Error", { cause: "TOKEN_UPDATE_FAILED" }))`)
+        console.info(`Reject AuthenticationError (cause: UNKNOWN_AUTH_ERROR)`);
         return Promise.reject(
-          new Error("Authentication Error", { cause: "TOKEN_UPDATE_FAILED" })
+          new Error("Authentication Error", { cause: "UNKNOWN_AUTH_ERROR" })
         );
       }
     );
