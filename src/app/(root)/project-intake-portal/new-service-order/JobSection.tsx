@@ -473,10 +473,15 @@ function JobSectionWithData({
 
     if (isWetStampChecked) {
       for (const wetStampService of values.typeOfWetStamp) {
-        serviceIds.push({
-          serviceId: wetStampService.id,
-          description: wetStampService.description,
-        });
+        const isAlreadyAdded = serviceIds.some(
+          (service) => service.serviceId === wetStampService.id
+        );
+        if (!isAlreadyAdded) {
+          serviceIds.push({
+            serviceId: wetStampService.id,
+            description: wetStampService.description,
+          });
+        }
       }
     }
     await mutateAsync({
