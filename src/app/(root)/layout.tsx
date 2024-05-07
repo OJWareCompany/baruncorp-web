@@ -1,3 +1,4 @@
+import { ClientOnly } from "../ClientOnly";
 import Authenticate from "./Authenticate";
 import SocketProvider from "./SocketProvider";
 import ExpandProvider from "./ExpandProvider";
@@ -9,12 +10,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Authenticate>
       <SocketProvider>
-        <ExpandProvider>
-          <ProfileProvider>
-            <Header />
-            <MainWrapper>{children}</MainWrapper>
-          </ProfileProvider>
-        </ExpandProvider>
+        <ClientOnly>
+          <ExpandProvider>
+            <ProfileProvider>
+              <Header />
+              <MainWrapper>{children}</MainWrapper>
+            </ProfileProvider>
+          </ExpandProvider>
+        </ClientOnly>
       </SocketProvider>
     </Authenticate>
   );
