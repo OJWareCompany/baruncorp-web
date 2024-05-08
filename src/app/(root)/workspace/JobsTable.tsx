@@ -40,7 +40,6 @@ import {
   FindMyJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
 } from "@/api/api-spec";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   InTableButtonStyles,
   JobPriorityEnum,
@@ -301,45 +300,8 @@ export default function JobsTable({ type }: Props) {
     }
   }, [isFetching, params]);
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("isExpedited", {
-        header: () => (
-          <EnumHeader
-            buttonText="Expedite"
-            searchParamName={expediteSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null &&
-              params.isExpedited !== syncedParams.isExpedited
-            }
-          />
-        ),
-        cell: ({ getValue }) => (
-          <div className="flex">
-            <Checkbox checked={getValue()} />
-          </div>
-        ),
-      }),
-      columnHelper.accessor("inReview", {
-        header: () => (
-          <EnumHeader
-            buttonText="In Review"
-            searchParamName={inReviewSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null && params.inReview !== syncedParams.inReview
-            }
-          />
-        ),
-        cell: ({ getValue }) => (
-          <div className="flex">
-            <Checkbox checked={getValue()} />
-          </div>
-        ),
-      }),
+  const columns = useMemo(() => {
+    const baseColumns = [
       columnHelper.accessor("jobFolderId", {
         header: "Google Drive",
         cell: ({ row }) => {
@@ -354,7 +316,7 @@ export default function JobsTable({ type }: Props) {
               <OpenJobFolderOnWebButton
                 job={job}
                 title="Google Drive"
-                className="-ml-3 text-xs h-8 px-2"
+                className="-ml-2 text-xs h-8 px-2"
               />
             </div>
           );
@@ -377,6 +339,18 @@ export default function JobsTable({ type }: Props) {
           const status = jobPriorities[value];
 
           return <Badge className={`${status.color}`}>{status.value}</Badge>;
+        },
+      }),
+      columnHelper.accessor("dueDate", {
+        header: "Date Due",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
         },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
@@ -451,7 +425,9 @@ export default function JobsTable({ type }: Props) {
                 }}
               >
                 {dateSentToClient !== null ? (
-                  <span>Resend Deliverables</span>
+                  <>
+                    <span>Resend Deliverables</span>
+                  </>
                 ) : (
                   <span>Send Deliverables</span>
                 )}
@@ -472,7 +448,7 @@ export default function JobsTable({ type }: Props) {
                 return (
                   <Badge
                     variant={"outline"}
-                    className="flex items-center py-1 "
+                    className="flex items-center py-1 my-1"
                     key={task.id}
                   >
                     {status && (
@@ -565,72 +541,55 @@ export default function JobsTable({ type }: Props) {
           return value;
         },
       }),
-      columnHelper.accessor("receivedAt", {
-        header: "Date Received",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-      columnHelper.accessor("dueDate", {
-        header: "Date Due",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
+    ];
+    if (type !== "In Progress") {
+      baseColumns.push(
+        columnHelper.accessor<"completedCancelledDate", string>(
+          "completedCancelledDate",
+          {
+            header: "Date Completed/Canceled",
+            cell: ({ getValue }) => {
+              const value = getValue();
+              if (value == null) {
+                return <p className="text-muted-foreground">-</p>;
+              }
+              return formatInEST(value);
+            },
           }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("completedCancelledDate", {
-        header: "Date Completed/Canceled",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("dateSentToClient", {
-        header: "Date Sent to Client",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-    ],
-    [
-      expediteSearchParamName,
-      pageIndexSearchParamName,
-      syncedParams,
-      params.isExpedited,
-      params.inReview,
-      params.priority,
-      params.jobName,
-      params.jobStatus,
-      params.projectPropertyType,
-      params.mountingType,
-      params.projectNumber,
-      params.propertyOwner,
-      inReviewSearchParamName,
-      prioritySearchParamName,
-      jobNameSearchParamName,
-      jobStatusSearchParamName,
-      type,
-      propertyTypeSearchParamName,
-      mountingTypeSearchParamName,
-      projectNumberSearchParamName,
-      propertyOwnerSearchParamName,
-      canSendDeliverables,
-    ]
-  );
+        ),
+        columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
+          header: "Date Sent to Client",
+          cell: ({ getValue }) => {
+            const value = getValue();
+            if (value == null) {
+              return <p className="text-muted-foreground">-</p>;
+            }
+            return formatInEST(value);
+          },
+        })
+      );
+    }
+    return baseColumns;
+  }, [
+    pageIndexSearchParamName,
+    syncedParams,
+    params.priority,
+    params.jobName,
+    params.jobStatus,
+    params.projectPropertyType,
+    params.mountingType,
+    params.projectNumber,
+    params.propertyOwner,
+    prioritySearchParamName,
+    jobNameSearchParamName,
+    jobStatusSearchParamName,
+    type,
+    propertyTypeSearchParamName,
+    mountingTypeSearchParamName,
+    projectNumberSearchParamName,
+    propertyOwnerSearchParamName,
+    canSendDeliverables,
+  ]);
   let sendDeliverables = false;
 
   if (
@@ -702,6 +661,7 @@ export default function JobsTable({ type }: Props) {
                   key={row.id}
                   href={`/workspace/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
+                  className={row.original.isExpedited ? "bg-yellow-100" : ""}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

@@ -65,7 +65,6 @@ import {
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
 import EnumHeader from "@/components/table/EnumHeader";
-import { Checkbox } from "@/components/ui/checkbox";
 import SearchHeader from "@/components/table/SearchHeader";
 import { formatInEST } from "@/lib/utils";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
@@ -335,51 +334,13 @@ export default function JobsTableForMember({ type }: Props) {
   );
 
   const { data, isLoading, isFetching } = useJobsQuery(params, true);
-
   useEffect(() => {
     if (!isFetching) {
       setSyncedParams(params);
     }
   }, [isFetching, params]);
   const columns = useMemo(() => {
-    return [
-      columnHelper.accessor("isExpedited", {
-        header: () => (
-          <EnumHeader
-            buttonText="Expedite"
-            searchParamName={expediteSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null &&
-              params.isExpedited !== syncedParams.isExpedited
-            }
-          />
-        ),
-        cell: ({ getValue }) => (
-          <div className="flex">
-            <Checkbox checked={getValue()} />
-          </div>
-        ),
-      }),
-      columnHelper.accessor("inReview", {
-        header: () => (
-          <EnumHeader
-            buttonText="In Review"
-            searchParamName={inReviewSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null && params.inReview !== syncedParams.inReview
-            }
-          />
-        ),
-        cell: ({ getValue }) => (
-          <div className="flex">
-            <Checkbox checked={getValue()} />
-          </div>
-        ),
-      }),
+    const baseColumns = [
       columnHelper.accessor("jobFolderId", {
         header: "Google Drive",
         cell: ({ row }) => {
@@ -394,7 +355,7 @@ export default function JobsTableForMember({ type }: Props) {
               <OpenJobFolderOnWebButton
                 job={job}
                 title="Google Drive"
-                className="-ml-3 text-xs h-8 px-2"
+                className="-ml-2 text-xs h-8 px-2"
               />
             </div>
           );
@@ -417,6 +378,18 @@ export default function JobsTableForMember({ type }: Props) {
           const status = jobPriorities[value];
 
           return <Badge className={`${status.color}`}>{status.value}</Badge>;
+        },
+      }),
+      columnHelper.accessor("dueDate", {
+        header: "Date Due",
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
         },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
@@ -607,53 +580,38 @@ export default function JobsTableForMember({ type }: Props) {
           return value;
         },
       }),
-      columnHelper.accessor("receivedAt", {
-        header: "Date Received",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-      columnHelper.accessor("dueDate", {
-        header: "Date Due",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("completedCancelledDate", {
-        header: "Date Completed/Canceled",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("dateSentToClient", {
-        header: "Date Sent to Client",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
     ];
+    if (type !== "In Progress") {
+      baseColumns.push(
+        columnHelper.accessor<"completedCancelledDate", string>(
+          "completedCancelledDate",
+          {
+            header: "Date Completed/Canceled",
+            cell: ({ getValue }) => {
+              const value = getValue();
+              if (value == null) {
+                return <p className="text-muted-foreground">-</p>;
+              }
+              return formatInEST(value);
+            },
+          }
+        ),
+        columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
+          header: "Date Sent to Client",
+          cell: ({ getValue }) => {
+            const value = getValue();
+            if (value == null) {
+              return <p className="text-muted-foreground">-</p>;
+            }
+            return formatInEST(value);
+          },
+        })
+      );
+    }
+    return baseColumns;
   }, [
-    expediteSearchParamName,
     pageIndexSearchParamName,
     syncedParams,
-    params.isExpedited,
-    params.inReview,
     params.priority,
     params.jobName,
     params.jobStatus,
@@ -661,7 +619,6 @@ export default function JobsTableForMember({ type }: Props) {
     params.mountingType,
     params.projectNumber,
     params.propertyOwner,
-    inReviewSearchParamName,
     prioritySearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
@@ -699,6 +656,7 @@ export default function JobsTableForMember({ type }: Props) {
       },
     },
   });
+
   return (
     <div className="space-y-2">
       <div className="rounded-md border overflow-hidden">
@@ -743,6 +701,7 @@ export default function JobsTableForMember({ type }: Props) {
                   key={row.id}
                   href={`/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
+                  className={row.original.isExpedited ? "bg-yellow-100" : ""}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

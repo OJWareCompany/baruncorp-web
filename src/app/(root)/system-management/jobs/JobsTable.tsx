@@ -41,7 +41,6 @@ import {
   FindJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
 } from "@/api/api-spec";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   InTableButtonStyles,
   JobPriorityEnum,
@@ -270,45 +269,6 @@ export default function JobsTable() {
 
   const columns = useMemo(() => {
     return [
-      columnHelper.accessor("isExpedited", {
-        enableSorting: false,
-        header: () => (
-          <EnumHeader
-            buttonText="Expedite"
-            searchParamName={expediteSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null &&
-              params.isExpedited !== syncedParams.isExpedited
-            }
-          />
-        ),
-        cell: ({ getValue }) => (
-          <div className="flex">
-            <Checkbox checked={getValue()} />
-          </div>
-        ),
-      }),
-      columnHelper.accessor("inReview", {
-        enableSorting: false,
-        header: () => (
-          <EnumHeader
-            buttonText="In Review"
-            searchParamName={inReviewSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null && params.inReview !== syncedParams.inReview
-            }
-          />
-        ),
-        cell: ({ getValue }) => (
-          <div className="flex">
-            <Checkbox checked={getValue()} />
-          </div>
-        ),
-      }),
       columnHelper.accessor("jobFolderId", {
         header: "Google Drive",
         enableSorting: false,
@@ -348,6 +308,19 @@ export default function JobsTable() {
           const status = jobPriorities[value];
 
           return <Badge className={`${status.color}`}>{status.value}</Badge>;
+        },
+      }),
+      columnHelper.accessor("dueDate", {
+        header: "Date Due",
+        enableSorting: true,
+        cell: ({ getValue }) => {
+          const value = getValue();
+
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return formatInEST(value);
         },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
@@ -544,60 +517,12 @@ export default function JobsTable() {
           return value;
         },
       }),
-      columnHelper.accessor("receivedAt", {
-        header: "Date Received",
-        enableSorting: false,
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-      columnHelper.accessor("dueDate", {
-        header: "Date Due",
-        enableSorting: true,
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("completedCancelledDate", {
-        header: "Date Completed/Canceled",
-        enableSorting: true,
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("dateSentToClient", {
-        header: "Date Sent to Client",
-        enableSorting: true,
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
     ];
   }, [
-    expediteSearchParamName,
-    inReviewSearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
     mountingTypeSearchParamName,
     pageIndexSearchParamName,
-    params.inReview,
-    params.isExpedited,
     params.jobName,
     params.jobStatus,
     params.mountingType,
@@ -680,7 +605,11 @@ export default function JobsTable() {
                   key={row.id}
                   href={`/system-management/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer"
+                  className={
+                    row.original.isExpedited
+                      ? "bg-yellow-100 cursor-pointer"
+                      : "cursor-pointer"
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

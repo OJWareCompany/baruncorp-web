@@ -55,18 +55,18 @@ import {
   transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
-import EnumHeader from "@/components/table/EnumHeader";
-import { Checkbox } from "@/components/ui/checkbox";
-import SearchHeader from "@/components/table/SearchHeader";
-import { formatInEST } from "@/lib/utils";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
-import TextCopyButton from "@/components/ui/incopybutton";
 import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
 import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
+import { formatInEST } from "@/lib/utils";
+import SearchHeader from "@/components/table/SearchHeader";
+import EnumHeader from "@/components/table/EnumHeader";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import TextCopyButton from "@/components/ui/incopybutton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -265,26 +265,7 @@ export default function JobsTableForClient({ type }: Props) {
   }, [isFetching, params]);
 
   const columns = useMemo(() => {
-    return [
-      columnHelper.accessor("isExpedited", {
-        header: () => (
-          <EnumHeader
-            buttonText="Expedite"
-            searchParamName={expediteSearchParamName}
-            pageIndexSearchParamName={pageIndexSearchParamName}
-            zodEnum={YesOrNoEnum}
-            isLoading={
-              syncedParams != null &&
-              params.isExpedited !== syncedParams.isExpedited
-            }
-          />
-        ),
-        cell: ({ getValue }) => (
-          <div className="flex">
-            <Checkbox checked={getValue()} />
-          </div>
-        ),
-      }),
+    const baseColumns = [
       columnHelper.accessor("inReview", {
         header: () => (
           <EnumHeader
@@ -475,52 +456,38 @@ export default function JobsTableForClient({ type }: Props) {
           return value;
         },
       }),
-      columnHelper.accessor("receivedAt", {
-        header: "Date Received",
-        cell: ({ getValue }) => formatInEST(getValue()),
-      }),
-      columnHelper.accessor("dueDate", {
-        header: "Date Due",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("completedCancelledDate", {
-        header: "Date Completed/Canceled",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("dateSentToClient", {
-        header: "Date Sent to Client",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
     ];
+    if (type !== "In Progress") {
+      baseColumns.push(
+        columnHelper.accessor<"completedCancelledDate", string>(
+          "completedCancelledDate",
+          {
+            header: "Date Completed/Canceled",
+            cell: ({ getValue }) => {
+              const value = getValue();
+              if (value == null) {
+                return <p className="text-muted-foreground">-</p>;
+              }
+              return formatInEST(value);
+            },
+          }
+        ),
+        columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
+          header: "Date Sent to Client",
+          cell: ({ getValue }) => {
+            const value = getValue();
+            if (value == null) {
+              return <p className="text-muted-foreground">-</p>;
+            }
+            return formatInEST(value);
+          },
+        })
+      );
+    }
+    return baseColumns;
   }, [
-    expediteSearchParamName,
     pageIndexSearchParamName,
     syncedParams,
-    params.isExpedited,
     params.inReview,
     params.priority,
     params.jobName,
