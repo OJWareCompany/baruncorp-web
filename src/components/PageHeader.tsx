@@ -8,7 +8,7 @@ interface Props {
 
 export default function PageHeader({ items, action }: Props) {
   return (
-    <div className="py-2">
+    <div className="py-2 sticky top-[65px] z-40 bg-white">
       <Breadcrumb>
         {items.map((item) => (
           <BreadcrumbItem key={item.name}>
