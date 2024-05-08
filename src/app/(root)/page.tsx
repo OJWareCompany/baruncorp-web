@@ -38,18 +38,6 @@ export default function Page() {
           <NewTabCollapsibleSection title="Completed">
             <JobsTableForMember type="Completed" />
           </NewTabCollapsibleSection>
-          <NewTabCollapsibleSection title="Sent To Client">
-            <JobsTableForMember type="Sent To Client" />
-          </NewTabCollapsibleSection>
-          <NewTabCollapsibleSection title="On Hold">
-            <JobsTableForMember type="On Hold" />
-          </NewTabCollapsibleSection>
-          <NewTabCollapsibleSection title="Canceled">
-            <JobsTableForMember type="Canceled" />
-          </NewTabCollapsibleSection>
-          <NewTabCollapsibleSection title="Canceled (Invoice)">
-            <JobsTableForMember type="Canceled (Invoice)" />
-          </NewTabCollapsibleSection>
           <NewTabCollapsibleSection title="All">
             <JobsTableForMember type="All" />
           </NewTabCollapsibleSection>
@@ -84,18 +72,6 @@ export default function Page() {
         </NewTabCollapsibleSection>
         <NewTabCollapsibleSection title="Completed">
           <JobsTableForClient type="Completed" />
-        </NewTabCollapsibleSection>
-        <NewTabCollapsibleSection title="Sent To Client">
-          <JobsTableForClient type="Sent To Client" />
-        </NewTabCollapsibleSection>
-        <NewTabCollapsibleSection title="On Hold">
-          <JobsTableForClient type="On Hold" />
-        </NewTabCollapsibleSection>
-        <NewTabCollapsibleSection title="Canceled">
-          <JobsTableForClient type="Canceled" />
-        </NewTabCollapsibleSection>
-        <NewTabCollapsibleSection title="Canceled (Invoice)">
-          <JobsTableForClient type="Canceled (Invoice)" />
         </NewTabCollapsibleSection>
         <NewTabCollapsibleSection title="All">
           <JobsTableForClient type="All" />
