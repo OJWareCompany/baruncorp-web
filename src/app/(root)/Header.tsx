@@ -117,7 +117,7 @@ export default function Header() {
       <div
         className={cn(
           "container px-6 flex h-16 items-center justify-between",
-          isExpanded && "max-w-[1920px]"
+          isExpanded && "max-w-[2500px]"
         )}
       >
         <div className="flex gap-8 items-center">
