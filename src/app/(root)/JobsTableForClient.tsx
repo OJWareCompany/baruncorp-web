@@ -565,7 +565,11 @@ export default function JobsTableForClient({ type }: Props) {
                   href={`/jobs/${row.id}`}
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="cursor-pointer"
+                  className={
+                    row.original.isExpedited
+                      ? "bg-yellow-100 cursor-pointer"
+                      : "cursor-pointer"
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
