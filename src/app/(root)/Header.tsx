@@ -113,7 +113,7 @@ export default function Header() {
     useProfileContext();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-white">
+    <header className="sticky top-0 z-50 w-full border-b bg-white">
       <div
         className={cn(
           "container px-6 flex h-16 items-center justify-between",
