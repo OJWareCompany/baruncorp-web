@@ -701,7 +701,13 @@ export default function JobsTableForMember({ type }: Props) {
                   key={row.id}
                   href={`/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
-                  className={row.original.isExpedited ? "bg-yellow-100" : ""}
+                  className={
+                    (row.original.isExpedited ? "bg-yellow-100 " : "") +
+                    (row.original.inReview ? "bg-violet-100 " : "") +
+                    (row.original.isExpedited && row.original.inReview
+                      ? "bg-blue-100"
+                      : "")
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
