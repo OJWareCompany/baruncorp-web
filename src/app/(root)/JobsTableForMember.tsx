@@ -701,7 +701,7 @@ export default function JobsTableForMember({ type }: Props) {
                     (row.original.isExpedited ? "bg-yellow-100 " : "") +
                     (row.original.inReview ? "bg-violet-100 " : "") +
                     (row.original.isExpedited && row.original.inReview
-                      ? "bg-blue-100"
+                      ? "bg-green-300"
                       : "")
                   }
                 >
