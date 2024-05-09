@@ -8,6 +8,7 @@ import {
 import { Plate, PlateContent } from "@udecode/plate-common";
 import { FolderOpen } from "lucide-react";
 import { useMemo } from "react";
+import Image from "next/image";
 import { Button } from "../ui/button";
 import {
   Table,
@@ -81,15 +82,28 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
       }),
       columnHelper.accessor("content", {
         header: "Content",
-        cell: ({ getValue }) => (
-          <Plate
-            plugins={mentionEditorPlugins}
-            readOnly
-            value={getEditorValue(getValue())}
-          >
-            <PlateContent />
-          </Plate>
-        ),
+        cell: ({ getValue }) => {
+          const content = getValue();
+          if (content.includes("data:image")) {
+            return <Image src={content} alt="Image" />;
+          } else {
+            const imageData = content.replace(/[\[\]]/g, "");
+
+            if (imageData.includes("data:image")) {
+              return <Image src={imageData} alt="Image" />;
+            } else {
+              return (
+                <Plate
+                  plugins={mentionEditorPlugins}
+                  readOnly
+                  value={getEditorValue(content)}
+                >
+                  <PlateContent />
+                </Plate>
+              );
+            }
+          }
+        },
       }),
       columnHelper.accessor("createdAt", {
         header: "Date Created",
@@ -175,11 +189,17 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map(
+                  (cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ),
+                  console.log(row.original.content)
+                )}
               </TableRow>
             ))
           ) : (
