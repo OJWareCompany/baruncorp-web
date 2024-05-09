@@ -566,9 +566,11 @@ export default function JobsTableForClient({ type }: Props) {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className={
-                    row.original.isExpedited
-                      ? "bg-yellow-100 cursor-pointer"
-                      : "cursor-pointer"
+                    (row.original.isExpedited ? "bg-yellow-100 " : "") +
+                    (row.original.inReview ? "bg-violet-100 " : "") +
+                    (row.original.isExpedited && row.original.inReview
+                      ? "bg-blue-100"
+                      : "")
                   }
                 >
                   {row.getVisibleCells().map((cell) => (

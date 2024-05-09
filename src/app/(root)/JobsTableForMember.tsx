@@ -347,16 +347,12 @@ export default function JobsTableForMember({ type }: Props) {
           const job = row.original;
           return (
             <div
-              className="flex"
+              className="flex pl-3"
               onClick={(event) => {
                 event.preventDefault();
               }}
             >
-              <OpenJobFolderOnWebButton
-                job={job}
-                title="Google Drive"
-                className="-ml-2 text-xs h-8 px-2"
-              />
+              <OpenJobFolderOnWebButton job={job} className="h-8 px-2" />
             </div>
           );
         },

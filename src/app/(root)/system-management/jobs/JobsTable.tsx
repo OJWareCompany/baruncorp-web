@@ -276,14 +276,13 @@ export default function JobsTable() {
           const job = row.original;
           return (
             <div
-              className="flex"
+              className="flex pl-3"
               onClick={(event) => {
                 event.preventDefault();
               }}
             >
               <OpenJobFolderOnWebButton
                 job={job}
-                title="Google Drive"
                 className="-ml-3 text-xs h-8 px-2"
               />
             </div>
@@ -606,9 +605,11 @@ export default function JobsTable() {
                   href={`/system-management/jobs/${row.id}`}
                   data-state={row.getIsSelected() && "selected"}
                   className={
-                    row.original.isExpedited
-                      ? "bg-yellow-100 cursor-pointer"
-                      : "cursor-pointer"
+                    (row.original.isExpedited ? "bg-yellow-100 " : "") +
+                    (row.original.inReview ? "bg-violet-100 " : "") +
+                    (row.original.isExpedited && row.original.inReview
+                      ? "bg-blue-100"
+                      : "")
                   }
                 >
                   {row.getVisibleCells().map((cell) => (

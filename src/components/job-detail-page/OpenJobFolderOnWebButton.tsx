@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   job: JobResponseDto;
-  title: string;
+  title?: string;
   className?: string;
 }
 
@@ -42,7 +42,7 @@ export default function OpenJobFolderOnWebButton({
           event.stopPropagation();
         }}
       >
-        <FolderOpen className="mr-2 h-4 w-4" />
+        <FolderOpen className="h-4 w-4" />
         <span>{title}</span>
       </Button>
     </a>
