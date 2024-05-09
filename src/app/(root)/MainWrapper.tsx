@@ -12,7 +12,7 @@ export default function MainWrapper({ children }: Props) {
 
   return (
     <main
-      className={cn("container px-6 pb-12", isExpanded && "max-w-[2500px]")}
+      className={cn("container px-6 pb-[70px]", isExpanded && "max-w-[2500px]")}
     >
       {children}
     </main>
