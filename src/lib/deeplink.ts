@@ -41,6 +41,7 @@ export function openProjectFolder({
   const url = `barun://open-project?payload=${encodeURIComponent(
     JSON.stringify({ organization, type, project, folderId, shareLink })
   )}`;
+  console.log(url);
   window.location.href = url;
 }
 
@@ -64,6 +65,7 @@ export function openJobFolder({
   const url = `barun://open-job?payload=${encodeURIComponent(
     JSON.stringify({ organization, type, project, job, folderId, shareLink })
   )}`;
+  console.log(url);
   window.location.href = url;
 }
 
@@ -98,6 +100,7 @@ export function openJobNoteFolder({
   const url = `barun://open-job-note?payload=${encodeURIComponent(
     JSON.stringify({ organization, type, project, job, jobNote, shareLink })
   )}`;
+  console.log(url);
   window.location.href = url;
 }
 
@@ -113,5 +116,6 @@ export function openAhjFolder({
   const url = `barun://open-ahj?payload=${encodeURIComponent(
     JSON.stringify({ geoId, fullAhjName })
   )}`;
+  console.log(url);
   window.location.href = url;
 }

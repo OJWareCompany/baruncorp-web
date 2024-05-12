@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "@/components/ui/use-toast";
 
 export default function useAuthenticatationUpdate() {
-  const { setAuthStatus } = useAuthStore();
+  const { authStatus, setAuthStatus } = useAuthStore();
   const router = useRouter();
 
   const login = async ({
@@ -14,6 +14,7 @@ export default function useAuthenticatationUpdate() {
     email: string;
     password: string;
   }) => {
+    if (authStatus === "authenticated") return;
     return await signIn("credentials", {
       email,
       password,
@@ -21,15 +22,17 @@ export default function useAuthenticatationUpdate() {
     });
   };
 
-  const logout = async () => {
+  const logout = async (onToast = true) => {
+    if (authStatus === "unauthenticated") return;
     return await signOut({ redirect: false }).then(() => {
       setAuthStatus("unauthenticated");
-      toast({ title: "Sign-out success" });
+      if (onToast) toast({ title: "Sign-out success" });
       router.push("/signin");
     });
   };
 
   const logoutOnAuthError = async () => {
+    if (authStatus === "unauthenticated") return;
     return await signOut({ redirect: false }).then(() => {
       toast({
         title: "Please sign-in again",

@@ -5,11 +5,17 @@ import { useEffect } from "react";
 import { isAxiosError } from "axios";
 import api from "@/api";
 import { useAuthStore } from "@/store/useAuthStore";
-import { signUpUrlRegExp, userInvitationUrlRegExp } from "@/lib/constants";
+import {
+  NETWORK_ERROR,
+  signUpUrlRegExp,
+  userInvitationUrlRegExp,
+} from "@/lib/constants";
+import { useCommonStore } from "@/store/useCommonStore";
 
 const useApi = () => {
   const { data: session, update, status } = useSession();
   const { triggeredAuthError, authStatus } = useAuthStore();
+  const { triggeredNetworkError, setTriggeredNetworkError } = useCommonStore();
 
   useEffect(() => {
     const requestIntercept = api.instance.interceptors.request.use((config) => {
@@ -60,11 +66,10 @@ const useApi = () => {
     const responseIntercept = api.instance.interceptors.response.use(
       (response) => {
         // console.info(`API Response: ${response.config?.method ?? 'method not found'} ${response.config?.url ?? 'url not found'} ${response?.status ?? 'status not found'} ${response?.statusText ?? 'statusText not found'}`)
+        if (triggeredNetworkError) setTriggeredNetworkError(false); // 네트워크 에러 트리거 상태였는데 요청이 정상적으로 수행되면 false로 값을 바꿈
         return response;
       },
       async (error) => {
-        // console.info(`responseIntercept.onRejected`)
-
         /**
          * request interceptor에서 Block된 요청인 경우
          */
@@ -77,6 +82,19 @@ const useApi = () => {
           !isAxiosError<ErrorResponseData>(error) ||
           error.response?.status !== 401
         ) {
+          // 네트워크 에러 혹은 nginx에서 던져주는 504 에러인 경우
+          if (error.code === NETWORK_ERROR || error.response.status === 504) {
+            setTriggeredNetworkError(true);
+          }
+          // 네트워크 에러 혹은 nginx에서 504를 던져주진 않지만 triggeredNetworkError가 true인 경우 (결국 에러 상태가 아니므로 false로 만들어야 함)
+          // 네트워크 에러 트리거 상태였는데 요청이 정상적으로 수행되면 false로 값을 바꿈
+          if (
+            error.code !== NETWORK_ERROR &&
+            error.response.status !== 504 &&
+            triggeredNetworkError
+          ) {
+            setTriggeredNetworkError(false);
+          }
           return Promise.reject(error);
         }
 
@@ -116,7 +134,7 @@ const useApi = () => {
       api.instance.interceptors.request.eject(requestIntercept);
       api.instance.interceptors.response.eject(responseIntercept);
     };
-  }, [session, update]);
+  }, [session, update, triggeredNetworkError]);
 
   return api;
 };
