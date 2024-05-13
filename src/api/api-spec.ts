@@ -3103,7 +3103,9 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
   taskAssigneeName?: string | null;
   /** Using LIKE (중간 값 검색) */
   clientOrganizationName?: string | null;
+  /** @format date-time */
   dateSentToClientStart?: string | null;
+  /** @format date-time */
   dateSentToClientEnd?: string | null;
   sortField?:
     | "dateSentToClient"
@@ -3166,6 +3168,16 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
    * @default ""
    */
   propertyOwner?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  taskName?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  taskAssigneeName?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  clientOrganizationName?: string | null;
+  /** @format date-time */
+  dateSentToClientStart?: string | null;
+  /** @format date-time */
+  dateSentToClientEnd?: string | null;
   sortField?:
     | "dateSentToClient"
     | "completedCancelledDate"
@@ -3249,6 +3261,14 @@ export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
    * @default ""
    */
   propertyOwner?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  taskName?: string | null;
+  /** Using LIKE (중간 값 검색) */
+  taskAssigneeName?: string | null;
+  /** @format date-time */
+  dateSentToClientStart?: string | null;
+  /** @format date-time */
+  dateSentToClientEnd?: string | null;
 }
 
 export interface FindServicePaginatedHttpControllerGetParams {
