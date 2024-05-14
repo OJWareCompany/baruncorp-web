@@ -19,8 +19,17 @@ import {
 import { Input } from "../ui/input";
 import ClientInvoiceDocument from "./ClientInvoiceDocument";
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -69,8 +78,8 @@ export default function IssueButton({
     }
 
     return {
-      ccArray: data.currentCc.map((cc) => ({
-        cc,
+      ccArray: data.issueHistory.map((issueHistory) => ({
+        cc: issueHistory.cc.join(", "),
       })),
     };
   };
@@ -118,7 +127,10 @@ export default function IssueButton({
     const file = new File([blob], fileName, {
       type: blob.type,
     });
-
+    console.log(
+      "cc",
+      values.ccArray.map((cc) => cc.cc)
+    );
     patchClientInvoiceIssueMutateAsync({
       files: [file],
       cc: values.ccArray.map((cc) => cc.cc),
@@ -149,115 +161,132 @@ export default function IssueButton({
 
   return (
     <>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            className="h-[28px] text-xs px-2"
-            disabled={instance.loading}
-          >
-            {clientInvoice.status === "Unissued" ? (
-              <ArrowUp className="mr-2 h-4 w-4" />
-            ) : (
-              <Mail className="mr-2 h-4 w-4" />
-            )}
-            {clientInvoice.status === "Unissued" ? "Issue" : "Remind"}
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Are you sure?</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="grid gap-4 py-4"
-            >
-              <FormField
-                control={form.control}
-                name="ccArray"
-                render={() => {
-                  return (
-                    <FormItem>
-                      <FormLabel>Cc</FormLabel>
-                      {fields.map((field, index) => (
-                        <FormField
-                          key={field.id}
-                          control={form.control}
-                          name={`ccArray.${index}.cc`}
-                          render={({ field }) => {
-                            return (
+      <Button
+        onClick={() => {
+          setOpen(true);
+        }}
+        variant={"outline"}
+        size={"sm"}
+        className="h-[28px] text-xs px-2"
+        disabled={instance.loading}
+      >
+        {clientInvoice.status === "Unissued" ? (
+          <ArrowUp className="mr-2 h-4 w-4" />
+        ) : (
+          <Mail className="mr-2 h-4 w-4" />
+        )}
+        {clientInvoice.status === "Unissued" ? "Issue" : "Remind"}
+      </Button>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>Continue</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Do you Want To Cc?</DialogTitle>
+                  <DialogDescription>
+                    Is This Dialog Description
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="grid gap-4 py-4"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="ccArray"
+                      render={() => {
+                        return (
+                          <FormItem>
+                            <FormLabel>Cc</FormLabel>
+                            {fields.map((field, index) => (
+                              <FormField
+                                key={field.id}
+                                control={form.control}
+                                name={`ccArray.${index}.cc`}
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem>
+                                      <div className="flex flex-row gap-2">
+                                        <FormControl>
+                                          <Input {...field} />
+                                        </FormControl>
+                                        {index !== 0 && (
+                                          <Button
+                                            variant={"outline"}
+                                            size={"icon"}
+                                            className="flex-shrink-0"
+                                            onClick={() => {
+                                              remove(index);
+                                            }}
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </Button>
+                                        )}
+                                      </div>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
+                            {fields.length === 0 && (
                               <FormItem>
                                 <div className="flex flex-row gap-2">
                                   <FormControl>
-                                    <Input {...field} />
+                                    <Input {...fields[0]} />
                                   </FormControl>
-                                  {index !== 0 && (
-                                    <Button
-                                      variant={"outline"}
-                                      size={"icon"}
-                                      className="flex-shrink-0"
-                                      onClick={() => {
-                                        remove(index);
-                                      }}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  )}
+                                  <Button
+                                    variant={"outline"}
+                                    size={"icon"}
+                                    className="flex-shrink-0"
+                                    onClick={() => {
+                                      append({ cc: "" });
+                                    }}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
                                 </div>
                                 <FormMessage />
                               </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                      {fields.length === 0 && (
-                        <FormItem>
-                          <div className="flex flex-row gap-2">
-                            <FormControl>
-                              <Input {...fields[0]} />
-                            </FormControl>
+                            )}
                             <Button
                               variant={"outline"}
-                              size={"icon"}
-                              className="flex-shrink-0"
+                              className="w-full"
                               onClick={() => {
                                 append({ cc: "" });
                               }}
+                              type="button"
                             >
-                              <X className="h-4 w-4" />
+                              Add Email
                             </Button>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                      <Button
-                        variant={"outline"}
-                        className="w-full"
-                        onClick={() => {
-                          append({ cc: "" });
-                        }}
-                        type="button"
+                          </FormItem>
+                        );
+                      }}
+                    />
+                    <DialogFooter>
+                      <LoadingButton
+                        type="submit"
+                        isLoading={form.formState.isSubmitting}
                       >
-                        Add Email
-                      </Button>
-                    </FormItem>
-                  );
-                }}
-              />
-              <DialogFooter>
-                <LoadingButton
-                  type="submit"
-                  isLoading={form.formState.isSubmitting}
-                >
-                  Submit
-                </LoadingButton>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                        Submit
+                      </LoadingButton>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

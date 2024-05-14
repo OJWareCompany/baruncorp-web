@@ -28,14 +28,13 @@ const columns = [
   columnHelper.accessor((row) => `${row.to}`, {
     header: "To",
   }),
-  columnHelper.accessor((row) => `${row.cc.join(", ")}`, {
+  columnHelper.accessor((row) => `${row.cc}`, {
     header: "Cc",
     cell: ({ getValue }) => {
       const value = getValue();
-      if (value == null || value.length === 0) {
+      if (!value) {
         return <p className="text-muted-foreground">-</p>;
       }
-      return value;
     },
   }),
   columnHelper.accessor((row) => `${row.issuedAt}`, {
