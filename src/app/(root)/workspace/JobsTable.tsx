@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ChevronsUpDown,
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -81,6 +82,11 @@ import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
 import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
 import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -129,6 +135,11 @@ export default function JobsTable({ type }: Props) {
   const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
   const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
   const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
+  const taskNameSearchParamName = `${TABLE_NAME}TaskName`;
+  const taskAssigneeNameSearchParamName = `${TABLE_NAME}${type}TaskAssigneeName`;
+  const clientOrganizationSearchParamName = `${TABLE_NAME}${type}ClientOrganization`;
+  const dateSentToClientStartSearchParamName = `${TABLE_NAME}${type}DateSentToClientStart`;
+  const dateSentToClientEndSearchParamName = `${TABLE_NAME}${type}DateSentToClientEnd`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -143,7 +154,13 @@ export default function JobsTable({ type }: Props) {
 
   const jobNameSearchParam =
     searchParams.get(encodeURIComponent(jobNameSearchParamName)) ?? "";
-
+  const clientOrganizationSearchParam =
+    searchParams.get(encodeURIComponent(clientOrganizationSearchParamName)) ??
+    "";
+  const taskNameSearchParam =
+    searchParams.get(encodeURIComponent(taskNameSearchParamName)) ?? "";
+  const taskAssigneeNameSearchParam =
+    searchParams.get(encodeURIComponent(taskAssigneeNameSearchParamName)) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
     searchParams.get(encodeURIComponent(jobStatusSearchParamName))
   );
@@ -241,6 +258,9 @@ export default function JobsTable({ type }: Props) {
       page: pagination.pageIndex + 1 || globalPagination.pageIndex + 1,
       limit: pagination.pageSize || globalPagination.pageSize,
       jobName: jobNameSearchParam || globalJobNameSearchParam,
+      clientOrganizationName: clientOrganizationSearchParam,
+      taskName: taskNameSearchParam,
+      taskAssigneeName: taskAssigneeNameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -277,6 +297,9 @@ export default function JobsTable({ type }: Props) {
       globalPagination.pageSize,
       jobNameSearchParam,
       globalJobNameSearchParam,
+      clientOrganizationSearchParam,
+      taskNameSearchParam,
+      taskAssigneeNameSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -353,7 +376,18 @@ export default function JobsTable({ type }: Props) {
         },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
-        header: "Organization",
+        header: () => (
+          <SearchHeader
+            buttonText="Organization"
+            searchParamName={clientOrganizationSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            isLoading={
+              syncedParams != null &&
+              params.clientOrganizationName !==
+                syncedParams.clientOrganizationName
+            }
+          />
+        ),
       }),
       columnHelper.accessor("jobName", {
         header: () => (
@@ -436,7 +470,42 @@ export default function JobsTable({ type }: Props) {
         },
       }),
       columnHelper.accessor("assignedTasks", {
-        header: "Tasks",
+        header: () => (
+          <>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  size={"sm"}
+                  variant={"ghost"}
+                  className="-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2"
+                >
+                  Task
+                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="grid w-30 gap-2 place-items-center">
+                <SearchHeader
+                  buttonText="Task Name"
+                  searchParamName={taskNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskName !== syncedParams.taskName
+                  }
+                />
+                <SearchHeader
+                  buttonText="Task Assignee"
+                  searchParamName={taskAssigneeNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskAssigneeName !== syncedParams.taskAssigneeName
+                  }
+                />
+              </PopoverContent>
+            </Popover>
+          </>
+        ),
         cell: ({ getValue, row }) => {
           const tasks = row.original.assignedTasks;
           return (
@@ -570,24 +639,30 @@ export default function JobsTable({ type }: Props) {
     }
     return baseColumns;
   }, [
+    type,
+    prioritySearchParamName,
     pageIndexSearchParamName,
     syncedParams,
     params.priority,
+    params.clientOrganizationName,
     params.jobName,
     params.jobStatus,
+    params.taskName,
+    params.taskAssigneeName,
     params.projectPropertyType,
     params.mountingType,
     params.projectNumber,
     params.propertyOwner,
-    prioritySearchParamName,
+    clientOrganizationSearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
-    type,
+    canSendDeliverables,
+    taskNameSearchParamName,
+    taskAssigneeNameSearchParamName,
     propertyTypeSearchParamName,
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
-    canSendDeliverables,
   ]);
   let sendDeliverables = false;
 

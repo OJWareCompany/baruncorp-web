@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ChevronsUpDown,
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -67,6 +68,11 @@ import EnumHeader from "@/components/table/EnumHeader";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import TextCopyButton from "@/components/ui/incopybutton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -101,6 +107,8 @@ export default function JobsTableForClient({ type }: Props) {
   const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
   const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
   const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
+  const taskNameSearchParamName = `${TABLE_NAME}TaskName`;
+  const taskAssigneeNameSearchParamName = `${TABLE_NAME}${type}TaskAssigneeName`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -114,6 +122,10 @@ export default function JobsTableForClient({ type }: Props) {
   };
   const jobNameSearchParam =
     searchParams.get(encodeURIComponent(jobNameSearchParamName)) ?? "";
+  const taskNameSearchParam =
+    searchParams.get(encodeURIComponent(taskNameSearchParamName)) ?? "";
+  const taskAssigneeNameSearchParam =
+    searchParams.get(encodeURIComponent(taskAssigneeNameSearchParamName)) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
     searchParams.get(encodeURIComponent(jobStatusSearchParamName))
   );
@@ -199,6 +211,8 @@ export default function JobsTableForClient({ type }: Props) {
       page: pagination.pageIndex + 1 || globalPagination.pageIndex + 1,
       limit: pagination.pageSize || globalPagination.pageSize,
       jobName: jobNameSearchParam || globalJobNameSearchParam,
+      taskName: taskNameSearchParam,
+      taskAssigneeName: taskAssigneeNameSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -241,6 +255,8 @@ export default function JobsTableForClient({ type }: Props) {
       globalPagination.pageSize,
       jobNameSearchParam,
       globalJobNameSearchParam,
+      taskNameSearchParam,
+      taskAssigneeNameSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -352,7 +368,42 @@ export default function JobsTableForClient({ type }: Props) {
         },
       }),
       columnHelper.accessor("assignedTasks", {
-        header: "Tasks",
+        header: () => (
+          <>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  size={"sm"}
+                  variant={"ghost"}
+                  className="-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2"
+                >
+                  Task
+                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="grid w-30 gap-2 place-items-center">
+                <SearchHeader
+                  buttonText="Task Name"
+                  searchParamName={taskNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskName !== syncedParams.taskName
+                  }
+                />
+                <SearchHeader
+                  buttonText="Task Assignee"
+                  searchParamName={taskAssigneeNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskAssigneeName !== syncedParams.taskAssigneeName
+                  }
+                />
+              </PopoverContent>
+            </Popover>
+          </>
+        ),
         cell: ({ getValue, row }) => {
           const tasks = row.original.assignedTasks;
           return (
@@ -486,21 +537,25 @@ export default function JobsTableForClient({ type }: Props) {
     }
     return baseColumns;
   }, [
+    type,
+    inReviewSearchParamName,
     pageIndexSearchParamName,
     syncedParams,
     params.inReview,
     params.priority,
     params.jobName,
     params.jobStatus,
+    params.taskName,
+    params.taskAssigneeName,
     params.projectPropertyType,
     params.mountingType,
     params.projectNumber,
     params.propertyOwner,
-    inReviewSearchParamName,
     prioritySearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
-    type,
+    taskNameSearchParamName,
+    taskAssigneeNameSearchParamName,
     propertyTypeSearchParamName,
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
