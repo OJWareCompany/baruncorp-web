@@ -73,12 +73,17 @@ export default function IssueButton({
   const [open, setOpen] = useState(false);
 
   const getFieldValues = (data: InvoiceResponseDto): FieldValues => {
+    if (!data.issueHistory) {
+      return { ccArray: [] };
+    }
+
     return {
-      ccArray: data.currentCc.map((cc) => ({
-        cc,
+      ccArray: data.issueHistory.map((issueHistory) => ({
+        cc: issueHistory.cc.join(", "),
       })),
     };
   };
+
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(clientInvoice),
@@ -122,7 +127,10 @@ export default function IssueButton({
     const file = new File([blob], fileName, {
       type: blob.type,
     });
-
+    console.log(
+      "cc",
+      values.ccArray.map((cc) => cc.cc)
+    );
     patchClientInvoiceIssueMutateAsync({
       files: [file],
       cc: values.ccArray.map((cc) => cc.cc),
