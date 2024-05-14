@@ -1104,8 +1104,7 @@ export interface ClientToInvoiceResponseDto {
 
 export interface IssueInvoiceRequestDto {
   files: File[];
-  /** @default ["hyomin@oj.vision"] */
-  cc?: string[];
+  cc?: string[][];
 }
 
 export interface ClientWithOutstandingBalancesResponseDto {
@@ -3071,9 +3070,15 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
    * @default "3480 Northwest 33rd Court"
    */
   jobName?: string | null;
-  /** Using LIKE (중간 값 검색) */
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
   projectNumber?: string | null;
-  /** Using LIKE (중간 값 검색) */
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
   propertyFullAddress?: string | null;
   /** @default "Commercial" */
   projectPropertyType?: "Residential" | "Commercial" | null;
@@ -3095,18 +3100,11 @@ export interface FindJobPaginatedHttpControllerFindJobParams {
   inReview?: boolean | null;
   /** @default "Medium" */
   priority?: "Immediate" | "High" | "Medium" | "Low" | "None" | null;
-  /** Using LIKE (중간 값 검색) */
+  /**
+   * Using LIKE (중간 값 검색)
+   * @default ""
+   */
   propertyOwner?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  taskName?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  taskAssigneeName?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  clientOrganizationName?: string | null;
-  /** @format date-time */
-  dateSentToClientStart?: string | null;
-  /** @format date-time */
-  dateSentToClientEnd?: string | null;
   sortField?:
     | "dateSentToClient"
     | "completedCancelledDate"
@@ -3168,16 +3166,6 @@ export interface FindMyJobPaginatedHttpControllerFindJobParams {
    * @default ""
    */
   propertyOwner?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  taskName?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  taskAssigneeName?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  clientOrganizationName?: string | null;
-  /** @format date-time */
-  dateSentToClientStart?: string | null;
-  /** @format date-time */
-  dateSentToClientEnd?: string | null;
   sortField?:
     | "dateSentToClient"
     | "completedCancelledDate"
@@ -3261,14 +3249,6 @@ export interface FindMyOrderedJobPaginatedHttpControllerFindJobParams {
    * @default ""
    */
   propertyOwner?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  taskName?: string | null;
-  /** Using LIKE (중간 값 검색) */
-  taskAssigneeName?: string | null;
-  /** @format date-time */
-  dateSentToClientStart?: string | null;
-  /** @format date-time */
-  dateSentToClientEnd?: string | null;
 }
 
 export interface FindServicePaginatedHttpControllerGetParams {
