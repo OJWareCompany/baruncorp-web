@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowUp, Mail, X } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
@@ -72,6 +72,9 @@ export default function IssueButton({
   const [open, setOpen] = useState(false);
 
   const getFieldValues = (data: InvoiceResponseDto): FieldValues => {
+    console.log("### getFieldValues ###");
+    console.log(data.issueHistory);
+    console.log(data.currentCc);
     if (!data.issueHistory) {
       return { ccArray: [] };
     }
@@ -87,10 +90,20 @@ export default function IssueButton({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(clientInvoice),
   });
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "ccArray",
   });
+
+  useEffect(() => {
+    console.log("### useEffect ###");
+    console.log(fields);
+    if (fields.length === 0) {
+      append({ cc: "" });
+    }
+  }, []);
+
   const [instance] = usePDF({
     document: (
       <ClientInvoiceDocument
@@ -232,60 +245,48 @@ export default function IssueButton({
                                 }}
                               />
                             ))} */}
-                            {fields.length !== 0 &&
-                              fields.map((field, index) => (
-                                <FormField
-                                  key={field.id}
-                                  control={form.control}
-                                  name={`ccArray.${index}.cc`}
-                                  render={({ field }) => {
-                                    return (
-                                      <FormItem>
-                                        <div className="flex flex-row gap-2">
-                                          <FormControl>
-                                            <Input {...field} />
-                                          </FormControl>
-                                          <Button
-                                            variant={"outline"}
-                                            size={"icon"}
-                                            className="flex-shrink-0"
-                                            onClick={() => {
-                                              remove(index);
-                                            }}
-                                          >
-                                            <X className="h-4 w-4" />
-                                          </Button>
-                                        </div>
-                                        <FormMessage />
-                                      </FormItem>
-                                    );
-                                  }}
-                                />
-                              ))}
-                            {fields.length === 0 && (
-                              <FormItem>
-                                <div className="flex flex-row gap-2">
-                                  <FormControl>
-                                    <Input {...fields[0]} />
-                                  </FormControl>
-                                  <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="flex-shrink-0"
-                                    onClick={() => {
-                                      append({ cc: "" });
-                                    }}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                            {fields.map((field, index) => (
+                              <FormField
+                                key={field.id}
+                                control={form.control}
+                                name={`ccArray.${index}.cc`}
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem>
+                                      <div className="flex flex-row gap-2">
+                                        <FormControl>
+                                          <Input {...field} />
+                                        </FormControl>
+                                        {index}
+                                        <Button
+                                          variant={"outline"}
+                                          size={"icon"}
+                                          className="flex-shrink-0"
+                                          onClick={() => {
+                                            if (fields.length === 1) {
+                                              form.setValue(
+                                                `ccArray.${index}.cc`,
+                                                ""
+                                              ); // 값을 초기화
+                                              return;
+                                            }
+                                            remove(index);
+                                          }}
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
                             <Button
                               variant={"outline"}
                               className="w-full"
                               onClick={() => {
+                                console.log("추가 append");
                                 append({ cc: "" });
                               }}
                               type="button"
@@ -332,6 +333,9 @@ export default function IssueButton({
                                 title: "Success",
                               });
                               setOpen(false);
+                              form.reset({
+                                ccArray: [{ cc: "" }],
+                              });
                             })
                             .catch((error: AxiosError<ErrorResponseData>) => {
                               if (
