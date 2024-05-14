@@ -8,7 +8,6 @@ import DownloadCSVButton from "./DownloadCSVButton";
 import PaymentsTable from "./PaymentsTable";
 import PaymentDialog from "./PaymentDialog";
 import IssueButton from "./IssueButton";
-import HistoryTable from "./HistoryTable";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import useClientInvoiceQuery from "@/queries/useClientInvoiceQuery";
 import useNotFound from "@/hook/useNotFound";
@@ -172,9 +171,6 @@ export default function ClientInvoiceDetailPage({
           action={<DownloadCSVButton clientInvoice={clientInvoice} />}
         >
           <JobsTable clientInvoice={clientInvoice} pageType={pageType} />
-        </CollapsibleSection>
-        <CollapsibleSection title="History">
-          <HistoryTable clientInvoice={clientInvoice} />
         </CollapsibleSection>
       </div>
     </div>
