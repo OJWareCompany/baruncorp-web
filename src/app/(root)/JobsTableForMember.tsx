@@ -11,7 +11,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ChevronsUpDown,
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -87,11 +86,6 @@ import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
 import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
 import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -502,42 +496,43 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("assignedTasks", {
-        header: () => (
-          <>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  size={"sm"}
-                  variant={"ghost"}
-                  className="-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2"
-                >
-                  Task
-                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="grid w-30 gap-2 place-items-center">
-                <SearchHeader
-                  buttonText="Task Name"
-                  searchParamName={taskNameSearchParamName}
-                  pageIndexSearchParamName={pageIndexSearchParamName}
-                  isLoading={
-                    syncedParams != null &&
-                    params.taskName !== syncedParams.taskName
-                  }
-                />
-                <SearchHeader
-                  buttonText="Task Assignee"
-                  searchParamName={taskAssigneeNameSearchParamName}
-                  pageIndexSearchParamName={pageIndexSearchParamName}
-                  isLoading={
-                    syncedParams != null &&
-                    params.taskAssigneeName !== syncedParams.taskAssigneeName
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-          </>
-        ),
+        header: "Tasks",
+        // header: () => (
+        //   <>
+        //     <Popover>
+        //       <PopoverTrigger asChild>
+        //         <Button
+        //           size={"sm"}
+        //           variant={"ghost"}
+        //           className="-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2"
+        //         >
+        //           Task
+        //           <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+        //         </Button>
+        //       </PopoverTrigger>
+        //       <PopoverContent className="grid w-30 gap-2 place-items-center">
+        //         <SearchHeader
+        //           buttonText="Task Name"
+        //           searchParamName={taskNameSearchParamName}
+        //           pageIndexSearchParamName={pageIndexSearchParamName}
+        //           isLoading={
+        //             syncedParams != null &&
+        //             params.taskName !== syncedParams.taskName
+        //           }
+        //         />
+        //         <SearchHeader
+        //           buttonText="Task Assignee"
+        //           searchParamName={taskAssigneeNameSearchParamName}
+        //           pageIndexSearchParamName={pageIndexSearchParamName}
+        //           isLoading={
+        //             syncedParams != null &&
+        //             params.taskAssigneeName !== syncedParams.taskAssigneeName
+        //           }
+        //         />
+        //       </PopoverContent>
+        //     </Popover>
+        //   </>
+        // ),
         cell: ({ getValue, row }) => {
           const tasks = row.original.assignedTasks;
           return (
@@ -688,8 +683,6 @@ export default function JobsTableForMember({ type }: Props) {
     params.priority,
     params.jobName,
     params.jobStatus,
-    params.taskName,
-    params.taskAssigneeName,
     params.projectPropertyType,
     params.mountingType,
     params.projectNumber,
@@ -697,8 +690,6 @@ export default function JobsTableForMember({ type }: Props) {
     jobNameSearchParamName,
     jobStatusSearchParamName,
     canSendDeliverables,
-    taskNameSearchParamName,
-    taskAssigneeNameSearchParamName,
     propertyTypeSearchParamName,
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
