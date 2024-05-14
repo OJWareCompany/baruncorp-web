@@ -84,7 +84,10 @@ export default function ClientInvoiceDocument({
           <Text>{organization.address.fullAddress}</Text>
           {organization.phoneNumber && <Text>{organization.phoneNumber}</Text>}
           {organization.invoiceRecipientEmail && (
-            <Text>{organization.invoiceRecipientEmail}</Text>
+            <>
+              <Text>{organization.invoiceRecipientEmail}</Text>
+              <Text>{clientInvoice.currentCc}</Text>
+            </>
           )}
         </View>
         <View style={{ marginBottom: 32 }}>
