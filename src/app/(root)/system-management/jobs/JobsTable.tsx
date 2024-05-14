@@ -89,6 +89,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -598,17 +599,16 @@ export default function JobsTable() {
         },
       }),
       columnHelper.accessor("dateSentToClient", {
-        header: "Date Sent to Client",
-        // header: () => (
-        //   <SearchDateHeader
-        //     buttonText="Date Sent to Client"
-        //     searchParamOptions={{
-        //       dateSentToClientStartSearchParamName,
-        //       dateSentToClientEndSearchParamName,
-        //     }}
-        //     pageIndexSearchParamName={pageIndexSearchParamName}
-        //   />
-        // ),
+        header: () => (
+          <SearchDateHeader
+            buttonText="Date Sent to Client"
+            searchParamOptions={{
+              dateSentToClientStartSearchParamName,
+              dateSentToClientEndSearchParamName,
+            }}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+          />
+        ),
         cell: ({ getValue }) => {
           const value = getValue();
           if (value == null) {
@@ -642,6 +642,8 @@ export default function JobsTable() {
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
 
   const table = useReactTable({
