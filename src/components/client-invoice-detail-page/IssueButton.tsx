@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ArrowUp, Mail, X } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
@@ -80,9 +80,12 @@ export default function IssueButton({
     }
 
     return {
-      ccArray: data.currentCc.map((cc) => ({
-        cc,
-      })),
+      ccArray:
+        data.currentCc.length === 0
+          ? [{ cc: "" }]
+          : data.currentCc.map((cc) => ({
+              cc,
+            })),
     };
   };
 
@@ -95,14 +98,6 @@ export default function IssueButton({
     control: form.control,
     name: "ccArray",
   });
-
-  useEffect(() => {
-    console.log("### useEffect ###");
-    console.log(fields);
-    if (fields.length === 0) {
-      append({ cc: "" });
-    }
-  }, []);
 
   const [instance] = usePDF({
     document: (
@@ -333,9 +328,13 @@ export default function IssueButton({
                                 title: "Success",
                               });
                               setOpen(false);
-                              form.reset({
-                                ccArray: [{ cc: "" }],
-                              });
+                              remove(
+                                Array.from(
+                                  { length: fields.length },
+                                  (_, i) => i
+                                )
+                              );
+                              append({ cc: "" });
                             })
                             .catch((error: AxiosError<ErrorResponseData>) => {
                               if (
