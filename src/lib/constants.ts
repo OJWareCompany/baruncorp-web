@@ -789,7 +789,6 @@ export const signUpUrlRegExp = new RegExp(/^\/sign-up\/[a-zA-Z0-9-]+$/);
 
 export const BARUNCORP_ORGANIZATION_ID = "ed26f353-09e8-4bb3-81a9-6df25c4540a0";
 export const KNOWN_ERROR = "KNOWN_ERROR";
-export const NETWORK_ERROR = "ERR_NETWORK";
 
 /* -------------------------------------------------------------------------- */
 

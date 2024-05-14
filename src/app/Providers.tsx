@@ -10,7 +10,7 @@ import { ReactNode, useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { isAxiosError } from "axios";
 import InitializeAuthStatus from "./(root)/InitializeAuthStatus";
-import { KNOWN_ERROR, NETWORK_ERROR, defaultErrorToast } from "@/lib/constants";
+import { KNOWN_ERROR, defaultErrorToast } from "@/lib/constants";
 import { useToast } from "@/components/ui/use-toast";
 import { isValidServerErrorCode, isError } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,8 +35,7 @@ export default function Providers({ children }: Props) {
               if (
                 isAxiosError<ErrorResponseData>(error) &&
                 (error.response?.status === 404 ||
-                  error.cause?.name === KNOWN_ERROR ||
-                  error.code === NETWORK_ERROR) // 네트워크 에러인 경우 서버 죽은 걸로 판단하고 retry 하지 않음
+                  error.cause?.name === KNOWN_ERROR)
               ) {
                 return false;
               }
