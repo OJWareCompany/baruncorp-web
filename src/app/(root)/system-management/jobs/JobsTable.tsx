@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ChevronsUpDown,
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -83,6 +84,12 @@ import GlobalSearch from "@/components/table/GlobalSearch";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -123,6 +130,11 @@ export default function JobsTable() {
   const propertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
   const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
   const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
+  const taskNameSearchParamName = `${TABLE_NAME}TaskName`;
+  const taskAssigneeNameSearchParamName = `${TABLE_NAME}TaskAssigneeName`;
+  const clientOrganizationSearchParamName = `${TABLE_NAME}ClientOrganization`;
+  const dateSentToClientStartSearchParamName = `${TABLE_NAME}DateSentToClientStart`;
+  const dateSentToClientEndSearchParamName = `${TABLE_NAME}DateSentToClientEnd`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}`,
@@ -142,6 +154,20 @@ export default function JobsTable() {
   const jobStatusSearchParam = jobStatusSearchParamParseResult.success
     ? jobStatusSearchParamParseResult.data
     : "";
+  const clientOrganizationSearchParam =
+    searchParams.get(encodeURIComponent(clientOrganizationSearchParamName)) ??
+    "";
+  const taskNameSearchParam =
+    searchParams.get(encodeURIComponent(taskNameSearchParamName)) ?? "";
+  const dateSentToClientStartSearchParam =
+    searchParams.get(
+      encodeURIComponent(dateSentToClientStartSearchParamName)
+    ) ?? "";
+  const dateSentToClientEndSearchParam =
+    searchParams.get(encodeURIComponent(dateSentToClientEndSearchParamName)) ??
+    "";
+  const taskAssigneeNameSearchParam =
+    searchParams.get(encodeURIComponent(taskAssigneeNameSearchParamName)) ?? "";
   const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
     searchParams.get(propertyTypeSearchParamName)
   );
@@ -213,6 +239,11 @@ export default function JobsTable() {
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       jobName: jobNameSearchParam,
+      clientOrganizationName: clientOrganizationSearchParam,
+      taskName: taskNameSearchParam,
+      taskAssigneeName: taskAssigneeNameSearchParam,
+      dateSentToClientStart: dateSentToClientStartSearchParam,
+      dateSentToClientEnd: dateSentToClientEndSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -246,6 +277,11 @@ export default function JobsTable() {
       pagination.pageIndex,
       pagination.pageSize,
       jobNameSearchParam,
+      clientOrganizationSearchParam,
+      taskNameSearchParam,
+      taskAssigneeNameSearchParam,
+      dateSentToClientStartSearchParam,
+      dateSentToClientEndSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -323,7 +359,18 @@ export default function JobsTable() {
         },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
-        header: "Organization",
+        header: () => (
+          <SearchHeader
+            buttonText="Organization"
+            searchParamName={clientOrganizationSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            isLoading={
+              syncedParams != null &&
+              params.clientOrganizationName !==
+                syncedParams.clientOrganizationName
+            }
+          />
+        ),
         enableSorting: false,
       }),
       columnHelper.accessor("jobName", {
@@ -407,7 +454,42 @@ export default function JobsTable() {
         },
       }),
       columnHelper.accessor("assignedTasks", {
-        header: "Tasks",
+        header: () => (
+          <>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  size={"sm"}
+                  variant={"ghost"}
+                  className="-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2"
+                >
+                  Task
+                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="grid w-30 gap-2 place-items-center">
+                <SearchHeader
+                  buttonText="Task Name"
+                  searchParamName={taskNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskName !== syncedParams.taskName
+                  }
+                />
+                <SearchHeader
+                  buttonText="Task Assignee"
+                  searchParamName={taskAssigneeNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskAssigneeName !== syncedParams.taskAssigneeName
+                  }
+                />
+              </PopoverContent>
+            </Popover>
+          </>
+        ),
         enableSorting: false,
         cell: ({ getValue, row }) => {
           const tasks = row.original.assignedTasks;
@@ -516,25 +598,52 @@ export default function JobsTable() {
           return value;
         },
       }),
+      columnHelper.accessor("dateSentToClient", {
+        header: () => (
+          <SearchDateHeader
+            buttonText="Date Sent to Client"
+            searchParamOptions={{
+              dateSentToClientStartSearchParamName,
+              dateSentToClientEndSearchParamName,
+            }}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+          return formatInEST(value);
+        },
+      }),
     ];
   }, [
-    jobNameSearchParamName,
-    jobStatusSearchParamName,
-    mountingTypeSearchParamName,
+    prioritySearchParamName,
     pageIndexSearchParamName,
+    syncedParams,
+    params.priority,
+    params.clientOrganizationName,
     params.jobName,
     params.jobStatus,
-    params.mountingType,
-    params.priority,
-    params.projectNumber,
+    params.taskName,
+    params.taskAssigneeName,
     params.projectPropertyType,
+    params.mountingType,
+    params.projectNumber,
     params.propertyOwner,
-    prioritySearchParamName,
+    clientOrganizationSearchParamName,
+    jobNameSearchParamName,
+    jobStatusSearchParamName,
+    canSendDeliverables,
+    taskNameSearchParamName,
+    taskAssigneeNameSearchParamName,
+    propertyTypeSearchParamName,
+    mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
-    propertyTypeSearchParamName,
-    syncedParams,
-    canSendDeliverables,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
 
   const table = useReactTable({

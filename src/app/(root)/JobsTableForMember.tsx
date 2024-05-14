@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ChevronsUpDown,
   Loader2,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -86,6 +87,12 @@ import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
 import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
 import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -178,6 +185,10 @@ export default function JobsTableForMember({ type }: Props) {
   const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
   const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
   const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
+  const taskNameSearchParamName = `${TABLE_NAME}TaskName`;
+  const taskAssigneeNameSearchParamName = `${TABLE_NAME}${type}TaskAssigneeName`;
+  const dateSentToClientStartSearchParamName = `${TABLE_NAME}${type}DateSentToClientStart`;
+  const dateSentToClientEndSearchParamName = `${TABLE_NAME}${type}DateSentToClientEnd`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -191,9 +202,20 @@ export default function JobsTableForMember({ type }: Props) {
   };
   const jobNameSearchParam =
     searchParams.get(encodeURIComponent(jobNameSearchParamName)) ?? "";
+  const taskNameSearchParam =
+    searchParams.get(encodeURIComponent(taskNameSearchParamName)) ?? "";
+  const taskAssigneeNameSearchParam =
+    searchParams.get(encodeURIComponent(taskAssigneeNameSearchParamName)) ?? "";
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
     searchParams.get(encodeURIComponent(jobStatusSearchParamName))
   );
+  const dateSentToClientStartSearchParam =
+    searchParams.get(
+      encodeURIComponent(dateSentToClientStartSearchParamName)
+    ) ?? "";
+  const dateSentToClientEndSearchParam =
+    searchParams.get(encodeURIComponent(dateSentToClientEndSearchParamName)) ??
+    "";
   const jobStatusSearchParam = jobStatusSearchParamParseResult.success
     ? jobStatusSearchParamParseResult.data
     : type === "All"
@@ -276,6 +298,10 @@ export default function JobsTableForMember({ type }: Props) {
       page: pagination.pageIndex + 1 || globalPagination.pageIndex + 1,
       limit: pagination.pageSize || globalPagination.pageSize,
       jobName: jobNameSearchParam || globalJobNameSearchParam,
+      taskName: taskNameSearchParam,
+      taskAssigneeName: taskAssigneeNameSearchParam,
+      dateSentToClientStart: dateSentToClientStartSearchParam,
+      dateSentToClientEnd: dateSentToClientEndSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -318,6 +344,10 @@ export default function JobsTableForMember({ type }: Props) {
       globalPagination.pageSize,
       jobNameSearchParam,
       globalJobNameSearchParam,
+      taskNameSearchParam,
+      taskAssigneeNameSearchParam,
+      dateSentToClientStartSearchParam,
+      dateSentToClientEndSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -334,6 +364,7 @@ export default function JobsTableForMember({ type }: Props) {
   );
 
   const { data, isLoading, isFetching } = useJobsQuery(params, true);
+  const [position, setPosition] = useState("bottom");
   useEffect(() => {
     if (!isFetching) {
       setSyncedParams(params);
@@ -472,7 +503,42 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("assignedTasks", {
-        header: "Tasks",
+        header: () => (
+          <>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  size={"sm"}
+                  variant={"ghost"}
+                  className="-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2"
+                >
+                  Task
+                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="grid w-30 gap-2 place-items-center">
+                <SearchHeader
+                  buttonText="Task Name"
+                  searchParamName={taskNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskName !== syncedParams.taskName
+                  }
+                />
+                <SearchHeader
+                  buttonText="Task Assignee"
+                  searchParamName={taskAssigneeNameSearchParamName}
+                  pageIndexSearchParamName={pageIndexSearchParamName}
+                  isLoading={
+                    syncedParams != null &&
+                    params.taskAssigneeName !== syncedParams.taskAssigneeName
+                  }
+                />
+              </PopoverContent>
+            </Popover>
+          </>
+        ),
         cell: ({ getValue, row }) => {
           const tasks = row.original.assignedTasks;
           return (
@@ -593,7 +659,16 @@ export default function JobsTableForMember({ type }: Props) {
           }
         ),
         columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
-          header: "Date Sent to Client",
+          header: () => (
+            <SearchDateHeader
+              buttonText="Date Sent to Client"
+              searchParamOptions={{
+                dateSentToClientStartSearchParamName,
+                dateSentToClientEndSearchParamName,
+              }}
+              pageIndexSearchParamName={pageIndexSearchParamName}
+            />
+          ),
           cell: ({ getValue }) => {
             const value = getValue();
             if (value == null) {
@@ -606,24 +681,30 @@ export default function JobsTableForMember({ type }: Props) {
     }
     return baseColumns;
   }, [
+    type,
+    prioritySearchParamName,
     pageIndexSearchParamName,
     syncedParams,
     params.priority,
     params.jobName,
     params.jobStatus,
+    params.taskName,
+    params.taskAssigneeName,
     params.projectPropertyType,
     params.mountingType,
     params.projectNumber,
     params.propertyOwner,
-    prioritySearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
-    type,
+    canSendDeliverables,
+    taskNameSearchParamName,
+    taskAssigneeNameSearchParamName,
     propertyTypeSearchParamName,
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
-    canSendDeliverables,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
 
   let sendDeliverables = false;
