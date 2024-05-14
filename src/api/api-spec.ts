@@ -1044,16 +1044,6 @@ export interface InvoicePayments {
   canceledAt: string | null;
 }
 
-export interface IssueHistory {
-  invoiceId: string;
-  to: string;
-  cc: string[];
-  /** @format date-time */
-  issuedAt: string;
-  issuedByUserId: string;
-  issuedByUserName: string;
-}
-
 export interface InvoiceResponseDto {
   id: string;
   status: "Unissued" | "Issued" | "Paid";
@@ -1076,8 +1066,6 @@ export interface InvoiceResponseDto {
   totalOfPayment: number;
   /** @format date-time */
   issuedAt: string | null;
-  currentCc: string[];
-  issueHistory: IssueHistory[];
 }
 
 export interface InvoicePaginatedResponseDto {
@@ -1104,7 +1092,6 @@ export interface ClientToInvoiceResponseDto {
 
 export interface IssueInvoiceRequestDto {
   files: File[];
-  cc: string[][];
 }
 
 export interface ClientWithOutstandingBalancesResponseDto {
