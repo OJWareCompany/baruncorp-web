@@ -73,6 +73,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -109,6 +110,8 @@ export default function JobsTableForClient({ type }: Props) {
   const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
   const taskNameSearchParamName = `${TABLE_NAME}TaskName`;
   const taskAssigneeNameSearchParamName = `${TABLE_NAME}${type}TaskAssigneeName`;
+  const dateSentToClientStartSearchParamName = `${TABLE_NAME}${type}DateSentToClientStart`;
+  const dateSentToClientEndSearchParamName = `${TABLE_NAME}${type}DateSentToClientEnd`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}_${type}`,
@@ -134,6 +137,13 @@ export default function JobsTableForClient({ type }: Props) {
     : type === "All"
     ? ""
     : type;
+  const dateSentToClientStartSearchParam =
+    searchParams.get(
+      encodeURIComponent(dateSentToClientStartSearchParamName)
+    ) ?? "";
+  const dateSentToClientEndSearchParam =
+    searchParams.get(encodeURIComponent(dateSentToClientEndSearchParamName)) ??
+    "";
   const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
     searchParams.get(encodeURIComponent(propertyTypeSearchParamName))
   );
@@ -213,6 +223,8 @@ export default function JobsTableForClient({ type }: Props) {
       jobName: jobNameSearchParam || globalJobNameSearchParam,
       taskName: taskNameSearchParam,
       taskAssigneeName: taskAssigneeNameSearchParam,
+      dateSentToClientStart: dateSentToClientStartSearchParam,
+      dateSentToClientEnd: dateSentToClientEndSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -257,6 +269,8 @@ export default function JobsTableForClient({ type }: Props) {
       globalJobNameSearchParam,
       taskNameSearchParam,
       taskAssigneeNameSearchParam,
+      dateSentToClientStartSearchParam,
+      dateSentToClientEndSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -524,7 +538,16 @@ export default function JobsTableForClient({ type }: Props) {
           }
         ),
         columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
-          header: "Date Sent to Client",
+          header: () => (
+            <SearchDateHeader
+              buttonText="Date Sent to Client"
+              searchParamOptions={{
+                dateSentToClientStartSearchParamName,
+                dateSentToClientEndSearchParamName,
+              }}
+              pageIndexSearchParamName={pageIndexSearchParamName}
+            />
+          ),
           cell: ({ getValue }) => {
             const value = getValue();
             if (value == null) {
@@ -560,6 +583,8 @@ export default function JobsTableForClient({ type }: Props) {
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
 
   const table = useReactTable({

@@ -87,6 +87,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -208,6 +209,13 @@ export default function JobsTable({ type }: Props) {
   const globalProjectNumberSearchParam =
     searchParams.get(encodeURIComponent(globalProjectNumberSearchParamName)) ??
     "";
+  const dateSentToClientStartSearchParam =
+    searchParams.get(
+      encodeURIComponent(dateSentToClientStartSearchParamName)
+    ) ?? "";
+  const dateSentToClientEndSearchParam =
+    searchParams.get(encodeURIComponent(dateSentToClientEndSearchParamName)) ??
+    "";
   const globalPropertyOwnerSearchParam =
     searchParams.get(encodeURIComponent(globalPropertyOwnerSearchParamName)) ??
     "";
@@ -261,6 +269,8 @@ export default function JobsTable({ type }: Props) {
       clientOrganizationName: clientOrganizationSearchParam,
       taskName: taskNameSearchParam,
       taskAssigneeName: taskAssigneeNameSearchParam,
+      dateSentToClientStart: dateSentToClientStartSearchParam,
+      dateSentToClientEnd: dateSentToClientEndSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -300,6 +310,8 @@ export default function JobsTable({ type }: Props) {
       clientOrganizationSearchParam,
       taskNameSearchParam,
       taskAssigneeNameSearchParam,
+      dateSentToClientStartSearchParam,
+      dateSentToClientEndSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -626,7 +638,16 @@ export default function JobsTable({ type }: Props) {
           }
         ),
         columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
-          header: "Date Sent to Client",
+          header: () => (
+            <SearchDateHeader
+              buttonText="Date Sent to Client"
+              searchParamOptions={{
+                dateSentToClientStartSearchParamName,
+                dateSentToClientEndSearchParamName,
+              }}
+              pageIndexSearchParamName={pageIndexSearchParamName}
+            />
+          ),
           cell: ({ getValue }) => {
             const value = getValue();
             if (value == null) {
@@ -663,6 +684,8 @@ export default function JobsTable({ type }: Props) {
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
   let sendDeliverables = false;
 

@@ -89,6 +89,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -132,6 +133,8 @@ export default function JobsTable() {
   const taskNameSearchParamName = `${TABLE_NAME}TaskName`;
   const taskAssigneeNameSearchParamName = `${TABLE_NAME}TaskAssigneeName`;
   const clientOrganizationSearchParamName = `${TABLE_NAME}ClientOrganization`;
+  const dateSentToClientStartSearchParamName = `${TABLE_NAME}DateSentToClientStart`;
+  const dateSentToClientEndSearchParamName = `${TABLE_NAME}DateSentToClientEnd`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
     `${RELATIVE_PATH}`,
@@ -156,6 +159,13 @@ export default function JobsTable() {
     "";
   const taskNameSearchParam =
     searchParams.get(encodeURIComponent(taskNameSearchParamName)) ?? "";
+  const dateSentToClientStartSearchParam =
+    searchParams.get(
+      encodeURIComponent(dateSentToClientStartSearchParamName)
+    ) ?? "";
+  const dateSentToClientEndSearchParam =
+    searchParams.get(encodeURIComponent(dateSentToClientEndSearchParamName)) ??
+    "";
   const taskAssigneeNameSearchParam =
     searchParams.get(encodeURIComponent(taskAssigneeNameSearchParamName)) ?? "";
   const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
@@ -232,6 +242,8 @@ export default function JobsTable() {
       clientOrganizationName: clientOrganizationSearchParam,
       taskName: taskNameSearchParam,
       taskAssigneeName: taskAssigneeNameSearchParam,
+      dateSentToClientStart: dateSentToClientStartSearchParam,
+      dateSentToClientEnd: dateSentToClientEndSearchParam,
       jobStatus:
         transformJobStatusEnumWithEmptyStringIntoNullableJobStatusEnum.parse(
           jobStatusSearchParam
@@ -268,6 +280,8 @@ export default function JobsTable() {
       clientOrganizationSearchParam,
       taskNameSearchParam,
       taskAssigneeNameSearchParam,
+      dateSentToClientStartSearchParam,
+      dateSentToClientEndSearchParam,
       jobStatusSearchParam,
       mountingTypeSearchParam,
       propertyTypeSearchParam,
@@ -584,6 +598,25 @@ export default function JobsTable() {
           return value;
         },
       }),
+      columnHelper.accessor("dateSentToClient", {
+        header: () => (
+          <SearchDateHeader
+            buttonText="Date Sent to Client"
+            searchParamOptions={{
+              dateSentToClientStartSearchParamName,
+              dateSentToClientEndSearchParamName,
+            }}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+          return formatInEST(value);
+        },
+      }),
     ];
   }, [
     prioritySearchParamName,
@@ -609,6 +642,8 @@ export default function JobsTable() {
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
 
   const table = useReactTable({
