@@ -101,13 +101,31 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
             );
             let replacedContent = content;
 
+            // ======
+            // const regex = /(\w+\.\w+)\n(\[data:image\/[^;]+;base64,[^\]]+\])/g;
+            // const images = [];
+            // let match;
+
+            // while ((match = regex.exec(content)) !== null) {
+            //   images.push({
+            //     filename: match[1],
+            //     data: match[2],
+            //   });
+            // }
+
+            // console.log(images);
+            // ======
+
             // 이미지 데이터가 매치된 경우
             imageDataMatches.forEach((imageDataMatch, index) => {
               const imageData = imageDataMatch[0].replace(/^\[|\]$/g, ""); // 대괄호 제거
-              const placeholder = `__IMAGE_PLACEHOLDER_${index}__`;
+              const placeholder = `__IMAGE_LINK_${index}__`;
+              const imageLink = `@ImageData_${index}`;
               replacedContent = replacedContent.replace(
-                imageDataMatch[0],
+                `\n${imageDataMatch[0]}`,
+                // `${imageDataMatch[0]}\n`,
                 placeholder
+                // ""
               ); // 대괄호 포함된 문자열 대신 placeholder로 대체
             });
 
@@ -120,15 +138,21 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                 >
                   <PlateContent />
                 </Plate>
+                <br />
+                <p>{"<Attached Images>"}</p>
                 {imageDataMatches.map((imageDataMatch, index) => (
-                  <button
-                    key={index}
-                    onClick={() =>
-                      debugBase64(imageDataMatch[0].replace(/^\[|\]$/g, ""))
-                    }
-                  >
-                    {`__IMAGE_PLACEHOLDER_${index}_`}
-                  </button>
+                  <>
+                    <button
+                      key={index}
+                      onClick={() =>
+                        debugBase64(imageDataMatch[0].replace(/^\[|\]$/g, ""))
+                      }
+                      className="text-blue-500"
+                    >
+                      {`__IMAGE_LINK_${index}_`}
+                    </button>
+                    <br />
+                  </>
                 ))}
               </div>
             );
