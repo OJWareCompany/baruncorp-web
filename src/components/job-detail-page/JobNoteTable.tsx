@@ -8,7 +8,6 @@ import {
 import { Plate, PlateContent } from "@udecode/plate-common";
 import { FolderOpen } from "lucide-react";
 import { useMemo } from "react";
-import Image from "next/image";
 import { Button } from "../ui/button";
 import {
   Table,
@@ -33,6 +32,15 @@ const columnHelper = createColumnHelper<JobNoteResponseDto["data"][number]>();
 interface Props {
   jobNotes: JobNoteResponseDto;
   pageType: JobDetailPageType;
+}
+
+function debugBase64(base64URL: any) {
+  var win = window.open();
+  win?.document.write(
+    '<iframe src="' +
+      base64URL +
+      '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>'
+  );
 }
 
 export default function JobNotesTable({ jobNotes, pageType }: Props) {
@@ -84,25 +92,58 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
         header: "Content",
         cell: ({ getValue }) => {
           const content = getValue();
-          if (content.includes("data:image")) {
-            return <Image src={content} alt="Image" />;
-          } else {
-            const imageData = content.replace(/[\[\]]/g, "");
 
-            if (imageData.includes("data:image")) {
-              return <Image src={imageData} alt="Image" />;
-            } else {
-              return (
+          // 이미지 데이터가 포함되어 있는지 확인
+          if (content.includes("data:image")) {
+            const imageDataRegex = /\[data:image\/[^;\]]+\;base64,[^\]]+\]/g;
+            const imageDataMatches = Array.from(
+              content.matchAll(imageDataRegex)
+            );
+            let replacedContent = content;
+
+            // 이미지 데이터가 매치된 경우
+            imageDataMatches.forEach((imageDataMatch, index) => {
+              const imageData = imageDataMatch[0].replace(/^\[|\]$/g, ""); // 대괄호 제거
+              const placeholder = `__IMAGE_PLACEHOLDER_${index}__`;
+              replacedContent = replacedContent.replace(
+                imageDataMatch[0],
+                placeholder
+              ); // 대괄호 포함된 문자열 대신 placeholder로 대체
+            });
+
+            return (
+              <div>
                 <Plate
                   plugins={mentionEditorPlugins}
                   readOnly
-                  value={getEditorValue(content)}
+                  value={getEditorValue(replacedContent)}
                 >
                   <PlateContent />
                 </Plate>
-              );
-            }
+                {imageDataMatches.map((imageDataMatch, index) => (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      debugBase64(imageDataMatch[0].replace(/^\[|\]$/g, ""))
+                    }
+                  >
+                    {`Image ${index + 1}`}
+                  </button>
+                ))}
+              </div>
+            );
           }
+
+          // 매치되지 않은 경우
+          return (
+            <Plate
+              plugins={mentionEditorPlugins}
+              readOnly
+              value={getEditorValue(content)}
+            >
+              <PlateContent />
+            </Plate>
+          );
         },
       }),
       columnHelper.accessor("createdAt", {
@@ -189,17 +230,11 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >
-                {row.getVisibleCells().map(
-                  (cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ),
-                  console.log(row.original.content)
-                )}
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
             ))
           ) : (
