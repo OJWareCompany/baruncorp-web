@@ -455,13 +455,17 @@ export default function JobsTable() {
         //         <Button
         //           size={"sm"}
         //           variant={"ghost"}
-        //           className="-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2"
+        //           className={cn(
+        //             "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
+        //             (params.taskAssigneeName || params.taskName) &&
+        //               "underline decoration-2 underline-offset-2"
+        //           )}
         //         >
         //           Task
         //           <ChevronsUpDown className="h-3 w-3 ml-1.5" />
         //         </Button>
         //       </PopoverTrigger>
-        //       <PopoverContent className="grid w-30 gap-2 place-items-center">
+        //       <PopoverContent className="grid w-[150px] gap-1 pl-5">
         //         <SearchHeader
         //           buttonText="Task Name"
         //           searchParamName={taskNameSearchParamName}
@@ -594,16 +598,21 @@ export default function JobsTable() {
       }),
       columnHelper.accessor("dateSentToClient", {
         header: "Date Sent to Client",
-        // header: () => (
-        //   <SearchDateHeader
-        //     buttonText="Date Sent to Client"
-        //     searchParamOptions={{
-        //       dateSentToClientStartSearchParamName,
-        //       dateSentToClientEndSearchParamName,
-        //     }}
-        //     pageIndexSearchParamName={pageIndexSearchParamName}
-        //   />
-        // ),
+        // header: () =>
+        //   type === "All" ||
+        //   type === "Completed" ||
+        //   type === "Canceled (Invoice)" ? (
+        //     <SearchDateHeader
+        //       buttonText="Date Sent to Client"
+        //       searchParamOptions={{
+        //         dateSentToClientStartSearchParamName,
+        //         dateSentToClientEndSearchParamName,
+        //       }}
+        //       pageIndexSearchParamName={pageIndexSearchParamName}
+        //     />
+        //   ) : (
+        //     "Date Sent to Client"
+        //   ),
         cell: ({ getValue }) => {
           const value = getValue();
           if (value == null) {

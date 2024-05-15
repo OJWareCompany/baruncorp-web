@@ -88,7 +88,7 @@ export default function EnumHeader<T extends EnumValues>({
           size={"sm"}
           variant={"ghost"}
           className={cn(
-            buttonText == "In Review" && "px-1 w-20",
+            buttonText == "Priority" && "px-1 w-24",
             "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-1",
             isFiltered && "underline decoration-2 underline-offset-4"
           )}
