@@ -161,11 +161,7 @@ export default function NewClientInvoiceSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant={"outline"}
-          size={"sm"}
-          className="text-white bg-slate-700"
-        >
+        <Button variant={"outline"} size={"sm"}>
           <Plus className="mr-2 h-4 w-4" />
           New Client Invoice
         </Button>

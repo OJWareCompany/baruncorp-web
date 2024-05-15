@@ -41,7 +41,7 @@ export default function DownloadCSVButton({ data, className, type }: Props) {
         download(csvConfig)(csv);
       }}
     >
-      <ArrowDownToLine className="mr-2 h-3 w-3" />
+      <ArrowDownToLine className="mr-2 h-4 w-4" />
       Download CSV
     </Button>
   );

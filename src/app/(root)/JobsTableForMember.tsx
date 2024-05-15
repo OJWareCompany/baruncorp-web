@@ -13,7 +13,6 @@ import {
   ChevronsRight,
   ChevronsUpDown,
   Loader2,
-  RotateCw,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -860,9 +859,7 @@ export default function JobsTableForMember({ type }: Props) {
                     scroll: false,
                   });
                 }}
-                className="gap-2"
               >
-                <RotateCw className="w-3 h-3" />
                 Reset
               </Button>
             </div>
