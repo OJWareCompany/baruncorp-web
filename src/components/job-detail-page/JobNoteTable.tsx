@@ -127,7 +127,7 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                       debugBase64(imageDataMatch[0].replace(/^\[|\]$/g, ""))
                     }
                   >
-                    {`Image ${index + 1}`}
+                    {`__IMAGE_PLACEHOLDER_${index}_`}
                   </button>
                 ))}
               </div>
