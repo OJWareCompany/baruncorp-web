@@ -34,13 +34,14 @@ interface Props {
   pageType: JobDetailPageType;
 }
 
-function debugBase64(base64URL: any) {
-  var win = window.open();
-  win?.document.write(
-    '<iframe src="' +
-      base64URL +
-      '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>'
-  );
+function debugBase64(base64URL: string) {
+  window
+    .open()
+    ?.document.write(
+      '<iframe src="' +
+        base64URL +
+        '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>'
+    );
 }
 
 export default function JobNotesTable({ jobNotes, pageType }: Props) {
@@ -93,67 +94,81 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
         cell: ({ getValue }) => {
           const content = getValue();
 
-          // 이미지 데이터가 포함되어 있는지 확인
           if (content.includes("data:image")) {
-            const imageDataRegex = /\[data:image\/[^;\]]+\;base64,[^\]]+\]/g;
-            const imageDataMatches = Array.from(
-              content.matchAll(imageDataRegex)
-            );
+            const imageDataRegex =
+              /(\w+\.\w+)\n(\[data:image\/[^;]+;base64,[^\]]+\])/g;
+            const errorIconRegex =
+              /(Error Icon)\n(\[data:image\/[^;]+;base64,[^\]]+\])/g;
+
             let replacedContent = content;
 
-            // ======
-            // const regex = /(\w+\.\w+)\n(\[data:image\/[^;]+;base64,[^\]]+\])/g;
-            // const images = [];
-            // let match;
+            let match;
+            const images: Array<{
+              id: string;
+              filename: string;
+              imageData: string;
+            }> = [];
 
-            // while ((match = regex.exec(content)) !== null) {
-            //   images.push({
-            //     filename: match[1],
-            //     data: match[2],
-            //   });
-            // }
+            const imageIdSet = new Set<string>();
+            let imageIdIndex = 0;
+            while (
+              (match = imageDataRegex.exec(content)) !== null ||
+              (match = errorIconRegex.exec(content)) !== null
+            ) {
+              const [_, filename, imageData] = match;
+              const strIndex = String(imageIdIndex).padStart(2, "0");
+              const imageId = `#${strIndex}__${filename}`;
+              imageIdSet.add(imageId);
+              images.push({
+                id: imageId,
+                filename,
+                imageData,
+              });
+              imageIdIndex++;
+            }
 
-            // console.log(images);
-            // ======
-
-            // 이미지 데이터가 매치된 경우
-            imageDataMatches.forEach((imageDataMatch, index) => {
-              const imageData = imageDataMatch[0].replace(/^\[|\]$/g, ""); // 대괄호 제거
-              const placeholder = `__IMAGE_LINK_${index}__`;
-              const imageLink = `@ImageData_${index}`;
-              replacedContent = replacedContent.replace(
-                `\n${imageDataMatch[0]}`,
-                // `${imageDataMatch[0]}\n`,
-                placeholder
-                // ""
-              ); // 대괄호 포함된 문자열 대신 placeholder로 대체
+            images.forEach((image) => {
+              const target = `${image.filename}\n${image.imageData}`;
+              replacedContent = replacedContent.replace(target, image.id);
             });
+
+            const editorValue = getEditorValue(replacedContent);
+            for (let i = 0; i < editorValue.length; i++) {
+              const value = editorValue[i];
+              const imageId = value.children[0].text;
+              if (typeof imageId === "string" && imageIdSet.has(imageId)) {
+                const found = images.find((image) => image.id === imageId);
+                if (!found) continue;
+
+                const imageData = found.imageData.replace(/^\[|\]$/g, "");
+                const url = new URL(window.location.href);
+                const dummyDomain = `${url.protocol}//${url.host}`;
+
+                editorValue[i] = {
+                  type: "a",
+                  url: dummyDomain, // dummy
+                  children: [
+                    {
+                      text: found.filename,
+                    },
+                  ],
+                  onClick: (event: any) => {
+                    event.preventDefault();
+                    debugBase64(imageData);
+                  },
+                };
+              }
+            }
 
             return (
               <div>
                 <Plate
                   plugins={mentionEditorPlugins}
                   readOnly
-                  value={getEditorValue(replacedContent)}
+                  value={editorValue}
                 >
                   <PlateContent />
                 </Plate>
-                <br />
-                <p>{"<Attached Images>"}</p>
-                {imageDataMatches.map((imageDataMatch, index) => (
-                  <>
-                    <button
-                      key={index}
-                      onClick={() =>
-                        debugBase64(imageDataMatch[0].replace(/^\[|\]$/g, ""))
-                      }
-                      className="text-blue-500"
-                    >
-                      {`__IMAGE_LINK_${index}_`}
-                    </button>
-                    <br />
-                  </>
-                ))}
               </div>
             );
           }

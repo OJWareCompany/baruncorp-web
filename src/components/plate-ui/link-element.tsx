@@ -4,7 +4,7 @@ import { PlateElement, useElement } from "@udecode/plate-common";
 import { TLinkElement, useLink } from "@udecode/plate-link";
 
 export const LinkElement = withRef<typeof PlateElement>(
-  ({ className, children, ...props }, ref) => {
+  ({ className, children, onClick, ...props }, ref) => {
     const element = useElement<TLinkElement>();
     const { props: linkProps } = useLink({ element });
 
@@ -16,6 +16,7 @@ export const LinkElement = withRef<typeof PlateElement>(
           "font-medium text-primary underline decoration-primary underline-offset-4",
           className
         )}
+        onClick={props.element.onClick}
         {...(linkProps as any)}
         {...props}
       >
