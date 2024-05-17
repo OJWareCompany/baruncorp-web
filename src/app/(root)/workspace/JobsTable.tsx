@@ -104,6 +104,11 @@ export default function JobsTable({ type }: Props) {
   const pathname = usePathname();
   const [syncedParams, setSyncedParams] =
     useState<FindMyJobPaginatedHttpControllerFindJobParams>();
+  const [reset, setReset] = useState(false);
+
+  const handleResetComplete = () => {
+    setReset(false);
+  };
 
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
@@ -821,17 +826,25 @@ export default function JobsTable({ type }: Props) {
                 searchParamName={sortFieldSearchParamName}
                 pageIndexSearchParamName={pageIndexSearchParamName}
                 zodEnum={SortFieldTypeEnum}
+                reset={reset}
+                onResetComplete={handleResetComplete}
               />
               <SortDirectionSelectButton
                 searchParamName={sortDirectionSearchParamName}
                 pageIndexSearchParamName={pageIndexSearchParamName}
                 zodEnum={SortDirectionTypeEnum}
+                reset={reset}
+                onResetComplete={handleResetComplete}
               />
               <Button
                 size={"sm"}
                 variant={"outline"}
                 onClick={() => {
-                  const newSearchParams = new URLSearchParams();
+                  const newSearchParams = new URLSearchParams(
+                    window.location.search
+                  );
+                  newSearchParams.delete(sortFieldSearchParamName);
+                  newSearchParams.delete(sortDirectionSearchParamName);
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
                     "0"
@@ -839,6 +852,7 @@ export default function JobsTable({ type }: Props) {
                   router.push(`${pathname}?${newSearchParams.toString()}`, {
                     scroll: false,
                   });
+                  setReset(true);
                 }}
               >
                 Reset

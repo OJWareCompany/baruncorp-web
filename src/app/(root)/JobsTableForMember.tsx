@@ -85,13 +85,13 @@ import { InTableButton } from "@/components/ui/intablebutton";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
 import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
-import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
-import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
+import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -156,6 +156,11 @@ export default function JobsTableForMember({ type }: Props) {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
   >({ open: false });
+  const [reset, setReset] = useState(false);
+
+  const handleResetComplete = () => {
+    setReset(false);
+  };
 
   const {
     isBarunCorpMember,
@@ -840,17 +845,25 @@ export default function JobsTableForMember({ type }: Props) {
                 searchParamName={sortFieldSearchParamName}
                 pageIndexSearchParamName={pageIndexSearchParamName}
                 zodEnum={SortFieldTypeEnum}
+                reset={reset}
+                onResetComplete={handleResetComplete}
               />
               <SortDirectionSelectButton
                 searchParamName={sortDirectionSearchParamName}
                 pageIndexSearchParamName={pageIndexSearchParamName}
                 zodEnum={SortDirectionTypeEnum}
+                reset={reset}
+                onResetComplete={handleResetComplete}
               />
               <Button
                 size={"sm"}
                 variant={"outline"}
                 onClick={() => {
-                  const newSearchParams = new URLSearchParams();
+                  const newSearchParams = new URLSearchParams(
+                    window.location.search
+                  );
+                  newSearchParams.delete(sortFieldSearchParamName);
+                  newSearchParams.delete(sortDirectionSearchParamName);
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
                     "0"
@@ -858,6 +871,7 @@ export default function JobsTableForMember({ type }: Props) {
                   router.push(`${pathname}?${newSearchParams.toString()}`, {
                     scroll: false,
                   });
+                  setReset(true);
                 }}
               >
                 Reset

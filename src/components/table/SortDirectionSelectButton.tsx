@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { EnumValues, ZodEnum } from "zod";
 import { Button } from "../ui/button";
@@ -17,17 +17,28 @@ interface Props<T extends EnumValues> {
   searchParamName: string;
   pageIndexSearchParamName: string;
   zodEnum: ZodEnum<T>;
+  reset: boolean;
+  onResetComplete: () => void;
 }
 
 export default function SortDirectionSelectButton<T extends EnumValues>({
   searchParamName,
   pageIndexSearchParamName,
   zodEnum,
+  reset,
+  onResetComplete,
 }: Props<T>) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [selectedOption, setSelectedOption] = useState<string>("");
+
+  useEffect(() => {
+    if (reset) {
+      setSelectedOption("");
+      onResetComplete();
+    }
+  }, [reset, onResetComplete]);
 
   return (
     <Popover>
@@ -62,12 +73,9 @@ export default function SortDirectionSelectButton<T extends EnumValues>({
                       encodeURIComponent(pageIndexSearchParamName),
                       "0"
                     );
-                    router.replace(
-                      `${pathname}?${newSearchParams.toString()}`,
-                      {
-                        scroll: false,
-                      }
-                    );
+                    router.push(`${pathname}?${newSearchParams.toString()}`, {
+                      scroll: false,
+                    });
                     setSelectedOption(value);
                   }}
                 >

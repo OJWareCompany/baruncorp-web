@@ -90,6 +90,11 @@ export default function JobsTableForClient({ type }: Props) {
   const pathname = usePathname();
   const [syncedParams, setSyncedParams] =
     useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
+  const [reset, setReset] = useState(false);
+
+  const handleResetComplete = () => {
+    setReset(false);
+  };
 
   const jobStatusSearchParamName = `${TABLE_NAME}${type}JobStatus`;
   const jobNameSearchParamName = `${TABLE_NAME}${type}JobName`;
@@ -708,17 +713,25 @@ export default function JobsTableForClient({ type }: Props) {
                 searchParamName={sortFieldSearchParamName}
                 pageIndexSearchParamName={pageIndexSearchParamName}
                 zodEnum={SortFieldTypeEnum}
+                reset={reset}
+                onResetComplete={handleResetComplete}
               />
               <SortDirectionSelectButton
                 searchParamName={sortDirectionSearchParamName}
                 pageIndexSearchParamName={pageIndexSearchParamName}
                 zodEnum={SortDirectionTypeEnum}
+                reset={reset}
+                onResetComplete={handleResetComplete}
               />
               <Button
                 size={"sm"}
                 variant={"outline"}
                 onClick={() => {
-                  const newSearchParams = new URLSearchParams();
+                  const newSearchParams = new URLSearchParams(
+                    window.location.search
+                  );
+                  newSearchParams.delete(sortFieldSearchParamName);
+                  newSearchParams.delete(sortDirectionSearchParamName);
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
                     "0"
@@ -726,6 +739,7 @@ export default function JobsTableForClient({ type }: Props) {
                   router.push(`${pathname}?${newSearchParams.toString()}`, {
                     scroll: false,
                   });
+                  setReset(true);
                 }}
               >
                 Reset
