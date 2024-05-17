@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+"use client";
+import React, { useState, useEffect, ReactNode } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "./ui/breadcrumb";
 
 interface Props {
@@ -7,8 +8,29 @@ interface Props {
 }
 
 export default function PageHeader({ items, action }: Props) {
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 0) {
+        setHasScrolled(true);
+      } else {
+        setHasScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <div className="py-2 sticky top-[65px] z-40 bg-white">
+    <div
+      className={`py-2 sticky top-[65px] z-40 bg-white ${
+        hasScrolled ? "border-b" : ""
+      }`}
+    >
       <Breadcrumb>
         {items.map((item) => (
           <BreadcrumbItem key={item.name}>
