@@ -3,7 +3,6 @@ import { ArrowUp, Mail, X } from "lucide-react";
 import { usePDF } from "@react-pdf/renderer";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { AxiosError } from "axios";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -62,12 +61,11 @@ export default function IssueButton({
   services,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<"cc" | "noCc" | null>(
+    null
+  );
 
   const getFieldValues = (data: InvoiceResponseDto): FieldValues => {
-    if (!data.issueHistory) {
-      return { ccArray: [] };
-    }
-
     return {
       ccArray:
         data.currentCc.length === 0
@@ -103,10 +101,10 @@ export default function IssueButton({
     usePatchClientInvoiceIssueMutation(clientInvoice.id);
 
   if (clientInvoice.status === "Paid") {
-    return;
+    return null;
   }
 
-  async function onSubmit(values: FieldValues) {
+  async function handleSubmit(values: FieldValues, ccIncluded: boolean) {
     const { blob } = instance;
     if (blob == null) {
       return;
@@ -119,36 +117,27 @@ export default function IssueButton({
       "MMM yyyy"
     )}, Client Invoice.pdf`;
 
-    // Blob을 File로 변환
-    const file = new File([blob], fileName, {
-      type: blob.type,
-    });
-    patchClientInvoiceIssueMutateAsync({
+    const file = new File([blob], fileName, { type: blob.type });
+    const payload = {
       files: [file],
-      cc: values.ccArray.map((cc) => cc.cc),
-    })
-      .then(() => {
-        queryClient.invalidateQueries({
-          queryKey: getClientInvoiceQueryKey(clientInvoice.id),
-        });
-        toast({
-          title: "Success",
-        });
-        setOpen(false);
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
-        ) {
-          toast({
-            title: error.response.data.message,
-            variant: "destructive",
-          });
-          return;
-        }
+      cc: ccIncluded ? values.ccArray.map((cc) => cc.cc) : [],
+    };
+
+    try {
+      await patchClientInvoiceIssueMutateAsync(payload);
+      queryClient.invalidateQueries({
+        queryKey: getClientInvoiceQueryKey(clientInvoice.id),
       });
+      toast({ title: "Success" });
+      setOpen(false);
+    } catch (error: any) {
+      if (error.response?.data?.errorCode?.length) {
+        toast({
+          title: error.response.data.message,
+          variant: "destructive",
+        });
+      }
+    }
   }
 
   return (
@@ -156,11 +145,9 @@ export default function IssueButton({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
-            onClick={() => {
-              setOpen(true);
-            }}
-            variant={"outline"}
-            size={"sm"}
+            onClick={() => setOpen(true)}
+            variant="outline"
+            size="sm"
             className="h-[28px] text-xs px-2"
             disabled={instance.loading}
           >
@@ -177,154 +164,67 @@ export default function IssueButton({
             <DialogTitle>Are You Sure?</DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="grid gap-4 py-4"
-            >
+            <form className="grid gap-4 py-4">
               <FormField
                 control={form.control}
                 name="ccArray"
-                render={() => {
-                  return (
-                    <FormItem>
-                      <FormLabel>Cc</FormLabel>
-                      {/* {fields.map((field, index) => (
-                              <FormField
-                                key={field.id}
-                                control={form.control}
-                                name={`ccArray.${index}.cc`}
-                                render={({ field }) => {
-                                  return (
-                                    <FormItem>
-                                      <div className="flex flex-row gap-2">
-                                        <FormControl>
-                                          <Input {...field} />
-                                        </FormControl>
-                                        <Button
-                                          variant={"outline"}
-                                          size={"icon"}
-                                          className="flex-shrink-0"
-                                          onClick={() => {
-                                            remove(index);
-                                          }}
-                                        >
-                                          <X className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                      <FormMessage />
-                                    </FormItem>
-                                  );
+                render={() => (
+                  <FormItem>
+                    <FormLabel>CC</FormLabel>
+                    {fields.map((field, index) => (
+                      <FormField
+                        key={field.id}
+                        control={form.control}
+                        name={`ccArray.${index}.cc`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex flex-row gap-2">
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="flex-shrink-0"
+                                onClick={() => {
+                                  if (fields.length === 1) {
+                                    form.setValue(`ccArray.${index}.cc`, "");
+                                    return;
+                                  }
+                                  remove(index);
                                 }}
-                              />
-                            ))} */}
-                      {fields.map((field, index) => (
-                        <FormField
-                          key={field.id}
-                          control={form.control}
-                          name={`ccArray.${index}.cc`}
-                          render={({ field }) => {
-                            return (
-                              <FormItem>
-                                <div className="flex flex-row gap-2">
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
-                                  <Button
-                                    variant={"outline"}
-                                    size={"icon"}
-                                    className="flex-shrink-0"
-                                    onClick={() => {
-                                      if (fields.length === 1) {
-                                        form.setValue(
-                                          `ccArray.${index}.cc`,
-                                          ""
-                                        ); // 값을 초기화
-                                        return;
-                                      }
-                                      remove(index);
-                                    }}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
-                      <Button
-                        variant={"outline"}
-                        className="w-full"
-                        onClick={() => {
-                          append({ cc: "" });
-                        }}
-                        type="button"
-                      >
-                        Add Email
-                      </Button>
-                    </FormItem>
-                  );
-                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => append({ cc: "" })}
+                      type="button"
+                    >
+                      Add Email
+                    </Button>
+                  </FormItem>
+                )}
               />
               <DialogFooter>
                 <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    const { blob } = instance;
-                    if (blob == null) {
-                      return;
-                    }
-
-                    const fileName = `[Barun Corp] ${
-                      clientInvoice.clientOrganization.name
-                    }, ${format(
-                      new Date(clientInvoice.servicePeriodDate.slice(0, 7)),
-                      "MMM yyyy"
-                    )}, Client Invoice.pdf`;
-
-                    // Blob을 File로 변환
-                    const file = new File([blob], fileName, {
-                      type: blob.type,
-                    });
-
-                    patchClientInvoiceIssueMutateAsync({
-                      files: [file],
-                    })
-                      .then(() => {
-                        queryClient.invalidateQueries({
-                          queryKey: getClientInvoiceQueryKey(clientInvoice.id),
-                        });
-                        toast({
-                          title: "Success",
-                        });
-                        setOpen(false);
-                        remove(
-                          Array.from({ length: fields.length }, (_, i) => i)
-                        );
-                        append({ cc: "" });
-                      })
-                      .catch((error: AxiosError<ErrorResponseData>) => {
-                        if (
-                          error.response &&
-                          error.response.data.errorCode.filter(
-                            (value) => value != null
-                          ).length !== 0
-                        ) {
-                          toast({
-                            title: error.response.data.message,
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-                      });
-                  }}
+                  variant="outline"
+                  onClick={() => setConfirmAction("noCc")}
+                  type="button"
                 >
                   Submit (No Cc)
                 </Button>
                 <LoadingButton
-                  type="submit"
+                  onClick={() => setConfirmAction("cc")}
                   isLoading={form.formState.isSubmitting}
+                  type="button"
                 >
                   Submit
                 </LoadingButton>
@@ -333,6 +233,37 @@ export default function IssueButton({
           </Form>
         </DialogContent>
       </Dialog>
+      {confirmAction && (
+        <Dialog
+          open={confirmAction !== null}
+          onOpenChange={() => setConfirmAction(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you sure?</DialogTitle>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setConfirmAction(null)} variant="outline">
+                Cancel
+              </Button>
+              <LoadingButton
+                onClick={() => {
+                  const values = form.getValues();
+                  if (confirmAction === "cc") {
+                    handleSubmit(values, true);
+                  } else {
+                    handleSubmit(values, false);
+                  }
+                  setConfirmAction(null);
+                }}
+                isLoading={form.formState.isSubmitting}
+              >
+                Continue
+              </LoadingButton>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }

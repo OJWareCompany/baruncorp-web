@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { InvoiceResponseDto } from "@/api/api-spec";
 import { formatInEST } from "@/lib/utils";
-import useClientInvoiceHistoriesQuery from "@/queries/useClientInvoiceHistoriresQuery";
+import useClientInvoiceHistoriesQuery from "@/queries/useClientInvoiceHistoriesQuery";
 
 const columnHelper =
   createColumnHelper<InvoiceResponseDto["issueHistory"][number]>();
