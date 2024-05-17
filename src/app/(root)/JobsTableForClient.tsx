@@ -13,6 +13,7 @@ import {
   ChevronsRight,
   ChevronsUpDown,
   Loader2,
+  RotateCcw,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -742,6 +743,7 @@ export default function JobsTableForClient({ type }: Props) {
                   setReset(true);
                 }}
               >
+                <RotateCcw className="mr-2 w-3 h-3" />
                 Reset
               </Button>
             </div>

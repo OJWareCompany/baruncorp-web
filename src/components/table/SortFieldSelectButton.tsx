@@ -43,7 +43,7 @@ export default function SortFieldSelectButton<T extends EnumValues>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button size={"sm"} variant={"outline"} placeholder="Select Field">
+        <Button size={"sm"} variant={"outline"}>
           {selectedOption === ""
             ? "Select Field"
             : selectedOption === "dateSentToClient"

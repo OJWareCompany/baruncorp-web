@@ -92,7 +92,7 @@ export default function GlobalSearch({
   return (
     <div className="flex items-start space-x-2">
       <Select onValueChange={setSelectedOption}>
-        <SelectTrigger className="w-[180px] mb-1 h-11 focus-visible:ring-0">
+        <SelectTrigger className="w-[180px] mb-1 h-11 focus:outline-none focus-visible:ring-0">
           <SelectValue placeholder={selectedOption} />
         </SelectTrigger>
         <SelectContent>
