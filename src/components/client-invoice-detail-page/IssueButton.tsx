@@ -66,6 +66,9 @@ export default function IssueButton({
   );
 
   const getFieldValues = (data: InvoiceResponseDto): FieldValues => {
+    if (!data.issueHistory) {
+      return { ccArray: [] };
+    }
     return {
       ccArray:
         data.currentCc.length === 0
@@ -130,6 +133,10 @@ export default function IssueButton({
       });
       toast({ title: "Success" });
       setOpen(false);
+      if (!ccIncluded) {
+        remove(Array.from({ length: values.ccArray.length }, (_, i) => i));
+        append({ cc: "" });
+      }
     } catch (error: any) {
       if (error.response?.data?.errorCode?.length) {
         toast({
