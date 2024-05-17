@@ -120,7 +120,11 @@ export default function NewTaskSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant={"outline"} size={"sm"}>
+        <Button
+          variant={"outline"}
+          size={"sm"}
+          className="text-white bg-slate-700"
+        >
           <Plus className="mr-2 h-4 w-4" />
           New Task
         </Button>

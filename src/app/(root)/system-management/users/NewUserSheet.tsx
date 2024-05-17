@@ -32,7 +32,11 @@ export default function NewUserSheet() {
     <>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetTrigger asChild>
-          <Button variant={"outline"} size={"sm"}>
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            className="text-white bg-slate-700"
+          >
             <Plus className="mr-2 h-4 w-4" />
             New User
           </Button>
