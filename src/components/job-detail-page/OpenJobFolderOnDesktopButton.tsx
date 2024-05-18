@@ -22,6 +22,8 @@ export default function OpenJobFolderOnDesktopButton({ job, project }: Props) {
           job: `Job ${job.jobRequestNumber}`,
           folderId: job.jobFolderId,
           shareLink: job.shareLink,
+          parentlessFolder: job.parentlessFolder ?? false,
+          sharedDriveVersion: job.sharedDriveVersion ?? "001",
         });
       }}
     >

@@ -20,6 +20,8 @@ export default function OpenProjectFolderOnDesktopButton({ project }: Props) {
           project: project.propertyAddress.fullAddress,
           folderId: project.projectFolderId,
           shareLink: project.shareLink,
+          parentlessFolder: project.parentlessFolder ?? false,
+          sharedDriveVersion: project.sharedDriveVersion ?? "001",
         });
       }}
     >

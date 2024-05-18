@@ -32,6 +32,8 @@ const columnHelper = createColumnHelper<JobNoteResponseDto["data"][number]>();
 interface Props {
   jobNotes: JobNoteResponseDto;
   pageType: JobDetailPageType;
+  parentlessFolder: boolean;
+  sharedDriveVersion: string;
 }
 
 function debugBase64(base64URL: string) {
@@ -44,7 +46,12 @@ function debugBase64(base64URL: string) {
     );
 }
 
-export default function JobNotesTable({ jobNotes, pageType }: Props) {
+export default function JobNotesTable({
+  jobNotes,
+  pageType,
+  parentlessFolder,
+  sharedDriveVersion,
+}: Props) {
   const { isBarunCorpMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
@@ -213,6 +220,8 @@ export default function JobNotesTable({ jobNotes, pageType }: Props) {
                       job: `Job ${jobNotes.jobRequestNumber}`,
                       jobNote: `#${row.original.jobNoteNumber} message`,
                       shareLink: row.original.fileShareLink,
+                      parentlessFolder: parentlessFolder,
+                      sharedDriveVersion: sharedDriveVersion,
                     });
                     return;
                   }

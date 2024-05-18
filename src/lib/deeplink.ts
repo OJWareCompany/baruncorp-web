@@ -29,19 +29,33 @@ export function openProjectFolder({
   project,
   folderId,
   shareLink,
+  parentlessFolder,
+  sharedDriveVersion,
 }: {
   organization: string;
   type: string;
   project: string;
   folderId: string | null;
   shareLink: string | null;
+  parentlessFolder: boolean;
+  sharedDriveVersion: string;
 }) {
   checkBarunFinderApp();
-
+  const payload = {
+    organization,
+    type,
+    project,
+    folderId,
+    shareLink,
+    parentlessFolder,
+    sharedDriveVersion,
+  };
   const url = `barun://open-project?payload=${encodeURIComponent(
-    JSON.stringify({ organization, type, project, folderId, shareLink })
+    JSON.stringify(payload)
   )}`;
-  console.log(url);
+  console.log("### openProjectFolder ###");
+  console.log(`url: ${url}`);
+  console.log(`payload: ${JSON.stringify(payload)}`);
   window.location.href = url;
 }
 
@@ -52,6 +66,8 @@ export function openJobFolder({
   job,
   folderId,
   shareLink,
+  parentlessFolder,
+  sharedDriveVersion,
 }: {
   organization: string;
   type: string;
@@ -59,13 +75,26 @@ export function openJobFolder({
   job: string;
   folderId: string | null;
   shareLink: string | null;
+  parentlessFolder: boolean;
+  sharedDriveVersion: string;
 }) {
   checkBarunFinderApp();
-
+  const payload = {
+    organization,
+    type,
+    project,
+    job,
+    folderId,
+    shareLink,
+    parentlessFolder,
+    sharedDriveVersion,
+  };
   const url = `barun://open-job?payload=${encodeURIComponent(
-    JSON.stringify({ organization, type, project, job, folderId, shareLink })
+    JSON.stringify(payload)
   )}`;
-  console.log(url);
+  console.log("### openJobFolder ###");
+  console.log(`url: ${url}`);
+  console.log(`payload: ${JSON.stringify(payload)}`);
   window.location.href = url;
 }
 
@@ -87,6 +116,8 @@ export function openJobNoteFolder({
   job,
   jobNote,
   shareLink,
+  parentlessFolder = false,
+  sharedDriveVersion = "001",
 }: {
   organization: string;
   type: string;
@@ -94,13 +125,26 @@ export function openJobNoteFolder({
   job: string;
   jobNote: string;
   shareLink: string | null;
+  parentlessFolder: boolean;
+  sharedDriveVersion: string;
 }) {
   checkBarunFinderApp();
-
+  const payload = {
+    organization,
+    type,
+    project,
+    job,
+    jobNote,
+    shareLink,
+    parentlessFolder,
+    sharedDriveVersion,
+  };
   const url = `barun://open-job-note?payload=${encodeURIComponent(
-    JSON.stringify({ organization, type, project, job, jobNote, shareLink })
+    JSON.stringify(payload)
   )}`;
-  console.log(url);
+  console.log("### openJobNoteFolder ###");
+  console.log(`url: ${url}`);
+  console.log(`payload: ${JSON.stringify(payload)}`);
   window.location.href = url;
 }
 
@@ -112,10 +156,12 @@ export function openAhjFolder({
   fullAhjName: string;
 }) {
   checkBarunFinderApp();
-
+  const payload = { geoId, fullAhjName };
   const url = `barun://open-ahj?payload=${encodeURIComponent(
-    JSON.stringify({ geoId, fullAhjName })
+    JSON.stringify(payload)
   )}`;
+  console.log("### openAhjFolder ###");
   console.log(url);
+  console.log(`payload: ${JSON.stringify(payload)}`);
   window.location.href = url;
 }

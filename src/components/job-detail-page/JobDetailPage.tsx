@@ -187,6 +187,8 @@ export default function JobDetailPage({ jobId, pageType }: Props) {
                   data: processedJobNotesData,
                 }}
                 pageType={pageType}
+                parentlessFolder={job.parentlessFolder ?? false}
+                sharedDriveVersion={job.sharedDriveVersion ?? "001"}
               />
               {isWorker && <JobNoteForm job={job} />}
             </ItemsContainer>
