@@ -584,6 +584,10 @@ export interface JobResponseDto {
   jobFolderId: string | null;
   /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
   shareLink: string | null;
+  /** @example false */
+  parentlessFolder?: boolean;
+  /** @example "002" */
+  sharedDriveVersion?: string | null;
 }
 
 export interface JobPaginatedResponseDto {
@@ -1809,6 +1813,10 @@ export interface ProjectResponseDto {
   projectFolderId: string | null;
   /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
   shareLink: string | null;
+  /** @example false */
+  parentlessFolder?: boolean;
+  /** @example "002" */
+  sharedDriveVersion: string | null;
 }
 
 export interface ProjectsCountResponseDto {
