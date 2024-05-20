@@ -139,8 +139,8 @@ export default function JobsTable({ type }: Props) {
   const globalProjectNumberSearchParamName = `${TABLE_NAME}ProjectNumber`;
   const globalPropertyOwnerSearchParamName = `${TABLE_NAME}PropertyOwner`;
   const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
-  const sortDirectionSearchParamName = `${TABLE_NAME}SortDirection`;
-  const sortFieldSearchParamName = `${TABLE_NAME}SortField`;
+  const sortDirectionSearchParamName = `${TABLE_NAME}${type}SortDirection`;
+  const sortFieldSearchParamName = `${TABLE_NAME}${type}SortField`;
   const taskNameSearchParamName = `${TABLE_NAME}TaskName`;
   const taskAssigneeNameSearchParamName = `${TABLE_NAME}${type}TaskAssigneeName`;
   const clientOrganizationSearchParamName = `${TABLE_NAME}${type}ClientOrganization`;
@@ -236,14 +236,14 @@ export default function JobsTable({ type }: Props) {
   };
 
   const sortDirectionSearchParamResult = SortDirectionTypeEnum.safeParse(
-    searchParams.get(sortDirectionSearchParamName)
+    searchParams.get(encodeURIComponent(sortDirectionSearchParamName))
   );
   const sortDirectionSearchParam = sortDirectionSearchParamResult.success
     ? sortDirectionSearchParamResult.data
     : undefined;
 
   const sortFieldSearchParamResult = SortFieldTypeEnum.safeParse(
-    searchParams.get(sortFieldSearchParamName)
+    searchParams.get(encodeURIComponent(sortFieldSearchParamName))
   );
   const sortFieldSearchParam = sortFieldSearchParamResult.success
     ? sortFieldSearchParamResult.data
@@ -842,10 +842,14 @@ export default function JobsTable({ type }: Props) {
                 variant={"outline"}
                 onClick={() => {
                   const newSearchParams = new URLSearchParams(
-                    window.location.search
+                    searchParams.toString()
                   );
-                  newSearchParams.delete(sortFieldSearchParamName);
-                  newSearchParams.delete(sortDirectionSearchParamName);
+                  newSearchParams.delete(
+                    encodeURIComponent(sortFieldSearchParamName)
+                  );
+                  newSearchParams.delete(
+                    encodeURIComponent(sortDirectionSearchParamName)
+                  );
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
                     "0"

@@ -797,10 +797,14 @@ export default function JobsTable() {
                 variant={"outline"}
                 onClick={() => {
                   const newSearchParams = new URLSearchParams(
-                    window.location.search
+                    searchParams.toString()
                   );
-                  newSearchParams.delete(sortFieldSearchParamName);
-                  newSearchParams.delete(sortDirectionSearchParamName);
+                  newSearchParams.delete(
+                    encodeURIComponent(sortFieldSearchParamName)
+                  );
+                  newSearchParams.delete(
+                    encodeURIComponent(sortDirectionSearchParamName)
+                  );
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
                     "0"
