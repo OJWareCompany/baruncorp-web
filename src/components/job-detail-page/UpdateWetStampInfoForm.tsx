@@ -15,14 +15,19 @@ import {
 } from "@/components/ui/form";
 import LoadingButton from "@/components/LoadingButton";
 import { JobResponseDto } from "@/api/api-spec";
-import { digitRegExp, transformNullishStringIntoString } from "@/lib/constants";
+import {
+  digitRegExp,
+  transformNullishStringIntoString,
+  transformStringIntoNullableString,
+} from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { getJobQueryKey } from "@/queries/useJobQuery";
 import Minimap from "@/components/Minimap";
 import AddressSearchButton from "@/components/AddressSearchButton";
 import usePatchJobMutation from "@/mutations/usePatchJobMutation";
 import RowItemsContainer from "@/components/RowItemsContainer";
-import { Button } from "@/components/ui/button";
+import usePostOrderedServiceMutation from "@/mutations/usePostOrderedServiceMutation";
+import { getProjectQueryKey } from "@/queries/useProjectQuery";
 
 const formSchema = z
   .object({
@@ -74,16 +79,26 @@ function getFieldValues(job: JobResponseDto): FieldValues {
 
 interface Props {
   job: JobResponseDto;
+  scopeId: string;
+  description: string | null;
+  isRevision: boolean;
   onSuccess: () => void;
 }
 
-export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
+export default function UpdateWetStampInfoForm({
+  job,
+  onSuccess,
+  scopeId,
+  description,
+  isRevision,
+}: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(job),
   });
 
   const { mutateAsync: patchJobMutateAsync } = usePatchJobMutation(job.id);
+  const usePostOrderedServiceMutationResult = usePostOrderedServiceMutation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -92,73 +107,54 @@ export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
   }, [job, form]);
 
   async function onSubmit(values: FieldValues) {
-    await patchJobMutateAsync({
-      additionalInformationFromClient: job.additionalInformationFromClient,
-      clientUserId: job.clientInfo.clientUserId,
-      deliverablesEmails: job.clientInfo.deliverablesEmails,
-      systemSize: job.systemSize,
-      numberOfWetStamp: Number(values.numberOfWetStamp),
-      mailingAddressForWetStamp: values.mailingAddress,
-      isExpedited: job.isExpedited,
-      dueDate: job.dueDate,
-      inReview: job.inReview,
-      priority: job.priority,
-      structuralUpgradeNote: job.structuralUpgradeNote,
-      loadCalcOrigin: job.loadCalcOrigin,
-      mountingType: job.mountingType,
-    })
-      .then(() => {
-        onSuccess();
-        toast({
-          title: "Success",
-        });
-        queryClient.invalidateQueries({
-          queryKey: getJobQueryKey(job.id),
-        });
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        switch (error.response?.status) {
-          case 400:
-            if (error.response?.data.errorCode.includes("40004")) {
-              form.setError(
-                "numberOfWetStamp",
-                {
-                  message: `Number of Wet Stamp should be less than 256`,
-                },
-                { shouldFocus: true }
-              );
-              return;
-            }
+    try {
+      await patchJobMutateAsync({
+        additionalInformationFromClient: job.additionalInformationFromClient,
+        clientUserId: job.clientInfo.clientUserId,
+        deliverablesEmails: job.clientInfo.deliverablesEmails,
+        systemSize: job.systemSize,
+        numberOfWetStamp: Number(values.numberOfWetStamp),
+        mailingAddressForWetStamp: values.mailingAddress,
+        isExpedited: job.isExpedited,
+        dueDate: job.dueDate,
+        inReview: job.inReview,
+        priority: job.priority,
+        structuralUpgradeNote: job.structuralUpgradeNote,
+        loadCalcOrigin: job.loadCalcOrigin,
+        mountingType: job.mountingType,
+      });
 
-          // if (error.response?.data.errorCode.includes("40006")) {
-          //   toast({
-          //     title: "Completed jobs cannot be modified",
-          //     variant: "destructive",
-          //   });
-          //   return;
-          // }
+      await usePostOrderedServiceMutationResult.mutateAsync({
+        jobId: job.id,
+        serviceId: scopeId,
+        description: transformStringIntoNullableString.parse(description),
+        isRevision: isRevision,
+      });
 
-          // if (error.response?.data.errorCode.includes("40002")) {
-          //   toast({
-          //     title: "Job cannot be updated after invoice is issued",
-          //     variant: "destructive",
-          //   });
-          //   return;
-          // }
-        }
+      queryClient.invalidateQueries({ queryKey: getJobQueryKey(job.id) });
+      queryClient.invalidateQueries({
+        queryKey: getProjectQueryKey(job.projectId),
+      });
 
+      toast({ title: "Success" });
+      onSuccess();
+    } catch (error) {
+      if (error instanceof AxiosError && error.response) {
         if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
+          error.response.status === 400 &&
+          error.response.data.errorCode.includes("40004")
         ) {
+          form.setError("numberOfWetStamp", {
+            message: "Number of Wet Stamp should be less than 256",
+          });
+        } else {
           toast({
             title: error.response.data.message,
             variant: "destructive",
           });
-          return;
         }
-      });
+      }
+    }
   }
 
   return (
@@ -172,6 +168,7 @@ export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
               <FormLabel required>Number of Wet Stamp</FormLabel>
               <FormControl>
                 <Input
+                  required
                   {...field}
                   onChange={(event) => {
                     const { value } = event.target;
@@ -260,20 +257,12 @@ export default function UpdateWetStampInfoForm({ job, onSuccess }: Props) {
           )}
         />
         <RowItemsContainer>
-          <Button
-            variant={"outline"}
-            onClick={() => {
-              onSuccess();
-            }}
-          >
-            Cancel
-          </Button>
           <LoadingButton
             type="submit"
             isLoading={form.formState.isSubmitting}
             disabled={!form.formState.isDirty}
           >
-            Save
+            Submit
           </LoadingButton>
         </RowItemsContainer>
       </form>

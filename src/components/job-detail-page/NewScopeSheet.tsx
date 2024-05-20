@@ -1,8 +1,7 @@
 "use client";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import NewScopeForm from "./NewScopeForm";
-import UpdateWetStampInfoForm from "./UpdateWetStampInfoForm";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -19,13 +18,6 @@ interface Props {
 
 export default function NewScopeSheet({ job }: Props) {
   const [open, setOpen] = useState(false);
-  const [isSecondStep, setIsSecondStep] = useState(false);
-
-  useEffect(() => {
-    if (!open && isSecondStep) {
-      setIsSecondStep(false);
-    }
-  }, [isSecondStep, open]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -41,28 +33,17 @@ export default function NewScopeSheet({ job }: Props) {
       </SheetTrigger>
       <SheetContent className="sm:max-w-[1400px] w-full">
         <SheetHeader className="mb-6">
-          <SheetTitle>
-            {!isSecondStep ? "New Scope" : "Update Information"}
-          </SheetTitle>
+          <SheetTitle>New Scope</SheetTitle>
         </SheetHeader>
-        {!isSecondStep ? (
-          <NewScopeForm
-            job={job}
-            onSuccessWithWetStamp={() => {
-              setIsSecondStep(true);
-            }}
-            onSuccessWithoutWetStamp={() => {
-              setOpen(false);
-            }}
-          />
-        ) : (
-          <UpdateWetStampInfoForm
-            job={job}
-            onSuccess={() => {
-              setOpen(false);
-            }}
-          />
-        )}
+        <NewScopeForm
+          job={job}
+          onSuccessWithoutWetStamp={() => {
+            setOpen(false);
+          }}
+          onSuccess={() => {
+            setOpen(false);
+          }}
+        />
       </SheetContent>
     </Sheet>
   );

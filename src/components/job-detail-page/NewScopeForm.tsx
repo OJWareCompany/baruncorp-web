@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import UpdateWetStampInfoForm from "./UpdateWetStampInfoForm";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -42,15 +43,11 @@ const formSchema = z
   })
   .superRefine((values, ctx) => {
     const { scopeId, description } = values;
-    if (scopeId !== OTHER_SERVICE_ID) {
-      return;
-    }
-
-    if (description.length === 0) {
+    if (scopeId === OTHER_SERVICE_ID && description.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Description is required",
-        path: [`description`],
+        path: ["description"],
       });
     }
   });
@@ -59,14 +56,14 @@ type FieldValues = z.infer<typeof formSchema>;
 
 interface Props {
   job: JobResponseDto;
-  onSuccessWithWetStamp: () => void;
   onSuccessWithoutWetStamp: () => void;
+  onSuccess: () => void;
 }
 
 export default function NewScopeForm({
   job,
-  onSuccessWithWetStamp,
   onSuccessWithoutWetStamp,
+  onSuccess,
 }: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -96,48 +93,33 @@ export default function NewScopeForm({
 
   async function onSubmit(values: FieldValues) {
     const { scopeId } = values;
-    await usePostOrderedServiceMutationResult
-      .mutateAsync({
+    try {
+      await usePostOrderedServiceMutationResult.mutateAsync({
         jobId: job.id,
         serviceId: scopeId,
         description: transformStringIntoNullableString.parse(
           values.description
         ),
         isRevision: values.isRevision,
-      })
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: getJobQueryKey(job.id) });
-        queryClient.invalidateQueries({
-          queryKey: getProjectQueryKey(job.projectId),
-        });
-        toast({
-          title: "Success",
-        });
-
-        if (
-          scopeId === STRUCTURAL_WET_STAMP_SERVICE_ID ||
-          scopeId === ELECTRICAL_WET_STAMP_SERVICE_ID
-        ) {
-          onSuccessWithWetStamp();
-          return;
-        }
-
-        onSuccessWithoutWetStamp();
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
-        ) {
-          toast({
-            title: error.response.data.message,
-            variant: "destructive",
-          });
-          return;
-        }
       });
+
+      queryClient.invalidateQueries({ queryKey: getJobQueryKey(job.id) });
+      queryClient.invalidateQueries({
+        queryKey: getProjectQueryKey(job.projectId),
+      });
+
+      toast({ title: "Success" });
+      onSuccessWithoutWetStamp();
+    } catch (error) {
+      if (error instanceof AxiosError && error.response) {
+        toast({
+          title: error.response.data.message,
+          variant: "destructive",
+        });
+      }
+    }
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -153,9 +135,6 @@ export default function NewScopeForm({
                   onServiceIdChange={field.onChange}
                   ref={field.ref}
                   modal
-                  // filteringIds={job.orderedServices.map(
-                  //   (value) => value.serviceId
-                  // )}
                 />
               </FormControl>
               <FormMessage />
@@ -163,61 +142,71 @@ export default function NewScopeForm({
           )}
         />
         {watchScopeId === OTHER_SERVICE_ID && (
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>Description</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        {watchScopeId === OTHER_SERVICE_ID && (
-          <FormField
-            control={form.control}
-            name="isRevision"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel required>Is Revision</FormLabel>
-                <Select
-                  required
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    if (value === "Is Revision") {
-                      form.setValue("isRevision", true);
-                    } else if (value === "New") {
-                      form.setValue("isRevision", false);
-                    }
-                  }}
-                >
+          <>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Description</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Status for Other Scope" />
-                    </SelectTrigger>
+                    <Input {...field} />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Is Revision">Revision</SelectItem>
-                    <SelectItem value="New">New</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isRevision"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel required>Is Revision</FormLabel>
+                  <Select
+                    required
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("isRevision", value === "Is Revision");
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Status for Other Scope" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Is Revision">Revision</SelectItem>
+                      <SelectItem value="New">New</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
         )}
-        <LoadingButton
-          type="submit"
-          isLoading={form.formState.isSubmitting}
-          className="w-full"
-        >
-          Submit
-        </LoadingButton>
+        {watchScopeId !== STRUCTURAL_WET_STAMP_SERVICE_ID &&
+          watchScopeId !== ELECTRICAL_WET_STAMP_SERVICE_ID && (
+            <LoadingButton
+              type="submit"
+              isLoading={form.formState.isSubmitting}
+              disabled={!form.formState.isDirty}
+              className="w-full"
+            >
+              Submit
+            </LoadingButton>
+          )}
       </form>
+      {(watchScopeId === STRUCTURAL_WET_STAMP_SERVICE_ID ||
+        watchScopeId === ELECTRICAL_WET_STAMP_SERVICE_ID) && (
+        <UpdateWetStampInfoForm
+          job={job}
+          onSuccess={onSuccess}
+          scopeId={form.getValues("scopeId")}
+          description={form.getValues("description")}
+          isRevision={form.getValues("isRevision")}
+        />
+      )}
     </Form>
   );
 }
