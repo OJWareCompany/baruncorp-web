@@ -366,6 +366,8 @@ export interface CreateJobRequestDto {
   numberOfWetStamp: number | null;
   /** @default false */
   isExpedited: boolean;
+  /** @default false */
+  isManualDueDate?: boolean;
   /**
    * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
    * @format date-time
@@ -393,6 +395,8 @@ export interface UpdateJobRequestDto {
   numberOfWetStamp: number | null;
   /** @default false */
   isExpedited: boolean;
+  /** @default false */
+  isManualDueDate?: boolean;
   /**
    * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
    * @format date-time
@@ -747,8 +751,8 @@ export interface CreateJobNoteRequestDto {
   emailBody?: string;
   /** @default "JobNote" */
   type: "JobNote" | "RFI";
-  /** @default ["yunwoo@oj.vision","antifragilista@oj.vision"] */
-  receiverEmails?: string[];
+  /** @default "yunwoo@oj.vision" */
+  receiverEmails?: string;
   files: File[];
 }
 
