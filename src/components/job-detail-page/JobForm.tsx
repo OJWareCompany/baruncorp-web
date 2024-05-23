@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { Value } from "@udecode/plate-common";
 import RowItemsContainer from "../RowItemsContainer";
+import AllDateTimePicker from "../date-time-picker/AllDateTimePicker";
 import {
   Form,
   FormControl,
@@ -44,7 +45,6 @@ import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { getEditorValue, isEditorValueEmpty } from "@/lib/plate-utils";
-import DateTimePicker from "@/components/date-time-picker/DateTimePicker";
 import {
   Select,
   SelectContent,
@@ -654,7 +654,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                 <FormItem>
                   <FormLabel>Date Due</FormLabel>
                   <FormControl>
-                    <DateTimePicker
+                    <AllDateTimePicker
                       value={field.value}
                       onChange={(...args) => {
                         const newValue = args[0];
