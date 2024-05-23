@@ -366,6 +366,8 @@ export interface CreateJobRequestDto {
   numberOfWetStamp: number | null;
   /** @default false */
   isExpedited: boolean;
+  /** @default false */
+  isManualDueDate?: boolean;
   /**
    * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
    * @format date-time
@@ -393,12 +395,8 @@ export interface UpdateJobRequestDto {
   numberOfWetStamp: number | null;
   /** @default false */
   isExpedited: boolean;
-  /**
-   * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
-   * @format date-time
-   * @default null
-   */
-  dueDate: string | null;
+  /** @default false */
+  isManualDueDate?: boolean;
   /** @example "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   inReview: boolean;
@@ -584,6 +582,10 @@ export interface JobResponseDto {
   jobFolderId: string | null;
   /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
   shareLink: string | null;
+  /** @example false */
+  parentlessFolder?: boolean;
+  /** @example "002" */
+  sharedDriveVersion?: string | null;
 }
 
 export interface JobPaginatedResponseDto {
@@ -603,6 +605,14 @@ export interface JobToInvoiceResponseDto {
   subtotal: number;
   discount: number;
   total: number;
+}
+
+export interface UpdateJobDueDateRequestDto {
+  /**
+   * @format date-time
+   * @default "2024-05-23T02:10:09.044Z"
+   */
+  dueDate: string;
 }
 
 export interface CommercialTier {
@@ -743,7 +753,7 @@ export interface CreateJobNoteRequestDto {
   emailBody?: string;
   /** @default "JobNote" */
   type: "JobNote" | "RFI";
-  /** @default ["yunwoo@oj.vision","antifragilista@oj.vision"] */
+  /** @default ["yunwoo@oj.vision"] */
   receiverEmails?: string[];
   files: File[];
 }
@@ -1809,6 +1819,10 @@ export interface ProjectResponseDto {
   projectFolderId: string | null;
   /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
   shareLink: string | null;
+  /** @example false */
+  parentlessFolder?: boolean;
+  /** @example "002" */
+  sharedDriveVersion: string | null;
 }
 
 export interface ProjectsCountResponseDto {
@@ -5159,6 +5173,25 @@ export class Api<
       this.request<void, any>({
         path: `/jobs/${jobId}/send-deliverables`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateJobDueDateHttpControllerUpdateJob
+     * @request PATCH:/jobs/{jobId}/due-date
+     */
+    updateJobDueDateHttpControllerUpdateJob: (
+      jobId: string,
+      data: UpdateJobDueDateRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/jobs/${jobId}/due-date`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
