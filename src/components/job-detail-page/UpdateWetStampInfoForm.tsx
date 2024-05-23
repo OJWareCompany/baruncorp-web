@@ -116,7 +116,6 @@ export default function UpdateWetStampInfoForm({
         numberOfWetStamp: Number(values.numberOfWetStamp),
         mailingAddressForWetStamp: values.mailingAddress,
         isExpedited: job.isExpedited,
-        dueDate: job.dueDate,
         inReview: job.inReview,
         priority: job.priority,
         structuralUpgradeNote: job.structuralUpgradeNote,
