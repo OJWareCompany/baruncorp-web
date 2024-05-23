@@ -5,9 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
-import { AxiosError } from "axios";
 import { Value } from "@udecode/plate-common";
 import RowItemsContainer from "../RowItemsContainer";
+import AllDateTimePicker from "../date-time-picker/AllDateTimePicker";
 import {
   Form,
   FormControl,
@@ -45,7 +45,6 @@ import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
 import BasicEditor from "@/components/editor/BasicEditor";
 import { getEditorValue, isEditorValueEmpty } from "@/lib/plate-utils";
-import DateTimePicker from "@/components/date-time-picker/DateTimePicker";
 import {
   Select,
   SelectContent,
@@ -56,6 +55,8 @@ import {
 } from "@/components/ui/select";
 import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import usePatchJobDueDateMutation from "@/mutations/usePatchJobDueDateMution";
+import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
 interface Props {
   project: ProjectResponseDto;
@@ -114,7 +115,7 @@ export default function JobForm({ project, job, pageType }: Props) {
           loadCalcOrigin: LoadCalcOriginEnum,
           additionalInformation: z.custom<Value>(),
           mountingType: MountingTypeEnum,
-          dueDate: z.date().nullable(),
+          dueDate: z.date(),
           isExpedited: z.boolean(),
           inReview: z.boolean(),
           priority: JobPriorityEnum,
@@ -198,7 +199,7 @@ export default function JobForm({ project, job, pageType }: Props) {
           ? INITIAL_EDITOR_VALUE
           : getEditorValue(job.additionalInformationFromClient),
       mountingType: job.mountingType as z.infer<typeof MountingTypeEnum>,
-      dueDate: job.dueDate == null ? null : new Date(job.dueDate),
+      dueDate: job.dueDate ? new Date(job.dueDate) : new Date(),
       isExpedited: job.isExpedited,
       inReview: job.inReview,
       priority: job.priority,
@@ -231,6 +232,7 @@ export default function JobForm({ project, job, pageType }: Props) {
   const queryClient = useQueryClient();
   const { data: user } = useUserQuery(watchUserId);
   const { mutateAsync: patchJobMutateAsync } = usePatchJobMutation(job.id);
+  const usePatchJobDueDateMutateResult = usePatchJobDueDateMutation(job.id);
 
   useEffect(() => {
     if (job) {
@@ -262,99 +264,100 @@ export default function JobForm({ project, job, pageType }: Props) {
   });
 
   async function onSubmit(values: FieldValues) {
-    await patchJobMutateAsync({
-      additionalInformationFromClient: isEditorValueEmpty(
-        values.additionalInformation
-      )
-        ? null
-        : JSON.stringify(values.additionalInformation),
-      clientUserId: values.clientUser.id,
-      deliverablesEmails:
-        values.clientUser.emailAddressesToReceiveDeliverables.map(
-          ({ email }) => email
-        ),
-      systemSize:
-        project.propertyType === "Commercial"
-          ? Number(values.systemSize)
-          : null,
-      numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
-      mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
-      isExpedited: values.isExpedited,
-      inReview: values.inReview,
-      priority: values.priority,
-      dueDate: values.dueDate == null ? null : values.dueDate.toISOString(),
-      structuralUpgradeNote: isEditorValueEmpty(values.structuralUpgradeNotes)
-        ? null
-        : JSON.stringify(values.structuralUpgradeNotes),
-      loadCalcOrigin: values.loadCalcOrigin,
-      mountingType: values.mountingType,
-    })
-      .then(() => {
-        toast({ title: "Success" });
-        queryClient.invalidateQueries({
-          queryKey: getJobQueryKey(job.id),
-        });
-        queryClient.invalidateQueries({
-          queryKey: getProjectQueryKey(project.projectId),
-        });
-        queryClient.invalidateQueries({
-          queryKey: getJobHistoriesQueryKey({ jobId: job.id }),
-        });
-      })
-      .catch((error: AxiosError<ErrorResponseData>) => {
-        switch (error.response?.status) {
-          case 400:
-            if (error.response?.data.errorCode.includes("40007")) {
-              form.setError(
-                "systemSize",
-                {
-                  message: `System Size should be less than 99999999`,
-                },
-                { shouldFocus: true }
-              );
-              return;
-            }
-
-            if (error.response?.data.errorCode.includes("40004")) {
-              form.setError(
-                "numberOfWetStamp",
-                {
-                  message: `Number of Wet Stamp should be less than 256`,
-                },
-                { shouldFocus: true }
-              );
-              return;
-            }
-
-            if (error.response?.data.errorCode.includes("40006")) {
-              toast({
-                title: "Completed jobs cannot be modified",
-                variant: "destructive",
-              });
-              return;
-            }
-
-            if (error.response?.data.errorCode.includes("40002")) {
-              toast({
-                title: "Job cannot be updated after invoice is issued",
-                variant: "destructive",
-              });
-              return;
-            }
-        }
-
-        if (
-          error.response &&
-          error.response.data.errorCode.filter((value) => value != null)
-            .length !== 0
-        ) {
-          toast({
-            title: error.response.data.message,
-            variant: "destructive",
-          });
-          return;
-        }
+    try {
+      await patchJobMutateAsync({
+        additionalInformationFromClient: isEditorValueEmpty(
+          values.additionalInformation
+        )
+          ? null
+          : JSON.stringify(values.additionalInformation),
+        clientUserId: values.clientUser.id,
+        deliverablesEmails:
+          values.clientUser.emailAddressesToReceiveDeliverables.map(
+            ({ email }) => email
+          ),
+        systemSize:
+          project.propertyType === "Commercial"
+            ? Number(values.systemSize)
+            : null,
+        numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
+        mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
+        isExpedited: values.isExpedited,
+        inReview: values.inReview,
+        priority: values.priority,
+        structuralUpgradeNote: isEditorValueEmpty(values.structuralUpgradeNotes)
+          ? null
+          : JSON.stringify(values.structuralUpgradeNotes),
+        loadCalcOrigin: values.loadCalcOrigin,
+        mountingType: values.mountingType,
       });
+      await usePatchJobDueDateMutateResult.mutateAsync({
+        dueDate: getISOStringForStartOfDayInUTC(values.dueDate),
+      });
+      toast({ title: "Success" });
+      queryClient.invalidateQueries({
+        queryKey: getJobQueryKey(job.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: getProjectQueryKey(project.projectId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: getJobHistoriesQueryKey({ jobId: job.id }),
+      });
+    } catch (error: any) {
+      switch (error.response?.status) {
+        case 400:
+          if (error.response?.data.errorCode.includes("40007")) {
+            form.setError(
+              "systemSize",
+              {
+                message: `System Size should be less than 99999999`,
+              },
+              { shouldFocus: true }
+            );
+            return;
+          }
+
+          if (error.response?.data.errorCode.includes("40004")) {
+            form.setError(
+              "numberOfWetStamp",
+              {
+                message: `Number of Wet Stamp should be less than 256`,
+              },
+              { shouldFocus: true }
+            );
+            return;
+          }
+
+          if (error.response?.data.errorCode.includes("40006")) {
+            toast({
+              title: "Completed jobs cannot be modified",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          if (error.response?.data.errorCode.includes("40002")) {
+            toast({
+              title: "Job cannot be updated after invoice is issued",
+              variant: "destructive",
+            });
+            return;
+          }
+      }
+
+      if (
+        error.response &&
+        error.response.data.errorCode.filter((value: any) => value != null)
+          .length !== 0
+      ) {
+        toast({
+          title: error.response.data.message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
   }
 
   return (
@@ -651,7 +654,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                 <FormItem>
                   <FormLabel>Date Due</FormLabel>
                   <FormControl>
-                    <DateTimePicker
+                    <AllDateTimePicker
                       value={field.value}
                       onChange={(...args) => {
                         const newValue = args[0];
