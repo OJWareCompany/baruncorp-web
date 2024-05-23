@@ -397,12 +397,6 @@ export interface UpdateJobRequestDto {
   isExpedited: boolean;
   /** @default false */
   isManualDueDate?: boolean;
-  /**
-   * dueDate를 입력하지 않으면 태스크에 설정된 duration으로 자동 계산된다.
-   * @format date-time
-   * @default null
-   */
-  dueDate: string | null;
   /** @example "Ground Mount" */
   mountingType?: "Roof Mount" | "Ground Mount" | null;
   inReview: boolean;
@@ -611,6 +605,14 @@ export interface JobToInvoiceResponseDto {
   subtotal: number;
   discount: number;
   total: number;
+}
+
+export interface UpdateJobDueDateRequestDto {
+  /**
+   * @format date-time
+   * @default "2024-05-23T02:10:09.044Z"
+   */
+  dueDate: string;
 }
 
 export interface CommercialTier {
@@ -5171,6 +5173,25 @@ export class Api<
       this.request<void, any>({
         path: `/jobs/${jobId}/send-deliverables`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateJobDueDateHttpControllerUpdateJob
+     * @request PATCH:/jobs/{jobId}/due-date
+     */
+    updateJobDueDateHttpControllerUpdateJob: (
+      jobId: string,
+      data: UpdateJobDueDateRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/jobs/${jobId}/due-date`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
