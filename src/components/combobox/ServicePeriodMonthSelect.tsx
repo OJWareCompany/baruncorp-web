@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { useState } from "react";
-import { AxiosError } from "axios";
 import { toast } from "../ui/use-toast";
 import LoadingButton from "../LoadingButton";
 import useClientsToInvoiceQuery from "@/queries/useClientsToInvoiceQuery";
@@ -48,21 +47,59 @@ const ServicePeriodMonthSelect = ({
 
   const [selectedMonth, setSelectedMonth] =
     useState<string>(defaultPeriodMonth);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [alertDialogState, setAlertDialogState] = useState<{
     open: boolean;
     selectedMonth: string;
   }>({ open: false, selectedMonth: defaultPeriodMonth });
 
+  const handleValueChange = (newValue: string) => {
+    if (!isSubmitting) {
+      setAlertDialogState({
+        open: true,
+        selectedMonth: newValue,
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setAlertDialogState({ open: false, selectedMonth: selectedMonth });
+  };
+
+  const handleContinue = async () => {
+    setIsSubmitting(true);
+    try {
+      await patchClientInvoiceServiceMonthMutationAsync({
+        serviceMonth: format(
+          new Date(alertDialogState.selectedMonth),
+          "yyyy-MM"
+        ),
+      });
+      toast({ title: "Success" });
+      setSelectedMonth(alertDialogState.selectedMonth);
+      setAlertDialogState({ ...alertDialogState, open: false });
+    } catch (error: any) {
+      if (
+        error.response &&
+        error.response.data.errorCode.filter((value: any) => value != null)
+          .length !== 0
+      ) {
+        toast({
+          title: error.response.data.message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <Select
         value={selectedMonth}
-        onValueChange={(newValue) => {
-          setAlertDialogState({
-            open: true,
-            selectedMonth: newValue,
-          });
-        }}
+        onValueChange={handleValueChange}
+        disabled={isSubmitting}
       >
         <SelectTrigger>
           <SelectValue placeholder={defaultPeriodMonth} />
@@ -84,11 +121,7 @@ const ServicePeriodMonthSelect = ({
         open={alertDialogState.open}
         onOpenChange={(newOpen) => {
           if (!newOpen) {
-            setAlertDialogState((prevState) => ({
-              ...prevState,
-              open: false,
-              selectedMonth: defaultPeriodMonth,
-            }));
+            setAlertDialogState({ open: false, selectedMonth: selectedMonth });
           }
         }}
       >
@@ -106,45 +139,13 @@ const ServicePeriodMonthSelect = ({
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setAlertDialogState({ ...alertDialogState, open: false });
-                setSelectedMonth(defaultPeriodMonth);
-              }}
-            >
+            <AlertDialogCancel onClick={handleCancel} disabled={isSubmitting}>
               Cancel
             </AlertDialogCancel>
             <LoadingButton
-              onClick={() => {
-                patchClientInvoiceServiceMonthMutationAsync({
-                  serviceMonth: format(
-                    new Date(alertDialogState.selectedMonth.slice(0, 7)),
-                    "yyyy-MM"
-                  ),
-                })
-                  .then(() => {
-                    toast({ title: "Success" });
-                    setSelectedMonth(alertDialogState.selectedMonth);
-                    setAlertDialogState({
-                      ...alertDialogState,
-                      open: false,
-                    });
-                  })
-                  .catch((error: AxiosError<ErrorResponseData>) => {
-                    if (
-                      error.response &&
-                      error.response.data.errorCode.filter(
-                        (value) => value != null
-                      ).length !== 0
-                    ) {
-                      toast({
-                        title: error.response.data.message,
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                  });
-              }}
+              onClick={handleContinue}
+              disabled={isSubmitting}
+              isLoading={isSubmitting}
             >
               Continue
             </LoadingButton>
