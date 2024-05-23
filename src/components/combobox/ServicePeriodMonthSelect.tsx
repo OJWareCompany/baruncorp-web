@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import usePatchClientInvoiceServiceMonthMutation from "@/mutations/usePatchClientInvoiceServiceMonthMutation";
+import useClientInvoiceQuery from "@/queries/useClientInvoiceQuery";
 
 interface Props {
   organizationId: string;
@@ -37,6 +38,8 @@ const ServicePeriodMonthSelect = ({
 
   const { mutateAsync: patchClientInvoiceServiceMonthMutationAsync } =
     usePatchClientInvoiceServiceMonthMutation(clientInvoiceId);
+
+  const { data: clientInvoice } = useClientInvoiceQuery(clientInvoiceId);
 
   const organization = organizations?.clientToInvoices.find(
     (value) => value.id === organizationId
@@ -88,7 +91,16 @@ const ServicePeriodMonthSelect = ({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {clientInvoice?.status === "Issued" ? (
+                <>
+                  This invoice was already issued. <br />
+                  Are you sure?
+                </>
+              ) : (
+                "Are you sure?"
+              )}
+            </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
