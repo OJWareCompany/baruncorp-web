@@ -46,6 +46,8 @@ const ServicePeriodMonthSelect = ({
   );
   const defaultPeriodMonth = format(new Date(servicePeriodMonth), "MMM yyyy");
 
+  const [selectedMonth, setSelectedMonth] =
+    useState<string>(defaultPeriodMonth);
   const [alertDialogState, setAlertDialogState] = useState<{
     open: boolean;
     selectedMonth: string;
@@ -54,6 +56,7 @@ const ServicePeriodMonthSelect = ({
   return (
     <>
       <Select
+        value={selectedMonth}
         onValueChange={(newValue) => {
           setAlertDialogState({
             open: true,
@@ -106,6 +109,7 @@ const ServicePeriodMonthSelect = ({
             <AlertDialogCancel
               onClick={() => {
                 setAlertDialogState({ ...alertDialogState, open: false });
+                setSelectedMonth(defaultPeriodMonth);
               }}
             >
               Cancel
@@ -120,10 +124,10 @@ const ServicePeriodMonthSelect = ({
                 })
                   .then(() => {
                     toast({ title: "Success" });
+                    setSelectedMonth(alertDialogState.selectedMonth);
                     setAlertDialogState({
                       ...alertDialogState,
                       open: false,
-                      selectedMonth: defaultPeriodMonth,
                     });
                   })
                   .catch((error: AxiosError<ErrorResponseData>) => {
