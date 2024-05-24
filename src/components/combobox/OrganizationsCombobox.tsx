@@ -1,7 +1,18 @@
 "use client";
 import { forwardRef, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { AxiosError } from "axios";
 import { Button } from "../ui/button";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import LoadingButton from "../LoadingButton";
+import { toast } from "../ui/use-toast";
 import {
   Popover,
   PopoverContent,
@@ -17,28 +28,45 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
+import usePostJoinOrganizationMutation from "@/mutations/usePostJoinOrganizationMutation";
 
 interface Props {
   organizationId: string;
   onOrganizationIdChange: (newOrganizationId: string) => void;
   disabled?: boolean;
   modal?: boolean;
+  dateOfJoining?: Date;
+  userId: string;
 }
 
 const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
   (
-    { organizationId, onOrganizationIdChange, disabled = false, modal = false },
+    {
+      organizationId,
+      onOrganizationIdChange,
+      disabled = false,
+      modal = false,
+      dateOfJoining,
+      userId,
+    },
     ref
   ) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
+    const [alertDialogState, setAlertDialogState] = useState<
+      { open: false } | { open: true; selectedOrganizationId: string }
+    >({ open: false });
 
     const { data: organizations, isLoading: isOrganizationsQueryLoading } =
       useOrganizationsQuery({
         limit: Number.MAX_SAFE_INTEGER,
       });
 
-    const placeholderText = "Select an organization";
+    const {
+      mutateAsync: PostJoinOrganizationAsync,
+      isPending: isPostJoinOrganizationMutationPending,
+    } = usePostJoinOrganizationMutation(userId, organizationId);
 
+    const placeholderText = "Select an organization";
     if (isOrganizationsQueryLoading || organizations == null) {
       return (
         <Button
@@ -92,8 +120,10 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
                         key={organization.id}
                         value={organization.name}
                         onSelect={() => {
-                          onOrganizationIdChange(organization.id);
-                          setPopoverOpen(false);
+                          setAlertDialogState({
+                            open: true,
+                            selectedOrganizationId: organization.id,
+                          });
                         }}
                       >
                         <Check
@@ -113,6 +143,57 @@ const OrganizationsCombobox = forwardRef<HTMLButtonElement, Props>(
             )}
           </Command>
         </PopoverContent>
+        <AlertDialog
+          open={alertDialogState.open}
+          onOpenChange={(newOpen) => {
+            if (!newOpen) {
+              setAlertDialogState({ open: false });
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <LoadingButton
+                isLoading={isPostJoinOrganizationMutationPending}
+                onClick={() => {
+                  if (!alertDialogState.open) {
+                    return;
+                  }
+                  PostJoinOrganizationAsync({
+                    dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
+                  })
+                    .then(() => {
+                      onOrganizationIdChange(
+                        alertDialogState.selectedOrganizationId
+                      );
+                      toast({ title: "Success" });
+                      setAlertDialogState({ open: false });
+                    })
+                    .catch((error: AxiosError<ErrorResponseData>) => {
+                      if (
+                        error.response &&
+                        error.response.data.errorCode.filter(
+                          (value) => value != null
+                        ).length !== 0
+                      ) {
+                        toast({
+                          title: error.response.data.message,
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                    });
+                }}
+              >
+                Continue
+              </LoadingButton>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Popover>
     );
   }

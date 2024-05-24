@@ -57,7 +57,7 @@ interface Props {
 
 export default function UserForm({ pageType, user, organization }: Props) {
   const { data: session, status } = useSession();
-  const { isBarunCorpMember: isSignedInUserBarunCorpMember } =
+  const { isBarunCorpMember: isSignedInUserBarunCorpMember, isAdmin } =
     useProfileContext();
 
   const isTargetUserOrganizationBarunCorp = useMemo(
@@ -238,7 +238,9 @@ export default function UserForm({ pageType, user, organization }: Props) {
                     organizationId={field.value}
                     onOrganizationIdChange={field.onChange}
                     ref={field.ref}
-                    disabled
+                    userId={user.id}
+                    dateOfJoining={form.getValues("dateOfJoining")}
+                    disabled={!isAdmin}
                   />
                 </FormControl>
                 <Button
@@ -422,7 +424,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
           type="submit"
           className="w-full"
           isLoading={form.formState.isSubmitting}
-          disabled={!form.formState.isDirty}
+          disabled={!form.formState.isDirty || !form.formState.isValid}
         >
           Save
         </LoadingButton>
