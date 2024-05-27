@@ -67,10 +67,13 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
     } = usePostJoinOrganizationMutation(userId, organizationId);
 
     useEffect(() => {
-      PostJoinOrganizationAsync({
-        dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
-      });
-    }, [PostJoinOrganizationAsync, dateOfJoining, organizationId]); // 변경된 organizationId가 받아오면서 변경될 때마다 실행
+      return () => {
+        PostJoinOrganizationAsync({
+          dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
+        });
+        console.log("## USE EFFECT ##");
+      };
+    }, [organizationId]); // 변경된 organizationId가 받아오면서 변경될 때마다 실행
 
     const placeholderText = "Select an organization";
     if (isOrganizationsQueryLoading || organizations == null) {
