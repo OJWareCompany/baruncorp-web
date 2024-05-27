@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
 import { Button } from "../ui/button";
@@ -65,6 +65,12 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
       mutateAsync: PostJoinOrganizationAsync,
       isPending: isPostJoinOrganizationMutationPending,
     } = usePostJoinOrganizationMutation(userId, organizationId);
+
+    useEffect(() => {
+      PostJoinOrganizationAsync({
+        dateOfJoining: dateOfJoining?.toISOString().slice(0, 10),
+      });
+    }, [PostJoinOrganizationAsync, dateOfJoining, organizationId]);
 
     const placeholderText = "Select an organization";
     if (isOrganizationsQueryLoading || organizations == null) {
@@ -159,34 +165,30 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <LoadingButton
                 isLoading={isPostJoinOrganizationMutationPending}
-                onClick={() => {
+                onClick={async () => {
                   if (!alertDialogState.open) {
                     return;
                   }
-                  PostJoinOrganizationAsync({
-                    dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
-                  })
-                    .then(() => {
-                      onOrganizationIdChange(
-                        alertDialogState.selectedOrganizationId
-                      );
-                      toast({ title: "Success" });
-                      setAlertDialogState({ open: false });
-                    })
-                    .catch((error: AxiosError<ErrorResponseData>) => {
-                      if (
-                        error.response &&
-                        error.response.data.errorCode.filter(
-                          (value) => value != null
-                        ).length !== 0
-                      ) {
-                        toast({
-                          title: error.response.data.message,
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                    });
+                  try {
+                    onOrganizationIdChange(
+                      alertDialogState.selectedOrganizationId
+                    );
+                    setAlertDialogState({ open: false });
+                    toast({ title: "Success" });
+                  } catch (error: any) {
+                    const axiosError = error as AxiosError<ErrorResponseData>;
+                    if (
+                      axiosError.response &&
+                      axiosError.response.data.errorCode.filter(
+                        (value) => value != null
+                      ).length !== 0
+                    ) {
+                      toast({
+                        title: axiosError.response.data.message,
+                        variant: "destructive",
+                      });
+                    }
+                  }
                 }}
               >
                 Continue
