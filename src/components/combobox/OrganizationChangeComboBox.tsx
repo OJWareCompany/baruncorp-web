@@ -68,9 +68,9 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
 
     useEffect(() => {
       PostJoinOrganizationAsync({
-        dateOfJoining: dateOfJoining?.toISOString().slice(0, 10),
+        dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
       });
-    }, [PostJoinOrganizationAsync, dateOfJoining, organizationId]);
+    }, [PostJoinOrganizationAsync, dateOfJoining, organizationId]); // 변경된 organizationId가 받아오면서 변경될 때마다 실행
 
     const placeholderText = "Select an organization";
     if (isOrganizationsQueryLoading || organizations == null) {
@@ -171,7 +171,7 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
                   }
                   try {
                     onOrganizationIdChange(
-                      alertDialogState.selectedOrganizationId
+                      alertDialogState.selectedOrganizationId // state로 변경된 값이 바로 적용 안됨. 이전 값이 들어감. // userForm에 변경된 organizationId를 보내는 작업
                     );
                     setAlertDialogState({ open: false });
                     toast({ title: "Success" });
