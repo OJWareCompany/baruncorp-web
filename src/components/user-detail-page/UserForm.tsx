@@ -8,6 +8,7 @@ import { ExternalLink, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import OrganizationChangeCombobox from "../combobox/OrganizationChangeComboBox";
 import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import {
   Form,
@@ -27,7 +28,6 @@ import usePatchProfileByUserIdMutation from "@/mutations/usePatchProfileByUserId
 import { Checkbox } from "@/components/ui/checkbox";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import { getProfileQueryKey } from "@/queries/useProfileQuery";
-import OrganizationsCombobox from "@/components/combobox/OrganizationsCombobox";
 import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
 import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
@@ -234,7 +234,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
               <FormLabel required>Organization</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
-                  <OrganizationsCombobox
+                  <OrganizationChangeCombobox
                     organizationId={field.value}
                     onOrganizationIdChange={field.onChange}
                     ref={field.ref}
