@@ -48,6 +48,10 @@ export function formatInEST(date: Date | string) {
   return formatInTimeZone(date, "America/New_York", "MM-dd-yyyy, p");
 }
 
+export function formatInESTAsMMddYY(date: Date | string) {
+  return formatInTimeZone(date, "America/New_York", "MM-dd-yyyy");
+}
+
 export function formatInESTAsMMMYYYY(date: Date | string) {
   return formatInTimeZone(date, "America/New_York", "MMM yyyy");
 }

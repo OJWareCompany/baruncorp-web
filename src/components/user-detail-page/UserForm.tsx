@@ -235,7 +235,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
               <FormLabel required>Organization</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
-                  {isAdmin ? (
+                  {isAdmin && pageType !== "MY_PROFILE" ? (
                     <OrganizationChangeCombobox
                       organizationId={field.value}
                       onOrganizationIdChange={field.onChange}
