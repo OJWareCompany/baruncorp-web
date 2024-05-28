@@ -15,7 +15,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
@@ -47,6 +46,7 @@ import {
 } from "@/lib/constants";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import EnumHeader from "@/components/table/EnumHeader";
+import { formatInESTAsMMddYY } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -206,7 +206,7 @@ export default function UsersTable({ organization }: Props) {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return format(new Date(value), "MM-dd-yyyy");
+          return formatInESTAsMMddYY(value);
         },
       }),
     ],
