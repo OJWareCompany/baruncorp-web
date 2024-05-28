@@ -16,7 +16,6 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
@@ -68,6 +67,7 @@ import { getProfileQueryKey } from "@/queries/useProfileQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
+import { formatInESTAsMMddYY } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<UserPaginatedResponseDto["items"][number]>();
@@ -241,7 +241,7 @@ export default function UsersTable({ department }: Props) {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return format(new Date(value), "MM-dd-yyyy");
+          return formatInESTAsMMddYY(value);
         },
       }),
       columnHelper.display({
