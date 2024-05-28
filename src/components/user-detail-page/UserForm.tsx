@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import Link from "next/link";
 import OrganizationChangeCombobox from "../combobox/OrganizationChangeComboBox";
+import OrganizationsCombobox from "../combobox/OrganizationsCombobox";
 import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import {
   Form,
@@ -234,14 +235,23 @@ export default function UserForm({ pageType, user, organization }: Props) {
               <FormLabel required>Organization</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
-                  <OrganizationChangeCombobox
-                    organizationId={field.value}
-                    onOrganizationIdChange={field.onChange}
-                    ref={field.ref}
-                    userId={user.id}
-                    dateOfJoining={form.getValues("dateOfJoining")}
-                    disabled={!isAdmin}
-                  />
+                  {isAdmin ? (
+                    <OrganizationChangeCombobox
+                      organizationId={field.value}
+                      onOrganizationIdChange={field.onChange}
+                      ref={field.ref}
+                      userId={user.id}
+                      dateOfJoining={form.getValues("dateOfJoining")}
+                      disabled={!isAdmin}
+                    />
+                  ) : (
+                    <OrganizationsCombobox
+                      organizationId={field.value}
+                      onOrganizationIdChange={field.onChange}
+                      ref={field.ref}
+                      disabled
+                    />
+                  )}
                 </FormControl>
                 <Button
                   size={"icon"}
