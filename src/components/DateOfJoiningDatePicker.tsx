@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { formatInESTAsMMddYY } from "../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -28,7 +28,7 @@ const DateOfJoiningDatePicker = forwardRef<HTMLButtonElement, Props>(
             ref={ref}
             disabled={disabled}
           >
-            {value ? format(value, "MM-dd-yyyy") : "Pick a date"}
+            {value ? formatInESTAsMMddYY(value) : "Pick a date"}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
