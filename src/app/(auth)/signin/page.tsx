@@ -34,15 +34,9 @@ const formSchema = z.object({
 type FieldValues = z.infer<typeof formSchema>;
 
 let defaultValues: DefaultValues<FieldValues> = {
-  email: "",
-  password: "",
+  email: "admin-test@baruncorp.com",
+  password: "Test123!@#",
 };
-if (process.env.NODE_ENV === "development") {
-  defaultValues = {
-    email: "admin-test@baruncorp.com",
-    password: "Test123!@#",
-  };
-}
 
 export default function Page() {
   const router = useRouter();
