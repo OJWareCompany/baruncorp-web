@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import usePatchProfileByUserIdMutation from "@/mutations/usePatchProfileByUserIdMutation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getUserQueryKey } from "@/queries/useUserQuery";
-import { getProfileQueryKey } from "@/queries/useProfileQuery";
+import useProfileQuery, { getProfileQueryKey } from "@/queries/useProfileQuery";
 import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
 import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
@@ -58,8 +58,12 @@ interface Props {
 
 export default function UserForm({ pageType, user, organization }: Props) {
   const { data: session, status } = useSession();
-  const { isBarunCorpMember: isSignedInUserBarunCorpMember, isAdmin } =
+  const { isBarunCorpMember: isSignedInUserBarunCorpMember } =
     useProfileContext();
+
+  const { data: profile } = useProfileQuery();
+
+  const management = profile?.departmentName === "Management";
 
   const isTargetUserOrganizationBarunCorp = useMemo(
     () => organization.organizationType.toUpperCase() === "ADMINISTRATION",
@@ -235,14 +239,14 @@ export default function UserForm({ pageType, user, organization }: Props) {
               <FormLabel required>Organization</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
-                  {isAdmin && pageType !== "MY_PROFILE" ? (
+                  {management && pageType !== "MY_PROFILE" ? (
                     <OrganizationChangeCombobox
                       organizationId={field.value}
                       onOrganizationIdChange={field.onChange}
                       ref={field.ref}
                       userId={user.id}
                       dateOfJoining={form.getValues("dateOfJoining")}
-                      disabled={!isAdmin}
+                      disabled={!management}
                     />
                   ) : (
                     <OrganizationsCombobox

@@ -1,7 +1,8 @@
 "use client";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "../ui/button";
 import {
   AlertDialog,
@@ -29,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import useOrganizationsQuery from "@/queries/useOrganizationsQuery";
 import usePostJoinOrganizationMutation from "@/mutations/usePostJoinOrganizationMutation";
+import { getOrganizationQueryKey } from "@/queries/useOrganizationQuery";
 
 interface Props {
   organizationId: string;
@@ -65,15 +67,16 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
       mutateAsync: PostJoinOrganizationAsync,
       isPending: isPostJoinOrganizationMutationPending,
     } = usePostJoinOrganizationMutation(userId, organizationId);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-      return () => {
-        PostJoinOrganizationAsync({
-          dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
-        });
-        console.log("## USE EFFECT ##");
-      };
-    }, [organizationId]); // 변경된 organizationId가 받아오면서 변경될 때마다 실행
+    // useEffect(() => {
+    //   return () => {
+    //     PostJoinOrganizationAsync({
+    //       dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
+    //     });
+    //     console.log("## USE EFFECT ##");
+    //   };
+    // }, [organizationId]); // 변경된 organizationId가 받아오면서 변경될 때마다 실행
 
     const placeholderText = "Select an organization";
     if (isOrganizationsQueryLoading || organizations == null) {
@@ -173,6 +176,12 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
                     return;
                   }
                   try {
+                    PostJoinOrganizationAsync({
+                      dateOfJoining: dateOfJoining?.toISOString().slice(0, 7),
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: getOrganizationQueryKey(organizationId),
+                    });
                     onOrganizationIdChange(
                       alertDialogState.selectedOrganizationId // state로 변경된 값이 바로 적용 안됨. 이전 값이 들어감. // userForm에 변경된 organizationId를 보내는 작업
                     );
