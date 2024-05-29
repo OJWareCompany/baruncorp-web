@@ -182,11 +182,13 @@ const OrganizationChangeCombobox = forwardRef<HTMLButtonElement, Props>(
                     queryClient.invalidateQueries({
                       queryKey: getOrganizationQueryKey(organizationId),
                     });
+
                     onOrganizationIdChange(
                       alertDialogState.selectedOrganizationId // state로 변경된 값이 바로 적용 안됨. 이전 값이 들어감. // userForm에 변경된 organizationId를 보내는 작업
                     );
                     setAlertDialogState({ open: false });
                     toast({ title: "Success" });
+                    window.location.reload();
                   } catch (error: any) {
                     const axiosError = error as AxiosError<ErrorResponseData>;
                     if (
