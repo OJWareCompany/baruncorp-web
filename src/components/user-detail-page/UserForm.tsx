@@ -8,6 +8,7 @@ import { ExternalLink, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import OrganizationChangeCombobox from "../combobox/OrganizationChangeComboBox";
 import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import {
   Form,
@@ -26,8 +27,7 @@ import { Button } from "@/components/ui/button";
 import usePatchProfileByUserIdMutation from "@/mutations/usePatchProfileByUserIdMutation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getUserQueryKey } from "@/queries/useUserQuery";
-import { getProfileQueryKey } from "@/queries/useProfileQuery";
-import OrganizationsCombobox from "@/components/combobox/OrganizationsCombobox";
+import useProfileQuery, { getProfileQueryKey } from "@/queries/useProfileQuery";
 import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
 import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
@@ -59,6 +59,10 @@ export default function UserForm({ pageType, user, organization }: Props) {
   const { data: session, status } = useSession();
   const { isBarunCorpMember: isSignedInUserBarunCorpMember } =
     useProfileContext();
+
+  const { data: profile } = useProfileQuery();
+
+  const management = profile?.departmentName === "Management";
 
   const isTargetUserOrganizationBarunCorp = useMemo(
     () => organization.organizationType.toUpperCase() === "ADMINISTRATION",
@@ -234,11 +238,13 @@ export default function UserForm({ pageType, user, organization }: Props) {
               <FormLabel required>Organization</FormLabel>
               <div className="flex gap-2">
                 <FormControl>
-                  <OrganizationsCombobox
+                  <OrganizationChangeCombobox
                     organizationId={field.value}
                     onOrganizationIdChange={field.onChange}
                     ref={field.ref}
-                    disabled
+                    userId={user.id}
+                    dateOfJoining={form.getValues("dateOfJoining")}
+                    disabled={!management}
                   />
                 </FormControl>
                 <Button
@@ -422,7 +428,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
           type="submit"
           className="w-full"
           isLoading={form.formState.isSubmitting}
-          disabled={!form.formState.isDirty}
+          disabled={!form.formState.isDirty || !form.formState.isValid}
         >
           Save
         </LoadingButton>
