@@ -16,7 +16,6 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { useMemo } from "react";
-import { format } from "date-fns";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
@@ -48,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
+import { formatInESTAsMMddYY } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<PtoDetailPaginatedResponseDto["items"][number]>();
@@ -103,8 +103,8 @@ export default function PtoDetailsTable({
       columnHelper.accessor(
         (row) => {
           const { startedAt, endedAt } = row;
-          const formattedStartedAt = format(new Date(startedAt), "MM-dd-yyyy");
-          const formattedEndedAt = format(new Date(endedAt), "MM-dd-yyyy");
+          const formattedStartedAt = formatInESTAsMMddYY(new Date(startedAt)); // TODO: Fix this 받아오는 데이터 EST로 포맷팅
+          const formattedEndedAt = formatInESTAsMMddYY(new Date(endedAt)); // TODO: Fix this 받아오는 데이터 EST로 포맷팅
           if (startedAt === endedAt) {
             return formattedStartedAt;
           }

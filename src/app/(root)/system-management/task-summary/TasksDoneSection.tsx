@@ -282,7 +282,7 @@ export default function TasksDoneSection() {
                 );
                 newSearchParams.set(
                   encodeURIComponent(toDateSearchParamName),
-                  fromDateData.toISOString()
+                  fromDateData.toISOString() // 만약 수정한다면 이 부분을 UTC로 변경하는 방향으로 가야함.
                 );
                 newSearchParams.set(
                   encodeURIComponent(pageIndexSearchParamName),

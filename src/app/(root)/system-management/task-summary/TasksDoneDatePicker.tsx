@@ -42,7 +42,7 @@ const TasksDoneDatePicker = forwardRef<HTMLButtonElement, Props>(
                     )}`}
                   </>
                 ) : (
-                  format(value.from, "MM-dd-yyyy")
+                  format(value.from, "MM-dd-yyyy") // 보이는 데이터 시스템 시간 포멧
                 )
               ) : (
                 <span>Pick a date</span>

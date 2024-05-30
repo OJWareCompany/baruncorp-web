@@ -150,7 +150,7 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
     if (state.type === "Add") {
       await postPtoDetailMutateAsync({
         userId: session.id,
-        startedAt: getISOStringForStartOfDayInUTC(values.rangeOfDays.from),
+        startedAt: getISOStringForStartOfDayInUTC(values.rangeOfDays.from), // ISO 데이터를 UTC로 서버에 전송
         ptoTypeId: values.ptoTypeId,
         amountPerDay: Number(values.amount),
         days,
@@ -245,7 +245,7 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
     if (state.type === "Modify") {
       await patchPtoDetailMutateAsync({
         ptoId: state.pto.id,
-        startedAt: getISOStringForStartOfDayInUTC(values.rangeOfDays.from),
+        startedAt: getISOStringForStartOfDayInUTC(values.rangeOfDays.from), // ISO 데이터를 UTC로 서버에 전송
         ptoTypeId: values.ptoTypeId,
         amountPerDay: Number(values.amount),
         days,

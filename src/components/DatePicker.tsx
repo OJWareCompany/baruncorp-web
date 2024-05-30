@@ -25,6 +25,7 @@ const DatePicker = forwardRef<HTMLButtonElement, Props>(
             variant={"outline"}
             className="pl-3 text-left font-normal"
             ref={ref}
+            /** 선택 데이터 EST? 일단 keep*/
           >
             {value ? format(value, "MM-dd-yyyy") : "Pick a date"}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />

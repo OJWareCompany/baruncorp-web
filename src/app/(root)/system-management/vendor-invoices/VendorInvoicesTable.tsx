@@ -39,11 +39,7 @@ import { Button } from "@/components/ui/button";
 import useVendorInvoicesQuery from "@/queries/useVendorInvoicesQuery";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import {
-  formatInEST,
-  formatInUTCAsMMMYYYY,
-  formatInUTCAsMMddyyyy,
-} from "@/lib/utils";
+import { formatInEST, formatInESTAsMMddYY } from "@/lib/utils";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 
@@ -116,11 +112,11 @@ export default function VendorInvoicesTable() {
       }),
       columnHelper.accessor("serviceMonth", {
         header: "Service Period Month",
-        cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
+        cell: ({ getValue }) => formatInESTAsMMddYY(getValue()), // 받아오는 데이터 EST
       }),
       columnHelper.accessor("invoiceDate", {
         header: "Invoice Date",
-        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
+        cell: ({ getValue }) => formatInESTAsMMddYY(getValue()), // 받아오는 데이터 EST
       }),
       columnHelper.accessor("terms", {
         header: "Terms",
@@ -134,7 +130,7 @@ export default function VendorInvoicesTable() {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return formatInUTCAsMMddyyyy(value);
+          return formatInESTAsMMddYY(value); // 받아오는 데이터 EST
         },
       }),
       columnHelper.accessor((row) => `$${row.subTotal}`, {

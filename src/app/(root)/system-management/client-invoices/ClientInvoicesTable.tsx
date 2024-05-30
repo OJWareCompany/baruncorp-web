@@ -38,8 +38,8 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   formatInEST,
-  formatInUTCAsMMMYYYY,
-  formatInUTCAsMMddyyyy,
+  formatInESTAsMMMYYYY,
+  formatInESTAsMMddYY,
 } from "@/lib/utils";
 import useClientInvoicesQuery from "@/queries/useClientInvoicesQuery";
 import {
@@ -144,7 +144,7 @@ export default function ClientInvoicesTable({ type }: Props) {
       }),
       columnHelper.accessor("servicePeriodDate", {
         header: "Service Period Month",
-        cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
+        cell: ({ getValue }) => formatInESTAsMMMYYYY(getValue()), // 보이는 시간 EST로 포멧
       }),
       columnHelper.accessor("status", {
         header: () => (
@@ -173,14 +173,14 @@ export default function ClientInvoicesTable({ type }: Props) {
       }),
       columnHelper.accessor("invoiceDate", {
         header: "Invoice Date",
-        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
+        cell: ({ getValue }) => formatInESTAsMMddYY(getValue()), // 보이는 시간 EST로 포멧
       }),
       columnHelper.accessor("terms", {
         header: "Terms",
       }),
       columnHelper.accessor("dueDate", {
         header: "Due Date",
-        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
+        cell: ({ getValue }) => formatInESTAsMMddYY(getValue()), // 보이는 시간 EST로 포멧
       }),
       columnHelper.accessor((row) => `$${row.subtotal}`, {
         header: "Subtotal",

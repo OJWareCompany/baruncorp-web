@@ -241,7 +241,7 @@ export default function UsersTable({ department }: Props) {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return formatInESTAsMMddYY(value);
+          return formatInESTAsMMddYY(value); // 보이는 시간 EST로 변경
         },
       }),
       columnHelper.display({

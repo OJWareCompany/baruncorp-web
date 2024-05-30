@@ -70,7 +70,7 @@ export default function NewLicenseForm({
       abbreviation: values.abbreviation,
       type: values.type,
       expiryDate: values.expiryDate
-        ? getISOStringForStartOfDayInUTC(values.expiryDate)
+        ? getISOStringForStartOfDayInUTC(values.expiryDate) // 보내는 데이터 UTC
         : null,
     })
       .then(() => {

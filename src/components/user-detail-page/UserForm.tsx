@@ -169,7 +169,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
       phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
       isVendor: isTargetUserOrganizationBarunCorp ? false : values.isContractor,
       dateOfJoining: isTargetUserOrganizationBarunCorp
-        ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+        ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date()) // 보내는 데이터 UTC
         : null,
     })
       .then(() => {

@@ -5,7 +5,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { endOfDay, format, isWithinInterval, startOfDay } from "date-fns";
+import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 import {
   Table,
   TableBody,
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { PtoPaginatedResponseDto } from "@/api/api-spec";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
+import { cn, formatInESTAsMMddYY } from "@/lib/utils";
 
 const columnHelper =
   createColumnHelper<PtoPaginatedResponseDto["items"][number]>();
@@ -24,9 +24,8 @@ const columnHelper =
 const columns = [
   columnHelper.accessor(
     (row) =>
-      `${format(new Date(row.startedAt), "MM-dd-yyyy")} ~ ${format(
-        new Date(row.endedAt),
-        "MM-dd-yyyy"
+      `${formatInESTAsMMddYY(new Date(row.startedAt))} ~ ${formatInESTAsMMddYY(
+        new Date(row.endedAt) // TODO: Fix this 받아오는 데이터 EST로 포맷팅
       )}`,
     {
       header: "Period",
