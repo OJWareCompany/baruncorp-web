@@ -93,6 +93,12 @@ import {
 } from "@/components/ui/popover";
 import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
 import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -510,40 +516,49 @@ export default function JobsTableForMember({ type }: Props) {
         header: () => (
           <>
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  size={"sm"}
-                  variant={"ghost"}
-                  className={cn(
-                    "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
-                    (params.taskAssigneeName || params.taskName) &&
-                      "underline decoration-2 underline-offset-2"
-                  )}
-                >
-                  Task
-                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="grid w-[150px] gap-1 pl-5">
-                <SearchHeader
-                  buttonText="Task Name"
-                  searchParamName={taskNameSearchParamName}
-                  pageIndexSearchParamName={pageIndexSearchParamName}
-                  isLoading={
-                    syncedParams != null &&
-                    params.taskName !== syncedParams.taskName
-                  }
-                />
-                <SearchHeader
-                  buttonText="Task Assignee"
-                  searchParamName={taskAssigneeNameSearchParamName}
-                  pageIndexSearchParamName={pageIndexSearchParamName}
-                  isLoading={
-                    syncedParams != null &&
-                    params.taskAssigneeName !== syncedParams.taskAssigneeName
-                  }
-                />
-              </PopoverContent>
+              <TooltipProvider delayDuration={500}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <PopoverTrigger asChild>
+                      <Button
+                        size={"sm"}
+                        variant={"ghost"}
+                        className={cn(
+                          "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
+                          (params.taskAssigneeName || params.taskName) &&
+                            "underline decoration-2 underline-offset-2"
+                        )}
+                      >
+                        Task
+                        <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+                      </Button>
+                    </PopoverTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Typing Search</p>
+                  </TooltipContent>
+                </Tooltip>
+                <PopoverContent className="grid w-[150px] gap-1 pl-5">
+                  <SearchHeader
+                    buttonText="Task Name"
+                    searchParamName={taskNameSearchParamName}
+                    pageIndexSearchParamName={pageIndexSearchParamName}
+                    isLoading={
+                      syncedParams != null &&
+                      params.taskName !== syncedParams.taskName
+                    }
+                  />
+                  <SearchHeader
+                    buttonText="Task Assignee"
+                    searchParamName={taskAssigneeNameSearchParamName}
+                    pageIndexSearchParamName={pageIndexSearchParamName}
+                    isLoading={
+                      syncedParams != null &&
+                      params.taskAssigneeName !== syncedParams.taskAssigneeName
+                    }
+                  />
+                </PopoverContent>
+              </TooltipProvider>
             </Popover>
           </>
         ),

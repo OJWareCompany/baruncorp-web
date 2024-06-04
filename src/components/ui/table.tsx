@@ -5,13 +5,25 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
+  // <TooltipProvider disableHoverableContent={true}>
+  //   <Tooltip>
   <div className="w-full overflow-auto">
+    {/* <TooltipTrigger asChild> */}
     <table
       ref={ref}
       className={cn("w-full caption-bottom text-xs", className)}
       {...props}
     />
+    {/* </TooltipTrigger> */}
   </div>
+  //     {/* <TooltipContent align="start" alignOffset={175}>
+  //       <p>
+  //         You can use shift and the mouse wheel together to flip the table
+  //         sideways.
+  //       </p>
+  //     </TooltipContent>
+  //   </Tooltip>
+  // </TooltipProvider> */}
 ));
 Table.displayName = "Table";
 

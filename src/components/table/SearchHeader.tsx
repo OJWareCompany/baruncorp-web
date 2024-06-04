@@ -3,6 +3,12 @@ import { ChevronsUpDown, Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -14,7 +20,6 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-
 interface Props {
   buttonText: string;
   isLoading: boolean | undefined;
@@ -39,54 +44,46 @@ export default function SearchHeader({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          size={"sm"}
-          variant={"ghost"}
-          className={cn(
-            "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
-            isFiltered && "underline decoration-2 underline-offset-2"
+      <TooltipProvider delayDuration={500}>
+        <Tooltip>
+          <TooltipTrigger>
+            <PopoverTrigger asChild>
+              <Button
+                size={"sm"}
+                variant={"ghost"}
+                className={cn(
+                  "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
+                  isFiltered && "underline decoration-2 underline-offset-2"
+                )}
+              >
+                {buttonText}
+                {isLoading ? (
+                  <Loader2 className="h-3 w-3 ml-1.5 animate-spin" />
+                ) : (
+                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+                )}
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          {buttonText === ("Task Name" || "Task Assignee") ? null : (
+            <TooltipContent>
+              <p className="text-xs">Typing Search</p>
+            </TooltipContent>
           )}
-        >
-          {buttonText}
-          {isLoading ? (
-            <Loader2 className="h-3 w-3 ml-1.5 animate-spin" />
-          ) : (
-            <ChevronsUpDown className="h-3 w-3 ml-1.5" />
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0 w-auto" align="start">
-        <Command shouldFilter={false}>
-          <CommandInput value={value} onValueChange={setValue} />
-          <CommandGroup>
-            <CommandItem
-              onSelect={() => {
-                const newSearchParams = new URLSearchParams(
-                  searchParams.toString()
-                );
-                newSearchParams.set(encodeURIComponent(searchParamName), value);
-                newSearchParams.set(
-                  encodeURIComponent(pageIndexSearchParamName),
-                  "0"
-                );
-                router.push(`${pathname}?${newSearchParams.toString()}`, {
-                  scroll: false,
-                });
-              }}
-              className="justify-center"
-            >
-              Search
-            </CommandItem>
-          </CommandGroup>
-          {isFiltered && (
-            <CommandGroup className="border-t">
+        </Tooltip>
+        <PopoverContent className="p-0 w-auto" align="start">
+          <Command shouldFilter={false}>
+            <CommandInput value={value} onValueChange={setValue} />
+            <CommandGroup>
               <CommandItem
                 onSelect={() => {
                   const newSearchParams = new URLSearchParams(
                     searchParams.toString()
                   );
-                  newSearchParams.delete(encodeURIComponent(searchParamName));
+                  newSearchParams.set(
+                    encodeURIComponent(searchParamName),
+                    value
+                  );
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
                     "0"
@@ -97,12 +94,34 @@ export default function SearchHeader({
                 }}
                 className="justify-center"
               >
-                Reset
+                Search
               </CommandItem>
             </CommandGroup>
-          )}
-        </Command>
-      </PopoverContent>
+            {isFiltered && (
+              <CommandGroup className="border-t">
+                <CommandItem
+                  onSelect={() => {
+                    const newSearchParams = new URLSearchParams(
+                      searchParams.toString()
+                    );
+                    newSearchParams.delete(encodeURIComponent(searchParamName));
+                    newSearchParams.set(
+                      encodeURIComponent(pageIndexSearchParamName),
+                      "0"
+                    );
+                    router.push(`${pathname}?${newSearchParams.toString()}`, {
+                      scroll: false,
+                    });
+                  }}
+                  className="justify-center"
+                >
+                  Reset
+                </CommandItem>
+              </CommandGroup>
+            )}
+          </Command>
+        </PopoverContent>
+      </TooltipProvider>
     </Popover>
   );
 }
