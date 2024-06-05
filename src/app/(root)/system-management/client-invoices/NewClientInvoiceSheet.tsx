@@ -25,7 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import { cn, getISOStringInEST } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
@@ -124,7 +124,7 @@ export default function NewClientInvoiceSheet() {
     await usePostClientInvoiceMutationResult
       .mutateAsync({
         clientOrganizationId: values.organizationId,
-        invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
+        invoiceDate: getISOStringInEST(values.invoiceDate),
         notesToClient: transformStringIntoNullableString.parse(values.notes),
         serviceMonth: formatInTimeZone(
           new Date(values.servicePeriodMonth.slice(0, 7)),
