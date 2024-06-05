@@ -34,7 +34,11 @@ import {
 import VendorsToInvoiceCombobox from "@/components/combobox/VendorsToInvoiceCombobox";
 import ServicePeriodMonthByVendorSelect from "@/components/combobox/ServicePeriodMonthByVendorSelect";
 import { TermsEnum, transformStringIntoNullableString } from "@/lib/constants";
-import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import {
+  cn,
+  formatInUTCAsYYYYMM,
+  getISOStringForStartOfDayInUTC,
+} from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
@@ -93,7 +97,7 @@ export default function NewVendorInvoiceSheet() {
       clientOrganizationId: watchVendorId,
       serviceMonth:
         watchServicePeriodMonth !== ""
-          ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
+          ? formatInUTCAsYYYYMM(watchServicePeriodMonth)
           : "",
     },
     true

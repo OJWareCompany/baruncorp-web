@@ -100,10 +100,6 @@ export default function NewClientInvoiceSheet() {
   const { data: jobs } = useJobsForClientInvoiceQuery(
     {
       clientOrganizationId: watchOrganizationId,
-      // serviceMonth:
-      //   watchServicePeriodMonth !== ""
-      //     ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
-      //     : "",
       serviceMonth:
         watchServicePeriodMonth !== ""
           ? formatInUTCAsYYYYMM(watchServicePeriodMonth)
