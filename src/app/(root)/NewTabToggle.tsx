@@ -26,12 +26,12 @@ export default function NewTabToggle({ href }: Props) {
     <Button
       size={"icon"}
       variant={"ghost"}
-      className="w-4 h-4 ml-3"
+      className="w-4 h-4 ml-3 pt-2"
       onClick={(event) => {
         event.stopPropagation();
       }}
     >
-      <Link href={hrefValue} className="ml-3" target="_blank">
+      <Link href={hrefValue} target="_blank">
         <ExternalLink className="w-5 h-5" />
       </Link>
     </Button>

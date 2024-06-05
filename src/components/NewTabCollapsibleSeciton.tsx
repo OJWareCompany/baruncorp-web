@@ -1,8 +1,22 @@
 "use client";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import NewTabToggle from "@/app/(root)/NewTabToggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface Props {
   title: string;
@@ -35,8 +49,33 @@ export default function NewTabCollapsibleSection({
             )}
           />
           <h2 className="h4">{title}</h2>
-          <NewTabToggle href={title} />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <NewTabToggle href={title} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">View Only the {title} Tab</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
+        {title === "Not Started" && (
+          <Dialog>
+            <DialogTrigger className="w-5 h-5">
+              <Info className="h-5 w-5 mr-3 cursor-pointer" />
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[450px]">
+              <DialogHeader>
+                <DialogTitle>Useful Tips</DialogTitle>
+                <DialogDescription className="text-color-black">
+                  You can scroll the table sideways by holding shift and
+                  spinning the wheel.
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        )}
         {action}
       </div>
       {!isCollapsed && children}

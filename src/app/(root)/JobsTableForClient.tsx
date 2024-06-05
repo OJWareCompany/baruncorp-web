@@ -74,6 +74,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -382,6 +388,87 @@ export default function JobsTableForClient({ type }: Props) {
             <div className={`flex items-center`}>
               <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
               <span className="whitespace-nowrap">{status.value}</span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("assignedTasks", {
+        header: () => (
+          <>
+            <Popover>
+              <TooltipProvider delayDuration={500}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <PopoverTrigger asChild>
+                      <Button
+                        size={"sm"}
+                        variant={"ghost"}
+                        className={cn(
+                          "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
+                          (params.taskAssigneeName || params.taskName) &&
+                            "underline decoration-2 underline-offset-2"
+                        )}
+                      >
+                        Task
+                        <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+                      </Button>
+                    </PopoverTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">Typing Search</p>
+                  </TooltipContent>
+                </Tooltip>
+                <PopoverContent className="grid w-[150px] gap-1 pl-5">
+                  <SearchHeader
+                    buttonText="Task Name"
+                    searchParamName={taskNameSearchParamName}
+                    pageIndexSearchParamName={pageIndexSearchParamName}
+                    isLoading={
+                      syncedParams != null &&
+                      params.taskName !== syncedParams.taskName
+                    }
+                  />
+                  <SearchHeader
+                    buttonText="Task Assignee"
+                    searchParamName={taskAssigneeNameSearchParamName}
+                    pageIndexSearchParamName={pageIndexSearchParamName}
+                    isLoading={
+                      syncedParams != null &&
+                      params.taskAssigneeName !== syncedParams.taskAssigneeName
+                    }
+                  />
+                </PopoverContent>
+              </TooltipProvider>
+            </Popover>
+          </>
+        ),
+        cell: ({ getValue, row }) => {
+          const tasks = row.original.assignedTasks;
+          return (
+            <div>
+              {tasks.map((task) => {
+                const status = jobStatuses[task.status];
+
+                return (
+                  <Badge
+                    variant={"outline"}
+                    className="flex items-center py-1 my-1"
+                    key={task.id}
+                  >
+                    {status && (
+                      <status.Icon
+                        className={`w-4 h-4 mr-2 flex-shrink-0 ${status.color}`}
+                      />
+                    )}
+                    <div className="flex flex-col">
+                      <p className="font-medium">{task.taskName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {task.assigneeName ?? "-"}
+                      </p>
+                    </div>
+                  </Badge>
+                );
+              })}
             </div>
           );
         },
