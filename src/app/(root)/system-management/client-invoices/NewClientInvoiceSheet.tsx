@@ -129,10 +129,7 @@ export default function NewClientInvoiceSheet() {
         clientOrganizationId: values.organizationId,
         invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
         notesToClient: transformStringIntoNullableString.parse(values.notes),
-        serviceMonth: format(
-          new Date(values.servicePeriodMonth.slice(0, 7)),
-          "yyyy-MM"
-        ),
+        serviceMonth: formatInUTCAsYYYYMM(values.servicePeriodMonth),
         terms: Number(values.terms) as 21 | 30 | 60,
       })
       .then(() => {

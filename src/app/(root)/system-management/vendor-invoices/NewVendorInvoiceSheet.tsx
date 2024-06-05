@@ -124,10 +124,7 @@ export default function NewVendorInvoiceSheet() {
         organizationId: values.vendorId,
         note: transformStringIntoNullableString.parse(values.notes),
         terms: Number(values.terms) as 21 | 30 | 60,
-        serviceMonth: format(
-          new Date(values.servicePeriodMonth.slice(0, 7)),
-          "yyyy-MM"
-        ),
+        serviceMonth: formatInUTCAsYYYYMM(values.servicePeriodMonth),
         invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
         invoiceNumber: "", // api-spec 상에는 필수값으로 되어있는데, 필요하지 않은 값이라고 함. 백엔드 쪽에서 빈 문자열로 보내달라고 요청함.
       })
