@@ -56,7 +56,7 @@ import {
 import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import usePatchJobDueDateMutation from "@/mutations/usePatchJobDueDateMution";
-import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import { getISOStringInEST } from "@/lib/utils";
 
 interface Props {
   project: ProjectResponseDto;
@@ -292,7 +292,7 @@ export default function JobForm({ project, job, pageType }: Props) {
         mountingType: values.mountingType,
       });
       await usePatchJobDueDateMutateResult.mutateAsync({
-        dueDate: getISOStringForStartOfDayInUTC(values.dueDate),
+        dueDate: getISOStringInEST(values.dueDate),
       });
       toast({ title: "Success" });
       queryClient.invalidateQueries({
