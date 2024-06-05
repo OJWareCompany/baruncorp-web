@@ -8,6 +8,7 @@ import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { formatInTimeZone } from "date-fns-tz";
 import JobsTable from "./JobsTable";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -125,8 +126,9 @@ export default function NewClientInvoiceSheet() {
         clientOrganizationId: values.organizationId,
         invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
         notesToClient: transformStringIntoNullableString.parse(values.notes),
-        serviceMonth: format(
+        serviceMonth: formatInTimeZone(
           new Date(values.servicePeriodMonth.slice(0, 7)),
+          "Etc/UTC",
           "yyyy-MM"
         ),
         terms: Number(values.terms) as 21 | 30 | 60,
@@ -255,7 +257,6 @@ export default function NewClientInvoiceSheet() {
                                 if (day == null) {
                                   return;
                                 }
-
                                 field.onChange(day);
                               }}
                               initialFocus

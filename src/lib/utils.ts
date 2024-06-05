@@ -2,8 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import React, { ForwardedRef, MutableRefObject } from "react";
 import { format, startOfDay } from "date-fns";
-import { formatInTimeZone, zonedTimeToUtc } from "date-fns-tz";
-import { utcToZonedTime } from "date-fns-tz";
+import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { getLocalTimeZone } from "@internationalized/date";
 
 export function cn(...inputs: ClassValue[]) {
@@ -65,7 +64,11 @@ export function formatInUTCAsMMddyyyy(date: Date | string) {
 }
 
 export function getISOStringForStartOfDayInUTC(date: Date) {
-  return zonedTimeToUtc(startOfDay(date), "Etc/UTC").toISOString();
+  return toZonedTime(startOfDay(date), "Etc/UTC").toISOString();
+}
+
+export function getISOStringInEST(date: Date) {
+  return fromZonedTime(date, "America/New_York").toISOString();
 }
 
 export function getDiffHoursFromLocalToEST() {
@@ -76,8 +79,8 @@ export function getDiffHoursFromLocalToEST() {
   const now = new Date();
 
   // Convert the date to each timezone
-  const timeInZone1 = utcToZonedTime(now, timezone1);
-  const timeInZone2 = utcToZonedTime(now, timezone2);
+  const timeInZone1 = toZonedTime(now, timezone1);
+  const timeInZone2 = toZonedTime(now, timezone2);
 
   // Convert the timezone-adjusted dates to timestamps
   const timestamp1 = timeInZone1.getTime();

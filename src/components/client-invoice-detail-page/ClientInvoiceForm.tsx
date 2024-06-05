@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { addDays, format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 import ServicePeriodMonthSelect from "../combobox/ServicePeriodMonthSelect";
 import {
   Form,
@@ -23,7 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import { cn, getISOStringInEST } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -113,7 +114,7 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
   async function onSubmit(values: FieldValues) {
     try {
       await patchClientInvoiceMutateAsync({
-        invoiceDate: getISOStringForStartOfDayInUTC(values.invoiceDate),
+        invoiceDate: getISOStringInEST(values.invoiceDate),
         notesToClient: transformNullishStringIntoString.parse(values.notes),
         terms: Number(values.terms) as 21 | 30 | 60,
       });
@@ -215,7 +216,11 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                         disabled={!isBarunCorpMember}
                       >
                         {field.value ? (
-                          format(field.value, "MM-dd-yyyy")
+                          formatInTimeZone(
+                            fromZonedTime(field.value, "America/New_York"),
+                            "America/New_York",
+                            "MM-dd-yyyy"
+                          )
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -231,7 +236,6 @@ export default function ClientInvoiceForm({ clientInvoice }: Props) {
                         if (day == null) {
                           return;
                         }
-
                         field.onChange(day);
                       }}
                       initialFocus

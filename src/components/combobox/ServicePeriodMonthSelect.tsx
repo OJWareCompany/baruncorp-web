@@ -1,5 +1,5 @@
-import { format } from "date-fns";
 import { useState } from "react";
+import { formatInTimeZone } from "date-fns-tz";
 import { toast } from "../ui/use-toast";
 import LoadingButton from "../LoadingButton";
 import useClientsToInvoiceQuery from "@/queries/useClientsToInvoiceQuery";
@@ -43,7 +43,11 @@ const ServicePeriodMonthSelect = ({
   const organization = organizations?.clientToInvoices.find(
     (value) => value.id === organizationId
   );
-  const defaultPeriodMonth = format(new Date(servicePeriodMonth), "MMM yyyy");
+  const defaultPeriodMonth = formatInTimeZone(
+    new Date(servicePeriodMonth),
+    "America/New_York",
+    "MMM yyyy"
+  );
 
   const [selectedMonth, setSelectedMonth] =
     useState<string>(defaultPeriodMonth);
@@ -70,8 +74,9 @@ const ServicePeriodMonthSelect = ({
     setIsSubmitting(true);
     try {
       await patchClientInvoiceServiceMonthMutationAsync({
-        serviceMonth: format(
+        serviceMonth: formatInTimeZone(
           new Date(alertDialogState.selectedMonth),
+          "Etc/UTC",
           "yyyy-MM"
         ),
       });
@@ -111,7 +116,11 @@ const ServicePeriodMonthSelect = ({
             </SelectItem>
             {organization?.date.map((value) => (
               <SelectItem key={value} value={value}>
-                {format(new Date(value.slice(0, 7)), "MMM yyyy")}
+                {formatInTimeZone(
+                  new Date(value.slice(0, 7)),
+                  "America/New_York",
+                  "MMM yyyy"
+                )}
               </SelectItem>
             ))}
           </SelectGroup>
