@@ -3,6 +3,12 @@ import { ChevronDown } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import NewTabToggle from "@/app/(root)/NewTabToggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   title: string;
@@ -35,7 +41,16 @@ export default function NewTabCollapsibleSection({
             )}
           />
           <h2 className="h4">{title}</h2>
-          <NewTabToggle href={title} />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <NewTabToggle href={title} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">View Only the {title} Tab</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {action}
       </div>
