@@ -56,6 +56,10 @@ export function formatInUTCAsMMMYYYY(date: Date | string) {
   return formatInTimeZone(date, "Etc/UTC", "MMM yyyy");
 }
 
+export function formatInUTCAsYYYYMM(date: Date | string) {
+  return formatInTimeZone(date, "Etc/UTC", "yyyy-MM");
+}
+
 export function formatInUTCAsMMddyyyy(date: Date | string) {
   return formatInTimeZone(date, "Etc/UTC", "MM-dd-yyyy");
 }

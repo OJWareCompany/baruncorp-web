@@ -24,7 +24,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { cn, getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import {
+  cn,
+  formatInUTCAsYYYYMM,
+  getISOStringForStartOfDayInUTC,
+} from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import Item from "@/components/Item";
 import { Label } from "@/components/ui/label";
@@ -96,9 +100,13 @@ export default function NewClientInvoiceSheet() {
   const { data: jobs } = useJobsForClientInvoiceQuery(
     {
       clientOrganizationId: watchOrganizationId,
+      // serviceMonth:
+      //   watchServicePeriodMonth !== ""
+      //     ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
+      //     : "",
       serviceMonth:
         watchServicePeriodMonth !== ""
-          ? format(new Date(watchServicePeriodMonth.slice(0, 7)), "yyyy-MM")
+          ? formatInUTCAsYYYYMM(watchServicePeriodMonth)
           : "",
     },
     true

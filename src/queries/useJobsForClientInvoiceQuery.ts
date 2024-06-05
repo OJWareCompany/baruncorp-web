@@ -14,6 +14,13 @@ const useJobsForClientInvoiceQuery = (
   params: FindJobToInvoiceHttpControllerFindJobParams,
   isKeepPreviousData?: boolean
 ) => {
+  console.log(
+    "############ useJobsForClientInvoiceQuery useJobsForClientInvoiceQuery"
+  );
+  console.log(`params.serviceMonth: ${params.serviceMonth}`);
+  console.log(
+    "############ useJobsForClientInvoiceQuery useJobsForClientInvoiceQuery"
+  );
   const api = useApi();
 
   return useQuery<JobToInvoiceResponseDto, AxiosError<ErrorResponseData>>({
