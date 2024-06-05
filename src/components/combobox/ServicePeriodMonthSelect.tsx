@@ -77,7 +77,7 @@ const ServicePeriodMonthSelect = ({
         serviceMonth: formatInTimeZone(
           new Date(alertDialogState.selectedMonth),
           "Etc/UTC",
-          "yyyy-MM"
+          "yyyy-MM-dd HH:mm:ss zzz"
         ),
       });
       toast({ title: "Success" });
