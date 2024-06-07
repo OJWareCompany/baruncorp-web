@@ -396,7 +396,7 @@ export default function JobsTableForClient({ type }: Props) {
         header: () => (
           <>
             <Popover>
-              <TooltipProvider delayDuration={500}>
+              <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger>
                     <PopoverTrigger asChild>

@@ -19,6 +19,12 @@ import { cn } from "@/lib/utils";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu-trigger-style";
 import useProfileQuery from "@/queries/useProfileQuery";
 import useDepartmentQuery from "@/queries/useDepartmentQuery";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const systemManagementItems: {
   title: string;
@@ -198,7 +204,16 @@ export default function Header() {
           </nav>
         </div>
         <div className="flex gap-2">
-          <ExpandToggle />
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger>
+                <ExpandToggle />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">Screen Expand</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {isBarunCorpMember && <HandToggle />}
           <Notification />
           <User />

@@ -89,7 +89,7 @@ export default function EnumHeader<T extends EnumValues>({
 
   return (
     <Popover>
-      <TooltipProvider delayDuration={500}>
+      <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger>
             <PopoverTrigger asChild>

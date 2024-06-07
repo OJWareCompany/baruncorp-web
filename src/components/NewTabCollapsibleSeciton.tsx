@@ -49,7 +49,7 @@ export default function NewTabCollapsibleSection({
             )}
           />
           <h2 className="h4">{title}</h2>
-          <TooltipProvider>
+          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger>
                 <NewTabToggle href={title} />

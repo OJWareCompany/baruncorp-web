@@ -44,7 +44,7 @@ export default function SearchHeader({
 
   return (
     <Popover>
-      <TooltipProvider delayDuration={500}>
+      <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger>
             <PopoverTrigger asChild>
