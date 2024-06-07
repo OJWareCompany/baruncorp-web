@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Loader2, Plus } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -92,7 +92,7 @@ export default function NewVendorInvoiceSheet() {
   const watchTerms = form.watch("terms");
   const watchServicePeriodMonth = form.watch("servicePeriodMonth");
 
-  const { data: tasks } = useJobsForVendorInvoiceQuery(
+  const { data: tasks, isLoading } = useJobsForVendorInvoiceQuery(
     {
       clientOrganizationId: watchVendorId,
       serviceMonth:
@@ -328,10 +328,12 @@ export default function NewVendorInvoiceSheet() {
               </form>
             </Form>
           </section>
-          {watchVendorId !== "" && watchServicePeriodMonth !== "" && tasks && (
+          {watchVendorId !== "" && watchServicePeriodMonth !== "" && tasks ? (
             <CollapsibleSection title="Tasks">
               <TasksTable tasks={tasks} />
             </CollapsibleSection>
+          ) : (
+            isLoading && <Loader2 className="h-6 w-6 animate-spin" />
           )}
         </div>
       </SheetContent>
