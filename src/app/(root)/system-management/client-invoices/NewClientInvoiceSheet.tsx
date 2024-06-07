@@ -373,7 +373,11 @@ export default function NewClientInvoiceSheet() {
               </CollapsibleSection>
             </>
           ) : (
-            isLoading && <Loader2 className="h-6 w-6 animate-spin" />
+            isLoading && (
+              <div className="flex justify-center items-center">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            )
           )}
         </div>
       </SheetContent>
