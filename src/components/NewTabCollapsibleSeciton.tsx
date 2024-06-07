@@ -61,20 +61,29 @@ export default function NewTabCollapsibleSection({
           </TooltipProvider>
         </div>
         {title === "Not Started" && (
-          <Dialog>
-            <DialogTrigger className="w-5 h-5">
-              <Info className="h-5 w-5 mr-3 cursor-pointer" />
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[450px]">
-              <DialogHeader>
-                <DialogTitle>Useful Tips</DialogTitle>
-                <DialogDescription className="text-color-black">
-                  You can scroll the table sideways by holding shift and
-                  spinning the wheel.
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <Dialog>
+                <TooltipTrigger>
+                  <DialogTrigger className="w-5 h-5">
+                    <Info className="h-5 w-5 mr-3 cursor-pointer" />
+                  </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Useful Tips</p>
+                </TooltipContent>
+                <DialogContent className="sm:max-w-[450px]">
+                  <DialogHeader>
+                    <DialogTitle>Useful Tips</DialogTitle>
+                    <DialogDescription className="text-color-black">
+                      You can scroll the table sideways by holding shift and
+                      spinning the wheel.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </Tooltip>
+          </TooltipProvider>
         )}
         {action}
       </div>
