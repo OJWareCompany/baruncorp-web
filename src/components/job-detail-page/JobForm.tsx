@@ -664,7 +664,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                           newValue === undefined ? null : newValue
                         );
                       }}
-                      disabled={!isWorker}
+                      disabled
                     />
                   </FormControl>
                   <FormMessage />
