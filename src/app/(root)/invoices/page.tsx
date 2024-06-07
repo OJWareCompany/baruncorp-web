@@ -2,14 +2,17 @@
 import { useSession } from "next-auth/react";
 import { z } from "zod";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import ClientInvoicesTable from "./ClientInvoicesTable";
-import OverdueClientInvoicesTable from "./OverdueClientInvoicesTable";
+import ClientInvoicesTable from "../system-management/client-invoices/ClientInvoicesTable";
+import OverdueClientInvoicesTable from "../system-management/client-invoices/OverdueClientInvoicesTable";
+import RootClientInvoicesTable from "./RootClientInvoicesTable";
+import RootOverdueClientInvoicesTable from "./RootOverdueClientInvoicesTable";
 import VendorInvoicesTable from "./VendorInvoicesTable";
 import PageHeader from "@/components/PageHeader";
 import CollapsibleSection from "@/components/CollapsibleSection";
 import PageLoading from "@/components/PageLoading";
 import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useProfileQuery from "@/queries/useProfileQuery";
 
 const TypeEnum = z.enum(["Client", "Vendor"]);
 type TypeEnum = z.infer<typeof TypeEnum>;
@@ -18,6 +21,8 @@ export default function Page() {
   const { data: session } = useSession();
   const { data: organization, isLoading: isOrganizationQueryLoading } =
     useOrganizationQuery(session?.organizationId ?? "");
+  const { data: profile } = useProfileQuery();
+  const management = profile?.departmentName === "Management";
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -40,19 +45,35 @@ export default function Page() {
   const clientInvoices = (
     <>
       <CollapsibleSection title="Open (Issued)">
-        <ClientInvoicesTable
+        <RootClientInvoicesTable
           type="Issued"
           organizationId={session.organizationId}
         />
       </CollapsibleSection>
       <CollapsibleSection title="Overdue">
-        <OverdueClientInvoicesTable organizationId={session.organizationId} />
+        <RootOverdueClientInvoicesTable
+          organizationId={session.organizationId}
+        />
       </CollapsibleSection>
       <CollapsibleSection title="Paid">
-        <ClientInvoicesTable
+        <RootClientInvoicesTable
           type="Paid"
           organizationId={session.organizationId}
         />
+      </CollapsibleSection>
+    </>
+  );
+
+  const managementClientInvoices = (
+    <>
+      <CollapsibleSection title="Open (Issued)">
+        <ClientInvoicesTable type="Issued" />
+      </CollapsibleSection>
+      <CollapsibleSection title="Overdue">
+        <OverdueClientInvoicesTable />
+      </CollapsibleSection>
+      <CollapsibleSection title="Paid">
+        <ClientInvoicesTable type="Paid" />
       </CollapsibleSection>
     </>
   );
@@ -105,7 +126,9 @@ export default function Page() {
   return (
     <div className="space-y-4">
       {pageHeader}
-      <div className="space-y-6">{clientInvoices}</div>
+      <div className="space-y-6">
+        {management ? managementClientInvoices : clientInvoices}
+      </div>
     </div>
   );
 }

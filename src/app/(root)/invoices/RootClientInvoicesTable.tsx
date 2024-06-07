@@ -14,7 +14,8 @@ import {
   ChevronsRight,
   Loader2,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
@@ -25,7 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  FindOverdueInvoicePaginatedHttpControllerGetParams,
+  FindInvoicePaginatedHttpControllerGetParams,
   InvoicePaginatedResponseDto,
 } from "@/api/api-spec";
 import {
@@ -36,37 +37,62 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import useOverdueClientInvoicesQuery from "@/queries/useOverdueClientInvoicesQuery";
-import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import {
   formatInEST,
   formatInUTCAsMMMYYYY,
   formatInUTCAsMMddyyyy,
 } from "@/lib/utils";
-import { invoiceStatuses } from "@/lib/constants";
+import useClientInvoicesQuery from "@/queries/useClientInvoicesQuery";
+import {
+  InvoiceStatusEnum,
+  invoiceStatuses,
+  transformInvoiceStatusEnumWithEmptyStringIntoNullableInvoiceStatusEnum,
+} from "@/lib/constants";
+import EnumHeader from "@/components/table/EnumHeader";
+import useOnPaginationChange from "@/hook/useOnPaginationChange";
 import InvoiceNotesHoverCard from "@/components/hover-card/InvoiceNotesHoverCard";
+import useOrganizationQuery from "@/queries/useOrganizationQuery";
+import useNotFound from "@/hook/useNotFound";
+import PageLoading from "@/components/PageLoading";
 
 const columnHelper =
   createColumnHelper<InvoicePaginatedResponseDto["items"][number]>();
 
-const TABLE_NAME = "OverdueClientInvoices";
-const RELATIVE_PATH = "src/app/(root)/invoices/OverdueClientInvoicesTable.tsx";
+const TABLE_NAME = "ClientInvoices";
+const RELATIVE_PATH = "src/app/(root)/invoices/ClientInvoicesTable.tsx";
+
+const StatusEnum = z.enum([
+  InvoiceStatusEnum.Values.Issued,
+  InvoiceStatusEnum.Values.Paid,
+]);
+
+type StatusEnum = z.infer<typeof StatusEnum>;
 
 interface Props {
+  type: "All" | StatusEnum;
   organizationId: string;
 }
 
-export default function OverdueClientInvoicesTable({ organizationId }: Props) {
+export default function RootClientInvoicesTable({
+  type,
+  organizationId,
+}: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [syncedParams, setSyncedParams] =
+    useState<FindInvoicePaginatedHttpControllerGetParams>();
 
-  const { data: organization } = useOrganizationQuery(organizationId);
+  const {
+    data: organization,
+    isLoading: isOrganizationQueryLoading,
+    error: organizationQueryError,
+  } = useOrganizationQuery(organizationId);
 
-  const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
+  const invoiceStatusSearchParamName = `${TABLE_NAME}${type}InvoiceStatus`;
+  const pageIndexSearchParamName = `${TABLE_NAME}${type}PageIndex`;
 
   const [pageSize, setPageSize] = useLocalStorage<number>(
-    `${RELATIVE_PATH}`,
+    `${RELATIVE_PATH}_${type}`,
     10
   );
   const pagination: PaginationState = {
@@ -75,6 +101,14 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
       : 0,
     pageSize,
   };
+  const invoiceStatusSearchParamParseResult = StatusEnum.safeParse(
+    searchParams.get(encodeURIComponent(invoiceStatusSearchParamName))
+  );
+  const invoiceStatusSearchParam = invoiceStatusSearchParamParseResult.success
+    ? invoiceStatusSearchParamParseResult.data
+    : type === "All"
+    ? ""
+    : type;
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -82,89 +116,124 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
     updatePageSize: setPageSize,
   });
 
-  const params: FindOverdueInvoicePaginatedHttpControllerGetParams = useMemo(
+  const params: FindInvoicePaginatedHttpControllerGetParams = useMemo(
     () => ({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
+      status:
+        transformInvoiceStatusEnumWithEmptyStringIntoNullableInvoiceStatusEnum.parse(
+          invoiceStatusSearchParam
+        ),
       clientOrganizationId: organizationId,
     }),
-    [organizationId, pagination.pageIndex, pagination.pageSize]
+    [
+      invoiceStatusSearchParam,
+      organizationId,
+      pagination.pageIndex,
+      pagination.pageSize,
+    ]
   );
 
-  const { data, isLoading } = useOverdueClientInvoicesQuery(params, true);
+  const { data, isLoading, isFetching } = useClientInvoicesQuery(params, true);
 
-  const columns = [
-    columnHelper.accessor("servicePeriodDate", {
-      header: "Service Period Month",
-      cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
-    }),
-    columnHelper.accessor("status", {
-      header: "Status",
-      cell: ({ getValue }) => {
-        const value = getValue();
-        const status = invoiceStatuses[value];
+  useEffect(() => {
+    if (!isFetching) {
+      setSyncedParams(params);
+    }
+  }, [isFetching, params]);
 
-        return (
-          <div className={`flex items-center`}>
-            <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
-            <span className="whitespace-nowrap">{status.value}</span>
-          </div>
-        );
-      },
-    }),
-    columnHelper.accessor("invoiceDate", {
-      header: "Invoice Date",
-      cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
-    }),
-    columnHelper.accessor(() => `${organization?.invoiceRecipientEmail}`, {
-      header: "Invoice Recipient Email",
-    }),
-    columnHelper.accessor("terms", {
-      header: "Terms",
-    }),
-    columnHelper.accessor("dueDate", {
-      header: "Due Date",
-      cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
-    }),
-    ...(organization?.isTierDiscount
-      ? [
-          columnHelper.accessor((row) => `$${row.subtotal}`, {
-            header: "Subtotal",
-          }),
-          columnHelper.accessor((row) => `$${row.volumeTierDiscount}`, {
-            header: "Volume Tier Discount",
-          }),
-        ]
-      : []),
-    columnHelper.accessor((row) => `$${row.total}`, {
-      header: "Total",
-    }),
-    columnHelper.accessor((row) => `$${row.appliedCredit}`, {
-      header: "Applied Credit",
-    }),
-    columnHelper.accessor((row) => `$${row.amountPaid}`, {
-      header: "Amount Paid",
-    }),
-    columnHelper.accessor((row) => `$${row.balanceDue}`, {
-      header: "Balance Due",
-    }),
-    columnHelper.accessor("notesToClient", {
-      header: "Notes",
-      cell: ({ getValue }) => {
-        const value = getValue();
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("servicePeriodDate", {
+        header: "Service Period Month",
+        cell: ({ getValue }) => formatInUTCAsMMMYYYY(getValue()),
+      }),
+      columnHelper.accessor("status", {
+        header: () => (
+          <EnumHeader
+            buttonText="Status"
+            searchParamName={invoiceStatusSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={InvoiceStatusEnum}
+            defaultValue={type === "All" ? null : type}
+            isLoading={
+              syncedParams != null && params.status !== syncedParams.status
+            }
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue();
+          const status = invoiceStatuses[value];
 
-        if (value == null) {
-          return <p className="text-muted-foreground">-</p>;
-        }
+          return (
+            <div className={`flex items-center`}>
+              <status.Icon className={`w-4 h-4 mr-2 ${status.color}`} />
+              <span className="whitespace-nowrap">{status.value}</span>
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("invoiceDate", {
+        header: "Invoice Date",
+        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
+      }),
+      columnHelper.accessor(() => `${organization?.invoiceRecipientEmail}`, {
+        header: "Invoice Recipient Email",
+      }),
+      columnHelper.accessor("terms", {
+        header: "Terms",
+      }),
+      columnHelper.accessor("dueDate", {
+        header: "Due Date",
+        cell: ({ getValue }) => formatInUTCAsMMddyyyy(getValue()),
+      }),
+      ...(organization?.isTierDiscount
+        ? [
+            columnHelper.accessor((row) => `$${row.subtotal}`, {
+              header: "Subtotal",
+            }),
+            columnHelper.accessor((row) => `$${row.volumeTierDiscount}`, {
+              header: "Volume Tier Discount",
+            }),
+          ]
+        : []),
+      columnHelper.accessor((row) => `$${row.total}`, {
+        header: "Total",
+      }),
+      columnHelper.accessor((row) => `$${row.appliedCredit}`, {
+        header: "Applied Credit",
+      }),
+      columnHelper.accessor((row) => `$${row.amountPaid}`, {
+        header: "Amount Paid",
+      }),
+      columnHelper.accessor((row) => `$${row.balanceDue}`, {
+        header: "Balance Due",
+      }),
+      columnHelper.accessor("notesToClient", {
+        header: "Notes",
+        cell: ({ getValue }) => {
+          const value = getValue();
 
-        return <InvoiceNotesHoverCard value={value} />;
-      },
-    }),
-    columnHelper.accessor("createdAt", {
-      header: "Date Created",
-      cell: ({ getValue }) => formatInEST(getValue()),
-    }),
-  ];
+          if (value == null) {
+            return <p className="text-muted-foreground">-</p>;
+          }
+
+          return <InvoiceNotesHoverCard value={value} />;
+        },
+      }),
+      columnHelper.accessor("createdAt", {
+        header: "Date Created",
+        cell: ({ getValue }) => formatInEST(getValue()),
+      }),
+    ],
+    [
+      invoiceStatusSearchParamName,
+      pageIndexSearchParamName,
+      params.status,
+      syncedParams,
+      type,
+    ]
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -179,6 +248,11 @@ export default function OverdueClientInvoicesTable({ organizationId }: Props) {
     },
   });
 
+  useNotFound(organizationQueryError);
+
+  if (isOrganizationQueryLoading || organization == null) {
+    return <PageLoading />;
+  }
   return (
     <div className="space-y-2">
       <div className="rounded-md border overflow-hidden">
