@@ -1,5 +1,7 @@
 "use client";
 import {
+  Cell,
+  Header,
   PaginationState,
   createColumnHelper,
   flexRender,
@@ -15,11 +17,29 @@ import {
   Loader2,
   RotateCcw,
 } from "lucide-react";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import {
+  arrayMove,
+  useSortable,
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 import { useProfileContext } from "./ProfileProvider";
 import {
   AlertDialog,
@@ -154,6 +174,64 @@ export function getItemsTableExportDataFromLineItems(
       : "-",
   }));
 }
+
+const DraggableTableHeader = ({
+  header,
+}: {
+  header: Header<JobPaginatedResponseDto["items"][number], unknown>;
+}) => {
+  const { attributes, isDragging, listeners, setNodeRef, transform } =
+    useSortable({
+      id: header.column.id,
+    });
+
+  const style: CSSProperties = {
+    opacity: isDragging ? 0.8 : 1,
+    position: "relative",
+    transform: CSS.Translate.toString(transform),
+    transition: "width transform 0.2s ease-in-outs",
+    whiteSpace: "nowrap",
+    width: header.column.getSize(),
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <TableHead colSpan={header.colSpan} ref={setNodeRef} style={style}>
+      {header.isPlaceholder
+        ? null
+        : flexRender(header.column.columnDef.header, header.getContext())}
+      <button {...attributes} {...listeners} className="ml-3">
+        🟰
+      </button>
+    </TableHead>
+  );
+};
+
+const DragAlongCell = ({
+  cell,
+}: {
+  cell: Cell<JobPaginatedResponseDto["items"][number], unknown>;
+}) => {
+  const { isDragging, setNodeRef, transform } = useSortable({
+    id: cell.column.id,
+  });
+
+  const style: CSSProperties = {
+    opacity: isDragging ? 0.8 : 1,
+    transform: CSS.Translate.toString(transform),
+    position: "relative",
+    transition: "width transform 0.2s ease-in-out",
+    width: cell.column.getSize(),
+    zIndex: isDragging ? 1 : 0,
+  };
+
+  return (
+    <TableCell style={style} ref={setNodeRef}>
+      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+    </TableCell>
+  );
+};
+
 export default function JobsTableForMember({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -163,7 +241,7 @@ export default function JobsTableForMember({ type }: Props) {
   const [alertDialogState, setAlertDialogState] = useState<
     { open: false } | { open: true; jobId: string }
   >({ open: false });
-  const [reset, setReset] = useState(false);
+  const [reset, setReset] = useState<boolean>(false);
 
   const handleResetComplete = () => {
     setReset(false);
@@ -380,6 +458,7 @@ export default function JobsTableForMember({ type }: Props) {
       setSyncedParams(params);
     }
   }, [isFetching, params]);
+
   const columns = useMemo(() => {
     const baseColumns = [
       columnHelper.accessor("jobFolderId", {
@@ -430,6 +509,7 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("clientInfo.clientOrganizationName", {
+        id: "organization",
         header: "Organization",
       }),
       columnHelper.accessor("jobName", {
@@ -736,6 +816,18 @@ export default function JobsTableForMember({ type }: Props) {
 
   let sendDeliverables = false;
 
+  const [columnOrder, setColumnOrder] = useState<string[]>(() =>
+    columns.map((column) => {
+      if ((column as any).accessorKey === "clientInfo.clientOrganizationName") {
+        return "organization";
+      } else {
+        return column.id! || (column as any).accessorKey;
+      }
+    })
+  );
+  console.log(
+    columns.map((column) => column.id! || (column as any).accessorKey)
+  );
   if (
     isBarunCorpMember &&
     canSendDeliverables &&
@@ -752,81 +844,107 @@ export default function JobsTableForMember({ type }: Props) {
     pageCount: data?.totalPage ?? -1,
     onPaginationChange,
     manualPagination: true,
+    onColumnOrderChange: setColumnOrder,
     state: {
       pagination,
       columnVisibility: {
         ...columnVisibility,
         sendDeliverables,
       },
+      columnOrder,
     },
   });
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((columnOrder) => {
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        console.log(active.id);
+        const newIndex = columnOrder.indexOf(over.id as string);
+        return arrayMove(columnOrder, oldIndex, newIndex);
+      });
+    }
+  }
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {}),
+    useSensor(TouchSensor, {}),
+    useSensor(KeyboardSensor, {})
+  );
+
   return (
     <div className="space-y-2">
-      <div className="rounded-md border overflow-hidden">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24">
-                  <div className="flex justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <NewTabTableRow
-                  key={row.id}
-                  href={`/jobs/${row.id}`}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={
-                    (row.original.isExpedited ? "bg-yellow-100 " : "") +
-                    (row.original.inReview ? "bg-violet-100 " : "") +
-                    (row.original.isExpedited && row.original.inReview
-                      ? "bg-green-300"
-                      : "")
-                  }
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </NewTabTableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <DndContext
+        collisionDetection={closestCenter}
+        modifiers={[restrictToHorizontalAxis]}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
+      >
+        <div className="rounded-md border overflow-hidden">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  <SortableContext
+                    items={columnOrder}
+                    strategy={horizontalListSortingStrategy}
+                  >
+                    {headerGroup.headers.map((header) => (
+                      <DraggableTableHeader key={header.id} header={header} />
+                    ))}
+                  </SortableContext>
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24">
+                    <div className="flex justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <NewTabTableRow
+                    key={row.id}
+                    href={`/jobs/${row.id}`}
+                    data-state={row.getIsSelected() && "selected"}
+                    className={
+                      (row.original.isExpedited ? "bg-yellow-100 " : "") +
+                      (row.original.inReview ? "bg-violet-100 " : "") +
+                      (row.original.isExpedited && row.original.inReview
+                        ? "bg-green-300"
+                        : "")
+                    }
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <SortableContext
+                        key={cell.id}
+                        items={columnOrder}
+                        strategy={horizontalListSortingStrategy}
+                      >
+                        <DragAlongCell key={cell.id} cell={cell} />
+                      </SortableContext>
+                    ))}
+                  </NewTabTableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </DndContext>
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
