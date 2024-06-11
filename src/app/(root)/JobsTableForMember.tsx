@@ -175,63 +175,6 @@ export function getItemsTableExportDataFromLineItems(
   }));
 }
 
-const DraggableTableHeader = ({
-  header,
-}: {
-  header: Header<JobPaginatedResponseDto["items"][number], unknown>;
-}) => {
-  const { attributes, isDragging, listeners, setNodeRef, transform } =
-    useSortable({
-      id: header.column.id,
-    });
-
-  const style: CSSProperties = {
-    opacity: isDragging ? 0.8 : 1,
-    position: "relative",
-    transform: CSS.Translate.toString(transform),
-    transition: "width transform 0.2s ease-in-outs",
-    whiteSpace: "nowrap",
-    width: header.column.getSize(),
-    zIndex: isDragging ? 1 : 0,
-  };
-
-  return (
-    <TableHead colSpan={header.colSpan} ref={setNodeRef} style={style}>
-      {header.isPlaceholder
-        ? null
-        : flexRender(header.column.columnDef.header, header.getContext())}
-      <button {...attributes} {...listeners} className="ml-3">
-        🟰
-      </button>
-    </TableHead>
-  );
-};
-
-const DragAlongCell = ({
-  cell,
-}: {
-  cell: Cell<JobPaginatedResponseDto["items"][number], unknown>;
-}) => {
-  const { isDragging, setNodeRef, transform } = useSortable({
-    id: cell.column.id,
-  });
-
-  const style: CSSProperties = {
-    opacity: isDragging ? 0.8 : 1,
-    transform: CSS.Translate.toString(transform),
-    position: "relative",
-    transition: "width transform 0.2s ease-in-out",
-    width: cell.column.getSize(),
-    zIndex: isDragging ? 1 : 0,
-  };
-
-  return (
-    <TableCell style={style} ref={setNodeRef}>
-      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-    </TableCell>
-  );
-};
-
 export default function JobsTableForMember({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -453,6 +396,87 @@ export default function JobsTableForMember({ type }: Props) {
   );
 
   const { data, isLoading, isFetching } = useJobsQuery(params, true);
+
+  const DraggableTableHeader = ({
+    header,
+  }: {
+    header: Header<JobPaginatedResponseDto["items"][number], unknown>;
+  }) => {
+    const { attributes, isDragging, listeners, setNodeRef, transform } =
+      useSortable({
+        id: header.column.id,
+      });
+
+    const style: CSSProperties = {
+      opacity: isDragging ? 0.8 : 1,
+      position: "relative",
+      transform: CSS.Translate.toString(transform),
+      transition: "width transform 0.2s ease-in-outs",
+      whiteSpace: "nowrap",
+      width: header.column.getSize(),
+      zIndex: isDragging ? 1 : 0,
+    };
+
+    return table.getRowModel().rows.length > 0 ? (
+      <TableHead
+        colSpan={header.colSpan}
+        ref={setNodeRef}
+        style={style}
+        className={`relative w-${header.getSize()}`}
+      >
+        {header.isPlaceholder
+          ? null
+          : flexRender(header.column.columnDef.header, header.getContext())}
+        <button {...attributes} {...listeners} className="ml-3">
+          🟰
+        </button>
+        <div
+          onMouseDown={header.getResizeHandler()}
+          onTouchStart={header.getResizeHandler()}
+          className={`resizer ${
+            header.column.getIsResizing() ? "isResizing" : ""
+          }`}
+        ></div>
+      </TableHead>
+    ) : (
+      <TableHead key={header.id}>
+        {header.isPlaceholder
+          ? null
+          : flexRender(header.column.columnDef.header, header.getContext())}
+      </TableHead>
+    );
+  };
+
+  const DragAlongCell = ({
+    cell,
+  }: {
+    cell: Cell<JobPaginatedResponseDto["items"][number], unknown>;
+  }) => {
+    const { isDragging, setNodeRef, transform } = useSortable({
+      id: cell.column.id,
+    });
+
+    const style: CSSProperties = {
+      opacity: isDragging ? 0.8 : 1,
+      transform: CSS.Translate.toString(transform),
+      position: "relative",
+      transition: "width transform 0.2s ease-in-out",
+      width: cell.column.getSize(),
+      zIndex: isDragging ? 1 : 0,
+    };
+
+    return (
+      <TableCell
+        style={style}
+        ref={setNodeRef}
+        key={cell.id}
+        className={`w-${cell.column.getSize()}`}
+      >
+        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      </TableCell>
+    );
+  };
+
   useEffect(() => {
     if (!isFetching) {
       setSyncedParams(params);
@@ -463,6 +487,7 @@ export default function JobsTableForMember({ type }: Props) {
     const baseColumns = [
       columnHelper.accessor("jobFolderId", {
         header: "Google Drive",
+        size: 110,
         cell: ({ row }) => {
           const job = row.original;
           return (
@@ -478,6 +503,7 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("priority", {
+        size: 136,
         header: () => (
           <EnumHeader
             buttonText="Priority"
@@ -497,6 +523,7 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("dueDate", {
+        size: 175,
         header: "Date Due",
         cell: ({ getValue }) => {
           const value = getValue();
@@ -513,6 +540,7 @@ export default function JobsTableForMember({ type }: Props) {
         header: "Organization",
       }),
       columnHelper.accessor("jobName", {
+        size: 450,
         header: () => (
           <SearchHeader
             buttonText="Name"
@@ -525,6 +553,7 @@ export default function JobsTableForMember({ type }: Props) {
         ),
       }),
       columnHelper.display({
+        size: 85,
         id: "copyJobId",
         cell: ({ row }) => {
           const value = row.original.jobName;
@@ -532,6 +561,7 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("jobStatus", {
+        size: 150,
         header: () =>
           type !== "All" ? (
             "Status"
@@ -562,6 +592,7 @@ export default function JobsTableForMember({ type }: Props) {
       }),
       columnHelper.display({
         id: "sendDeliverables",
+        size: 180,
         cell: ({ row }) => {
           const value = row.original.jobStatus;
           const dateSentToClient = row.original.dateSentToClient;
@@ -593,6 +624,7 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("assignedTasks", {
+        size: 280,
         header: () => (
           <>
             <Popover>
@@ -825,9 +857,6 @@ export default function JobsTableForMember({ type }: Props) {
       }
     })
   );
-  console.log(
-    columns.map((column) => column.id! || (column as any).accessorKey)
-  );
   if (
     isBarunCorpMember &&
     canSendDeliverables &&
@@ -843,6 +872,7 @@ export default function JobsTableForMember({ type }: Props) {
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
     onPaginationChange,
+    columnResizeMode: "onChange",
     manualPagination: true,
     onColumnOrderChange: setColumnOrder,
     state: {
@@ -860,7 +890,6 @@ export default function JobsTableForMember({ type }: Props) {
     if (active && over && active.id !== over.id) {
       setColumnOrder((columnOrder) => {
         const oldIndex = columnOrder.indexOf(active.id as string);
-        console.log(active.id);
         const newIndex = columnOrder.indexOf(over.id as string);
         return arrayMove(columnOrder, oldIndex, newIndex);
       });
@@ -882,7 +911,15 @@ export default function JobsTableForMember({ type }: Props) {
         sensors={sensors}
       >
         <div className="rounded-md border overflow-hidden">
-          <Table>
+          <Table
+            {...(table.getRowModel().rows.length > 0
+              ? {
+                  style: {
+                    width: table.getTotalSize(),
+                  },
+                }
+              : {})}
+          >
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -945,6 +982,7 @@ export default function JobsTableForMember({ type }: Props) {
           </Table>
         </div>
       </DndContext>
+
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">

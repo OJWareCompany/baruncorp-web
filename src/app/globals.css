@@ -122,3 +122,20 @@
 .highcharts-credits {
   display: none;
 }
+
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: rgba(230, 230, 230, 0.5);
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+.resizer.isResizing {
+  background: rgb(76, 107, 207);
+  opacity: 1;
+}
