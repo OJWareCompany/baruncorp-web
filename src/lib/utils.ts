@@ -44,7 +44,11 @@ export function formatDateTime(dateTimeString: string) {
 }
 
 export function formatInEST(date: Date | string) {
-  return formatInTimeZone(date, "America/New_York", "MM-dd-yyyy, p");
+  return formatInTimeZone(new Date(date), "America/New_York", "MM-dd-yyyy, p");
+}
+
+export function formatInUTC(date: Date | string) {
+  return formatInTimeZone(new Date(date), "Etc/UTC", "MM-dd-yyyy, p");
 }
 
 export function formatInESTAsMMddYY(date: Date | string) {
@@ -68,7 +72,15 @@ export function getISOStringForStartOfDayInUTC(date: Date) {
 }
 
 export function getISOStringInEST(date: Date) {
-  return fromZonedTime(date, "America/New_York").toISOString();
+  return fromZonedTime(new Date(date), "America/New_York").toISOString();
+}
+
+export function getISOStringInUTC(date: Date) {
+  return fromZonedTime(new Date(date), "Etc/UTC").toISOString();
+}
+
+export function getISOStringInToUTC(date: Date) {
+  return toZonedTime(date, "Etc/UTC").toISOString();
 }
 
 export function getDiffHoursFromLocalToEST() {
