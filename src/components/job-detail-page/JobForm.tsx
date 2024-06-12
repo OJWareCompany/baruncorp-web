@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { Value } from "@udecode/plate-common";
+import { formatInTimeZone } from "date-fns-tz";
 import RowItemsContainer from "../RowItemsContainer";
 import AllDateTimePicker from "../date-time-picker/AllDateTimePicker";
 import {
@@ -56,7 +57,6 @@ import {
 import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import usePatchJobDueDateMutation from "@/mutations/usePatchJobDueDateMution";
-import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
 interface Props {
   project: ProjectResponseDto;
@@ -292,7 +292,11 @@ export default function JobForm({ project, job, pageType }: Props) {
         mountingType: values.mountingType,
       });
       await usePatchJobDueDateMutateResult.mutateAsync({
-        dueDate: getISOStringForStartOfDayInUTC(values.dueDate),
+        dueDate: formatInTimeZone(
+          new Date(values.dueDate),
+          "Etc/UTC",
+          "yyyy-MM-dd HH:mm:ss zzz"
+        ),
       });
       toast({ title: "Success" });
       queryClient.invalidateQueries({
@@ -664,7 +668,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                           newValue === undefined ? null : newValue
                         );
                       }}
-                      disabled
+                      disabled={!isWorker}
                     />
                   </FormControl>
                   <FormMessage />
