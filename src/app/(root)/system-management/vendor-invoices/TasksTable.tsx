@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { v4 as uuidv4 } from "uuid";
 import {
   Table,
   TableBody,
@@ -117,7 +118,7 @@ export default function TasksTable({ tasks }: Props) {
           ) : (
             table.getRowModel().rows.map((row) => (
               <TableRow
-                key={row.id}
+                key={uuidv4()}
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
