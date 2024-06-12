@@ -3,6 +3,7 @@ import {
   Cell,
   Header,
   PaginationState,
+  VisibilityState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -40,6 +41,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useProfileContext } from "./ProfileProvider";
 import {
   AlertDialog,
@@ -119,6 +121,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -185,15 +192,28 @@ export default function JobsTableForMember({ type }: Props) {
     { open: false } | { open: true; jobId: string }
   >({ open: false });
   const [reset, setReset] = useState<boolean>(false);
-
-  const handleResetComplete = () => {
-    setReset(false);
-  };
-
+  const columnVisibilities = useJobsColumnVisibility();
   const {
     isBarunCorpMember,
     authority: { canSendDeliverables },
   } = useProfileContext();
+  let sendDeliverables = false;
+  if (
+    isBarunCorpMember &&
+    canSendDeliverables &&
+    (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
+  ) {
+    sendDeliverables = true;
+  }
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    ...columnVisibilities,
+    sendDeliverables:
+      canSendDeliverables &&
+      (type === "Completed" || type === "Canceled (Invoice)" || type === "All"),
+  });
+  const handleResetComplete = () => {
+    setReset(false);
+  };
 
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
@@ -323,7 +343,6 @@ export default function JobsTableForMember({ type }: Props) {
     pagination,
     updatePageSize: setPageSize,
   });
-  const columnVisibility = useJobsColumnVisibility();
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -846,8 +865,6 @@ export default function JobsTableForMember({ type }: Props) {
     propertyOwnerSearchParamName,
   ]);
 
-  let sendDeliverables = false;
-
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     columns.map((column) => {
       if ((column as any).accessorKey === "clientInfo.clientOrganizationName") {
@@ -857,13 +874,6 @@ export default function JobsTableForMember({ type }: Props) {
       }
     })
   );
-  if (
-    isBarunCorpMember &&
-    canSendDeliverables &&
-    (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
-  ) {
-    sendDeliverables = true;
-  }
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -875,12 +885,10 @@ export default function JobsTableForMember({ type }: Props) {
     columnResizeMode: "onChange",
     manualPagination: true,
     onColumnOrderChange: setColumnOrder,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       pagination,
-      columnVisibility: {
-        ...columnVisibility,
-        sendDeliverables,
-      },
+      columnVisibility,
       columnOrder,
     },
   });
@@ -904,6 +912,47 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <Button variant={"outline"} size={"sm"}>
+            {table.getIsAllColumnsVisible() ? "Show Column" : "Hide Column"}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          <DropdownMenuCheckboxItem
+            checked={table.getIsAllColumnsVisible()}
+            onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
+          >
+            Toggle All
+          </DropdownMenuCheckboxItem>
+          {table.getAllLeafColumns().map((column) => {
+            return (
+              // <DropdownMenuCheckboxItem
+              //   key={column.id}
+              //   checked={column.getIsVisible()}
+              //   onCheckedChange={column.getToggleVisibilityHandler()}
+              // >
+              //   {column.id}
+              // </DropdownMenuCheckboxItem>
+              <div
+                key={column.id}
+                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              >
+                <label>
+                  <input
+                    {...{
+                      type: "checkbox",
+                      checked: column.getIsVisible(),
+                      onChange: column.getToggleVisibilityHandler(),
+                    }}
+                  />
+                  {column.id}
+                </label>
+              </div>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
       <DndContext
         collisionDetection={closestCenter}
         modifiers={[restrictToHorizontalAxis]}
