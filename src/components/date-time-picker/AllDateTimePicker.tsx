@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { formatInEST, getDiffHoursFromLocalToEST } from "@/lib/utils";
+import { formatInNewDateEST, getDiffHoursFromLocalToEST } from "@/lib/utils";
 
 interface Props {
   value: Date | null | undefined;
@@ -49,7 +49,7 @@ const AllDateTimePicker = forwardRef<HTMLButtonElement, Props>(
             ref={ref}
             disabled={disabled}
           >
-            {value ? formatInEST(new Date(value)) : "Pick a date"}
+            {value ? formatInNewDateEST(new Date(value)) : "Pick a date"}
 
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
