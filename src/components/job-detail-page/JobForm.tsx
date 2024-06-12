@@ -4,7 +4,7 @@ import { DefaultValues, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { Info, X } from "lucide-react";
 import { Value } from "@udecode/plate-common";
 import { formatInTimeZone } from "date-fns-tz";
 import RowItemsContainer from "../RowItemsContainer";
@@ -57,6 +57,12 @@ import {
 import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import usePatchJobDueDateMutation from "@/mutations/usePatchJobDueDateMution";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   project: ProjectResponseDto;
@@ -656,7 +662,21 @@ export default function JobForm({ project, job, pageType }: Props) {
               name="dueDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date Due</FormLabel>
+                  <div className="flex item-center gap-2">
+                    <FormLabel>Date Due</FormLabel>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 cursor-pointer" />
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                          <p className="text-xs">
+                            You can change Am and Pm with the direction key.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <FormControl>
                     <AllDateTimePicker
                       value={field.value}
