@@ -68,8 +68,8 @@ export default function SearchDateHeader({
     } = searchParamOptions;
 
     if (dates) {
-      const fromDate = dates.from?.toISOString() ?? "";
-      const toDate = dates.to.toISOString() ?? "";
+      const fromDate = dates.from ? dates.from.toLocaleDateString("en-CA") : "";
+      const toDate = dates.to ? dates.to.toLocaleDateString("en-CA") : "";
       newSearchParams.set(
         encodeURIComponent(dateSentToClientStartSearchParamName),
         fromDate
@@ -87,7 +87,17 @@ export default function SearchDateHeader({
 
   const handleReset = () => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
+
+    newSearchParams.delete(
+      encodeURIComponent(
+        searchParamOptions.dateSentToClientStartSearchParamName
+      )
+    );
+    newSearchParams.delete(
+      encodeURIComponent(searchParamOptions.dateSentToClientEndSearchParamName)
+    );
     newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+
     router.push(`${pathname}?${newSearchParams.toString()}`, {
       scroll: false,
     });
