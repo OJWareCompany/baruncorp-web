@@ -9,7 +9,6 @@ import { InvoiceResponseDto } from "@/api/api-spec";
 interface Props {
   clientInvoice: InvoiceResponseDto;
 }
-
 export default function DownloadCSVButton({ clientInvoice }: Props) {
   const csvConfig = useMemo(() => {
     return mkConfig({
@@ -27,9 +26,14 @@ export default function DownloadCSVButton({ clientInvoice }: Props) {
       size={"sm"}
       className="h-[28px] text-xs px-2"
       onClick={() => {
-        const csv = generateCsv(csvConfig)(
-          getLineItemsTableExportDataFromLineItems(clientInvoice.lineItems)
+        const lineItems = getLineItemsTableExportDataFromLineItems(
+          clientInvoice.lineItems
         );
+        const formattedLineItems = lineItems.map((item) => ({
+          ...item,
+          // 필요한 경우 각 필드를 적절히 변환
+        }));
+        const csv = generateCsv(csvConfig)(formattedLineItems);
         download(csvConfig)(csv);
       }}
     >
