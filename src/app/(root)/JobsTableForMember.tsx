@@ -10,6 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
+  Check,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -912,47 +913,44 @@ export default function JobsTableForMember({ type }: Props) {
 
   return (
     <div className="space-y-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <Button variant={"outline"} size={"sm"}>
-            {table.getIsAllColumnsVisible() ? "Show Column" : "Hide Column"}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
-          <DropdownMenuCheckboxItem
-            checked={table.getIsAllColumnsVisible()}
-            onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
-          >
-            Toggle All
-          </DropdownMenuCheckboxItem>
-          {table.getAllLeafColumns().map((column) => {
-            return (
-              // <DropdownMenuCheckboxItem
-              //   key={column.id}
-              //   checked={column.getIsVisible()}
-              //   onCheckedChange={column.getToggleVisibilityHandler()}
-              // >
-              //   {column.id}
-              // </DropdownMenuCheckboxItem>
-              <div
-                key={column.id}
-                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-              >
-                <label>
-                  <input
-                    {...{
-                      type: "checkbox",
-                      checked: column.getIsVisible(),
-                      onChange: column.getToggleVisibilityHandler(),
-                    }}
-                  />
-                  {column.id}
-                </label>
-              </div>
-            );
-          })}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="relative">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant={"outline"} size={"sm"}>
+              {table.getIsAllColumnsVisible() ? "Hide Column" : "Show Column"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuCheckboxItem
+              checked={table.getIsAllColumnsVisible()}
+              onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
+            >
+              Toggle All
+            </DropdownMenuCheckboxItem>
+            {table.getAllLeafColumns().map((column) => {
+              return (
+                <div
+                  key={column.id}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={column.getIsVisible()}
+                      onChange={column.getToggleVisibilityHandler()}
+                      className="hidden"
+                    />
+                    <span className="flex items-center justify-center w-4 h-4 mr-2">
+                      {column.getIsVisible() && <Check className="h-4 w-4" />}
+                    </span>
+                    {column.id}
+                  </label>
+                </div>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <DndContext
         collisionDetection={closestCenter}
         modifiers={[restrictToHorizontalAxis]}
