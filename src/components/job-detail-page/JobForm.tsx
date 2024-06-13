@@ -299,7 +299,7 @@ export default function JobForm({ project, job, pageType }: Props) {
       });
       await usePatchJobDueDateMutateResult.mutateAsync({
         dueDate: formatInTimeZone(
-          new Date(values.dueDate),
+          new Date(values.dueDate).setSeconds(0),
           "Etc/UTC",
           "yyyy-MM-dd HH:mm:ss zzz"
         ),
