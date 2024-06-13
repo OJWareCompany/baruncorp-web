@@ -920,7 +920,7 @@ export default function JobsTableForMember({ type }: Props) {
               {table.getIsAllColumnsVisible() ? "Hide Column" : "Show Column"}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
+          <DropdownMenuContent className="w-56 max-h-60 overflow-auto">
             <DropdownMenuCheckboxItem
               checked={table.getIsAllColumnsVisible()}
               onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
@@ -931,7 +931,7 @@ export default function JobsTableForMember({ type }: Props) {
               return (
                 <div
                   key={column.id}
-                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                 >
                   <label className="flex items-center">
                     <input
