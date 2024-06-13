@@ -125,7 +125,6 @@ export default function TasksCompletedSection() {
       : 0,
     pageSize,
   };
-
   const currentDate = new Date();
   const initialFromDate = startOfMonth(currentDate);
   const initialToDate = endOfDay(currentDate);
@@ -141,8 +140,8 @@ export default function TasksCompletedSection() {
     ? fromDateSearchParamParseResult.data
     : initialFromDate;
   const fromDateSearchParam = fromDateSearchParamParseResult.success
-    ? fromDateSearchParamParseResult.data.toISOString()
-    : initialFromDate.toISOString();
+    ? fromDateSearchParamParseResult.data.toLocaleDateString("en-US")
+    : initialFromDate.toLocaleDateString("en-US");
 
   const toDateSearchParamParseResult = z
     .date()
@@ -155,8 +154,8 @@ export default function TasksCompletedSection() {
     ? toDateSearchParamParseResult.data
     : initialToDate;
   const toDateSearchParam = toDateSearchParamParseResult.success
-    ? toDateSearchParamParseResult.data.toISOString()
-    : initialToDate.toISOString();
+    ? toDateSearchParamParseResult.data.toLocaleDateString("en-US")
+    : initialToDate.toLocaleDateString("en-US");
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -216,11 +215,11 @@ export default function TasksCompletedSection() {
               if (newValue == null) {
                 newSearchParams.set(
                   encodeURIComponent(fromDateSearchParamName),
-                  fromDateData.toISOString()
+                  fromDateData.toLocaleDateString("en-US")
                 );
                 newSearchParams.set(
                   encodeURIComponent(toDateSearchParamName),
-                  fromDateData.toISOString()
+                  fromDateData.toLocaleDateString("en-US")
                 );
                 newSearchParams.set(
                   encodeURIComponent(pageIndexSearchParamName),
@@ -230,7 +229,7 @@ export default function TasksCompletedSection() {
                 if (newValue.from != null) {
                   newSearchParams.set(
                     encodeURIComponent(fromDateSearchParamName),
-                    newValue.from.toISOString()
+                    newValue.from.toLocaleDateString("en-US")
                   );
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
@@ -241,7 +240,7 @@ export default function TasksCompletedSection() {
                 if (newValue.to != null) {
                   newSearchParams.set(
                     encodeURIComponent(toDateSearchParamName),
-                    newValue.to.toISOString()
+                    newValue.to.toLocaleDateString("en-US")
                   );
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
