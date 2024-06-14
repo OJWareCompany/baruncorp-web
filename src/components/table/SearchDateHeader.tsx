@@ -74,7 +74,7 @@ export default function SearchDateHeader({
         : "";
       const toDate = dates.to
         ? zonedTimeToUtc(
-            new Date(dates.to.setHours(23, 59, 59)),
+            new Date(dates.to.setHours(27, 59, 59)),
             "UTC"
           ).toISOString()
         : "";

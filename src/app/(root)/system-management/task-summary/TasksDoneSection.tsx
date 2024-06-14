@@ -125,11 +125,11 @@ export default function TasksDoneSection() {
     : initialToDate;
   const toDateSearchParam = toDateSearchParamParseResult.success
     ? zonedTimeToUtc(
-        new Date(toDateSearchParamParseResult.data.setHours(23, 59, 59)),
+        new Date(toDateSearchParamParseResult.data.setHours(27, 59, 59)),
         "UTC"
       ).toISOString()
     : zonedTimeToUtc(
-        new Date(initialToDate.setHours(23, 59, 59)),
+        new Date(initialToDate.setHours(27, 59, 59)),
         "UTC"
       ).toISOString();
 
