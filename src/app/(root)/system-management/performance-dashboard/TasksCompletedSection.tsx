@@ -12,11 +12,12 @@ import {
 } from "@tanstack/react-table";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
-import { endOfDay, startOfMonth } from "date-fns";
+import { addHours, endOfDay, startOfMonth } from "date-fns";
 import { z } from "zod";
 import * as Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { zonedTimeToUtc } from "date-fns-tz";
 import TasksCompletedDatePicker from "./TasksCompletedDatePicker";
 import TasksCompletedDetailSheet from "./TasksCompletedDetailSheet";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -140,8 +141,11 @@ export default function TasksCompletedSection() {
     ? fromDateSearchParamParseResult.data
     : initialFromDate;
   const fromDateSearchParam = fromDateSearchParamParseResult.success
-    ? fromDateSearchParamParseResult.data.toLocaleDateString("en-US")
-    : initialFromDate.toLocaleDateString("en-US");
+    ? zonedTimeToUtc(
+        addHours(fromDateSearchParamParseResult.data, 4),
+        "UTC"
+      ).toISOString()
+    : zonedTimeToUtc(addHours(initialFromDate, 4), "UTC").toISOString();
 
   const toDateSearchParamParseResult = z
     .date()
@@ -154,8 +158,14 @@ export default function TasksCompletedSection() {
     ? toDateSearchParamParseResult.data
     : initialToDate;
   const toDateSearchParam = toDateSearchParamParseResult.success
-    ? toDateSearchParamParseResult.data.toLocaleDateString("en-US")
-    : initialToDate.toLocaleDateString("en-US");
+    ? zonedTimeToUtc(
+        new Date(toDateSearchParamParseResult.data.setHours(23, 59, 59)),
+        "UTC"
+      ).toISOString()
+    : zonedTimeToUtc(
+        new Date(initialToDate.setHours(23, 59, 59)),
+        "UTC"
+      ).toISOString();
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,

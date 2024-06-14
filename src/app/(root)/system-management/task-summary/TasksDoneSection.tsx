@@ -15,9 +15,10 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { endOfDay, startOfMonth } from "date-fns";
+import { addHours, endOfDay, startOfMonth } from "date-fns";
 import { z } from "zod";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { zonedTimeToUtc } from "date-fns-tz";
 import TasksDoneDatePicker from "./TasksDoneDatePicker";
 import TasksDoneDetailSheet from "./TasksDoneDetailSheet";
 import {
@@ -106,8 +107,11 @@ export default function TasksDoneSection() {
     ? fromDateSearchParamParseResult.data
     : initialFromDate;
   const fromDateSearchParam = fromDateSearchParamParseResult.success
-    ? fromDateSearchParamParseResult.data.toLocaleDateString("en-US")
-    : initialFromDate.toLocaleDateString("en-US");
+    ? zonedTimeToUtc(
+        addHours(fromDateSearchParamParseResult.data, 4),
+        "UTC"
+      ).toISOString()
+    : zonedTimeToUtc(addHours(initialFromDate, 4), "UTC").toISOString();
 
   const toDateSearchParamParseResult = z
     .date()
@@ -120,8 +124,14 @@ export default function TasksDoneSection() {
     ? toDateSearchParamParseResult.data
     : initialToDate;
   const toDateSearchParam = toDateSearchParamParseResult.success
-    ? toDateSearchParamParseResult.data.toLocaleDateString("en-US")
-    : initialToDate.toLocaleDateString("en-US");
+    ? zonedTimeToUtc(
+        new Date(toDateSearchParamParseResult.data.setHours(23, 59, 59)),
+        "UTC"
+      ).toISOString()
+    : zonedTimeToUtc(
+        new Date(initialToDate.setHours(23, 59, 59)),
+        "UTC"
+      ).toISOString();
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
