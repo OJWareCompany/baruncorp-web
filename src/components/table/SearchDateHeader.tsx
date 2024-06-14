@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DateRange } from "react-day-picker";
 import { cn } from "@udecode/cn";
-import { zonedTimeToUtc } from "date-fns-tz";
+import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import {
@@ -48,10 +48,17 @@ export default function SearchDateHeader({
     const toDate = urlSearchParams.get(
       searchParamOptions.dateSentToClientEndSearchParamName
     );
+
     if (fromDate && toDate) {
+      const estFromDate = utcToZonedTime(
+        new Date(fromDate),
+        "America/New_York"
+      );
+      const estToDate = utcToZonedTime(new Date(toDate), "America/New_York");
+
       setSelectedDates({
-        from: new Date(fromDate),
-        to: new Date(toDate),
+        from: estFromDate,
+        to: estToDate,
       });
       setIsFiltered(true);
     }
@@ -74,7 +81,7 @@ export default function SearchDateHeader({
         : "";
       const toDate = dates.to
         ? zonedTimeToUtc(
-            new Date(dates.to.setHours(27, 59, 59)),
+            addHours(new Date(dates.to.setHours(23, 59, 59)), 4),
             "UTC"
           ).toISOString()
         : "";
