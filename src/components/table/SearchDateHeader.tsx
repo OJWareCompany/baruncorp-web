@@ -1,9 +1,10 @@
-import { addDays, subDays } from "date-fns";
+import { addDays, addHours, subDays } from "date-fns";
 import { ChevronsUpDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DateRange } from "react-day-picker";
 import { cn } from "@udecode/cn";
+import { zonedTimeToUtc } from "date-fns-tz";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import {
@@ -68,8 +69,15 @@ export default function SearchDateHeader({
     } = searchParamOptions;
 
     if (dates) {
-      const fromDate = dates.from ? dates.from.toLocaleDateString("en-US") : "";
-      const toDate = dates.to ? dates.to.toLocaleDateString("en-US") : "";
+      const fromDate = dates.from
+        ? zonedTimeToUtc(addHours(new Date(dates.from), 4), "UTC").toISOString()
+        : "";
+      const toDate = dates.to
+        ? zonedTimeToUtc(
+            new Date(dates.to.setHours(23, 59, 59)),
+            "UTC"
+          ).toISOString()
+        : "";
       newSearchParams.set(
         encodeURIComponent(dateSentToClientStartSearchParamName),
         fromDate
@@ -79,6 +87,15 @@ export default function SearchDateHeader({
         toDate
       );
       newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+
+      console.log(
+        dates.from
+          ? zonedTimeToUtc(
+              addHours(new Date(dates.from), 4),
+              "UTC"
+            ).toISOString()
+          : ""
+      );
     }
     router.push(`${pathname}?${newSearchParams.toString()}`, {
       scroll: false,
