@@ -701,7 +701,48 @@ export default function JobForm({ project, job, pageType }: Props) {
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <div className="flex item-center gap-2">
+                      <FormLabel>Priority</FormLabel>
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-4 w-4 cursor-pointer" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p className="text-xs">
+                              <strong>Priority Update Policy</strong>
+                              <ul className="list-disc pl-4">
+                                <li>
+                                  <strong>Low</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>On Hold</li>
+                                    <li>Elapsed Time - 20% or less</li>
+                                  </ul>
+                                </li>
+                                <li>
+                                  <strong>Medium</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>Elapsed Time - 21% to 41%</li>
+                                  </ul>
+                                </li>
+                                <li>
+                                  <strong>High</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>Elapsed Time - 41% to 71%</li>
+                                  </ul>
+                                </li>
+                                <li>
+                                  <strong>Immediate</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>Elapsed Time - 71% or more</li>
+                                  </ul>
+                                </li>
+                              </ul>
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <FormControl>
                       <Select
                         value={field.value}
