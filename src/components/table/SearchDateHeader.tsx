@@ -68,8 +68,8 @@ export default function SearchDateHeader({
     } = searchParamOptions;
 
     if (dates) {
-      const fromDate = dates.from ? dates.from.toLocaleDateString("en-CA") : "";
-      const toDate = dates.to ? dates.to.toLocaleDateString("en-CA") : "";
+      const fromDate = dates.from ? dates.from.toLocaleDateString("en-US") : "";
+      const toDate = dates.to ? dates.to.toLocaleDateString("en-US") : "";
       newSearchParams.set(
         encodeURIComponent(dateSentToClientStartSearchParamName),
         fromDate
