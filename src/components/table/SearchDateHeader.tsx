@@ -8,6 +8,12 @@ import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -131,34 +137,43 @@ export default function SearchDateHeader({
 
   return (
     <Popover>
-      <PopoverTrigger>
-        <Button
-          size={"sm"}
-          variant={"ghost"}
-          className={cn(
-            "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
-            isFiltered && "underline decoration-2 underline-offset-2"
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger>
+            <PopoverTrigger>
+              <Button
+                size={"sm"}
+                variant={"ghost"}
+                className={cn(
+                  "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
+                  isFiltered && "underline decoration-2 underline-offset-2"
+                )}
+              >
+                {buttonText}
+                <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">Select Search</p>
+          </TooltipContent>
+        </Tooltip>
+        <PopoverContent className="p-0 w-auto" align="end">
+          <Calendar
+            mode="range"
+            selected={selectedDates}
+            onSelect={handleDateSelect}
+            numberOfMonths={2}
+            fromMonth={subDays(new Date(), 180)}
+            toMonth={addDays(new Date(), 180)}
+          />
+          {isFiltered && (
+            <Button onClick={handleReset} className="justify-center">
+              Reset
+            </Button>
           )}
-        >
-          {buttonText}
-          <ChevronsUpDown className="h-3 w-3 ml-1.5" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0 w-auto" align="end">
-        <Calendar
-          mode="range"
-          selected={selectedDates}
-          onSelect={handleDateSelect}
-          numberOfMonths={2}
-          fromMonth={subDays(new Date(), 180)}
-          toMonth={addDays(new Date(), 180)}
-        />
-        {isFiltered && (
-          <Button onClick={handleReset} className="justify-center">
-            Reset
-          </Button>
-        )}
-      </PopoverContent>
+        </PopoverContent>
+      </TooltipProvider>
     </Popover>
   );
 }
