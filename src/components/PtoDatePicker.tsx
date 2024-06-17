@@ -1,9 +1,8 @@
 "use client";
-import { addDays, getDay, subDays } from "date-fns";
+import { addDays, format, getDay, subDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange, SelectRangeEventHandler } from "react-day-picker";
 import { forwardRef } from "react";
-import { formatInTimeZone } from "date-fns-tz";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -39,18 +38,13 @@ const PtoDatePicker = forwardRef<HTMLButtonElement, Props>(
               {value?.from ? (
                 value.to ? (
                   <>
-                    {`${formatInTimeZone(
-                      new Date(value.from),
-                      "America/New_York",
-                      "MM-dd-yyyy"
-                    )} ~ ${formatInTimeZone(
-                      new Date(value.to),
-                      "America/New_York",
+                    {`${format(value.from, "MM-dd-yyyy")} ~ ${format(
+                      value.to,
                       "MM-dd-yyyy"
                     )}`}
                   </>
                 ) : (
-                  formatInTimeZone(value.from, "America/New_York", "MM-dd-yyyy")
+                  format(value.from, "MM-dd-yyyy")
                 )
               ) : (
                 <span>Pick a date</span>
