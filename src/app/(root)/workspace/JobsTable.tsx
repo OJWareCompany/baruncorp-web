@@ -88,7 +88,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -648,21 +647,22 @@ export default function JobsTable({ type }: Props) {
           }
         ),
         columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
-          header: () =>
-            type === "All" ||
-            type === "Completed" ||
-            type === "Canceled (Invoice)" ? (
-              <SearchDateHeader
-                buttonText="Date Sent to Client"
-                searchParamOptions={{
-                  dateSentToClientStartSearchParamName,
-                  dateSentToClientEndSearchParamName,
-                }}
-                pageIndexSearchParamName={pageIndexSearchParamName}
-              />
-            ) : (
-              "Date Sent to Client"
-            ),
+          header: "Date Sent to Client",
+          // header: () =>
+          //   type === "All" ||
+          //   type === "Completed" ||
+          //   type === "Canceled (Invoice)" ? (
+          //     <SearchDateHeader
+          //       buttonText="Date Sent to Client"
+          //       searchParamOptions={{
+          //         dateSentToClientStartSearchParamName,
+          //         dateSentToClientEndSearchParamName,
+          //       }}
+          //       pageIndexSearchParamName={pageIndexSearchParamName}
+          //     />
+          //   ) : (
+          //     "Date Sent to Client"
+          //   ),
           cell: ({ getValue }) => {
             const value = getValue();
             if (value == null) {

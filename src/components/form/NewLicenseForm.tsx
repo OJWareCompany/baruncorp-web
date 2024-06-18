@@ -3,8 +3,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AxiosError } from "axios";
-import { zonedTimeToUtc } from "date-fns-tz";
-import { addHours } from "date-fns";
 import LoadingButton from "../LoadingButton";
 import DatePicker from "../DatePicker";
 import StatesCombobox from "../combobox/StatesCombobox";
@@ -28,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
 const formSchema = z.object({
   userId: z.string().trim().min(1, { message: "User is required" }),
@@ -71,10 +70,7 @@ export default function NewLicenseForm({
       abbreviation: values.abbreviation,
       type: values.type,
       expiryDate: values.expiryDate
-        ? zonedTimeToUtc(
-            addHours(new Date(values.expiryDate), 4),
-            "UTC"
-          ).toISOString()
+        ? getISOStringForStartOfDayInUTC(values.expiryDate)
         : null,
     })
       .then(() => {

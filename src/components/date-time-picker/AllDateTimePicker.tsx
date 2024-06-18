@@ -4,8 +4,8 @@ import { CalendarIcon } from "lucide-react";
 import { useDatePickerState } from "react-stately";
 import {
   fromDate,
-  getLocalTimeZone,
   toCalendarDate,
+  getLocalTimeZone,
 } from "@internationalized/date";
 import { Calendar } from "../ui/calendar";
 import TimeField from "./TimeField";
@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { formatInNewDateEST, getDiffHoursFromLocalToEST } from "@/lib/utils";
+import { formatInEST, getDiffHoursFromLocalToEST } from "@/lib/utils";
 
 interface Props {
   value: Date | null | undefined;
@@ -49,8 +49,7 @@ const AllDateTimePicker = forwardRef<HTMLButtonElement, Props>(
             ref={ref}
             disabled={disabled}
           >
-            {value ? formatInNewDateEST(new Date(value)) : "Pick a date"}
-
+            {value ? formatInEST(value) : "Pick a date"}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -75,10 +74,18 @@ const AllDateTimePicker = forwardRef<HTMLButtonElement, Props>(
                 return;
               }
 
-              const selectedDate = fromDate(day, "America/New_York");
-              const adjustedDate = selectedDate.add({ hours: diffHours });
+              if (state.value == null) {
+                state.setValue(
+                  fromDate(day, "America/New_York").add({ hours: diffHours })
+                );
+                return;
+              }
 
-              state.setDateValue(toCalendarDate(adjustedDate));
+              state.setDateValue(
+                toCalendarDate(
+                  fromDate(day, "America/New_York").add({ hours: diffHours })
+                )
+              );
             }}
             defaultMonth={
               new Date(

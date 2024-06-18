@@ -4,17 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { DateRange } from "react-day-picker";
-import {
-  addHours,
-  differenceInCalendarDays,
-  eachDayOfInterval,
-  getDay,
-} from "date-fns";
+import { differenceInCalendarDays, eachDayOfInterval, getDay } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { AxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
-import { zonedTimeToUtc } from "date-fns-tz";
 import { PtoDialogState } from "./PtoDetails";
 import usePostPtoDetailMutation from "@/mutations/usePostPtoDetailMutation";
 import PtoTypeAmountsCombobox from "@/components/combobox/PtoTypeAmountsCombobox";
@@ -42,6 +36,7 @@ import PtoDatePicker from "@/components/PtoDatePicker";
 import UsersByOrganizationCombobox from "@/components/combobox/UsersByOrganizationCombobox";
 import { BARUNCORP_ORGANIZATION_ID } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
+import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 
 const formSchema = z.object({
   rangeOfDays: z
@@ -172,10 +167,7 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
     if (state.type === "Add") {
       await postPtoDetailMutateAsync({
         userId: values.userId,
-        startedAt: zonedTimeToUtc(
-          addHours(new Date(values.rangeOfDays.from), 4),
-          "UTC"
-        ).toISOString(),
+        startedAt: getISOStringForStartOfDayInUTC(values.rangeOfDays.from),
         ptoTypeId: values.ptoTypeId,
         amountPerDay: Number(values.amount),
         days,
@@ -265,10 +257,7 @@ export default function PtoDialog({ state, ...dialogProps }: Props) {
     if (state.type === "Modify") {
       await patchPtoDetailMutateAsync({
         ptoId: state.pto.id,
-        startedAt: zonedTimeToUtc(
-          addHours(new Date(values.rangeOfDays.from), 4),
-          "UTC"
-        ).toISOString(),
+        startedAt: getISOStringForStartOfDayInUTC(values.rangeOfDays.from),
         ptoTypeId: values.ptoTypeId,
         amountPerDay: Number(values.amount),
         days,

@@ -4,7 +4,6 @@ import { DayContent, DayContentProps } from "react-day-picker";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, isWithinInterval, startOfDay, subMonths } from "date-fns";
 import { AxiosError } from "axios";
-import { utcToZonedTime } from "date-fns-tz";
 import PtoDialog from "./PtoDialog";
 import PtoDetailsTable from "./PtoDetailsTable";
 import {
@@ -53,19 +52,10 @@ function CustomDayContent({
   ...props
 }: CustomDayContentProps) {
   const target = ptoItems.find((value) => {
-    const estFromDate = utcToZonedTime(
-      new Date(value.startedAt),
-      "America/New_York"
-    );
-    const estToDate = utcToZonedTime(
-      new Date(value.endedAt),
-      "America/New_York"
-    );
     const isDateWithin = isWithinInterval(startOfDay(props.date), {
-      start: estFromDate,
-      end: estToDate,
+      start: startOfDay(new Date(value.startedAt)),
+      end: startOfDay(new Date(value.endedAt)),
     });
-
     return isDateWithin;
   });
 

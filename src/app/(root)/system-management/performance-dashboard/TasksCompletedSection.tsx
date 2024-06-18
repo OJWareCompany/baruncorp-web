@@ -12,12 +12,11 @@ import {
 } from "@tanstack/react-table";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { memo, useCallback, useMemo, useState } from "react";
-import { addHours, endOfDay, startOfMonth } from "date-fns";
+import { endOfDay, startOfMonth } from "date-fns";
 import { z } from "zod";
 import * as Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { zonedTimeToUtc } from "date-fns-tz";
 import TasksCompletedDatePicker from "./TasksCompletedDatePicker";
 import TasksCompletedDetailSheet from "./TasksCompletedDetailSheet";
 import CollapsibleSection from "@/components/CollapsibleSection";
@@ -126,6 +125,7 @@ export default function TasksCompletedSection() {
       : 0,
     pageSize,
   };
+
   const currentDate = new Date();
   const initialFromDate = startOfMonth(currentDate);
   const initialToDate = endOfDay(currentDate);
@@ -141,11 +141,8 @@ export default function TasksCompletedSection() {
     ? fromDateSearchParamParseResult.data
     : initialFromDate;
   const fromDateSearchParam = fromDateSearchParamParseResult.success
-    ? zonedTimeToUtc(
-        addHours(fromDateSearchParamParseResult.data, 4),
-        "UTC"
-      ).toISOString()
-    : zonedTimeToUtc(addHours(initialFromDate, 4), "UTC").toISOString();
+    ? fromDateSearchParamParseResult.data.toISOString()
+    : initialFromDate.toISOString();
 
   const toDateSearchParamParseResult = z
     .date()
@@ -158,17 +155,8 @@ export default function TasksCompletedSection() {
     ? toDateSearchParamParseResult.data
     : initialToDate;
   const toDateSearchParam = toDateSearchParamParseResult.success
-    ? zonedTimeToUtc(
-        addHours(
-          new Date(toDateSearchParamParseResult.data.setHours(23, 59, 59)),
-          4
-        ),
-        "UTC"
-      ).toISOString()
-    : zonedTimeToUtc(
-        new Date(initialToDate.setHours(27, 59, 59)),
-        "UTC"
-      ).toISOString();
+    ? toDateSearchParamParseResult.data.toISOString()
+    : initialToDate.toISOString();
 
   const onPaginationChange = useOnPaginationChange({
     pageIndexSearchParamName,
@@ -228,11 +216,11 @@ export default function TasksCompletedSection() {
               if (newValue == null) {
                 newSearchParams.set(
                   encodeURIComponent(fromDateSearchParamName),
-                  fromDateData.toLocaleDateString("en-US")
+                  fromDateData.toISOString()
                 );
                 newSearchParams.set(
                   encodeURIComponent(toDateSearchParamName),
-                  fromDateData.toLocaleDateString("en-US")
+                  fromDateData.toISOString()
                 );
                 newSearchParams.set(
                   encodeURIComponent(pageIndexSearchParamName),
@@ -242,7 +230,7 @@ export default function TasksCompletedSection() {
                 if (newValue.from != null) {
                   newSearchParams.set(
                     encodeURIComponent(fromDateSearchParamName),
-                    newValue.from.toLocaleDateString("en-US")
+                    newValue.from.toISOString()
                   );
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
@@ -253,7 +241,7 @@ export default function TasksCompletedSection() {
                 if (newValue.to != null) {
                   newSearchParams.set(
                     encodeURIComponent(toDateSearchParamName),
-                    newValue.to.toLocaleDateString("en-US")
+                    newValue.to.toISOString()
                   );
                   newSearchParams.set(
                     encodeURIComponent(pageIndexSearchParamName),
