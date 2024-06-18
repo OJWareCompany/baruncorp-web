@@ -50,6 +50,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  ResizeTableCell,
   Table,
   TableBody,
   TableCell,
@@ -486,14 +487,14 @@ export default function JobsTableForMember({ type }: Props) {
     };
 
     return (
-      <TableCell
+      <ResizeTableCell
         style={style}
         ref={setNodeRef}
         key={cell.id}
         className={`w-${cell.column.getSize()}`}
       >
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
-      </TableCell>
+      </ResizeTableCell>
     );
   };
 
