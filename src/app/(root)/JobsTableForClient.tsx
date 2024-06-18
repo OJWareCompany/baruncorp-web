@@ -105,7 +105,6 @@ import {
 } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -128,23 +127,9 @@ export default function JobsTableForClient({ type }: Props) {
     useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
   const [reset, setReset] = useState(false);
   const columnVisibilities = useJobsColumnVisibility();
-  const {
-    isBarunCorpMember,
-    authority: { canSendDeliverables },
-  } = useProfileContext();
-  let sendDeliverables = false;
-  if (
-    isBarunCorpMember &&
-    canSendDeliverables &&
-    (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
-  ) {
-    sendDeliverables = true;
-  }
+  const { isContractor } = useProfileContext();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     ...columnVisibilities,
-    sendDeliverables:
-      canSendDeliverables &&
-      (type === "Completed" || type === "Canceled (Invoice)" || type === "All"),
   });
 
   const handleResetComplete = () => {
@@ -791,43 +776,61 @@ export default function JobsTableForClient({ type }: Props) {
     useSensor(KeyboardSensor, {})
   );
 
+  const columnHeaders: { [key: string]: string } = {
+    jobFolderId: "Google Drive",
+    priority: "Priority",
+    dueDate: "Date Due",
+    "clientInfo.clientOrganizationName": "Organization",
+    jobName: "Name",
+    copyJobId: "Copy ID",
+    jobStatus: "Status",
+    assignedTasks: "Task",
+    projectPropertyType: "Property Type",
+    mountingType: "Mounting Type",
+    projectNumber: "Project Number",
+    propertyOwner: "Property Owner",
+    completedCancelledDate: "Date Completed/Canceled",
+    dateSentToClient: "Date Sent to Client",
+  };
+
   return (
     <div className="space-y-2">
       <div className="relative">
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant={"outline"} size={"sm"}>
-              {table.getIsAllColumnsVisible() ? "Hide Column" : "Show Column"}
+              Columns Visible
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 max-h-60 overflow-auto">
-            <DropdownMenuCheckboxItem
-              checked={table.getIsAllColumnsVisible()}
-              onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
-            >
-              Toggle All
-            </DropdownMenuCheckboxItem>
-            {table.getAllLeafColumns().map((column) => {
-              return (
-                <div
-                  key={column.id}
-                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                >
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={column.getIsVisible()}
-                      onChange={column.getToggleVisibilityHandler()}
-                      className="hidden"
-                    />
-                    <span className="flex items-center justify-center w-4 h-4 mr-2">
-                      {column.getIsVisible() && <Check className="h-4 w-4" />}
-                    </span>
-                    {column.id}
-                  </label>
-                </div>
-              );
-            })}
+            {table
+              .getAllLeafColumns()
+              .filter(
+                (column) =>
+                  isContractor ||
+                  (column.id !== "inReview" && column.id !== "priority")
+              )
+              .map((column) => {
+                return (
+                  <div
+                    key={column.id}
+                    className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
+                  >
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={column.getIsVisible()}
+                        onChange={column.getToggleVisibilityHandler()}
+                        className="hidden"
+                      />
+                      <span className="flex items-center justify-center w-4 h-4 mr-2">
+                        {column.getIsVisible() && <Check className="h-4 w-4" />}
+                      </span>
+                      {columnHeaders[column.id] || column.id}
+                    </label>
+                  </div>
+                );
+              })}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

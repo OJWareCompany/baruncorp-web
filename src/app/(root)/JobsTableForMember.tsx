@@ -912,13 +912,30 @@ export default function JobsTableForMember({ type }: Props) {
     useSensor(KeyboardSensor, {})
   );
 
+  const columnHeaders: { [key: string]: string } = {
+    jobFolderId: "Google Drive",
+    priority: "Priority",
+    dueDate: "Date Due",
+    organization: "Organization",
+    jobName: "Name",
+    copyJobId: "Copy ID",
+    jobStatus: "Status",
+    assignedTasks: "Task",
+    projectPropertyType: "Property Type",
+    mountingType: "Mounting Type",
+    projectNumber: "Project Number",
+    propertyOwner: "Property Owner",
+    completedCancelledDate: "Date Completed/Canceled",
+    dateSentToClient: "Date Sent to Client",
+  };
+
   return (
     <div className="space-y-2">
       <div className="relative">
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant={"outline"} size={"sm"}>
-              {table.getIsAllColumnsVisible() ? "Hide Column" : "Show Column"}
+              Columns Visible
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 max-h-60 overflow-auto">
@@ -926,13 +943,25 @@ export default function JobsTableForMember({ type }: Props) {
               checked={table.getIsAllColumnsVisible()}
               onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
             >
-              Toggle All
+              {table.getIsAllColumnsVisible()
+                ? "Hide All Columns"
+                : "Show All Columns"}
             </DropdownMenuCheckboxItem>
             {table.getAllLeafColumns().map((column) => {
+              if (
+                column.id === "sendDeliverables" &&
+                !(
+                  type === "Completed" ||
+                  type === "Canceled (Invoice)" ||
+                  type === "All"
+                )
+              ) {
+                return null;
+              }
               return (
                 <div
                   key={column.id}
-                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
                 >
                   <label className="flex items-center">
                     <input
@@ -940,11 +969,19 @@ export default function JobsTableForMember({ type }: Props) {
                       checked={column.getIsVisible()}
                       onChange={column.getToggleVisibilityHandler()}
                       className="hidden"
+                      disabled={
+                        column.id === "sendDeliverables" &&
+                        !(
+                          type === "Completed" ||
+                          type === "Canceled (Invoice)" ||
+                          type === "All"
+                        )
+                      }
                     />
                     <span className="flex items-center justify-center w-4 h-4 mr-2">
                       {column.getIsVisible() && <Check className="h-4 w-4" />}
                     </span>
-                    {column.id}
+                    {columnHeaders[column.id] || column.id}
                   </label>
                 </div>
               );
