@@ -1,12 +1,16 @@
 "use client";
 import {
+  Cell,
+  Header,
   PaginationState,
+  VisibilityState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import {
+  Check,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -16,8 +20,27 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  SortableContext,
+  arrayMove,
+  horizontalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import { useProfileContext } from "./ProfileProvider";
 import {
   Table,
   TableBody,
@@ -80,6 +103,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
@@ -99,6 +127,11 @@ export default function JobsTableForClient({ type }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
   const [reset, setReset] = useState(false);
+  const columnVisibilities = useJobsColumnVisibility();
+  const { isContractor } = useProfileContext();
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    ...columnVisibilities,
+  });
 
   const handleResetComplete = () => {
     setReset(false);
@@ -226,7 +259,6 @@ export default function JobsTableForClient({ type }: Props) {
     pagination,
     updatePageSize: setPageSize,
   });
-  const columnVisibility = useJobsColumnVisibility();
 
   const params: FindMyOrderedJobPaginatedHttpControllerFindJobParams = useMemo(
     () => ({
@@ -300,6 +332,86 @@ export default function JobsTableForClient({ type }: Props) {
 
   const { data, isLoading, isFetching } = useMyOrderedJobsQuery(params, true);
 
+  const DraggableTableHeader = ({
+    header,
+  }: {
+    header: Header<JobPaginatedResponseDto["items"][number], unknown>;
+  }) => {
+    const { attributes, isDragging, listeners, setNodeRef, transform } =
+      useSortable({
+        id: header.column.id,
+      });
+
+    const style: CSSProperties = {
+      opacity: isDragging ? 0.8 : 1,
+      position: "relative",
+      transform: CSS.Translate.toString(transform),
+      transition: "width transform 0.2s ease-in-outs",
+      whiteSpace: "nowrap",
+      width: header.column.getSize(),
+      zIndex: isDragging ? 1 : 0,
+    };
+
+    return table.getRowModel().rows.length > 0 ? (
+      <TableHead
+        colSpan={header.colSpan}
+        ref={setNodeRef}
+        style={style}
+        className={`relative w-${header.getSize()}`}
+      >
+        {header.isPlaceholder
+          ? null
+          : flexRender(header.column.columnDef.header, header.getContext())}
+        <button {...attributes} {...listeners} className="ml-3">
+          🟰
+        </button>
+        <div
+          onMouseDown={header.getResizeHandler()}
+          onTouchStart={header.getResizeHandler()}
+          className={`resizer ${
+            header.column.getIsResizing() ? "isResizing" : ""
+          }`}
+        ></div>
+      </TableHead>
+    ) : (
+      <TableHead key={header.id}>
+        {header.isPlaceholder
+          ? null
+          : flexRender(header.column.columnDef.header, header.getContext())}
+      </TableHead>
+    );
+  };
+
+  const DragAlongCell = ({
+    cell,
+  }: {
+    cell: Cell<JobPaginatedResponseDto["items"][number], unknown>;
+  }) => {
+    const { isDragging, setNodeRef, transform } = useSortable({
+      id: cell.column.id,
+    });
+
+    const style: CSSProperties = {
+      opacity: isDragging ? 0.8 : 1,
+      transform: CSS.Translate.toString(transform),
+      position: "relative",
+      transition: "width transform 0.2s ease-in-out",
+      width: cell.column.getSize(),
+      zIndex: isDragging ? 1 : 0,
+    };
+
+    return (
+      <TableCell
+        style={style}
+        ref={setNodeRef}
+        key={cell.id}
+        className={`w-${cell.column.getSize()}`}
+      >
+        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      </TableCell>
+    );
+  };
+
   useEffect(() => {
     if (!isFetching) {
       setSyncedParams(params);
@@ -346,6 +458,7 @@ export default function JobsTableForClient({ type }: Props) {
         },
       }),
       columnHelper.accessor("jobName", {
+        size: 450,
         header: () => (
           <SearchHeader
             buttonText="Name"
@@ -358,6 +471,7 @@ export default function JobsTableForClient({ type }: Props) {
         ),
       }),
       columnHelper.display({
+        size: 85,
         id: "copyJobId",
         cell: ({ row }) => {
           const value = row.original.jobName;
@@ -365,6 +479,7 @@ export default function JobsTableForClient({ type }: Props) {
         },
       }),
       columnHelper.accessor("jobStatus", {
+        size: 150,
         header: () =>
           type !== "All" ? (
             "Status"
@@ -394,6 +509,7 @@ export default function JobsTableForClient({ type }: Props) {
         },
       }),
       columnHelper.accessor("assignedTasks", {
+        size: 280,
         header: () => (
           <>
             <Popover>
@@ -454,78 +570,6 @@ export default function JobsTableForClient({ type }: Props) {
                   <Badge
                     variant={"outline"}
                     className="flex items-center py-1 my-1"
-                    key={task.id}
-                  >
-                    {status && (
-                      <status.Icon
-                        className={`w-4 h-4 mr-2 flex-shrink-0 ${status.color}`}
-                      />
-                    )}
-                    <div className="flex flex-col">
-                      <p className="font-medium">{task.taskName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {task.assigneeName ?? "-"}
-                      </p>
-                    </div>
-                  </Badge>
-                );
-              })}
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor("assignedTasks", {
-        header: () => (
-          <>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  size={"sm"}
-                  variant={"ghost"}
-                  className={cn(
-                    "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
-                    (params.taskAssigneeName || params.taskName) &&
-                      "underline decoration-2 underline-offset-2"
-                  )}
-                >
-                  Task
-                  <ChevronsUpDown className="h-3 w-3 ml-1.5" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="grid w-[150px] gap-1 pl-5">
-                <SearchHeader
-                  buttonText="Task Name"
-                  searchParamName={taskNameSearchParamName}
-                  pageIndexSearchParamName={pageIndexSearchParamName}
-                  isLoading={
-                    syncedParams != null &&
-                    params.taskName !== syncedParams.taskName
-                  }
-                />
-                <SearchHeader
-                  buttonText="Task Assignee"
-                  searchParamName={taskAssigneeNameSearchParamName}
-                  pageIndexSearchParamName={pageIndexSearchParamName}
-                  isLoading={
-                    syncedParams != null &&
-                    params.taskAssigneeName !== syncedParams.taskAssigneeName
-                  }
-                />
-              </PopoverContent>
-            </Popover>
-          </>
-        ),
-        cell: ({ getValue, row }) => {
-          const tasks = row.original.assignedTasks;
-          return (
-            <div>
-              {tasks.map((task) => {
-                const status = jobStatuses[task.status];
-
-                return (
-                  <Badge
-                    variant={"outline"}
-                    className="flex items-center py-1 "
                     key={task.id}
                   >
                     {status && (
@@ -685,7 +729,19 @@ export default function JobsTableForClient({ type }: Props) {
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
+
+  const [columnOrder, setColumnOrder] = useState<string[]>(() =>
+    columns.map((column) => {
+      if ((column as any).accessorKey === "clientInfo.clientOrganizationName") {
+        return "organization";
+      } else {
+        return column.id! || (column as any).accessorKey;
+      }
+    })
+  );
 
   const table = useReactTable({
     data: data?.items ?? [],
@@ -694,79 +750,170 @@ export default function JobsTableForClient({ type }: Props) {
     getRowId: ({ id }) => id,
     pageCount: data?.totalPage ?? -1,
     onPaginationChange,
+    columnResizeMode: "onChange",
     manualPagination: true,
+    onColumnOrderChange: setColumnOrder,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       pagination,
       columnVisibility,
+      columnOrder,
     },
   });
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((columnOrder) => {
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        const newIndex = columnOrder.indexOf(over.id as string);
+        return arrayMove(columnOrder, oldIndex, newIndex);
+      });
+    }
+  }
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {}),
+    useSensor(TouchSensor, {}),
+    useSensor(KeyboardSensor, {})
+  );
+
+  const columnHeaders: { [key: string]: string } = {
+    jobFolderId: "Google Drive",
+    priority: "Priority",
+    dueDate: "Date Due",
+    "clientInfo.clientOrganizationName": "Organization",
+    jobName: "Name",
+    copyJobId: "Copy ID",
+    jobStatus: "Status",
+    assignedTasks: "Task",
+    projectPropertyType: "Property Type",
+    mountingType: "Mounting Type",
+    projectNumber: "Project Number",
+    propertyOwner: "Property Owner",
+    completedCancelledDate: "Date Completed/Canceled",
+    dateSentToClient: "Date Sent to Client",
+  };
+
   return (
     <div className="space-y-2">
-      <div className="rounded-md border overflow-hidden">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24">
-                  <div className="flex justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="relative">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant={"outline"} size={"sm"}>
+              Columns Visible
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 max-h-60 overflow-auto">
+            {table
+              .getAllLeafColumns()
+              .filter(
+                (column) =>
+                  isContractor ||
+                  (column.id !== "inReview" && column.id !== "priority")
+              )
+              .map((column) => {
+                return (
+                  <div
+                    key={column.id}
+                    className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
+                  >
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={column.getIsVisible()}
+                        onChange={column.getToggleVisibilityHandler()}
+                        className="hidden"
+                      />
+                      <span className="flex items-center justify-center w-4 h-4 mr-2">
+                        {column.getIsVisible() && <Check className="h-4 w-4" />}
+                      </span>
+                      {columnHeaders[column.id] || column.id}
+                    </label>
                   </div>
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <NewTabTableRow
-                  href={`/jobs/${row.id}`}
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={
-                    (row.original.isExpedited ? "bg-yellow-100 " : "") +
-                    (row.original.inReview ? "bg-violet-100 " : "") +
-                    (row.original.isExpedited && row.original.inReview
-                      ? "bg-blue-100"
-                      : "")
-                  }
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </NewTabTableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+      <DndContext
+        collisionDetection={closestCenter}
+        modifiers={[restrictToHorizontalAxis]}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
+      >
+        <div className="rounded-md border overflow-hidden">
+          <Table
+            {...(table.getRowModel().rows.length > 0
+              ? {
+                  style: {
+                    width: table.getTotalSize(),
+                  },
+                }
+              : {})}
+          >
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  <SortableContext
+                    items={columnOrder}
+                    strategy={horizontalListSortingStrategy}
+                  >
+                    {headerGroup.headers.map((header) => (
+                      <DraggableTableHeader key={header.id} header={header} />
+                    ))}
+                  </SortableContext>
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24">
+                    <div className="flex justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <NewTabTableRow
+                    href={`/jobs/${row.id}`}
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className={
+                      (row.original.isExpedited ? "bg-yellow-100 " : "") +
+                      (row.original.inReview ? "bg-violet-100 " : "") +
+                      (row.original.isExpedited && row.original.inReview
+                        ? "bg-blue-100"
+                        : "")
+                    }
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <SortableContext
+                        key={cell.id}
+                        items={columnOrder}
+                        strategy={horizontalListSortingStrategy}
+                      >
+                        <DragAlongCell key={cell.id} cell={cell} />
+                      </SortableContext>
+                    ))}
+                  </NewTabTableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </DndContext>
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">

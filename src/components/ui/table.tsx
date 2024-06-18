@@ -84,13 +84,28 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn(
-      "px-3 py-2 align-middle [&:has([role=checkbox])]:pr-0 whitespace-nowrap max-w-[450px] overflow-hidden text-ellipsis",
+      "px-3 py-2 align-middle [&:has([role=checkbox])]:pr-0 max-w-[450px] overflow-hidden text-ellipsis whitespace-nowrap",
       className
     )}
     {...props}
   />
 ));
 TableCell.displayName = "TableCell";
+
+const ResizeTableCell = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={cn(
+      "px-3 py-2 align-middle [&:has([role=checkbox])]:pr-0 max-w-[450px] overflow-hidden text-ellipsis ",
+      className
+    )}
+    {...props}
+  />
+));
+ResizeTableCell.displayName = "ResizeTableCell";
 
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
@@ -112,5 +127,6 @@ export {
   TableHead,
   TableRow,
   TableCell,
+  ResizeTableCell,
   TableCaption,
 };
