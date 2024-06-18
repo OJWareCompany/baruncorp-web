@@ -4,8 +4,9 @@ import { DefaultValues, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { Info, X } from "lucide-react";
 import { Value } from "@udecode/plate-common";
+import { formatInTimeZone } from "date-fns-tz";
 import RowItemsContainer from "../RowItemsContainer";
 import AllDateTimePicker from "../date-time-picker/AllDateTimePicker";
 import {
@@ -56,7 +57,12 @@ import {
 import { getJobHistoriesQueryKey } from "@/queries/useJobHistoriesQuery";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 import usePatchJobDueDateMutation from "@/mutations/usePatchJobDueDateMution";
-import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   project: ProjectResponseDto;
@@ -292,7 +298,11 @@ export default function JobForm({ project, job, pageType }: Props) {
         mountingType: values.mountingType,
       });
       await usePatchJobDueDateMutateResult.mutateAsync({
-        dueDate: getISOStringForStartOfDayInUTC(values.dueDate),
+        dueDate: formatInTimeZone(
+          new Date(values.dueDate).setSeconds(0),
+          "Etc/UTC",
+          "yyyy-MM-dd HH:mm:ss zzz"
+        ),
       });
       toast({ title: "Success" });
       queryClient.invalidateQueries({
@@ -652,7 +662,21 @@ export default function JobForm({ project, job, pageType }: Props) {
               name="dueDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date Due</FormLabel>
+                  <div className="flex item-center gap-2">
+                    <FormLabel>Date Due</FormLabel>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 cursor-pointer" />
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                          <p className="text-xs">
+                            You can change Am and Pm with the direction key.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <FormControl>
                     <AllDateTimePicker
                       value={field.value}
@@ -664,7 +688,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                           newValue === undefined ? null : newValue
                         );
                       }}
-                      disabled
+                      disabled={!isWorker}
                     />
                   </FormControl>
                   <FormMessage />
@@ -677,7 +701,48 @@ export default function JobForm({ project, job, pageType }: Props) {
                 name="priority"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Priority</FormLabel>
+                    <div className="flex item-center gap-2">
+                      <FormLabel>Priority</FormLabel>
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-4 w-4 cursor-pointer" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p className="text-xs">
+                              <strong>Priority Update Policy</strong>
+                              <ul className="list-disc pl-4">
+                                <li>
+                                  <strong>Low</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>On Hold</li>
+                                    <li>Elapsed Time - 20% or less</li>
+                                  </ul>
+                                </li>
+                                <li>
+                                  <strong>Medium</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>Elapsed Time - 21% to 41%</li>
+                                  </ul>
+                                </li>
+                                <li>
+                                  <strong>High</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>Elapsed Time - 41% to 71%</li>
+                                  </ul>
+                                </li>
+                                <li>
+                                  <strong>Immediate</strong>
+                                  <ul className="list-disc pl-4">
+                                    <li>Elapsed Time - 71% or more</li>
+                                  </ul>
+                                </li>
+                              </ul>
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <FormControl>
                       <Select
                         value={field.value}

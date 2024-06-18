@@ -44,6 +44,10 @@ export function formatDateTime(dateTimeString: string) {
   return format(new Date(dateTimeString), "MM-dd-yyyy, p");
 }
 
+export function formatInNewDateEST(date: Date | string) {
+  return formatInTimeZone(date, "America/New_York", "MM-dd-yyyy, p");
+}
+
 export function formatInEST(date: Date | string) {
   return formatInTimeZone(date, "America/New_York", "MM-dd-yyyy, p");
 }

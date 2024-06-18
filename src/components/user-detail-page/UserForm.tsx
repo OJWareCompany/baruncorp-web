@@ -8,6 +8,7 @@ import { ExternalLink, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import { formatInTimeZone } from "date-fns-tz";
 import OrganizationChangeCombobox from "../combobox/OrganizationChangeComboBox";
 import { OrganizationResponseDto, UserResponseDto } from "@/api/api-spec";
 import {
@@ -29,7 +30,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { getUserQueryKey } from "@/queries/useUserQuery";
 import useProfileQuery, { getProfileQueryKey } from "@/queries/useProfileQuery";
 import DateOfJoiningDatePicker from "@/components/DateOfJoiningDatePicker";
-import { getISOStringForStartOfDayInUTC } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
 
@@ -159,6 +159,13 @@ export default function UserForm({ pageType, user, organization }: Props) {
   }, [form, getFieldValues, user]);
 
   async function onSubmit(values: FieldValues) {
+    const dateOfJoiningUTC = values.dateOfJoining
+      ? formatInTimeZone(
+          new Date(values.dateOfJoining).setSeconds(0),
+          "Etc/UTC",
+          "yyyy-MM-dd HH:mm:ss 'UTC'"
+        )
+      : null;
     await mutateAsync({
       deliverablesEmails: values.emailAddressesToReceiveDeliverables.map(
         ({ email }) => email
@@ -168,7 +175,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
       phoneNumber: transformStringIntoNullableString.parse(values.phoneNumber),
       isVendor: isTargetUserOrganizationBarunCorp ? false : values.isContractor,
       dateOfJoining: isTargetUserOrganizationBarunCorp
-        ? getISOStringForStartOfDayInUTC(values.dateOfJoining ?? new Date())
+        ? dateOfJoiningUTC
         : null,
     })
       .then(() => {

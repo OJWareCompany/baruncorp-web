@@ -1,11 +1,18 @@
-import { addDays, subDays } from "date-fns";
+import { addDays, addHours, subDays } from "date-fns";
 import { ChevronsUpDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DateRange } from "react-day-picker";
 import { cn } from "@udecode/cn";
+import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 import {
   Popover,
   PopoverContent,
@@ -47,10 +54,17 @@ export default function SearchDateHeader({
     const toDate = urlSearchParams.get(
       searchParamOptions.dateSentToClientEndSearchParamName
     );
+
     if (fromDate && toDate) {
+      const estFromDate = utcToZonedTime(
+        new Date(fromDate),
+        "America/New_York"
+      );
+      const estToDate = utcToZonedTime(new Date(toDate), "America/New_York");
+
       setSelectedDates({
-        from: new Date(fromDate),
-        to: new Date(toDate),
+        from: estFromDate,
+        to: estToDate,
       });
       setIsFiltered(true);
     }
@@ -68,8 +82,15 @@ export default function SearchDateHeader({
     } = searchParamOptions;
 
     if (dates) {
-      const fromDate = dates.from?.toISOString() ?? "";
-      const toDate = dates.to.toISOString() ?? "";
+      const fromDate = dates.from
+        ? zonedTimeToUtc(addHours(new Date(dates.from), 4), "UTC").toISOString()
+        : "";
+      const toDate = dates.to
+        ? zonedTimeToUtc(
+            addHours(new Date(dates.to.setHours(23, 59, 59)), 4),
+            "UTC"
+          ).toISOString()
+        : "";
       newSearchParams.set(
         encodeURIComponent(dateSentToClientStartSearchParamName),
         fromDate
@@ -79,6 +100,15 @@ export default function SearchDateHeader({
         toDate
       );
       newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+
+      console.log(
+        dates.from
+          ? zonedTimeToUtc(
+              addHours(new Date(dates.from), 4),
+              "UTC"
+            ).toISOString()
+          : ""
+      );
     }
     router.push(`${pathname}?${newSearchParams.toString()}`, {
       scroll: false,
@@ -87,7 +117,17 @@ export default function SearchDateHeader({
 
   const handleReset = () => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
+
+    newSearchParams.delete(
+      encodeURIComponent(
+        searchParamOptions.dateSentToClientStartSearchParamName
+      )
+    );
+    newSearchParams.delete(
+      encodeURIComponent(searchParamOptions.dateSentToClientEndSearchParamName)
+    );
     newSearchParams.set(encodeURIComponent(pageIndexSearchParamName), "0");
+
     router.push(`${pathname}?${newSearchParams.toString()}`, {
       scroll: false,
     });
@@ -97,34 +137,43 @@ export default function SearchDateHeader({
 
   return (
     <Popover>
-      <PopoverTrigger>
-        <Button
-          size={"sm"}
-          variant={"ghost"}
-          className={cn(
-            "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
-            isFiltered && "underline decoration-2 underline-offset-2"
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger>
+            <PopoverTrigger>
+              <Button
+                size={"sm"}
+                variant={"ghost"}
+                className={cn(
+                  "-ml-2 focus-visible:ring-0 whitespace-nowrap text-xs h-8 px-2",
+                  isFiltered && "underline decoration-2 underline-offset-2"
+                )}
+              >
+                {buttonText}
+                <ChevronsUpDown className="h-3 w-3 ml-1.5" />
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">Select Search</p>
+          </TooltipContent>
+        </Tooltip>
+        <PopoverContent className="p-0 w-auto" align="end">
+          <Calendar
+            mode="range"
+            selected={selectedDates}
+            onSelect={handleDateSelect}
+            numberOfMonths={2}
+            fromMonth={subDays(new Date(), 180)}
+            toMonth={addDays(new Date(), 180)}
+          />
+          {isFiltered && (
+            <Button onClick={handleReset} className="justify-center">
+              Reset
+            </Button>
           )}
-        >
-          {buttonText}
-          <ChevronsUpDown className="h-3 w-3 ml-1.5" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0 w-auto" align="end">
-        <Calendar
-          mode="range"
-          selected={selectedDates}
-          onSelect={handleDateSelect}
-          numberOfMonths={2}
-          fromMonth={subDays(new Date(), 180)}
-          toMonth={addDays(new Date(), 180)}
-        />
-        {isFiltered && (
-          <Button onClick={handleReset} className="justify-center">
-            Reset
-          </Button>
-        )}
-      </PopoverContent>
+        </PopoverContent>
+      </TooltipProvider>
     </Popover>
   );
 }

@@ -128,6 +128,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
+import SearchDateHeader from "@/components/table/SearchDateHeader";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -815,22 +816,21 @@ export default function JobsTableForMember({ type }: Props) {
           }
         ),
         columnHelper.accessor<"dateSentToClient", string>("dateSentToClient", {
-          header: "Date Sent to Client",
-          // header: () =>
-          //   type === "All" ||
-          //   type === "Completed" ||
-          //   type === "Canceled (Invoice)" ? (
-          //     <SearchDateHeader
-          //       buttonText="Date Sent to Client"
-          //       searchParamOptions={{
-          //         dateSentToClientStartSearchParamName,
-          //         dateSentToClientEndSearchParamName,
-          //       }}
-          //       pageIndexSearchParamName={pageIndexSearchParamName}
-          //     />
-          //   ) : (
-          //     "Date Sent to Client"
-          //   ),
+          header: () =>
+            type === "All" ||
+            type === "Completed" ||
+            type === "Canceled (Invoice)" ? (
+              <SearchDateHeader
+                buttonText="Date Sent to Client"
+                searchParamOptions={{
+                  dateSentToClientStartSearchParamName,
+                  dateSentToClientEndSearchParamName,
+                }}
+                pageIndexSearchParamName={pageIndexSearchParamName}
+              />
+            ) : (
+              "Date Sent to Client"
+            ),
           cell: ({ getValue }) => {
             const value = getValue();
             if (value == null) {
@@ -865,6 +865,8 @@ export default function JobsTableForMember({ type }: Props) {
     mountingTypeSearchParamName,
     projectNumberSearchParamName,
     propertyOwnerSearchParamName,
+    dateSentToClientStartSearchParamName,
+    dateSentToClientEndSearchParamName,
   ]);
 
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>

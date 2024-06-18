@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { formatInTimeZone, zonedTimeToUtc } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -28,7 +28,9 @@ const DateOfJoiningDatePicker = forwardRef<HTMLButtonElement, Props>(
             ref={ref}
             disabled={disabled}
           >
-            {value ? format(value, "MM-dd-yyyy") : "Pick a date"}
+            {value
+              ? formatInTimeZone(value, "America/New_York", "MM-dd-yyyy")
+              : "Pick a date"}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -45,7 +47,8 @@ const DateOfJoiningDatePicker = forwardRef<HTMLButtonElement, Props>(
                 return;
               }
 
-              onChange(day);
+              const estDate = zonedTimeToUtc(day, "America/New_York");
+              onChange(estDate);
             }}
             captionLayout="dropdown"
             fromYear={2018}

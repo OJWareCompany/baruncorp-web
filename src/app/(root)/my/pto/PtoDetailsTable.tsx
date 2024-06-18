@@ -16,8 +16,8 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { useMemo } from "react";
-import { format } from "date-fns";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { formatInTimeZone } from "date-fns-tz";
 import {
   Table,
   TableBody,
@@ -103,8 +103,16 @@ export default function PtoDetailsTable({
       columnHelper.accessor(
         (row) => {
           const { startedAt, endedAt } = row;
-          const formattedStartedAt = format(new Date(startedAt), "MM-dd-yyyy");
-          const formattedEndedAt = format(new Date(endedAt), "MM-dd-yyyy");
+          const formattedStartedAt = formatInTimeZone(
+            new Date(startedAt),
+            "America/New_York",
+            "MM-dd-yyyy"
+          );
+          const formattedEndedAt = formatInTimeZone(
+            new Date(endedAt),
+            "America/New_York",
+            "MM-dd-yyyy"
+          );
           if (startedAt === endedAt) {
             return formattedStartedAt;
           }
