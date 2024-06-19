@@ -1,11 +1,17 @@
 "use client";
+import { Info } from "lucide-react";
 import JobsTableForClient from "./JobsTableForClient";
 import JobsTableForMember from "./JobsTableForMember";
 import { useProfileContext } from "./ProfileProvider";
 import PageHeader from "@/components/PageHeader";
 import NewTabCollapsibleSection from "@/components/NewTabCollapsibleSeciton";
 import GlobalSearch from "@/components/table/GlobalSearch";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 export default function Page() {
   const { isBarunCorpMember } = useProfileContext();
 
@@ -19,7 +25,24 @@ export default function Page() {
     const globalPageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
     return (
       <div className="space-y-4">
-        <PageHeader items={[{ href: "/", name: "Home" }]} />
+        <PageHeader
+          items={[{ href: "/", name: "Home" }]}
+          action={
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-5 w-5 mr-3 cursor-pointer" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>
+                    You can scroll the table sideways by holding <br /> shift
+                    and spinning the wheel.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          }
+        />
         <GlobalSearch
           searchParamOptions={{
             jobNameSearchParamName: globalJobNameSearchParamName,
