@@ -16,6 +16,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ChevronsUpDown,
+  GripHorizontal,
   Loader2,
   RotateCcw,
 } from "lucide-react";
@@ -42,7 +43,6 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { useProfileContext } from "./ProfileProvider";
 import {
   AlertDialog,
@@ -58,13 +58,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   FindMyOrderedJobPaginatedHttpControllerFindJobParams,
@@ -108,7 +101,6 @@ import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
 import { InTableButton } from "@/components/ui/intablebutton";
 import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
-import DownloadCSVButton from "@/components/table/DownloadCSVButton";
 import TextCopyButton from "@/components/ui/incopybutton";
 import {
   Popover,
@@ -123,12 +115,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
 import SearchDateHeader from "@/components/table/SearchDateHeader";
+import PaginationControls from "@/components/table/PaginationControls";
+
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
 
@@ -448,9 +437,24 @@ export default function JobsTableForMember({ type }: Props) {
         {header.isPlaceholder
           ? null
           : flexRender(header.column.columnDef.header, header.getContext())}
-        <button {...attributes} {...listeners} className="ml-3">
-          🟰
-        </button>
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute top-2 bottom-0 right-5 w-1 pl-3"
+        >
+          <GripHorizontal className="w-4 h-4" />
+        </div>
+        <div
+          className={`absolute top-0 bottom-0 right-0 w-1 ${
+            isDragging ? "bg-green-300" : ""
+          }`}
+        />
+        <div
+          className={`absolute top-0 bottom-0 left-0 w-1 ${
+            isDragging ? "bg-green-300" : ""
+          }`}
+        />
+
         <div
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
@@ -467,7 +471,6 @@ export default function JobsTableForMember({ type }: Props) {
       </TableHead>
     );
   };
-
   const DragAlongCell = ({
     cell,
   }: {
@@ -805,6 +808,7 @@ export default function JobsTableForMember({ type }: Props) {
           "completedCancelledDate",
           {
             header: "Date Completed/Canceled",
+            size: 190,
             cell: ({ getValue }) => {
               const value = getValue();
               if (value == null) {
@@ -933,64 +937,84 @@ export default function JobsTableForMember({ type }: Props) {
   return (
     <div className="space-y-2">
       <div className="relative">
-        <DropdownMenu>
-          <DropdownMenuTrigger>
+        <Popover>
+          <PopoverTrigger asChild>
             <Button variant={"outline"} size={"sm"}>
               Columns Visible
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 max-h-60 overflow-auto">
-            <DropdownMenuCheckboxItem
-              checked={table.getIsAllColumnsVisible()}
-              onCheckedChange={table.getToggleAllColumnsVisibilityHandler()}
-            >
-              {table.getIsAllColumnsVisible()
-                ? "Hide All Columns"
-                : "Show All Columns"}
-            </DropdownMenuCheckboxItem>
-            {table.getAllLeafColumns().map((column) => {
-              if (
-                column.id === "sendDeliverables" &&
-                !(
-                  canSendDeliverables &&
-                  (type === "Completed" ||
-                    type === "Canceled (Invoice)" ||
-                    type === "All")
-                )
-              ) {
-                return null;
-              }
-              return (
-                <div
-                  key={column.id}
-                  className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
-                >
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={column.getIsVisible()}
-                      onChange={column.getToggleVisibilityHandler()}
-                      className="hidden"
-                      disabled={
-                        column.id === "sendDeliverables" &&
-                        !(
-                          canSendDeliverables &&
-                          (type === "Completed" ||
-                            type === "Canceled (Invoice)" ||
-                            type === "All")
-                        )
-                      }
-                    />
-                    <span className="flex items-center justify-center w-4 h-4 mr-2">
-                      {column.getIsVisible() && <Check className="h-4 w-4" />}
-                    </span>
-                    {columnHeaders[column.id] || column.id}
-                  </label>
-                </div>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 max-h-60 overflow-auto p-1">
+            <div className="p-0">
+              <div
+                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground"
+                style={{ cursor: "pointer" }}
+              >
+                <label className="flex items-center w-full cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={table.getIsAllColumnsVisible()}
+                    onChange={table.getToggleAllColumnsVisibilityHandler()}
+                    className="hidden"
+                  />
+                  <span className="flex items-center justify-center w-4 h-4 mr-2 ">
+                    {table.getIsAllColumnsVisible() && (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </span>
+                  <span className="flex-1">
+                    {table.getIsAllColumnsVisible()
+                      ? "Hide All Columns"
+                      : "Show All Columns"}
+                  </span>
+                </label>
+              </div>
+              {table.getAllLeafColumns().map((column) => {
+                if (
+                  column.id === "sendDeliverables" &&
+                  !(
+                    canSendDeliverables &&
+                    (type === "Completed" ||
+                      type === "Canceled (Invoice)" ||
+                      type === "All")
+                  )
+                ) {
+                  return null;
+                }
+                return (
+                  <div
+                    key={column.id}
+                    className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <label className="flex items-center w-full cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={column.getIsVisible()}
+                        onChange={column.getToggleVisibilityHandler()}
+                        className="hidden"
+                        disabled={
+                          column.id === "sendDeliverables" &&
+                          !(
+                            canSendDeliverables &&
+                            (type === "Completed" ||
+                              type === "Canceled (Invoice)" ||
+                              type === "All")
+                          )
+                        }
+                      />
+                      <span className="flex items-center justify-center w-4 h-4 mr-2 cursor-pointer">
+                        {column.getIsVisible() && <Check className="h-4 w-4" />}
+                      </span>
+                      <span className="flex-1">
+                        {columnHeaders[column.id] || column.id}
+                      </span>
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
       <DndContext
         collisionDetection={closestCenter}
@@ -1073,31 +1097,7 @@ export default function JobsTableForMember({ type }: Props) {
 
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2">
-            {table.getRowModel().rows.length === 0 ? null : (
-              <DownloadCSVButton data={data} type={type} className="mr-2" />
-            )}
-            <p className="text-sm font-medium">Rows per page</p>
-            <Select
-              value={`${table.getState().pagination.pageSize}`}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value));
-              }}
-            >
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue
-                  placeholder={table.getState().pagination.pageSize}
-                />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[5, 10, 25, 50, 100].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <PaginationControls table={table} data={data} type={type} />
           {table.getRowModel().rows.length === 0 ? null : (
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium">Sort Page</p>

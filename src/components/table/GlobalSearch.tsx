@@ -2,15 +2,9 @@
 
 import React, { useState, KeyboardEvent, MouseEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { X, ChevronDown, Check } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "../ui/button";
 import { Command, CommandInput, CommandItem } from "@/components/ui/command";
 
 interface Props {
@@ -36,9 +30,7 @@ export default function GlobalSearch({
     if (event.key === "Enter") {
       const trimmedValue = value.trim();
       let searchParam = searchParamOptions.jobNameSearchParamName;
-      if (selectedOption === "") {
-        searchParam = searchParamOptions.jobNameSearchParamName;
-      } else if (selectedOption === "JobName") {
+      if (selectedOption === "JobName") {
         searchParam = searchParamOptions.jobNameSearchParamName;
       } else if (selectedOption === "ProjectNumber") {
         searchParam = searchParamOptions.projectNumberSearchParamName;
@@ -91,18 +83,35 @@ export default function GlobalSearch({
 
   return (
     <div className="flex items-start space-x-2">
-      <Select onValueChange={setSelectedOption}>
-        <SelectTrigger className="w-[180px] mb-1 h-11 focus:outline-none focus-visible:ring-0">
-          <SelectValue placeholder={selectedOption} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem value="JobName">Job Name</SelectItem>
-            <SelectItem value="ProjectNumber">Project Number</SelectItem>
-            <SelectItem value="PropertyOwner">Property Owner</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            className="h-12 w-auto min-w-[150px] text-center"
+            variant={"outline"}
+          >
+            {selectedOption}
+            <ChevronDown className="h-4 w-4 opacity-50 ml-2" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="bottom" className="w-full p-1">
+          {["Job Name", "Project Number", "Property Owner"].map((option) => (
+            <div
+              key={option}
+              className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-200 focus:bg-accent focus:text-accent-foreground w-full`}
+              onClick={() => setSelectedOption(option)}
+            >
+              <span className="flex items-center justify-center w-4 h-4 mr-2">
+                {selectedOption === option && <Check className="h-4 w-4" />}
+              </span>
+              {option === "Job Name"
+                ? "Job Name"
+                : option === "Project Number"
+                ? "Project Number"
+                : "Property Owner"}
+            </div>
+          ))}
+        </PopoverContent>
+      </Popover>
       <Command shouldFilter={false} className="grid grid-cols-2 pb-2">
         <CommandInput
           value={value}
