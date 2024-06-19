@@ -2,7 +2,7 @@
 import * as z from "zod";
 import { DefaultValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -42,11 +42,18 @@ import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import { useToast } from "@/components/ui/use-toast";
 import { getProjectsQueryKey } from "@/queries/useProjectsQuery";
 import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
+import {
+  fetchGeocodeFeatures,
+  getMapboxPlacesQueryKey,
+} from "@/queries/useAddressSearchQuery";
 
 const formSchema = z.object({
   propertyType: PropertyTypeEnum,
   propertyOwner: z.string().trim(),
   projectNumber: z.string().trim(),
+  /**
+   * 사용자가 직접 입력 할 시에 이 validation에 대해 수정해야 할 수도 있음
+   */
   address: z
     .object({
       street1: z.string().trim(),
@@ -59,6 +66,11 @@ const formSchema = z.object({
       coordinates: z.array(z.number()),
     })
     .superRefine((value, ctx) => {
+      /**
+       * @TODO
+       * API에서 FullAddress가 없어도 작동 된다면 이거 없어도 상관 없음
+       * 다만 API 수행에 있어서 FullAddress가 무조건 있어야 한다면 필요함
+       */
       if (value.fullAddress.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -70,6 +82,10 @@ const formSchema = z.object({
 });
 
 type FieldValues = z.infer<typeof formSchema>;
+type AddressTextField = Pick<
+  FieldValues["address"],
+  "street1" | "street2" | "city" | "state" | "postalCode" | "country"
+>;
 
 const defaultValues: DefaultValues<FieldValues> = {
   propertyType: "Residential",
@@ -109,6 +125,24 @@ export default function NewProjectSheet({
   const { data: organization } = useOrganizationQuery(organizationId);
 
   const watchState = form.watch("address.state");
+
+  const [minimapCoordinates, setMinimapCoordinates] = useState<
+    [number, number]
+  >([0, 0]);
+
+  /**
+   * @생각 initAddressFormBySearchAddressButtonRef
+   * 활용 가능성이 있는가?
+   */
+  const initAddressFormBySearchAddressButtonRef = useRef(false);
+
+  const isAddressFieldFocusedRef = useRef(false);
+  const handleFocusAddressField = () =>
+    (isAddressFieldFocusedRef.current = true);
+  const handleBlurAddressField = async () => {
+    isAddressFieldFocusedRef.current = false;
+    updateAddressFormCoordinatesFromGeocode();
+  };
 
   useEffect(() => {
     if (organization && organization.projectPropertyTypeDefaultValue) {
@@ -218,14 +252,88 @@ export default function NewProjectSheet({
       });
   }
 
+  const updateAddressFormCoordinatesFromGeocode = async () => {
+    const geocodeFeatures = await queryClient.fetchQuery({
+      queryKey: getMapboxPlacesQueryKey(generateAddressSearchText()),
+      queryFn: fetchGeocodeFeatures,
+    });
+    if (geocodeFeatures && geocodeFeatures.length > 0) {
+      /**
+       * @TODO Delete
+       */
+      console.log(
+        `geocodeFeatures.coordinates: ${JSON.stringify(
+          geocodeFeatures.map((item: any) => {
+            return { id: item.id, coordi: item.geometry.coordinates };
+          }),
+          null,
+          2
+        )}`
+      );
+      const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
+      updateAddressCoordinates([longitude, latitude]);
+      form.setValue("address.fullAddress", geocodeFeatures[0].place_name);
+    }
+
+    if (!geocodeFeatures || geocodeFeatures.length === 0) {
+      updateAddressCoordinates([0, 0]);
+      form.setValue("address.fullAddress", "");
+    }
+  };
+
+  const updateAddressCoordinates = (
+    coordinates: [longitude: number, latitude: number]
+  ) => {
+    form.setValue("address.coordinates", coordinates);
+    setMinimapCoordinates(coordinates);
+  };
+
+  const handleFormKeyDown = async (
+    event: React.KeyboardEvent<HTMLFormElement>
+  ) => {
+    if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+      event.preventDefault();
+      updateAddressFormCoordinatesFromGeocode();
+    }
+  };
+
+  const generateAddressSearchText = () => {
+    const addressFields: Array<keyof AddressTextField> = [
+      "street1",
+      "street2",
+      "city",
+      "state",
+      "postalCode",
+      "country",
+    ];
+
+    const addressSearchText = addressFields
+      .map((field) => form.getValues(`address.${field}`)?.trim())
+      .filter(Boolean)
+      .join(" ");
+
+    /**
+     * @Delete Delete
+     */
+    console.log(`Generated SearchText: ${addressSearchText}`);
+
+    return addressSearchText;
+  };
+
   return (
     <Sheet {...dialogProps}>
       <SheetContent className="sm:max-w-[1400px] w-full">
         <SheetHeader className="mb-6">
           <SheetTitle>New Project</SheetTitle>
         </SheetHeader>
+        {/* <p>{JSON.stringify(form.getValues("address.coordinates"), null, 2)}</p>
+        <p>{JSON.stringify(minimapCoordinates, null, 2)}</p> */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            onKeyDown={handleFormKeyDown}
+            className="space-y-4"
+          >
             <RowItemsContainer>
               <FormField
                 control={form.control}
@@ -310,11 +418,25 @@ export default function NewProjectSheet({
                               },
                               { shouldValidate: true, shouldDirty: true }
                             );
+
+                            /**
+                             * 이 onSelect 이벤트 콜백이 호출되는 경우의 address.fullAddress는 AddressSearchButton 컴포넌트 내부에서 초기화 된다
+                             */
+                            const [longitude, latitude] = value.coordinates;
+                            updateAddressCoordinates([longitude, latitude]);
                           }}
                         />
                         <Input
                           value={field.value.street1}
-                          disabled
+                          // disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              street1: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Street 1"
                         />
                         <Input
@@ -325,34 +447,68 @@ export default function NewProjectSheet({
                               street2: event.target.value,
                             });
                           }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Street 2"
                         />
                         <Input
                           value={field.value.city}
-                          disabled
+                          // disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              city: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="City"
                         />
                         <Input
                           value={field.value.state}
-                          disabled
+                          // disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              state: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="State Or Region"
                         />
                         <Input
                           value={field.value.postalCode}
-                          disabled
+                          // disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              postalCode: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Postal Code"
                         />
                         <Input
                           value={field.value.country}
-                          disabled
+                          // disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              country: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Country"
                         />
                       </FormItem>
                     </div>
                     <div className="col-span-1">
                       <Minimap
-                        longitude={field.value.coordinates[0]}
-                        latitude={field.value.coordinates[1]}
+                        longitude={minimapCoordinates[0]}
+                        latitude={minimapCoordinates[1]}
                       />
                     </div>
                   </div>
