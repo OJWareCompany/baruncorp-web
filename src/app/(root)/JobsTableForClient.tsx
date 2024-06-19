@@ -117,6 +117,19 @@ export default function JobsTableForClient({ type }: Props) {
   const [syncedParams, setSyncedParams] =
     useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
   const [reset, setReset] = useState(false);
+  const COLUMN_SIZES_KEY = `${RELATIVE_PATH}_${type}_columnSizes`;
+
+  const [columnSizes, setColumnSizes] = useLocalStorage<Record<string, number>>(
+    COLUMN_SIZES_KEY,
+    {}
+  );
+
+  const saveColumnSize = (columnId: string, size: number) => {
+    setColumnSizes((prevSizes) => ({
+      ...prevSizes,
+      [columnId]: size,
+    }));
+  };
   const columnVisibilities = useJobsColumnVisibility();
   const { isContractor } = useProfileContext();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
@@ -126,6 +139,12 @@ export default function JobsTableForClient({ type }: Props) {
   const handleResetComplete = () => {
     setReset(false);
   };
+
+  useEffect(() => {
+    if (Object.keys(columnSizes).length > 0) {
+      table.setColumnSizing(columnSizes);
+    }
+  }, []);
 
   const jobStatusSearchParamName = `${TABLE_NAME}${type}JobStatus`;
   const jobNameSearchParamName = `${TABLE_NAME}${type}JobName`;
@@ -372,6 +391,12 @@ export default function JobsTableForClient({ type }: Props) {
         <div
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
+          onMouseUp={() =>
+            saveColumnSize(header.column.id, header.column.getSize())
+          }
+          onTouchEnd={() =>
+            saveColumnSize(header.column.id, header.column.getSize())
+          }
           className={`resizer ${
             header.column.getIsResizing() ? "isResizing" : ""
           }`}

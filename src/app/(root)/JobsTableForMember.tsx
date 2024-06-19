@@ -183,6 +183,19 @@ export default function JobsTableForMember({ type }: Props) {
     { open: false } | { open: true; jobId: string }
   >({ open: false });
   const [reset, setReset] = useState<boolean>(false);
+  const COLUMN_SIZES_KEY = `${RELATIVE_PATH}_${type}_columnSizes`;
+
+  const [columnSizes, setColumnSizes] = useLocalStorage<Record<string, number>>(
+    COLUMN_SIZES_KEY,
+    {}
+  );
+
+  const saveColumnSize = (columnId: string, size: number) => {
+    setColumnSizes((prevSizes) => ({
+      ...prevSizes,
+      [columnId]: size,
+    }));
+  };
   const columnVisibilities = useJobsColumnVisibility();
   const {
     isBarunCorpMember,
@@ -206,6 +219,11 @@ export default function JobsTableForMember({ type }: Props) {
     setReset(false);
   };
 
+  useEffect(() => {
+    if (Object.keys(columnSizes).length > 0) {
+      table.setColumnSizing(columnSizes);
+    }
+  }, []);
   const {
     mutateAsync: patchSendDeliverablesMutationAsync,
     isPending: isPatchSendDeliverablesMutationPending,
@@ -458,6 +476,12 @@ export default function JobsTableForMember({ type }: Props) {
         <div
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
+          onMouseUp={() =>
+            saveColumnSize(header.column.id, header.column.getSize())
+          }
+          onTouchEnd={() =>
+            saveColumnSize(header.column.id, header.column.getSize())
+          }
           className={`resizer ${
             header.column.getIsResizing() ? "isResizing" : ""
           }`}
