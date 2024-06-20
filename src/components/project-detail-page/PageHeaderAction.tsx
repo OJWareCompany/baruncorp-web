@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ScrollText } from "lucide-react";
-import TextCopyButton from "../ui/incopybutton";
 import OpenProjectFolderOnDesktopButton from "./OpenProjectFolderOnDesktopButton";
 import OpenProjectFolderOnWebButton from "./OpenProjectFolderOnWebButton";
 import { Button } from "@/components/ui/button";
@@ -51,10 +50,6 @@ export default function PageHeaderAction({ project, pageType }: Props) {
   if (isWorker) {
     return (
       <div className="flex gap-2">
-        <TextCopyButton
-          JobId={project.propertyAddress.fullAddress}
-          className="relative right-32"
-        />
         <OpenProjectFolderOnWebButton project={project} />
         <OpenProjectFolderOnDesktopButton project={project} />
         <DropdownMenu>
