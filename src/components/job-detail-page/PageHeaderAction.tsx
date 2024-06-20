@@ -52,7 +52,7 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
   if (isWorker) {
     return (
       <div className="flex gap-2">
-        <TextCopyButton JobId={job.jobName} />
+        <TextCopyButton JobId={job.jobName} className="relative right-32" />
         <OpenJobFolderOnWebButton job={job} title="Open Folder on Web" />
         <OpenJobFolderOnDesktopButton job={job} project={project} />
         <DropdownMenu>
