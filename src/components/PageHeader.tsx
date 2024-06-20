@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, ReactNode } from "react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "./ui/breadcrumb";
+import TextCopyButton from "./ui/incopybutton";
 
 interface Props {
   items: { href: string; name: string }[];
@@ -24,7 +25,7 @@ export default function PageHeader({ items, action }: Props) {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
+  console.log("Last item href:", items[items.length - 1].href);
   return (
     <div
       className={`py-2 sticky top-[65px] z-40 bg-white ${
@@ -38,11 +39,26 @@ export default function PageHeader({ items, action }: Props) {
           </BreadcrumbItem>
         ))}
       </Breadcrumb>
-      <div className="flex justify-between items-center h-9 gap-2">
-        <h3 className="h3 text-ellipsis overflow-hidden whitespace-nowrap max-w-[580px]">
-          {items[items.length - 1].name}
-        </h3>
-        {action && <div className="shrink-0">{action}</div>}
+      <div className="flex justify-between items-center h-9">
+        <div className="flex">
+          <h3 className="h3 text-ellipsis overflow-hidden whitespace-nowrap">
+            {items[items.length - 1].name}
+          </h3>
+          {(items[items.length - 1].href.includes("/jobs/") ||
+            items[items.length - 1].href.includes("/workspace/jobs/") ||
+            items[items.length - 1].href.includes("/system-management/jobs/") ||
+            items[items.length - 1].href.includes("/projects/") ||
+            items[items.length - 1].href.includes("/workspace/projects/") ||
+            items[items.length - 1].href.includes(
+              "/system-management/projects/"
+            )) && (
+            <TextCopyButton
+              JobId={items[items.length - 1].name}
+              className="ml-7"
+            />
+          )}
+        </div>
+        {action && <div className="shrink-0 ml-2">{action}</div>}
       </div>
     </div>
   );
