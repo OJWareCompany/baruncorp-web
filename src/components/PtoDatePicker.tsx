@@ -1,8 +1,9 @@
 "use client";
-import { addDays, format, getDay, subDays } from "date-fns";
+import { addDays, addHours, format, getDay, subDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange, SelectRangeEventHandler } from "react-day-picker";
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
+import { formatInTimeZone, utcToZonedTime } from "date-fns-tz";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -20,6 +21,30 @@ interface Props {
 const PtoDatePicker = forwardRef<HTMLButtonElement, Props>(
   ({ value, onChange }, ref) => {
     const currentDate = new Date();
+    const [isChanged, setIsChanged] = useState(false);
+    const timeZone = "America/New_York";
+
+    const zonedValue = value
+      ? {
+          from: value.from,
+          to: value.to
+            ? isChanged
+              ? addHours(utcToZonedTime(value.to, timeZone), 13)
+              : utcToZonedTime(value.to, timeZone)
+            : undefined,
+        }
+      : undefined;
+
+    const handleSelect: SelectRangeEventHandler = (
+      range,
+      selectedDay,
+      e,
+      activeModifiers
+    ) => {
+      console.log("Selected range:", range);
+      setIsChanged(true);
+      onChange(range, selectedDay, e, activeModifiers);
+    };
 
     return (
       <div className="grid gap-2">
@@ -30,7 +55,7 @@ const PtoDatePicker = forwardRef<HTMLButtonElement, Props>(
               variant={"outline"}
               className={cn(
                 "w-auto justify-start text-left font-normal",
-                !value && "text-muted-foreground"
+                !zonedValue && "text-muted-foreground"
               )}
               ref={ref}
             >
@@ -38,10 +63,19 @@ const PtoDatePicker = forwardRef<HTMLButtonElement, Props>(
               {value?.from ? (
                 value.to ? (
                   <>
-                    {`${format(value.from, "MM-dd-yyyy")} ~ ${format(
-                      value.to,
-                      "MM-dd-yyyy"
-                    )}`}
+                    {isChanged
+                      ? `${format(value.from, "MM-dd-yyyy")}~ ${format(
+                          value.to,
+                          "MM-dd-yyyy"
+                        )}`
+                      : `${format(
+                          value.from,
+                          "MM-dd-yyyy"
+                        )}~ ${formatInTimeZone(
+                          value.to,
+                          timeZone,
+                          "MM-dd-yyyy"
+                        )}`}
                   </>
                 ) : (
                   format(value.from, "MM-dd-yyyy")
@@ -55,9 +89,9 @@ const PtoDatePicker = forwardRef<HTMLButtonElement, Props>(
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={value?.from}
-              selected={value}
-              onSelect={onChange}
+              defaultMonth={zonedValue?.from}
+              selected={zonedValue}
+              onSelect={handleSelect}
               numberOfMonths={2}
               disabled={(date) => {
                 const day = getDay(date);
