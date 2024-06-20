@@ -39,7 +39,7 @@ export default function PageHeader({ items, action }: Props) {
         ))}
       </Breadcrumb>
       <div className="flex justify-between items-center h-9 gap-2">
-        <h3 className="h3 text-ellipsis overflow-hidden whitespace-nowrap">
+        <h3 className="h3 text-ellipsis overflow-hidden whitespace-nowrap max-w-[580px]">
           {items[items.length - 1].name}
         </h3>
         {action && <div className="shrink-0">{action}</div>}

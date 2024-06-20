@@ -2,12 +2,17 @@ import React from "react";
 import { ClipboardCopy } from "lucide-react";
 import { Button } from "./button";
 import { useToast } from "./use-toast";
+import { cn } from "@/lib/utils";
 
 interface JobIdCopyButtonProps {
   JobId: string;
+  className?: string;
 }
 
-const TextCopyButton: React.FC<JobIdCopyButtonProps> = ({ JobId }) => {
+const TextCopyButton: React.FC<JobIdCopyButtonProps> = ({
+  JobId,
+  className,
+}) => {
   const { toast } = useToast();
 
   const handleCopy = () => {
@@ -20,7 +25,7 @@ const TextCopyButton: React.FC<JobIdCopyButtonProps> = ({ JobId }) => {
   };
 
   return (
-    <div>
+    <div className={(cn("relative"), className)}>
       <Button
         size={"sm"}
         variant={"outline"}
