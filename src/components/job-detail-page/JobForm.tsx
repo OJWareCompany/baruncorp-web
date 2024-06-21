@@ -301,18 +301,6 @@ export default function JobForm({ project, job, pageType }: Props) {
       queryFn: fetchGeocodeFeatures,
     });
     if (geocodeFeatures && geocodeFeatures.length > 0) {
-      /**
-       * @TODO Delete
-       */
-      console.log(
-        `geocodeFeatures.coordinates: ${JSON.stringify(
-          geocodeFeatures.map((item: any) => {
-            return { id: item.id, coordi: item.geometry.coordinates };
-          }),
-          null,
-          2
-        )}`
-      );
       const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
       updateAddressCoordinates([longitude, latitude]);
       form.setValue(
@@ -357,11 +345,6 @@ export default function JobForm({ project, job, pageType }: Props) {
       .map((field) => form.getValues(`mailingAddress.${field}`)?.trim())
       .filter(Boolean)
       .join(" ");
-
-    /**
-     * @Delete Delete
-     */
-    console.log(`Generated SearchText: ${addressSearchText}`);
 
     return addressSearchText;
   };
@@ -1008,13 +991,4 @@ export default function JobForm({ project, job, pageType }: Props) {
       </form>
     </Form>
   );
-}
-function getFullAddressByAddressFields(arg0: {
-  street1: any;
-  city: any;
-  state: any;
-  postalCode: any;
-  country: any;
-}): string {
-  throw new Error("Function not implemented.");
 }

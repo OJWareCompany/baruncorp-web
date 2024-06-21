@@ -295,18 +295,6 @@ export default function NewProjectSheet({
       queryFn: fetchGeocodeFeatures,
     });
     if (geocodeFeatures && geocodeFeatures.length > 0) {
-      /**
-       * @TODO Delete
-       */
-      console.log(
-        `geocodeFeatures.coordinates: ${JSON.stringify(
-          geocodeFeatures.map((item: any) => {
-            return { id: item.id, coordi: item.geometry.coordinates };
-          }),
-          null,
-          2
-        )}`
-      );
       const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
       updateAddressCoordinates([longitude, latitude]);
       form.setValue("address.fullAddress", geocodeFeatures[0].place_name);
@@ -348,11 +336,6 @@ export default function NewProjectSheet({
       .map((field) => form.getValues(`address.${field}`)?.trim())
       .filter(Boolean)
       .join(" ");
-
-    /**
-     * @Delete Delete
-     */
-    console.log(`Generated SearchText: ${addressSearchText}`);
 
     return addressSearchText;
   };

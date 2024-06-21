@@ -370,18 +370,6 @@ function JobSectionWithData({
       queryFn: fetchGeocodeFeatures,
     });
     if (geocodeFeatures && geocodeFeatures.length > 0) {
-      /**
-       * @TODO Delete
-       */
-      console.log(
-        `geocodeFeatures.coordinates: ${JSON.stringify(
-          geocodeFeatures.map((item: any) => {
-            return { id: item.id, coordi: item.geometry.coordinates };
-          }),
-          null,
-          2
-        )}`
-      );
       const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
       updateAddressCoordinates([longitude, latitude]);
       form.setValue(
@@ -426,11 +414,6 @@ function JobSectionWithData({
       .map((field) => form.getValues(`mailingAddress.${field}`)?.trim())
       .filter(Boolean)
       .join(" ");
-
-    /**
-     * @Delete Delete
-     */
-    console.log(`Generated SearchText: ${addressSearchText}`);
 
     return addressSearchText;
   };
@@ -664,16 +647,6 @@ function JobSectionWithData({
             street2: transformStringIntoNullableString.parse(
               values.mailingAddress.street2
             ),
-            // fullAddress:
-            //   values.mailingAddress.fullAddress === ""
-            //     ? getFullAddressByAddressFields({
-            //         street1: values.mailingAddress.street1,
-            //         city: values.mailingAddress.city,
-            //         state: values.mailingAddress.state,
-            //         postalCode: values.mailingAddress.postalCode,
-            //         country: values.mailingAddress.country,
-            //       })
-            //     : values.mailingAddress.fullAddress,
           }
         : null,
       numberOfWetStamp: isWetStampChecked
