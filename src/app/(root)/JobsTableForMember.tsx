@@ -551,7 +551,7 @@ export default function JobsTableForMember({ type }: Props) {
           const job = row.original;
           return (
             <div
-              className="flex"
+              className="flex justify-around"
               onClick={(event) => {
                 event.preventDefault();
               }}
