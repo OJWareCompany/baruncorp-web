@@ -468,6 +468,7 @@ export default function JobsTableForClient({ type }: Props) {
         ),
       }),
       columnHelper.accessor("priority", {
+        size: 130,
         header: () => (
           <EnumHeader
             buttonText="Priority"
@@ -483,7 +484,11 @@ export default function JobsTableForClient({ type }: Props) {
           const value = getValue();
           const status = jobPriorities[value];
 
-          return <Badge className={`${status.color}`}>{status.value}</Badge>;
+          return (
+            <div className="flex justify-around">
+              <Badge className={`${status.color}`}>{status.value}</Badge>
+            </div>
+          );
         },
       }),
       columnHelper.accessor("jobName", {
@@ -598,7 +603,7 @@ export default function JobsTableForClient({ type }: Props) {
                 return (
                   <Badge
                     variant={"outline"}
-                    className="flex items-center my-1"
+                    className="flex items-center"
                     key={task.id}
                   >
                     {status && (
