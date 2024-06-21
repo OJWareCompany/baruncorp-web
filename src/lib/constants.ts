@@ -785,6 +785,12 @@ export const userInvitationUrlRegExp = new RegExp(
  */
 export const signUpUrlRegExp = new RegExp(/^\/sign-up\/[a-zA-Z0-9-]+$/);
 
+/**
+ * 23213
+ * 23213-1234
+ */
+export const postalCodeRegExp = new RegExp(/^\d{5}(-\d{4})?$/);
+
 /* -------------------------------------------------------------------------- */
 
 export const BARUNCORP_ORGANIZATION_ID = "ed26f353-09e8-4bb3-81a9-6df25c4540a0";

@@ -48,6 +48,7 @@ import {
   STRUCTURAL_WET_STAMP_SERVICE_ID,
   capitalizedStateNames,
   digitRegExp,
+  postalCodeRegExp,
   toTwoDecimalRegExp,
   transformStringIntoNullableString,
 } from "@/lib/constants";
@@ -83,7 +84,6 @@ import {
   fetchGeocodeFeatures,
   getMapboxPlacesQueryKey,
 } from "@/queries/useAddressSearchQuery";
-import { getFullAddressByAddressFields } from "@/lib/utils";
 
 export type ResultDialogState =
   | { open: false }
@@ -284,6 +284,15 @@ function JobSectionWithData({
             });
             return;
           }
+          if (!postalCodeRegExp.test(mailingAddress.postalCode)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                "Invalid postal code format. Postal code should be in the format XXXXX or XXXXX-XXXX",
+              path: [`mailingAddress`],
+            });
+            return;
+          }
         })
         .superRefine((values, ctx) => {
           if (project.propertyType === "Commercial") {
@@ -341,12 +350,18 @@ function JobSectionWithData({
     [number, number]
   >([0, 0]);
 
-  const isAddressFieldFocusedRef = useRef(false);
-  const handleFocusAddressField = () =>
-    (isAddressFieldFocusedRef.current = true);
+  const [isAddressFieldFocused, setIsAddressFieldFocused] = useState(false);
+  const handleFocusAddressField = () => setIsAddressFieldFocused(true);
   const handleBlurAddressField = async () => {
-    isAddressFieldFocusedRef.current = false;
+    setIsAddressFieldFocused(false);
     updateAddressFormCoordinatesFromGeocode();
+  };
+  const handleOnOpenChangeAddressSelect = (open: boolean) => {
+    if (open) {
+      handleFocusAddressField();
+    } else {
+      handleBlurAddressField();
+    }
   };
 
   const updateAddressFormCoordinatesFromGeocode = async () => {
@@ -391,7 +406,7 @@ function JobSectionWithData({
   // const handleFormKeyDown = async (
   //   event: React.KeyboardEvent<HTMLFormElement>
   // ) => {
-  //   if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+  //   if (event.key === "Enter" && isAddressFieldFocused) {
   //     event.preventDefault();
   //     updateAddressFormCoordinatesFromGeocode();
   //   }
@@ -489,6 +504,10 @@ function JobSectionWithData({
       ) !== undefined;
     if (hasElectricalWetStampService || hasStructuralWetStampService) {
       setIsWetStampChecked(true);
+      const coordinates = recentJob?.mailingAddressForWetStamp?.coordinates;
+      if (coordinates && coordinates.length === 2) {
+        setMinimapCoordinates([coordinates[0], coordinates[1]]);
+      }
     }
     const typeOfWetStamp: {
       id: string;
@@ -572,6 +591,15 @@ function JobSectionWithData({
     session?.id,
   ]);
   async function onSubmit(values: FieldValues) {
+    if (isWetStampChecked && values.mailingAddress.fullAddress.length === 0) {
+      toast({
+        description:
+          "Please enter mailing address information with coordinates for the map display",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Please wait a minute",
       description: "Creating related folders in Google Drive",
@@ -636,16 +664,16 @@ function JobSectionWithData({
             street2: transformStringIntoNullableString.parse(
               values.mailingAddress.street2
             ),
-            fullAddress:
-              values.mailingAddress.fullAddress === ""
-                ? getFullAddressByAddressFields({
-                    street1: values.mailingAddress.street1,
-                    city: values.mailingAddress.city,
-                    state: values.mailingAddress.state,
-                    postalCode: values.mailingAddress.postalCode,
-                    country: values.mailingAddress.country,
-                  })
-                : values.mailingAddress.fullAddress,
+            // fullAddress:
+            //   values.mailingAddress.fullAddress === ""
+            //     ? getFullAddressByAddressFields({
+            //         street1: values.mailingAddress.street1,
+            //         city: values.mailingAddress.city,
+            //         state: values.mailingAddress.state,
+            //         postalCode: values.mailingAddress.postalCode,
+            //         country: values.mailingAddress.country,
+            //       })
+            //     : values.mailingAddress.fullAddress,
           }
         : null,
       numberOfWetStamp: isWetStampChecked
@@ -713,7 +741,13 @@ function JobSectionWithData({
       <section>
         <h2 className="h4 mb-2">Job</h2>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            // onSubmit={(event) => {
+            //   event.preventDefault();
+            //   form.handleSubmit(onSubmit)(event);
+            // }}
+          >
             <ItemsContainer>
               <FormField
                 control={form.control}
@@ -1327,15 +1361,6 @@ function JobSectionWithData({
                             <div className="flex flex-col gap-2">
                               <FormItem>
                                 <FormLabel required>Mailing Address</FormLabel>
-                                <p>
-                                  {JSON.stringify(
-                                    form.getValues(
-                                      "mailingAddress.fullAddress"
-                                    ),
-                                    null,
-                                    2
-                                  )}
-                                </p>
                                 <AddressSearchButton
                                   ref={field.ref}
                                   format="us"
@@ -1365,7 +1390,6 @@ function JobSectionWithData({
                                 />
                                 <Input
                                   value={field.value.street1}
-                                  // disabled
                                   onChange={(event) => {
                                     field.onChange({
                                       ...field.value,
@@ -1390,7 +1414,6 @@ function JobSectionWithData({
                                 />
                                 <Input
                                   value={field.value.city}
-                                  // disabled
                                   onChange={(event) => {
                                     field.onChange({
                                       ...field.value,
@@ -1401,19 +1424,6 @@ function JobSectionWithData({
                                   onBlur={handleBlurAddressField}
                                   placeholder="City"
                                 />
-                                {/* <Input
-                                  value={field.value.state}
-                                  // disabled
-                                  onChange={(event) => {
-                                    field.onChange({
-                                      ...field.value,
-                                      state: event.target.value,
-                                    });
-                                  }}
-                                  onFocus={handleFocusAddressField}
-                                  onBlur={handleBlurAddressField}
-                                  placeholder="State Or Region"
-                                /> */}
                                 <Select
                                   value={field.value.state}
                                   onValueChange={(value) => {
@@ -1421,8 +1431,8 @@ function JobSectionWithData({
                                       ...field.value,
                                       state: value,
                                     });
-                                    handleBlurAddressField();
                                   }}
+                                  onOpenChange={handleOnOpenChangeAddressSelect}
                                 >
                                   <SelectTrigger className="h-10 w-full">
                                     <SelectValue
@@ -1445,7 +1455,6 @@ function JobSectionWithData({
                                 </Select>
                                 <Input
                                   value={field.value.postalCode}
-                                  // disabled
                                   onChange={(event) => {
                                     field.onChange({
                                       ...field.value,
@@ -1458,7 +1467,6 @@ function JobSectionWithData({
                                 />
                                 <Input
                                   value={field.value.country}
-                                  // disabled
                                   onChange={(event) => {
                                     field.onChange({
                                       ...field.value,
@@ -1570,8 +1578,11 @@ function JobSectionWithData({
                 className="w-full"
                 type="submit"
                 isLoading={form.formState.isSubmitting}
+                disabled={isAddressFieldFocused}
               >
-                Submit
+                {isAddressFieldFocused
+                  ? "Disabled when editing address field"
+                  : "Submit"}
               </LoadingButton>
             </ItemsContainer>
           </form>

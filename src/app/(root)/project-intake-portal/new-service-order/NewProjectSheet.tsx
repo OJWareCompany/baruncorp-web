@@ -36,6 +36,7 @@ import usePostProjectMutation from "@/mutations/usePostProjectMutation";
 import {
   PropertyTypeEnum,
   capitalizedStateNames,
+  postalCodeRegExp,
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import LoadingButton from "@/components/LoadingButton";
@@ -47,7 +48,6 @@ import {
   fetchGeocodeFeatures,
   getMapboxPlacesQueryKey,
 } from "@/queries/useAddressSearchQuery";
-import { getFullAddressByAddressFields } from "@/lib/utils";
 
 const formSchema = z.object({
   propertyType: PropertyTypeEnum,
@@ -90,7 +90,15 @@ const formSchema = z.object({
       if (address.postalCode.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Postal Code is required",
+          message: "Postal code is required",
+        });
+        return;
+      }
+      if (!postalCodeRegExp.test(address.postalCode)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Invalid postal code format. Postal code should be in the format XXXXX or XXXXX-XXXX",
         });
         return;
       }
@@ -150,12 +158,18 @@ export default function NewProjectSheet({
     [number, number]
   >([0, 0]);
 
-  const isAddressFieldFocusedRef = useRef(false);
-  const handleFocusAddressField = () =>
-    (isAddressFieldFocusedRef.current = true);
+  const [isAddressFieldFocused, setIsAddressFieldFocused] = useState(false);
+  const handleFocusAddressField = () => setIsAddressFieldFocused(true);
   const handleBlurAddressField = async () => {
-    isAddressFieldFocusedRef.current = false;
+    setIsAddressFieldFocused(false);
     updateAddressFormCoordinatesFromGeocode();
+  };
+  const handleOnOpenChangeAddressSelect = (open: boolean) => {
+    if (open) {
+      handleFocusAddressField();
+    } else {
+      handleBlurAddressField();
+    }
   };
 
   useEffect(() => {
@@ -187,6 +201,15 @@ export default function NewProjectSheet({
   ]);
 
   async function onSubmit(values: FieldValues) {
+    if (values.address.fullAddress.length === 0) {
+      toast({
+        description:
+          "Please enter address information with coordinates for the map display",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Please wait a minute",
       description: "Creating related folders in Google Drive",
@@ -210,16 +233,16 @@ export default function NewProjectSheet({
           street2: transformStringIntoNullableString.parse(
             values.address.street2
           ),
-          fullAddress:
-            values.address.fullAddress === ""
-              ? getFullAddressByAddressFields({
-                  street1: values.address.street1,
-                  city: values.address.city,
-                  state: values.address.state,
-                  postalCode: values.address.postalCode,
-                  country: values.address.country,
-                })
-              : values.address.fullAddress,
+          // fullAddress:
+          //   values.address.fullAddress === ""
+          //     ? getFullAddressByAddressFields({
+          //         street1: values.address.street1,
+          //         city: values.address.city,
+          //         state: values.address.state,
+          //         postalCode: values.address.postalCode,
+          //         country: values.address.country,
+          //       })
+          //     : values.address.fullAddress,
         },
         utilityId: values.utilityId === "" ? undefined : values.utilityId,
       })
@@ -315,7 +338,7 @@ export default function NewProjectSheet({
   const handleFormKeyDown = async (
     event: React.KeyboardEvent<HTMLFormElement>
   ) => {
-    if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+    if (event.key === "Enter" && isAddressFieldFocused) {
       event.preventDefault();
       updateAddressFormCoordinatesFromGeocode();
     }
@@ -350,13 +373,13 @@ export default function NewProjectSheet({
         <SheetHeader className="mb-6">
           <SheetTitle>New Project</SheetTitle>
         </SheetHeader>
-        {/* <p>{JSON.stringify(form.getValues("address.coordinates"), null, 2)}</p>
-         */}
-        <p>{form.getValues("address.fullAddress")}</p>
-        <p>{JSON.stringify(minimapCoordinates, null, 2)}</p>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
+            // onSubmit={(event) => {
+            //   event.preventDefault();
+            //   form.handleSubmit(onSubmit)(event);
+            // }}
             onKeyDown={handleFormKeyDown}
             className="space-y-4"
           >
@@ -454,7 +477,6 @@ export default function NewProjectSheet({
                         />
                         <Input
                           value={field.value.street1}
-                          // disabled
                           onChange={(event) => {
                             field.onChange({
                               ...field.value,
@@ -479,7 +501,6 @@ export default function NewProjectSheet({
                         />
                         <Input
                           value={field.value.city}
-                          // disabled
                           onChange={(event) => {
                             field.onChange({
                               ...field.value,
@@ -497,8 +518,8 @@ export default function NewProjectSheet({
                               ...field.value,
                               state: value,
                             });
-                            handleBlurAddressField();
                           }}
+                          onOpenChange={handleOnOpenChangeAddressSelect}
                         >
                           <SelectTrigger className="h-10 w-full">
                             <SelectValue
@@ -518,7 +539,6 @@ export default function NewProjectSheet({
                         </Select>
                         <Input
                           value={field.value.postalCode}
-                          // disabled
                           onChange={(event) => {
                             field.onChange({
                               ...field.value,
@@ -531,7 +551,6 @@ export default function NewProjectSheet({
                         />
                         <Input
                           value={field.value.country}
-                          // disabled
                           onChange={(event) => {
                             field.onChange({
                               ...field.value,
@@ -578,8 +597,11 @@ export default function NewProjectSheet({
               type="submit"
               className="w-full"
               isLoading={form.formState.isSubmitting}
+              disabled={isAddressFieldFocused}
             >
-              Submit
+              {isAddressFieldFocused
+                ? "Disabled when editing address field"
+                : "Submit"}
             </LoadingButton>
           </form>
         </Form>

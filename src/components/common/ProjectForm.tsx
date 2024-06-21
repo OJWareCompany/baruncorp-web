@@ -31,6 +31,7 @@ import usePatchProjectMutation from "@/mutations/usePatchProjectMutation";
 import {
   PropertyTypeEnum,
   capitalizedStateNames,
+  postalCodeRegExp,
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
@@ -41,7 +42,6 @@ import {
   fetchGeocodeFeatures,
   getMapboxPlacesQueryKey,
 } from "@/queries/useAddressSearchQuery";
-import { getFullAddressByAddressFields } from "@/lib/utils";
 
 const formSchema = z.object({
   organization: z
@@ -88,6 +88,14 @@ const formSchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Postal Code is required",
+        });
+        return;
+      }
+      if (!postalCodeRegExp.test(value.postalCode)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Invalid postal code format. Postal code should be in the format XXXXX or XXXXX-XXXX",
         });
         return;
       }
@@ -154,12 +162,18 @@ export default function ProjectForm({ project, pageType }: Props) {
     [number, number]
   >([0, 0]);
 
-  const isAddressFieldFocusedRef = useRef(false);
-  const handleFocusAddressField = () =>
-    (isAddressFieldFocusedRef.current = true);
+  const [isAddressFieldFocused, setIsAddressFieldFocused] = useState(false);
+  const handleFocusAddressField = () => setIsAddressFieldFocused(true);
   const handleBlurAddressField = async () => {
-    isAddressFieldFocusedRef.current = false;
+    setIsAddressFieldFocused(false);
     updateAddressFormCoordinatesFromGeocode();
+  };
+  const handleOnOpenChangeAddressSelect = (open: boolean) => {
+    if (open) {
+      handleFocusAddressField();
+    } else {
+      handleBlurAddressField();
+    }
   };
 
   const queryClient = useQueryClient();
@@ -168,6 +182,15 @@ export default function ProjectForm({ project, pageType }: Props) {
   const { mutateAsync } = usePatchProjectMutation(project.projectId);
 
   async function onSubmit(values: FieldValues) {
+    if (values.address.fullAddress.length === 0) {
+      toast({
+        description:
+          "Please enter address information with coordinates for the map display",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (
       values.propertyType !== project.propertyType ||
       values.address.fullAddress !== project.propertyAddress.fullAddress
@@ -195,16 +218,16 @@ export default function ProjectForm({ project, pageType }: Props) {
         street2: transformStringIntoNullableString.parse(
           values.address.street2
         ),
-        fullAddress:
-          values.address.fullAddress === ""
-            ? getFullAddressByAddressFields({
-                street1: values.address.street1,
-                city: values.address.city,
-                state: values.address.state,
-                postalCode: values.address.postalCode,
-                country: values.address.country,
-              })
-            : values.address.fullAddress,
+        // fullAddress:
+        //   values.address.fullAddress === ""
+        //     ? getFullAddressByAddressFields({
+        //         street1: values.address.street1,
+        //         city: values.address.city,
+        //         state: values.address.state,
+        //         postalCode: values.address.postalCode,
+        //         country: values.address.country,
+        //       })
+        //     : values.address.fullAddress,
       },
       utilityId: values.utilityId === "" ? undefined : values.utilityId,
     })
@@ -293,7 +316,7 @@ export default function ProjectForm({ project, pageType }: Props) {
   const handleFormKeyDown = async (
     event: React.KeyboardEvent<HTMLFormElement>
   ) => {
-    if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+    if (event.key === "Enter" && isAddressFieldFocused) {
       event.preventDefault();
       updateAddressFormCoordinatesFromGeocode();
     }
@@ -332,13 +355,13 @@ export default function ProjectForm({ project, pageType }: Props) {
 
   return (
     <>
-      {/* <p>{JSON.stringify(form.getValues("address.coordinates"), null, 2)}</p>
-      <p>{JSON.stringify(minimapCoordinates, null, 2)}</p> */}
-      {/* <p>{JSON.stringify(form.getValues("address.state"), null, 2)}</p> */}
-      {/* <p>{JSON.stringify(form.getValues("address.fullAddress"))}</p> */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
+          // onSubmit={(event) => {
+          //   event.preventDefault();
+          //   form.handleSubmit(onSubmit)(event);
+          // }}
           onKeyDown={handleFormKeyDown}
           className="space-y-4"
         >
@@ -478,7 +501,6 @@ export default function ProjectForm({ project, pageType }: Props) {
                       )}
                       <Input
                         value={field.value.street1}
-                        // disabled
                         disabled={!isWorker}
                         onChange={(event) => {
                           field.onChange({
@@ -509,7 +531,6 @@ export default function ProjectForm({ project, pageType }: Props) {
                       />
                       <Input
                         value={field.value.city}
-                        // disabled
                         disabled={!isWorker}
                         onChange={(event) => {
                           field.onChange({
@@ -521,20 +542,6 @@ export default function ProjectForm({ project, pageType }: Props) {
                         onBlur={handleBlurAddressField}
                         placeholder="City"
                       />
-                      {/* <Input
-                        value={field.value.state}
-                        // disabled
-                        disabled={!isWorker}
-                        onChange={(event) => {
-                          field.onChange({
-                            ...field.value,
-                            state: event.target.value,
-                          });
-                        }}
-                        onFocus={handleFocusAddressField}
-                        onBlur={handleBlurAddressField}
-                        placeholder="State Or Region"
-                      /> */}
                       <Select
                         value={field.value.state}
                         disabled={!isWorker}
@@ -543,8 +550,8 @@ export default function ProjectForm({ project, pageType }: Props) {
                             ...field.value,
                             state: value,
                           });
-                          handleBlurAddressField();
                         }}
+                        onOpenChange={handleOnOpenChangeAddressSelect}
                       >
                         <SelectTrigger className="h-10 w-full">
                           <SelectValue
@@ -564,7 +571,6 @@ export default function ProjectForm({ project, pageType }: Props) {
                       </Select>
                       <Input
                         value={field.value.postalCode}
-                        // disabled
                         disabled={!isWorker}
                         onChange={(event) => {
                           field.onChange({
@@ -578,7 +584,6 @@ export default function ProjectForm({ project, pageType }: Props) {
                       />
                       <Input
                         value={field.value.country}
-                        // disabled
                         disabled={!isWorker}
                         onChange={(event) => {
                           field.onChange({
@@ -628,9 +633,11 @@ export default function ProjectForm({ project, pageType }: Props) {
               type="submit"
               className="w-full"
               isLoading={form.formState.isSubmitting}
-              disabled={!form.formState.isDirty}
+              disabled={!form.formState.isDirty || isAddressFieldFocused}
             >
-              Save
+              {isAddressFieldFocused
+                ? "Disabled when editing address field"
+                : "Save"}
             </LoadingButton>
           )}
         </form>

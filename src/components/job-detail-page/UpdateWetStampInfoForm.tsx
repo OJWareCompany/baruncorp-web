@@ -29,6 +29,7 @@ import { JobResponseDto } from "@/api/api-spec";
 import {
   capitalizedStateNames,
   digitRegExp,
+  postalCodeRegExp,
   transformNullishStringIntoString,
   transformStringIntoNullableString,
 } from "@/lib/constants";
@@ -40,7 +41,6 @@ import usePatchJobMutation from "@/mutations/usePatchJobMutation";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import usePostOrderedServiceMutation from "@/mutations/usePostOrderedServiceMutation";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
-import { getFullAddressByAddressFields } from "@/lib/utils";
 
 const formSchema = z
   .object({
@@ -93,17 +93,14 @@ const formSchema = z
       });
       return;
     }
-    /**
-     * @todo
-     * fullAddress에 대한 검증 하지 않고, onSubmit에서 요청 보내는 것으로
-     * 왜냐하면 여기서 검증 시켜 버리면 onSubmit까지 가지도 못함
-     */
-    if (mailingAddress.fullAddress.length === 0) {
+    if (!postalCodeRegExp.test(mailingAddress.postalCode)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Mailing Address is required",
+        message:
+          "Invalid postal code format. Postal code should be in the format XXXXX or XXXXX-XXXX",
         path: [`mailingAddress`],
       });
+      return;
     }
   });
 
@@ -120,13 +117,7 @@ function getFieldValues(job: JobResponseDto): FieldValues {
     ),
     mailingAddress: {
       city: job.mailingAddressForWetStamp?.city ?? "",
-      // coordinates: job.mailingAddressForWetStamp?.coordinates ?? [],
-      coordinates:
-        !job.mailingAddressForWetStamp?.coordinates ||
-        (job.mailingAddressForWetStamp?.coordinates &&
-          job.mailingAddressForWetStamp?.coordinates.length !== 2)
-          ? [0, 0]
-          : job.mailingAddressForWetStamp?.coordinates,
+      coordinates: job.mailingAddressForWetStamp?.coordinates ?? [],
       country: job.mailingAddressForWetStamp?.country ?? "",
       fullAddress: job.mailingAddressForWetStamp?.fullAddress ?? "",
       postalCode: job.mailingAddressForWetStamp?.postalCode ?? "",
@@ -157,16 +148,23 @@ export default function UpdateWetStampInfoForm({
     defaultValues: getFieldValues(job),
   });
   const statesOrRegionsRef = useRef(capitalizedStateNames);
+  const [longitude, latitude] = form.getValues("mailingAddress.coordinates");
   const [minimapCoordinates, setMinimapCoordinates] = useState<
     [number, number]
-  >([0, 0]);
+  >([longitude, latitude]);
 
-  const isAddressFieldFocusedRef = useRef(false);
-  const handleFocusAddressField = () =>
-    (isAddressFieldFocusedRef.current = true);
+  const [isAddressFieldFocused, setIsAddressFieldFocused] = useState(false);
+  const handleFocusAddressField = () => setIsAddressFieldFocused(true);
   const handleBlurAddressField = async () => {
-    isAddressFieldFocusedRef.current = false;
+    setIsAddressFieldFocused(false);
     updateAddressFormCoordinatesFromGeocode();
+  };
+  const handleOnOpenChangeAddressSelect = (open: boolean) => {
+    if (open) {
+      handleFocusAddressField();
+    } else {
+      handleBlurAddressField();
+    }
   };
 
   const updateAddressFormCoordinatesFromGeocode = async () => {
@@ -211,7 +209,7 @@ export default function UpdateWetStampInfoForm({
   // const handleFormKeyDown = async (
   //   event: React.KeyboardEvent<HTMLFormElement>
   // ) => {
-  //   if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+  //   if (event.key === "Enter" && isAddressFieldFocused) {
   //     event.preventDefault();
   //     updateAddressFormCoordinatesFromGeocode();
   //   }
@@ -250,6 +248,15 @@ export default function UpdateWetStampInfoForm({
   }, [job, form]);
 
   async function onSubmit(values: FieldValues) {
+    if (values.mailingAddress.fullAddress.length === 0) {
+      toast({
+        description:
+          "Please enter mailing address information with coordinates for the map display",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await patchJobMutateAsync({
         additionalInformationFromClient: job.additionalInformationFromClient,
@@ -257,20 +264,7 @@ export default function UpdateWetStampInfoForm({
         deliverablesEmails: job.clientInfo.deliverablesEmails,
         systemSize: job.systemSize,
         numberOfWetStamp: Number(values.numberOfWetStamp),
-        // mailingAddressForWetStamp: values.mailingAddress,
-        mailingAddressForWetStamp: {
-          ...values.mailingAddress,
-          fullAddress:
-            values.mailingAddress.fullAddress === ""
-              ? getFullAddressByAddressFields({
-                  street1: values.mailingAddress.street1,
-                  city: values.mailingAddress.city,
-                  state: values.mailingAddress.state,
-                  postalCode: values.mailingAddress.postalCode,
-                  country: values.mailingAddress.country,
-                })
-              : values.mailingAddress.fullAddress,
-        },
+        mailingAddressForWetStamp: values.mailingAddress,
         isExpedited: job.isExpedited,
         inReview: job.inReview,
         priority: job.priority,
@@ -314,7 +308,14 @@ export default function UpdateWetStampInfoForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        // onSubmit={(event) => {
+        //   event.preventDefault();
+        //   form.handleSubmit(onSubmit)(event);
+        // }}
+        className="space-y-4 mt-4"
+      >
         <FormField
           control={form.control}
           name="numberOfWetStamp"
@@ -371,7 +372,6 @@ export default function UpdateWetStampInfoForm({
                     />
                     <Input
                       value={field.value.street1}
-                      // disabled
                       onChange={(event) => {
                         field.onChange({
                           ...field.value,
@@ -396,7 +396,6 @@ export default function UpdateWetStampInfoForm({
                     />
                     <Input
                       value={field.value.city}
-                      // disabled
                       onChange={(event) => {
                         field.onChange({
                           ...field.value,
@@ -407,11 +406,6 @@ export default function UpdateWetStampInfoForm({
                       onBlur={handleBlurAddressField}
                       placeholder="City"
                     />
-                    {/* <Input
-                      value={field.value.state}
-                      disabled
-                      placeholder="State Or Region"
-                    /> */}
                     <Select
                       value={field.value.state}
                       onValueChange={(value) => {
@@ -419,8 +413,8 @@ export default function UpdateWetStampInfoForm({
                           ...field.value,
                           state: value,
                         });
-                        handleBlurAddressField();
                       }}
+                      onOpenChange={handleOnOpenChangeAddressSelect}
                     >
                       <SelectTrigger className="h-10 w-full">
                         <SelectValue
@@ -440,7 +434,6 @@ export default function UpdateWetStampInfoForm({
                     </Select>
                     <Input
                       value={field.value.postalCode}
-                      // disabled
                       onChange={(event) => {
                         field.onChange({
                           ...field.value,
@@ -453,7 +446,6 @@ export default function UpdateWetStampInfoForm({
                     />
                     <Input
                       value={field.value.country}
-                      // disabled
                       onChange={(event) => {
                         field.onChange({
                           ...field.value,
@@ -481,9 +473,11 @@ export default function UpdateWetStampInfoForm({
           <LoadingButton
             type="submit"
             isLoading={form.formState.isSubmitting}
-            disabled={!form.formState.isDirty}
+            disabled={!form.formState.isDirty || isAddressFieldFocused}
           >
-            Submit
+            {isAddressFieldFocused
+              ? "Disabled when editing address field"
+              : "Submit"}
           </LoadingButton>
         </RowItemsContainer>
       </form>

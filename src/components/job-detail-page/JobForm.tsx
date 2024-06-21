@@ -43,6 +43,7 @@ import {
   digitRegExp,
   toTwoDecimalRegExp,
   capitalizedStateNames,
+  postalCodeRegExp,
 } from "@/lib/constants";
 import useUserQuery from "@/queries/useUserQuery";
 import { getJobQueryKey } from "@/queries/useJobQuery";
@@ -192,6 +193,15 @@ export default function JobForm({ project, job, pageType }: Props) {
             });
             return;
           }
+          if (!postalCodeRegExp.test(mailingAddress.postalCode)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message:
+                "Invalid postal code format. Postal code should be in the format XXXXX or XXXXX-XXXX",
+              path: [`mailingAddress`],
+            });
+            return;
+          }
         })
         .superRefine((values, ctx) => {
           if (project?.propertyType === "Commercial") {
@@ -240,13 +250,7 @@ export default function JobForm({ project, job, pageType }: Props) {
         job.numberOfWetStamp == null ? "" : String(job.numberOfWetStamp),
       mailingAddress: {
         city: job.mailingAddressForWetStamp?.city ?? "",
-        // coordinates: job.mailingAddressForWetStamp?.coordinates ?? [0, 0],
-        coordinates:
-          !job.mailingAddressForWetStamp?.coordinates ||
-          (job.mailingAddressForWetStamp?.coordinates &&
-            job.mailingAddressForWetStamp?.coordinates.length !== 2)
-            ? [0, 0]
-            : job.mailingAddressForWetStamp?.coordinates,
+        coordinates: job.mailingAddressForWetStamp?.coordinates ?? [0, 0],
         country: job.mailingAddressForWetStamp?.country ?? "",
         fullAddress: job.mailingAddressForWetStamp?.fullAddress ?? "",
         postalCode: job.mailingAddressForWetStamp?.postalCode ?? "",
@@ -266,16 +270,23 @@ export default function JobForm({ project, job, pageType }: Props) {
     defaultValues: getFieldValues(job) as DefaultValues<FieldValues>, // editor value의 deep partial 문제로 typescript가 error를 발생시키나, 실제로는 문제 없음
   });
   const statesOrRegionsRef = useRef(capitalizedStateNames);
+  const [longitude, latitude] = form.getValues("mailingAddress.coordinates");
   const [minimapCoordinates, setMinimapCoordinates] = useState<
     [number, number]
-  >([0, 0]);
+  >([longitude, latitude]);
 
-  const isAddressFieldFocusedRef = useRef(false);
-  const handleFocusAddressField = () =>
-    (isAddressFieldFocusedRef.current = true);
+  const [isAddressFieldFocused, setIsAddressFieldFocused] = useState(false);
+  const handleFocusAddressField = () => setIsAddressFieldFocused(true);
   const handleBlurAddressField = async () => {
-    isAddressFieldFocusedRef.current = false;
+    setIsAddressFieldFocused(false);
     updateAddressFormCoordinatesFromGeocode();
+  };
+  const handleOnOpenChangeAddressSelect = (open: boolean) => {
+    if (open) {
+      handleFocusAddressField();
+    } else {
+      handleBlurAddressField();
+    }
   };
 
   const updateAddressFormCoordinatesFromGeocode = async () => {
@@ -320,7 +331,7 @@ export default function JobForm({ project, job, pageType }: Props) {
   // const handleFormKeyDown = async (
   //   event: React.KeyboardEvent<HTMLFormElement>
   // ) => {
-  //   if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+  //   if (event.key === "Enter" && isAddressFieldFocused) {
   //     event.preventDefault();
   //     updateAddressFormCoordinatesFromGeocode();
   //   }
@@ -385,6 +396,15 @@ export default function JobForm({ project, job, pageType }: Props) {
   });
 
   async function onSubmit(values: FieldValues) {
+    if (hasWetStamp && values.mailingAddress.fullAddress.length === 0) {
+      toast({
+        description:
+          "Please enter mailing address information with coordinates for the map display",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await patchJobMutateAsync({
         additionalInformationFromClient: isEditorValueEmpty(
@@ -402,21 +422,7 @@ export default function JobForm({ project, job, pageType }: Props) {
             ? Number(values.systemSize)
             : null,
         numberOfWetStamp: hasWetStamp ? Number(values.numberOfWetStamp) : null,
-        mailingAddressForWetStamp: hasWetStamp
-          ? {
-              ...values.mailingAddress,
-              fullAddress:
-                values.mailingAddress.fullAddress === ""
-                  ? getFullAddressByAddressFields({
-                      street1: values.mailingAddress.street1,
-                      city: values.mailingAddress.city,
-                      state: values.mailingAddress.state,
-                      postalCode: values.mailingAddress.postalCode,
-                      country: values.mailingAddress.country,
-                    })
-                  : values.mailingAddress.fullAddress,
-            }
-          : null,
+        mailingAddressForWetStamp: hasWetStamp ? values.mailingAddress : null,
         isExpedited: values.isExpedited,
         inReview: values.inReview,
         priority: values.priority,
@@ -497,7 +503,13 @@ export default function JobForm({ project, job, pageType }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        // onSubmit={(event) => {
+        //   event.preventDefault();
+        //   form.handleSubmit(onSubmit)(event);
+        // }}
+      >
         <ItemsContainer>
           <FormField
             control={form.control}
@@ -698,7 +710,6 @@ export default function JobForm({ project, job, pageType }: Props) {
                           )}
                           <Input
                             value={field.value.street1}
-                            // disabled
                             onChange={(event) => {
                               field.onChange({
                                 ...field.value,
@@ -743,8 +754,8 @@ export default function JobForm({ project, job, pageType }: Props) {
                                 ...field.value,
                                 state: value,
                               });
-                              handleBlurAddressField();
                             }}
+                            onOpenChange={handleOnOpenChangeAddressSelect}
                             disabled={!isWorker}
                           >
                             <SelectTrigger className="h-10 w-full">
@@ -961,10 +972,12 @@ export default function JobForm({ project, job, pageType }: Props) {
           {isWorker && (
             <LoadingButton
               type="submit"
-              disabled={!form.formState.isDirty}
+              disabled={!form.formState.isDirty || isAddressFieldFocused}
               isLoading={form.formState.isSubmitting}
             >
-              Save
+              {isAddressFieldFocused
+                ? "Disabled when editing address field"
+                : "Save"}
             </LoadingButton>
           )}
         </ItemsContainer>
