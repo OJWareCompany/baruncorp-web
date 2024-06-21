@@ -1,9 +1,9 @@
 "use client";
-import { addDays, addHours, format, getDay, subDays } from "date-fns";
+import { addDays, format, getDay, startOfDay, subDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange, SelectRangeEventHandler } from "react-day-picker";
 import { forwardRef, useState } from "react";
-import { formatInTimeZone, utcToZonedTime } from "date-fns-tz";
+import { formatInTimeZone, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -29,7 +29,7 @@ const PtoDatePicker = forwardRef<HTMLButtonElement, Props>(
           from: value.from,
           to: value.to
             ? isChanged
-              ? addHours(utcToZonedTime(value.to, timeZone), 13)
+              ? zonedTimeToUtc(startOfDay(value.to), timeZone)
               : utcToZonedTime(value.to, timeZone)
             : undefined,
         }
@@ -41,7 +41,6 @@ const PtoDatePicker = forwardRef<HTMLButtonElement, Props>(
       e,
       activeModifiers
     ) => {
-      console.log("Selected range:", range);
       setIsChanged(true);
       onChange(range, selectedDay, e, activeModifiers);
     };
