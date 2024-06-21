@@ -19,7 +19,6 @@ const useAddressSearchQuery = (
   return useQuery<GeocodeFeature[], AxiosError>({
     queryKey: ["mapbox.places", searchText],
     queryFn: async () => {
-      // console.log(`[useAddressSearchQuery Call] queryKey:`, ["mapbox.places", searchText]);
       const response = await axios.get(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json`,
         {
@@ -33,16 +32,6 @@ const useAddressSearchQuery = (
           },
         }
       );
-      /**
-       * @TODO Delete
-       */
-      // console.log(
-      //   `geocodeFeatures.coordinates: ${JSON.stringify(
-      //     response.data.features.map((item: any) => { return { id: item.id, coordi: item.geometry.coordinates } }),
-      //     null,
-      //     2
-      //   )}`
-      // );
       return response.data.features;
     },
     enabled: searchText.length >= 1,
