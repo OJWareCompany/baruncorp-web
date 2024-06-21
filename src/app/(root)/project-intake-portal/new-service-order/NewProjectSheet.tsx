@@ -2,7 +2,7 @@
 import * as z from "zod";
 import { DefaultValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -35,6 +35,8 @@ import Minimap from "@/components/Minimap";
 import usePostProjectMutation from "@/mutations/usePostProjectMutation";
 import {
   PropertyTypeEnum,
+  capitalizedStateNames,
+  postalCodeRegExp,
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import LoadingButton from "@/components/LoadingButton";
@@ -42,6 +44,10 @@ import useOrganizationQuery from "@/queries/useOrganizationQuery";
 import { useToast } from "@/components/ui/use-toast";
 import { getProjectsQueryKey } from "@/queries/useProjectsQuery";
 import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
+import {
+  fetchGeocodeFeatures,
+  getMapboxPlacesQueryKey,
+} from "@/queries/useAddressSearchQuery";
 
 const formSchema = z.object({
   propertyType: PropertyTypeEnum,
@@ -59,17 +65,52 @@ const formSchema = z.object({
       coordinates: z.array(z.number()),
     })
     .superRefine((value, ctx) => {
-      if (value.fullAddress.length === 0) {
+      const address = value;
+      if (address.street1.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Address is required",
+          message: "Street 1 is required",
         });
+        return;
+      }
+      if (address.city.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "City is required",
+        });
+        return;
+      }
+      if (address.state.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "State is required",
+        });
+        return;
+      }
+      if (address.postalCode.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Postal code is required",
+        });
+        return;
+      }
+      if (!postalCodeRegExp.test(address.postalCode)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Invalid postal code format. Postal code should be in the format XXXXX or XXXXX-XXXX",
+        });
+        return;
       }
     }),
   utilityId: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
+type AddressTextField = Pick<
+  FieldValues["address"],
+  "street1" | "street2" | "city" | "state" | "postalCode" | "country"
+>;
 
 const defaultValues: DefaultValues<FieldValues> = {
   propertyType: "Residential",
@@ -83,7 +124,7 @@ const defaultValues: DefaultValues<FieldValues> = {
     postalCode: "",
     country: "",
     fullAddress: "",
-    coordinates: [],
+    coordinates: [0, 0],
   },
   utilityId: "",
 };
@@ -104,11 +145,32 @@ export default function NewProjectSheet({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+
   const usePostProjectMutationResult = usePostProjectMutation();
   const queryClient = useQueryClient();
   const { data: organization } = useOrganizationQuery(organizationId);
 
   const watchState = form.watch("address.state");
+
+  const statesOrRegionsRef = useRef(capitalizedStateNames);
+
+  const [minimapCoordinates, setMinimapCoordinates] = useState<
+    [number, number]
+  >([0, 0]);
+
+  const [isAddressFieldFocused, setIsAddressFieldFocused] = useState(false);
+  const handleFocusAddressField = () => setIsAddressFieldFocused(true);
+  const handleBlurAddressField = async () => {
+    setIsAddressFieldFocused(false);
+    updateAddressFormCoordinatesFromGeocode();
+  };
+  const handleOnOpenChangeAddressSelect = (open: boolean) => {
+    if (open) {
+      handleFocusAddressField();
+    } else {
+      handleBlurAddressField();
+    }
+  };
 
   useEffect(() => {
     if (organization && organization.projectPropertyTypeDefaultValue) {
@@ -139,6 +201,15 @@ export default function NewProjectSheet({
   ]);
 
   async function onSubmit(values: FieldValues) {
+    if (values.address.fullAddress.length === 0) {
+      toast({
+        description:
+          "Please enter address information with coordinates for the map display",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Please wait a minute",
       description: "Creating related folders in Google Drive",
@@ -218,6 +289,74 @@ export default function NewProjectSheet({
       });
   }
 
+  const updateAddressFormCoordinatesFromGeocode = async () => {
+    const geocodeFeatures = await queryClient.fetchQuery({
+      queryKey: getMapboxPlacesQueryKey(generateAddressSearchText()),
+      queryFn: fetchGeocodeFeatures,
+    });
+    if (geocodeFeatures && geocodeFeatures.length > 0) {
+      /**
+       * @TODO Delete
+       */
+      console.log(
+        `geocodeFeatures.coordinates: ${JSON.stringify(
+          geocodeFeatures.map((item: any) => {
+            return { id: item.id, coordi: item.geometry.coordinates };
+          }),
+          null,
+          2
+        )}`
+      );
+      const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
+      updateAddressCoordinates([longitude, latitude]);
+      form.setValue("address.fullAddress", geocodeFeatures[0].place_name);
+    }
+
+    if (!geocodeFeatures || geocodeFeatures.length === 0) {
+      updateAddressCoordinates([0, 0]);
+      form.setValue("address.fullAddress", "");
+    }
+  };
+
+  const updateAddressCoordinates = (
+    coordinates: [longitude: number, latitude: number]
+  ) => {
+    form.setValue("address.coordinates", coordinates);
+    setMinimapCoordinates(coordinates);
+  };
+
+  const handleFormKeyDown = async (
+    event: React.KeyboardEvent<HTMLFormElement>
+  ) => {
+    if (event.key === "Enter" && isAddressFieldFocused) {
+      event.preventDefault();
+      updateAddressFormCoordinatesFromGeocode();
+    }
+  };
+
+  const generateAddressSearchText = () => {
+    const addressFields: Array<keyof AddressTextField> = [
+      "street1",
+      "street2",
+      "city",
+      "state",
+      "postalCode",
+      "country",
+    ];
+
+    const addressSearchText = addressFields
+      .map((field) => form.getValues(`address.${field}`)?.trim())
+      .filter(Boolean)
+      .join(" ");
+
+    /**
+     * @Delete Delete
+     */
+    console.log(`Generated SearchText: ${addressSearchText}`);
+
+    return addressSearchText;
+  };
+
   return (
     <Sheet {...dialogProps}>
       <SheetContent className="sm:max-w-[1400px] w-full">
@@ -225,7 +364,15 @@ export default function NewProjectSheet({
           <SheetTitle>New Project</SheetTitle>
         </SheetHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            // onSubmit={(event) => {
+            //   event.preventDefault();
+            //   form.handleSubmit(onSubmit)(event);
+            // }}
+            onKeyDown={handleFormKeyDown}
+            className="space-y-4"
+          >
             <RowItemsContainer>
               <FormField
                 control={form.control}
@@ -310,11 +457,24 @@ export default function NewProjectSheet({
                               },
                               { shouldValidate: true, shouldDirty: true }
                             );
+
+                            /**
+                             * 이 onSelect 이벤트 콜백이 호출되는 경우의 address.fullAddress는 AddressSearchButton 컴포넌트 내부에서 초기화 된다
+                             */
+                            const [longitude, latitude] = value.coordinates;
+                            updateAddressCoordinates([longitude, latitude]);
                           }}
                         />
                         <Input
                           value={field.value.street1}
-                          disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              street1: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Street 1"
                         />
                         <Input
@@ -325,34 +485,78 @@ export default function NewProjectSheet({
                               street2: event.target.value,
                             });
                           }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Street 2"
                         />
                         <Input
                           value={field.value.city}
-                          disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              city: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="City"
                         />
-                        <Input
+                        <Select
                           value={field.value.state}
-                          disabled
-                          placeholder="State Or Region"
-                        />
+                          onValueChange={(value) => {
+                            field.onChange({
+                              ...field.value,
+                              state: value,
+                            });
+                          }}
+                          onOpenChange={handleOnOpenChangeAddressSelect}
+                        >
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue
+                              placeholder={"Select an state or region"}
+                            />
+                          </SelectTrigger>
+                          <SelectContent
+                            side="bottom"
+                            className="max-h-48 overflow-y-auto"
+                          >
+                            {statesOrRegionsRef.current.map((state) => (
+                              <SelectItem key={state} value={`${state}`}>
+                                {state}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Input
                           value={field.value.postalCode}
-                          disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              postalCode: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Postal Code"
                         />
                         <Input
                           value={field.value.country}
-                          disabled
+                          onChange={(event) => {
+                            field.onChange({
+                              ...field.value,
+                              country: event.target.value,
+                            });
+                          }}
+                          onFocus={handleFocusAddressField}
+                          onBlur={handleBlurAddressField}
                           placeholder="Country"
                         />
                       </FormItem>
                     </div>
                     <div className="col-span-1">
                       <Minimap
-                        longitude={field.value.coordinates[0]}
-                        latitude={field.value.coordinates[1]}
+                        longitude={minimapCoordinates[0]}
+                        latitude={minimapCoordinates[1]}
                       />
                     </div>
                   </div>
@@ -383,8 +587,11 @@ export default function NewProjectSheet({
               type="submit"
               className="w-full"
               isLoading={form.formState.isSubmitting}
+              disabled={isAddressFieldFocused}
             >
-              Submit
+              {isAddressFieldFocused
+                ? "Disabled when editing address field"
+                : "Submit"}
             </LoadingButton>
           </form>
         </Form>
