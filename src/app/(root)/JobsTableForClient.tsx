@@ -598,7 +598,7 @@ export default function JobsTableForClient({ type }: Props) {
                 return (
                   <Badge
                     variant={"outline"}
-                    className="flex items-center py-1 my-1"
+                    className="flex items-center my-1"
                     key={task.id}
                   >
                     {status && (
