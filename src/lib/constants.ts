@@ -730,7 +730,7 @@ export type SortFieldTypeEnum = z.infer<typeof SortFieldTypeEnum>;
 /* -------------------------------------------------------------------------- */
 
 // "Self" | "Client Provided"
-export const LoadCalcOriginEnum = z.enum(["Self", "Client Provided"], {
+export const LoadCalcOriginEnum = z.enum(["By Barun Corp", "Client Provided"], {
   errorMap: () => ({ message: "Structural Calculation Origin is required" }),
 });
 // // "Self" | "Client Provided" | ""
@@ -928,6 +928,13 @@ const StateNames = [
   "WISCONSIN",
   "WYOMING",
 ] as const;
+
+export const capitalizedStateNames = StateNames.map((state) => {
+  return state
+    .split(" ")
+    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+    .join(" ");
+});
 
 export type Abbreviation = (typeof Abbreviations)[number];
 export type StateName = (typeof StateNames)[number];

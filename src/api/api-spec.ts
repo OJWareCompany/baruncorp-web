@@ -357,8 +357,8 @@ export interface CreateJobRequestDto {
   mountingType: "Roof Mount" | "Ground Mount";
   /** @default "Medium" */
   priority?: "Immediate" | "High" | "Medium" | "Low" | "None";
-  /** @default "Self" */
-  loadCalcOrigin: "Self" | "Client Provided";
+  /** @default "By Barun Corp" */
+  loadCalcOrigin: "By Barun Corp" | "Client Provided";
   /** @default [{"serviceId":"e5d81943-3fef-416d-a85b-addb8be296c0","description":""},{"serviceId":"99ff64ee-fe47-4235-a026-db197628d077","description":""},{"serviceId":"5c29f1ae-d50b-4400-a6fb-b1a2c87126e9","description":""},{"serviceId":"2a2a256b-57a5-46f5-8cfb-1855cc29238a","description":"This is not on the menu.","isRevision":false}] */
   taskIds: CreateOrderedTaskWhenJobIsCreatedRequestDto[];
   mailingAddressForWetStamp: AddressDto | null;
@@ -388,8 +388,8 @@ export interface UpdateJobRequestDto {
   structuralUpgradeNote: string | null;
   /** @default "Medium" */
   priority: "Immediate" | "High" | "Medium" | "Low" | "None";
-  /** @default "Self" */
-  loadCalcOrigin: "Self" | "Client Provided";
+  /** @default "By Barun Corp" */
+  loadCalcOrigin: "By Barun Corp" | "Client Provided";
   mailingAddressForWetStamp: AddressDto | null;
   /** @default 3 */
   numberOfWetStamp: number | null;
@@ -549,8 +549,8 @@ export interface JobResponseDto {
     | "Completed"
     | "Canceled (Invoice)"
     | "Sent To Client";
-  /** @example "Self" */
-  loadCalcOrigin: "Self" | "Client Provided";
+  /** @example "By Barun Corp" */
+  loadCalcOrigin: "By Barun Corp" | "Client Provided";
   assignedTasks: AssignedTaskResponseDto[];
   orderedServices: OrderedServiceResponseFields[];
   clientInfo: ClientInformationFields;
@@ -1685,6 +1685,102 @@ export interface AddressFromMapBox {
   coordinates: number[];
 }
 
+export interface CensusState {
+  AREALAND: number;
+  AREAWATER: number;
+  CENTLAT: string;
+  CENTLON: string;
+  DIVISION: string;
+  INTPTLAT: string;
+  INTPTLON: string;
+  MTFCC: string;
+  OBJECTID: number;
+  OID: string;
+  REGION: string;
+  ansiCode: string;
+  stateName: string;
+  funcStat: string;
+  geoId: string;
+  lsadCode: string;
+  stateLongName: string;
+  stateCode: string;
+  abbreviation: string;
+}
+
+export interface CensusCounties {
+  AREALAND: number;
+  AREAWATER: number;
+  CENTLAT: string;
+  CENTLON: string;
+  COUNTYCC: string;
+  INTPTLAT: string;
+  INTPTLON: string;
+  MTFCC: string;
+  OBJECTID: number;
+  OID: string;
+  ansiCode: string;
+  countyName: string;
+  countyCode: string;
+  funcStat: string;
+  geoId: string;
+  lsadCode: string;
+  countyLongName: string;
+  stateCode: string;
+}
+
+export interface CensusCountySubdivisions {
+  MTFCC: string;
+  AREALAND: number;
+  AREAWATER: number;
+  CENTLAT: string;
+  CENTLON: string;
+  COUSUB: string;
+  COUSUBCC: string;
+  INTPTLAT: string;
+  INTPTLON: string;
+  OBJECTID: number;
+  OID: string;
+  ansiCode: string;
+  name: string;
+  countyCode: string;
+  funcStat: string;
+  geoId: string;
+  lsadCode: string;
+  longName: string;
+  stateCode: string;
+}
+
+export interface CensusPlace {
+  MTFCC: string;
+  CBSAPCI: string;
+  CENTLAT: string;
+  CENTLON: string;
+  NECTAPCI: string;
+  OBJECTID: number;
+  OID: string;
+  INTPTLAT: string;
+  INTPTLON: string;
+  AREALAND: number;
+  AREAWATER: number;
+  DISP_CLR: number;
+  placeName: string;
+  funcStat: string;
+  geoId: string;
+  lsadCode: string;
+  placeLongName: string;
+  placeFips: string;
+  placeC: string;
+  ansiCode: string;
+  stateCode: string;
+}
+
+export interface CensusResponseDto {
+  state: CensusState;
+  county: CensusCounties;
+  countySubdivisions: CensusCountySubdivisions | null;
+  place: CensusPlace;
+}
+
 export interface CreateProjectRequestDto {
   /** @default "Residential" */
   projectPropertyType: "Residential" | "Commercial";
@@ -1828,6 +1924,17 @@ export interface ProjectResponseDto {
 export interface ProjectsCountResponseDto {
   projectsCount: number;
   jobsCount: number;
+}
+
+export interface UpdateProjectAssociatedRegulatoryRequestDto {
+  /** @default "12" */
+  stateId: string;
+  /** @default "12011" */
+  countyId: string | null;
+  /** @default "1201191098" */
+  countySubdivisionsId: string | null;
+  /** @default "1239525" */
+  placeId: string | null;
 }
 
 export interface AhjNoteListResponseDto {
@@ -3771,6 +3878,8 @@ export interface GeographyControllerGetFindNotesParams {
   page?: number;
   /** @default "1239525" */
   geoId?: string | null;
+  /** @default "STATE" */
+  type?: "STATE" | "COUNTY" | "COUNTY SUBDIVISIONS" | "PLACE" | null;
   /** Using LIKE (중간 값 검색) */
   fullAhjName?: string | null;
   /** Using LIKE (중간 값 검색) */
@@ -6751,11 +6860,31 @@ export class Api<
       data: AddressFromMapBox,
       params: RequestParams = {}
     ) =>
-      this.request<void, any>({
+      this.request<CensusResponseDto, CensusResponseDto>({
         path: `/search-census`,
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FindSearchCensusHttpControllerSearchCensus
+     * @request GET:/search-census
+     */
+    findSearchCensusHttpControllerSearchCensus: (
+      data: AddressFromMapBox,
+      params: RequestParams = {}
+    ) =>
+      this.request<CensusResponseDto, CensusResponseDto>({
+        path: `/search-census`,
+        method: "GET",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
   };
@@ -6848,6 +6977,25 @@ export class Api<
         path: `/projects/${projectId}`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateProjectAssociatedRegulatoryHttpControllerUpdate
+     * @request PATCH:/projects/{projectId}/associatedRegulatory
+     */
+    updateProjectAssociatedRegulatoryHttpControllerUpdate: (
+      projectId: string,
+      data: UpdateProjectAssociatedRegulatoryRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/projects/${projectId}/associatedRegulatory`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

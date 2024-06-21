@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProjectResponseDto } from "@/api/api-spec";
 import {
   Form,
@@ -30,12 +30,18 @@ import Minimap from "@/components/Minimap";
 import usePatchProjectMutation from "@/mutations/usePatchProjectMutation";
 import {
   PropertyTypeEnum,
+  capitalizedStateNames,
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
 import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import {
+  fetchGeocodeFeatures,
+  getMapboxPlacesQueryKey,
+} from "@/queries/useAddressSearchQuery";
+import { getFullAddressByAddressFields } from "@/lib/utils";
 
 const formSchema = z.object({
   organization: z
@@ -45,20 +51,55 @@ const formSchema = z.object({
   propertyType: PropertyTypeEnum,
   propertyOwner: z.string().trim(),
   projectNumber: z.string().trim(),
-  address: z.object({
-    street1: z.string().trim(),
-    street2: z.string().trim(),
-    city: z.string().trim(),
-    state: z.string().trim(),
-    postalCode: z.string().trim(),
-    country: z.string().trim(),
-    fullAddress: z.string().trim(),
-    coordinates: z.array(z.number()),
-  }),
+  address: z
+    .object({
+      street1: z.string().trim(),
+      street2: z.string().trim(),
+      city: z.string().trim(),
+      state: z.string().trim(),
+      postalCode: z.string().trim(),
+      country: z.string().trim(),
+      fullAddress: z.string().trim(),
+      coordinates: z.array(z.number()),
+    })
+    .superRefine((value, ctx) => {
+      if (value.street1.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Street 1 is required",
+        });
+        return;
+      }
+      if (value.city.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "City is required",
+        });
+        return;
+      }
+      if (value.state.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "State is required",
+        });
+        return;
+      }
+      if (value.postalCode.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Postal Code is required",
+        });
+        return;
+      }
+    }),
   utilityId: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
+type AddressTextField = Pick<
+  FieldValues["address"],
+  "street1" | "street2" | "city" | "state" | "postalCode" | "country"
+>;
 
 function getFieldValues(project: ProjectResponseDto): FieldValues {
   return {
@@ -70,6 +111,10 @@ function getFieldValues(project: ProjectResponseDto): FieldValues {
       ...project.propertyAddress,
       street2: project.propertyAddress.street2 ?? "",
       country: project.propertyAddress.country ?? "",
+      coordinates:
+        project.propertyAddress.coordinates.length === 2
+          ? project.propertyAddress.coordinates
+          : [0, 0],
     },
     utilityId: project.utilityId ?? "",
   };
@@ -96,7 +141,26 @@ export default function ProjectForm({ project, pageType }: Props) {
     defaultValues: getFieldValues(project),
   });
 
+  const initialStateOrRegion = form.getValues("address.state");
+  const statesOrRegionsRef = useRef(
+    capitalizedStateNames.includes(initialStateOrRegion)
+      ? capitalizedStateNames
+      : [initialStateOrRegion, ...capitalizedStateNames]
+  );
+
   const watchState = form.watch("address.state");
+
+  const [minimapCoordinates, setMinimapCoordinates] = useState<
+    [number, number]
+  >([0, 0]);
+
+  const isAddressFieldFocusedRef = useRef(false);
+  const handleFocusAddressField = () =>
+    (isAddressFieldFocusedRef.current = true);
+  const handleBlurAddressField = async () => {
+    isAddressFieldFocusedRef.current = false;
+    updateAddressFormCoordinatesFromGeocode();
+  };
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -131,6 +195,16 @@ export default function ProjectForm({ project, pageType }: Props) {
         street2: transformStringIntoNullableString.parse(
           values.address.street2
         ),
+        fullAddress:
+          values.address.fullAddress === ""
+            ? getFullAddressByAddressFields({
+                street1: values.address.street1,
+                city: values.address.city,
+                state: values.address.state,
+                postalCode: values.address.postalCode,
+                country: values.address.country,
+              })
+            : values.address.fullAddress,
       },
       utilityId: values.utilityId === "" ? undefined : values.utilityId,
     })
@@ -180,220 +254,387 @@ export default function ProjectForm({ project, pageType }: Props) {
       });
   }
 
+  const updateAddressFormCoordinatesFromGeocode = async () => {
+    const geocodeFeatures = await queryClient.fetchQuery({
+      queryKey: getMapboxPlacesQueryKey(generateAddressSearchText()),
+      queryFn: fetchGeocodeFeatures,
+    });
+    if (geocodeFeatures && geocodeFeatures.length > 0) {
+      /**
+       * @TODO Delete
+       */
+      console.log(
+        `geocodeFeatures.coordinates: ${JSON.stringify(
+          geocodeFeatures.map((item: any) => {
+            return { id: item.id, coordi: item.geometry.coordinates };
+          }),
+          null,
+          2
+        )}`
+      );
+      const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
+      updateAddressCoordinates([longitude, latitude]);
+      form.setValue("address.fullAddress", geocodeFeatures[0].place_name);
+    }
+
+    if (!geocodeFeatures || geocodeFeatures.length === 0) {
+      updateAddressCoordinates([0, 0]);
+      form.setValue("address.fullAddress", "");
+    }
+  };
+
+  const updateAddressCoordinates = (
+    coordinates: [longitude: number, latitude: number]
+  ) => {
+    form.setValue("address.coordinates", coordinates);
+    setMinimapCoordinates(coordinates);
+  };
+
+  const handleFormKeyDown = async (
+    event: React.KeyboardEvent<HTMLFormElement>
+  ) => {
+    if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+      event.preventDefault();
+      updateAddressFormCoordinatesFromGeocode();
+    }
+  };
+
+  const generateAddressSearchText = () => {
+    const addressFields: Array<keyof AddressTextField> = [
+      "street1",
+      "street2",
+      "city",
+      "state",
+      "postalCode",
+      "country",
+    ];
+
+    const addressSearchText = addressFields
+      .map((field) => form.getValues(`address.${field}`)?.trim())
+      .filter(Boolean)
+      .join(" ");
+
+    /**
+     * @Delete Delete
+     */
+    console.log(`Generated SearchText: ${addressSearchText}`);
+
+    return addressSearchText;
+  };
+
   useEffect(() => {
     if (project) {
       form.reset(getFieldValues(project));
+      const [longitude, latitude] = project.propertyAddress.coordinates;
+      setMinimapCoordinates([longitude, latitude]);
     }
   }, [form, project]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="organization"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required>Organization</FormLabel>
-              <FormControl>
-                <Input {...field} disabled />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <RowItemsContainer>
-          {isBarunCorpMember ? (
-            <FormField
-              control={form.control}
-              name="propertyType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Property Type</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select a property type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {PropertyTypeEnum.options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ) : (
-            <FormField
-              control={form.control}
-              name="propertyType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel required>Property Type</FormLabel>
-                  <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled
-                    >
-                      <SelectTrigger ref={field.ref}>
-                        <SelectValue placeholder="Select a property type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {PropertyTypeEnum.options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+    <>
+      {/* <p>{JSON.stringify(form.getValues("address.coordinates"), null, 2)}</p>
+      <p>{JSON.stringify(minimapCoordinates, null, 2)}</p> */}
+      {/* <p>{JSON.stringify(form.getValues("address.state"), null, 2)}</p> */}
+      {/* <p>{JSON.stringify(form.getValues("address.fullAddress"))}</p> */}
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          onKeyDown={handleFormKeyDown}
+          className="space-y-4"
+        >
           <FormField
             control={form.control}
-            name="propertyOwner"
+            name="organization"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Property Owner</FormLabel>
+                <FormLabel required>Organization</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={!isWorker} />
+                  <Input {...field} disabled />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="projectNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Project Number</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={!isWorker} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </RowItemsContainer>
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-2">
+          <RowItemsContainer>
+            {isBarunCorpMember ? (
+              <FormField
+                control={form.control}
+                name="propertyType"
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel required>Address</FormLabel>
-                    {isWorker && (
-                      <AddressSearchButton
-                        ref={field.ref}
-                        format="us"
-                        onSelect={(value) => {
-                          form.setValue(
-                            "address",
-                            {
-                              ...value,
-                              street2: "",
-                            },
-                            { shouldValidate: true, shouldDirty: true }
-                          );
-                        }}
-                      />
-                    )}
-                    <Input
-                      value={field.value.street1}
-                      disabled
-                      placeholder="Street 1"
-                    />
-                    <Input
-                      value={field.value.street2}
-                      onChange={(event) => {
-                        field.onChange({
-                          ...field.value,
-                          street2: event.target.value,
-                        });
-                      }}
-                      placeholder="Street 2"
-                      disabled={!isWorker}
-                    />
-                    <Input
-                      value={field.value.city}
-                      disabled
-                      placeholder="City"
-                    />
-                    <Input
-                      value={field.value.state}
-                      disabled
-                      placeholder="State Or Region"
-                    />
-                    <Input
-                      value={field.value.postalCode}
-                      disabled
-                      placeholder="Postal Code"
-                    />
-                    <Input
-                      value={field.value.country}
-                      disabled
-                      placeholder="Country"
-                    />
+                    <FormLabel required>Property Type</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue placeholder="Select a property type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {PropertyTypeEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="propertyType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Property Type</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled
+                      >
+                        <SelectTrigger ref={field.ref}>
+                          <SelectValue placeholder="Select a property type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {PropertyTypeEnum.options.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <FormField
+              control={form.control}
+              name="propertyOwner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Property Owner</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={!isWorker} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="projectNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Number</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={!isWorker} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </RowItemsContainer>
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-2">
+                    <FormItem>
+                      <FormLabel required>Address</FormLabel>
+                      {isWorker && (
+                        <AddressSearchButton
+                          ref={field.ref}
+                          format="us"
+                          onSelect={(value) => {
+                            form.setValue(
+                              "address",
+                              {
+                                ...value,
+                                street2: "",
+                              },
+                              { shouldValidate: true, shouldDirty: true }
+                            );
+
+                            /**
+                             * 이 onSelect 이벤트 콜백이 호출되는 경우의 address.fullAddress는 AddressSearchButton 컴포넌트 내부에서 초기화 된다
+                             */
+                            const [longitude, latitude] = value.coordinates;
+                            updateAddressCoordinates([longitude, latitude]);
+                          }}
+                        />
+                      )}
+                      <Input
+                        value={field.value.street1}
+                        // disabled
+                        disabled={!isWorker}
+                        onChange={(event) => {
+                          field.onChange({
+                            ...field.value,
+                            street1: event.target.value,
+                          });
+                        }}
+                        onFocus={handleFocusAddressField}
+                        onBlur={handleBlurAddressField}
+                        placeholder="Street 1"
+                      />
+                      <Input
+                        value={field.value.street2}
+                        /**
+                         * @TODO
+                         * 이게 뭐지? workwer만 수정할 수 있도록 해야 하나?
+                         */
+                        disabled={!isWorker}
+                        onChange={(event) => {
+                          field.onChange({
+                            ...field.value,
+                            street2: event.target.value,
+                          });
+                        }}
+                        onFocus={handleFocusAddressField}
+                        onBlur={handleBlurAddressField}
+                        placeholder="Street 2"
+                      />
+                      <Input
+                        value={field.value.city}
+                        // disabled
+                        disabled={!isWorker}
+                        onChange={(event) => {
+                          field.onChange({
+                            ...field.value,
+                            city: event.target.value,
+                          });
+                        }}
+                        onFocus={handleFocusAddressField}
+                        onBlur={handleBlurAddressField}
+                        placeholder="City"
+                      />
+                      {/* <Input
+                        value={field.value.state}
+                        // disabled
+                        disabled={!isWorker}
+                        onChange={(event) => {
+                          field.onChange({
+                            ...field.value,
+                            state: event.target.value,
+                          });
+                        }}
+                        onFocus={handleFocusAddressField}
+                        onBlur={handleBlurAddressField}
+                        placeholder="State Or Region"
+                      /> */}
+                      <Select
+                        value={field.value.state}
+                        disabled={!isWorker}
+                        onValueChange={(value) => {
+                          field.onChange({
+                            ...field.value,
+                            state: value,
+                          });
+                          handleBlurAddressField();
+                        }}
+                      >
+                        <SelectTrigger className="h-10 w-full">
+                          <SelectValue
+                            placeholder={"Select an state or region"}
+                          />
+                        </SelectTrigger>
+                        <SelectContent
+                          side="bottom"
+                          className="max-h-48 overflow-y-auto"
+                        >
+                          {statesOrRegionsRef.current.map((state) => (
+                            <SelectItem key={state} value={`${state}`}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        value={field.value.postalCode}
+                        // disabled
+                        disabled={!isWorker}
+                        onChange={(event) => {
+                          field.onChange({
+                            ...field.value,
+                            postalCode: event.target.value,
+                          });
+                        }}
+                        onFocus={handleFocusAddressField}
+                        onBlur={handleBlurAddressField}
+                        placeholder="Postal Code"
+                      />
+                      <Input
+                        value={field.value.country}
+                        // disabled
+                        disabled={!isWorker}
+                        onChange={(event) => {
+                          field.onChange({
+                            ...field.value,
+                            country: event.target.value,
+                          });
+                        }}
+                        onFocus={handleFocusAddressField}
+                        onBlur={handleBlurAddressField}
+                        placeholder="Country"
+                      />
+                    </FormItem>
+                  </div>
+                  <div className="col-span-1">
+                    <Minimap
+                      longitude={minimapCoordinates[0]}
+                      latitude={minimapCoordinates[1]}
+                    />
+                  </div>
                 </div>
-                <div className="col-span-1">
-                  <Minimap
-                    longitude={field.value.coordinates[0]}
-                    latitude={field.value.coordinates[1]}
-                  />
-                </div>
+                <FormMessage className="mt-2" />
               </div>
-              <FormMessage className="mt-2" />
-            </div>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="utilityId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Utility</FormLabel>
+                <FormControl>
+                  <UtilitiesCombobox
+                    utilityId={field.value}
+                    onUtilityIdChange={field.onChange}
+                    state={watchState}
+                    ref={field.ref}
+                    modal
+                    disabled={!isWorker}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {isWorker && (
+            <LoadingButton
+              type="submit"
+              className="w-full"
+              isLoading={form.formState.isSubmitting}
+              disabled={!form.formState.isDirty}
+            >
+              Save
+            </LoadingButton>
           )}
-        />
-        <FormField
-          control={form.control}
-          name="utilityId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Utility</FormLabel>
-              <FormControl>
-                <UtilitiesCombobox
-                  utilityId={field.value}
-                  onUtilityIdChange={field.onChange}
-                  state={watchState}
-                  ref={field.ref}
-                  modal
-                  disabled={!isWorker}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {isWorker && (
-          <LoadingButton
-            type="submit"
-            className="w-full"
-            isLoading={form.formState.isSubmitting}
-            disabled={!form.formState.isDirty}
-          >
-            Save
-          </LoadingButton>
-        )}
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </>
   );
 }

@@ -35,6 +35,7 @@ import Minimap from "@/components/Minimap";
 import usePostProjectMutation from "@/mutations/usePostProjectMutation";
 import {
   PropertyTypeEnum,
+  capitalizedStateNames,
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import LoadingButton from "@/components/LoadingButton";
@@ -46,14 +47,12 @@ import {
   fetchGeocodeFeatures,
   getMapboxPlacesQueryKey,
 } from "@/queries/useAddressSearchQuery";
+import { getFullAddressByAddressFields } from "@/lib/utils";
 
 const formSchema = z.object({
   propertyType: PropertyTypeEnum,
   propertyOwner: z.string().trim(),
   projectNumber: z.string().trim(),
-  /**
-   * 사용자가 직접 입력 할 시에 이 validation에 대해 수정해야 할 수도 있음
-   */
   address: z
     .object({
       street1: z.string().trim(),
@@ -66,16 +65,34 @@ const formSchema = z.object({
       coordinates: z.array(z.number()),
     })
     .superRefine((value, ctx) => {
-      /**
-       * @TODO
-       * API에서 FullAddress가 없어도 작동 된다면 이거 없어도 상관 없음
-       * 다만 API 수행에 있어서 FullAddress가 무조건 있어야 한다면 필요함
-       */
-      if (value.fullAddress.length === 0) {
+      const address = value;
+      if (address.street1.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Address is required",
+          message: "Street 1 is required",
         });
+        return;
+      }
+      if (address.city.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "City is required",
+        });
+        return;
+      }
+      if (address.state.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "State is required",
+        });
+        return;
+      }
+      if (address.postalCode.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Postal Code is required",
+        });
+        return;
       }
     }),
   utilityId: z.string().trim(),
@@ -99,7 +116,7 @@ const defaultValues: DefaultValues<FieldValues> = {
     postalCode: "",
     country: "",
     fullAddress: "",
-    coordinates: [],
+    coordinates: [0, 0],
   },
   utilityId: "",
 };
@@ -120,21 +137,18 @@ export default function NewProjectSheet({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+
   const usePostProjectMutationResult = usePostProjectMutation();
   const queryClient = useQueryClient();
   const { data: organization } = useOrganizationQuery(organizationId);
 
   const watchState = form.watch("address.state");
 
+  const statesOrRegionsRef = useRef(capitalizedStateNames);
+
   const [minimapCoordinates, setMinimapCoordinates] = useState<
     [number, number]
   >([0, 0]);
-
-  /**
-   * @생각 initAddressFormBySearchAddressButtonRef
-   * 활용 가능성이 있는가?
-   */
-  const initAddressFormBySearchAddressButtonRef = useRef(false);
 
   const isAddressFieldFocusedRef = useRef(false);
   const handleFocusAddressField = () =>
@@ -196,6 +210,16 @@ export default function NewProjectSheet({
           street2: transformStringIntoNullableString.parse(
             values.address.street2
           ),
+          fullAddress:
+            values.address.fullAddress === ""
+              ? getFullAddressByAddressFields({
+                  street1: values.address.street1,
+                  city: values.address.city,
+                  state: values.address.state,
+                  postalCode: values.address.postalCode,
+                  country: values.address.country,
+                })
+              : values.address.fullAddress,
         },
         utilityId: values.utilityId === "" ? undefined : values.utilityId,
       })
@@ -327,7 +351,9 @@ export default function NewProjectSheet({
           <SheetTitle>New Project</SheetTitle>
         </SheetHeader>
         {/* <p>{JSON.stringify(form.getValues("address.coordinates"), null, 2)}</p>
-        <p>{JSON.stringify(minimapCoordinates, null, 2)}</p> */}
+         */}
+        <p>{form.getValues("address.fullAddress")}</p>
+        <p>{JSON.stringify(minimapCoordinates, null, 2)}</p>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -464,19 +490,32 @@ export default function NewProjectSheet({
                           onBlur={handleBlurAddressField}
                           placeholder="City"
                         />
-                        <Input
+                        <Select
                           value={field.value.state}
-                          // disabled
-                          onChange={(event) => {
+                          onValueChange={(value) => {
                             field.onChange({
                               ...field.value,
-                              state: event.target.value,
+                              state: value,
                             });
+                            handleBlurAddressField();
                           }}
-                          onFocus={handleFocusAddressField}
-                          onBlur={handleBlurAddressField}
-                          placeholder="State Or Region"
-                        />
+                        >
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue
+                              placeholder={"Select an state or region"}
+                            />
+                          </SelectTrigger>
+                          <SelectContent
+                            side="bottom"
+                            className="max-h-48 overflow-y-auto"
+                          >
+                            {statesOrRegionsRef.current.map((state) => (
+                              <SelectItem key={state} value={`${state}`}>
+                                {state}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Input
                           value={field.value.postalCode}
                           // disabled

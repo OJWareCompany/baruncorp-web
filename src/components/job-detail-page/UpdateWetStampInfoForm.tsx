@@ -1,9 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  fetchGeocodeFeatures,
+  getMapboxPlacesQueryKey,
+} from "@/queries/useAddressSearchQuery";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -16,6 +27,7 @@ import {
 import LoadingButton from "@/components/LoadingButton";
 import { JobResponseDto } from "@/api/api-spec";
 import {
+  capitalizedStateNames,
   digitRegExp,
   transformNullishStringIntoString,
   transformStringIntoNullableString,
@@ -28,6 +40,7 @@ import usePatchJobMutation from "@/mutations/usePatchJobMutation";
 import RowItemsContainer from "@/components/RowItemsContainer";
 import usePostOrderedServiceMutation from "@/mutations/usePostOrderedServiceMutation";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
+import { getFullAddressByAddressFields } from "@/lib/utils";
 
 const formSchema = z
   .object({
@@ -48,6 +61,43 @@ const formSchema = z
   })
   .superRefine((values, ctx) => {
     const { mailingAddress } = values;
+    if (mailingAddress.street1.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Street 1 is required",
+        path: [`mailingAddress`],
+      });
+      return;
+    }
+    if (mailingAddress.city.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "City is required",
+        path: [`mailingAddress`],
+      });
+      return;
+    }
+    if (mailingAddress.state.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "State is required",
+        path: [`mailingAddress`],
+      });
+      return;
+    }
+    if (mailingAddress.postalCode.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Postal Code is required",
+        path: [`mailingAddress`],
+      });
+      return;
+    }
+    /**
+     * @todo
+     * fullAddress에 대한 검증 하지 않고, onSubmit에서 요청 보내는 것으로
+     * 왜냐하면 여기서 검증 시켜 버리면 onSubmit까지 가지도 못함
+     */
     if (mailingAddress.fullAddress.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -58,6 +108,10 @@ const formSchema = z
   });
 
 type FieldValues = z.infer<typeof formSchema>;
+type AddressTextField = Pick<
+  FieldValues["mailingAddress"],
+  "street1" | "street2" | "city" | "state" | "postalCode" | "country"
+>;
 
 function getFieldValues(job: JobResponseDto): FieldValues {
   return {
@@ -66,7 +120,13 @@ function getFieldValues(job: JobResponseDto): FieldValues {
     ),
     mailingAddress: {
       city: job.mailingAddressForWetStamp?.city ?? "",
-      coordinates: job.mailingAddressForWetStamp?.coordinates ?? [],
+      // coordinates: job.mailingAddressForWetStamp?.coordinates ?? [],
+      coordinates:
+        !job.mailingAddressForWetStamp?.coordinates ||
+        (job.mailingAddressForWetStamp?.coordinates &&
+          job.mailingAddressForWetStamp?.coordinates.length !== 2)
+          ? [0, 0]
+          : job.mailingAddressForWetStamp?.coordinates,
       country: job.mailingAddressForWetStamp?.country ?? "",
       fullAddress: job.mailingAddressForWetStamp?.fullAddress ?? "",
       postalCode: job.mailingAddressForWetStamp?.postalCode ?? "",
@@ -96,6 +156,89 @@ export default function UpdateWetStampInfoForm({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(job),
   });
+  const statesOrRegionsRef = useRef(capitalizedStateNames);
+  const [minimapCoordinates, setMinimapCoordinates] = useState<
+    [number, number]
+  >([0, 0]);
+
+  const isAddressFieldFocusedRef = useRef(false);
+  const handleFocusAddressField = () =>
+    (isAddressFieldFocusedRef.current = true);
+  const handleBlurAddressField = async () => {
+    isAddressFieldFocusedRef.current = false;
+    updateAddressFormCoordinatesFromGeocode();
+  };
+
+  const updateAddressFormCoordinatesFromGeocode = async () => {
+    const geocodeFeatures = await queryClient.fetchQuery({
+      queryKey: getMapboxPlacesQueryKey(generateAddressSearchText()),
+      queryFn: fetchGeocodeFeatures,
+    });
+    if (geocodeFeatures && geocodeFeatures.length > 0) {
+      /**
+       * @TODO Delete
+       */
+      console.log(
+        `geocodeFeatures.coordinates: ${JSON.stringify(
+          geocodeFeatures.map((item: any) => {
+            return { id: item.id, coordi: item.geometry.coordinates };
+          }),
+          null,
+          2
+        )}`
+      );
+      const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
+      updateAddressCoordinates([longitude, latitude]);
+      form.setValue(
+        "mailingAddress.fullAddress",
+        geocodeFeatures[0].place_name
+      );
+    }
+
+    if (!geocodeFeatures || geocodeFeatures.length === 0) {
+      updateAddressCoordinates([0, 0]);
+      form.setValue("mailingAddress.fullAddress", "");
+    }
+  };
+
+  const updateAddressCoordinates = (
+    coordinates: [longitude: number, latitude: number]
+  ) => {
+    form.setValue("mailingAddress.coordinates", coordinates);
+    setMinimapCoordinates(coordinates);
+  };
+
+  // const handleFormKeyDown = async (
+  //   event: React.KeyboardEvent<HTMLFormElement>
+  // ) => {
+  //   if (event.key === "Enter" && isAddressFieldFocusedRef.current) {
+  //     event.preventDefault();
+  //     updateAddressFormCoordinatesFromGeocode();
+  //   }
+  // };
+
+  const generateAddressSearchText = () => {
+    const addressFields: Array<keyof AddressTextField> = [
+      "street1",
+      "street2",
+      "city",
+      "state",
+      "postalCode",
+      "country",
+    ];
+
+    const addressSearchText = addressFields
+      .map((field) => form.getValues(`mailingAddress.${field}`)?.trim())
+      .filter(Boolean)
+      .join(" ");
+
+    /**
+     * @Delete Delete
+     */
+    console.log(`Generated SearchText: ${addressSearchText}`);
+
+    return addressSearchText;
+  };
 
   const { mutateAsync: patchJobMutateAsync } = usePatchJobMutation(job.id);
   const usePostOrderedServiceMutationResult = usePostOrderedServiceMutation();
@@ -114,7 +257,20 @@ export default function UpdateWetStampInfoForm({
         deliverablesEmails: job.clientInfo.deliverablesEmails,
         systemSize: job.systemSize,
         numberOfWetStamp: Number(values.numberOfWetStamp),
-        mailingAddressForWetStamp: values.mailingAddress,
+        // mailingAddressForWetStamp: values.mailingAddress,
+        mailingAddressForWetStamp: {
+          ...values.mailingAddress,
+          fullAddress:
+            values.mailingAddress.fullAddress === ""
+              ? getFullAddressByAddressFields({
+                  street1: values.mailingAddress.street1,
+                  city: values.mailingAddress.city,
+                  state: values.mailingAddress.state,
+                  postalCode: values.mailingAddress.postalCode,
+                  country: values.mailingAddress.country,
+                })
+              : values.mailingAddress.fullAddress,
+        },
         isExpedited: job.isExpedited,
         inReview: job.inReview,
         priority: job.priority,
@@ -205,11 +361,25 @@ export default function UpdateWetStampInfoForm({
                             shouldDirty: true,
                           }
                         );
+
+                        /**
+                         * 이 onSelect 이벤트 콜백이 호출되는 경우의 address.fullAddress는 AddressSearchButton 컴포넌트 내부에서 초기화 된다
+                         */
+                        const [longitude, latitude] = value.coordinates;
+                        updateAddressCoordinates([longitude, latitude]);
                       }}
                     />
                     <Input
                       value={field.value.street1}
-                      disabled
+                      // disabled
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          street1: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Street 1"
                     />
                     <Input
@@ -220,34 +390,86 @@ export default function UpdateWetStampInfoForm({
                           street2: event.target.value,
                         });
                       }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Street 2"
                     />
                     <Input
                       value={field.value.city}
-                      disabled
+                      // disabled
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          city: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="City"
                     />
-                    <Input
+                    {/* <Input
                       value={field.value.state}
                       disabled
                       placeholder="State Or Region"
-                    />
+                    /> */}
+                    <Select
+                      value={field.value.state}
+                      onValueChange={(value) => {
+                        field.onChange({
+                          ...field.value,
+                          state: value,
+                        });
+                        handleBlurAddressField();
+                      }}
+                    >
+                      <SelectTrigger className="h-10 w-full">
+                        <SelectValue
+                          placeholder={"Select an state or region"}
+                        />
+                      </SelectTrigger>
+                      <SelectContent
+                        side="bottom"
+                        className="max-h-48 overflow-y-auto"
+                      >
+                        {statesOrRegionsRef.current.map((state) => (
+                          <SelectItem key={state} value={`${state}`}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Input
                       value={field.value.postalCode}
-                      disabled
+                      // disabled
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          postalCode: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Postal Code"
                     />
                     <Input
                       value={field.value.country}
-                      disabled
+                      // disabled
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          country: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Country"
                     />
                   </FormItem>
                 </div>
                 <div className="col-span-1">
                   <Minimap
-                    longitude={field.value.coordinates[0]}
-                    latitude={field.value.coordinates[1]}
+                    longitude={minimapCoordinates[0]}
+                    latitude={minimapCoordinates[1]}
                   />
                 </div>
               </div>

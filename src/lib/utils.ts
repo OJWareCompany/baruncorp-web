@@ -123,3 +123,22 @@ export function isValidServerErrorCode(errorCode: string | string[]): boolean {
     return true;
   return false;
 }
+
+export function getFullAddressByAddressFields({
+  street1,
+  city,
+  state,
+  postalCode,
+  country,
+}: {
+  street1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country?: string;
+}): string {
+  if (country === "") {
+    return `${street1}, ${city}, ${state} ${postalCode}`;
+  }
+  return `${street1}, ${city}, ${state} ${postalCode}, ${country}`;
+}
