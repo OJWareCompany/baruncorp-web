@@ -1,6 +1,11 @@
 import { GeocodeFeature } from "@mapbox/mapbox-sdk/services/geocoding";
-import { useQuery } from "@tanstack/react-query";
+import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+
+export const getMapboxPlacesQueryKey = (searchText: string) => [
+  "mapbox.places",
+  searchText,
+];
 
 const useAddressSearchQuery = (
   searchText: string,
@@ -14,6 +19,7 @@ const useAddressSearchQuery = (
   return useQuery<GeocodeFeature[], AxiosError>({
     queryKey: ["mapbox.places", searchText],
     queryFn: async () => {
+      // console.log(`[useAddressSearchQuery Call] queryKey:`, ["mapbox.places", searchText]);
       const response = await axios.get(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json`,
         {
@@ -27,6 +33,16 @@ const useAddressSearchQuery = (
           },
         }
       );
+      /**
+       * @TODO Delete
+       */
+      // console.log(
+      //   `geocodeFeatures.coordinates: ${JSON.stringify(
+      //     response.data.features.map((item: any) => { return { id: item.id, coordi: item.geometry.coordinates } }),
+      //     null,
+      //     2
+      //   )}`
+      // );
       return response.data.features;
     },
     enabled: searchText.length >= 1,
@@ -34,3 +50,24 @@ const useAddressSearchQuery = (
 };
 
 export default useAddressSearchQuery;
+
+export const fetchGeocodeFeatures = async <T = GeocodeFeature[]>(
+  context: QueryFunctionContext
+): Promise<T> => {
+  const { queryKey } = context;
+  const [_, searchText] = queryKey;
+  const response = await axios.get(
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json`,
+    {
+      headers: {
+        Accept: "application/json",
+      },
+      params: {
+        access_token: process.env.NEXT_PUBLIC_MAP_API_KEY,
+        types: "address",
+        country: "us",
+      },
+    }
+  );
+  return response.data.features as T;
+};
