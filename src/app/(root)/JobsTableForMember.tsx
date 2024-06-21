@@ -534,8 +534,19 @@ export default function JobsTableForMember({ type }: Props) {
   const columns = useMemo(() => {
     const baseColumns = [
       columnHelper.accessor("jobFolderId", {
-        header: "Google Drive",
-        size: 110,
+        size: 90,
+        header: () => (
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>GD</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Google Drive</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
         cell: ({ row }) => {
           const job = row.original;
           return (
@@ -732,7 +743,7 @@ export default function JobsTableForMember({ type }: Props) {
                 return (
                   <Badge
                     variant={"outline"}
-                    className="flex items-center py-1 my-1"
+                    className="flex items-center my-1"
                     key={task.id}
                   >
                     {status && (
