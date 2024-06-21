@@ -534,7 +534,7 @@ export default function JobsTableForMember({ type }: Props) {
   const columns = useMemo(() => {
     const baseColumns = [
       columnHelper.accessor("jobFolderId", {
-        size: 90,
+        size: 85,
         header: () => (
           <TooltipProvider delayDuration={0}>
             <Tooltip>
@@ -551,7 +551,7 @@ export default function JobsTableForMember({ type }: Props) {
           const job = row.original;
           return (
             <div
-              className="flex pl-3"
+              className="flex"
               onClick={(event) => {
                 event.preventDefault();
               }}
@@ -562,7 +562,7 @@ export default function JobsTableForMember({ type }: Props) {
         },
       }),
       columnHelper.accessor("priority", {
-        size: 136,
+        size: 130,
         header: () => (
           <EnumHeader
             buttonText="Priority"
@@ -578,11 +578,15 @@ export default function JobsTableForMember({ type }: Props) {
           const value = getValue();
           const status = jobPriorities[value];
 
-          return <Badge className={`${status.color}`}>{status.value}</Badge>;
+          return (
+            <div className="flex justify-around">
+              <Badge className={`${status.color}`}>{status.value}</Badge>
+            </div>
+          );
         },
       }),
       columnHelper.accessor("dueDate", {
-        size: 175,
+        size: 180,
         header: "Date Due",
         cell: ({ getValue }) => {
           const value = getValue();
@@ -743,7 +747,7 @@ export default function JobsTableForMember({ type }: Props) {
                 return (
                   <Badge
                     variant={"outline"}
-                    className="flex items-center my-1"
+                    className="flex items-center "
                     key={task.id}
                   >
                     {status && (
