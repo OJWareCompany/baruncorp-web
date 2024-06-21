@@ -730,7 +730,7 @@ export type SortFieldTypeEnum = z.infer<typeof SortFieldTypeEnum>;
 /* -------------------------------------------------------------------------- */
 
 // "Self" | "Client Provided"
-export const LoadCalcOriginEnum = z.enum(["Self", "Client Provided"], {
+export const LoadCalcOriginEnum = z.enum(["By Barun Corp", "Client Provided"], {
   errorMap: () => ({ message: "Structural Calculation Origin is required" }),
 });
 // // "Self" | "Client Provided" | ""

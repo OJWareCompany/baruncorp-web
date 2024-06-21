@@ -278,7 +278,7 @@ function JobSectionWithData({
       mountingType: "Roof Mount",
       services: [],
       descriptionForOtherServices: [{ description: "", isRevision: false }],
-      loadCalcOrigin: "Self",
+      loadCalcOrigin: "By Barun Corp",
       numberOfWetStamp: "",
       mailingAddress: {
         city: "",
@@ -423,7 +423,7 @@ function JobSectionWithData({
                 isRevision: value.isRevision ?? null,
               }))
         : [{ description: "", isRevision: null }],
-      loadCalcOrigin: "Self",
+      loadCalcOrigin: "By Barun Corp",
       numberOfWetStamp: "",
       mailingAddress: {
         city: mailingAddressForWetStamp?.city ?? "",
