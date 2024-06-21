@@ -20,6 +20,7 @@ const TextCopyButton: React.FC<JobIdCopyButtonProps> = ({
       toast({
         title: "Copy successful!",
         description: JobId,
+        duration: 800,
       });
     });
   };
