@@ -620,7 +620,11 @@ export default function JobsTableForMember({ type }: Props) {
         id: "copyJobId",
         cell: ({ row }) => {
           const value = row.original.jobName;
-          return <TextCopyButton JobId={value} />;
+          return (
+            <div className="ml-2">
+              <TextCopyButton JobId={value} />
+            </div>
+          );
         },
       }),
       columnHelper.accessor("jobStatus", {
