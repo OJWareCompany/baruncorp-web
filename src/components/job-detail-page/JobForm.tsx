@@ -297,13 +297,31 @@ export default function JobForm({ project, job, pageType }: Props) {
         loadCalcOrigin: values.loadCalcOrigin,
         mountingType: values.mountingType,
       });
-      await usePatchJobDueDateMutateResult.mutateAsync({
-        dueDate: formatInTimeZone(
-          new Date(values.dueDate).setSeconds(0),
-          "Etc/UTC",
-          "yyyy-MM-dd HH:mm:ss zzz"
-        ),
-      });
+
+      const newDueDate = formatInTimeZone(
+        new Date(values.dueDate).setSeconds(0),
+        "Etc/UTC",
+        "yyyy-MM-dd"
+      );
+
+      const currentDueDate = job.dueDate
+        ? formatInTimeZone(
+            new Date(job.dueDate).setSeconds(0),
+            "Etc/UTC",
+            "yyyy-MM-dd"
+          )
+        : null;
+
+      if (newDueDate !== currentDueDate) {
+        await usePatchJobDueDateMutateResult.mutateAsync({
+          dueDate: formatInTimeZone(
+            new Date(values.dueDate).setSeconds(0),
+            "Etc/UTC",
+            "yyyy-MM-dd HH:mm:ss zzz"
+          ),
+        });
+      }
+
       toast({ title: "Success" });
       queryClient.invalidateQueries({
         queryKey: getJobQueryKey(job.id),
