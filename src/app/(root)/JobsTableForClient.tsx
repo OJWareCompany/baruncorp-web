@@ -831,8 +831,8 @@ export default function JobsTableForClient({ type }: Props) {
   };
 
   return (
-    <div className="space-y-2">
-      <div className="relative">
+    <div className="relative space-y-2">
+      <div className="absolute -top-[44px] ml-[170px]">
         <Popover>
           <PopoverTrigger asChild>
             <Button variant={"outline"} size={"sm"}>
