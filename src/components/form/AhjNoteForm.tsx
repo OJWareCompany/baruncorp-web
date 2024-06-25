@@ -100,10 +100,12 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
               <RowItemsContainer>
                 <FormField
                   control={form.control}
-                  name="general.name"
+                  // name="general.name"
+                  name="general.fullAhjName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      {/* <FormLabel>Name</FormLabel> */}
+                      <FormLabel>Full AHJ Name</FormLabel>
                       <FormControl>
                         <Input {...field} disabled />
                       </FormControl>

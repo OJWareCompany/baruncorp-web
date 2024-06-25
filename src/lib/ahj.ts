@@ -27,6 +27,7 @@ export const formSchema = z.object({
   // general
   general: z.object({
     name: z.string().trim(),
+    fullAhjName: z.string().trim(),
     website: z.custom<Value>(),
     specificFormRequired: SelectOptionEnumWithEmptyString,
     structuralStampRequired: SelectOptionEnumWithEmptyString,
@@ -76,6 +77,9 @@ export function getFieldValuesFromAhjNote(
     // general
     general: {
       name: transformNullishStringIntoString.parse(ahjNote?.general.name),
+      fullAhjName: transformNullishStringIntoString.parse(
+        ahjNote?.general.fullAhjName
+      ),
       website: getEditorValue(ahjNote?.general.website),
       specificFormRequired:
         transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
