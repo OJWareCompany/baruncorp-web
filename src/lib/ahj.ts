@@ -319,6 +319,42 @@ export function transformProjectAssociatedRegulatoryBodyIntoArray(
       geoId: projectAssociatedRegulatoryBody.stateId,
     });
   }
+  return array;
+}
+
+/**
+ * @TODO
+ * 함수 네이밍 적절하게 수정할 필요 있음
+ */
+export function transformProjectAssociatedRegulatoryBodyIntoArrayV2(
+  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto
+): ProjectAssociatedRegulatoryBodyArray {
+  if (projectAssociatedRegulatoryBody == null) {
+    return [];
+  }
+
+  const array: ProjectAssociatedRegulatoryBodyArray = [];
+
+  array.push({
+    type: "place",
+    name: "Place",
+    geoId: projectAssociatedRegulatoryBody.placeId ?? "",
+  });
+  array.push({
+    type: "countySubdivision",
+    name: "County Subdivision",
+    geoId: projectAssociatedRegulatoryBody.countySubdivisionsId ?? "",
+  });
+  array.push({
+    type: "county",
+    name: "County",
+    geoId: projectAssociatedRegulatoryBody.countyId ?? "",
+  });
+  array.push({
+    type: "state",
+    name: "State",
+    geoId: projectAssociatedRegulatoryBody.stateId,
+  });
 
   return array;
 }
