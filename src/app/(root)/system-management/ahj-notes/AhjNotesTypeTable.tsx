@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,7 +15,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   Table,
   TableBody,
@@ -40,28 +39,48 @@ import { formatInEST } from "@/lib/utils";
 import useAhjNotesQuery from "@/queries/useAhjNotesQuery";
 import SearchHeader from "@/components/table/SearchHeader";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import NewTabTableRow from "@/components/table/NewTabTableRow";
+import NewSheetTableRow from "@/components/table/NewSheetTableRow";
+import { ProjectAssociatedRegulatoryBody } from "@/lib/ahj";
 
 const columnHelper =
   createColumnHelper<AhjNotePaginatedResponseDto["items"][number]>();
 
 const TABLE_NAME = "AhjNotes";
-const RELATIVE_PATH =
-  "src/app/(root)/system-management/ahj-notes/AhjNotesTable.tsx";
 
-export default function AhjNotesTable() {
+export type AhjNoteType = "STATE" | "COUNTY" | "COUNTY SUBDIVISIONS" | "PLACE";
+
+type Props = {
+  projectId: string;
+  originProjectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBody;
+  type: AhjNoteType;
+  closeTableSheet: () => void;
+};
+
+export default function AhjNotesTypeTable({
+  projectId,
+  originProjectAssociatedRegulatoryBody,
+  type,
+  closeTableSheet,
+}: Props) {
   const searchParams = useSearchParams();
   const [syncedParams, setSyncedParams] =
     useState<GeographyControllerGetFindNotesParams>();
+
+  /**
+   * searchParams 초기화 방법
+   * 더 좋은 방법은 없는 것인가?
+   */
+  const router = useRouter();
+  useEffect(() => {
+    const params = new URLSearchParams();
+    router.replace(`?${params.toString()}`);
+  }, [router]);
 
   const nameSearchParamName = `${TABLE_NAME}Name`;
   const fullNameSearchParamName = `${TABLE_NAME}FullName`;
   const pageIndexSearchParamName = `${TABLE_NAME}PageIndex`;
 
-  const [pageSize, setPageSize] = useLocalStorage<number>(
-    `${RELATIVE_PATH}`,
-    10
-  );
+  const [pageSize, setPageSize] = useState<number>(10);
   const pagination: PaginationState = {
     pageIndex: searchParams.get(encodeURIComponent(pageIndexSearchParamName))
       ? Number(searchParams.get(encodeURIComponent(pageIndexSearchParamName)))
@@ -83,12 +102,14 @@ export default function AhjNotesTable() {
       limit: pagination.pageSize,
       fullAhjName: fullNameSearchParam,
       name: nameSearchParam,
+      type,
     }),
     [
       fullNameSearchParam,
       nameSearchParam,
       pagination.pageIndex,
       pagination.pageSize,
+      type,
     ]
   );
 
@@ -213,10 +234,15 @@ export default function AhjNotesTable() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <NewTabTableRow
+                <NewSheetTableRow
                   key={row.id}
-                  href={`/system-management/ahj-notes/${row.id}`}
+                  projectId={projectId}
+                  originProjectAssociatedRegulatoryBody={
+                    originProjectAssociatedRegulatoryBody
+                  }
+                  geoId={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  closeTableSheet={closeTableSheet}
                   className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -227,7 +253,7 @@ export default function AhjNotesTable() {
                       )}
                     </TableCell>
                   ))}
-                </NewTabTableRow>
+                </NewSheetTableRow>
               ))
             )}
           </TableBody>

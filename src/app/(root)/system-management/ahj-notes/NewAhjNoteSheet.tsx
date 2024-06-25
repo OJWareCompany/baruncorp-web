@@ -159,7 +159,6 @@ export default function NewAhjNoteSheet() {
       queryFn: fetchGeocodeFeatures,
     });
 
-    geocodeFeatures.forEach((item) => console.log(item.geometry.coordinates));
     const coordinatesList = geocodeFeatures.map(
       (item) => item.geometry.coordinates
     );

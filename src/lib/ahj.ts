@@ -301,7 +301,7 @@ export function transformProjectAssociatedRegulatoryBodyIntoArray(
   if (projectAssociatedRegulatoryBody.countySubdivisionsId != null) {
     array.push({
       type: "countySubdivision",
-      name: "County Subdivision",
+      name: "County Subdivisions",
       geoId: projectAssociatedRegulatoryBody.countySubdivisionsId,
     });
   }
@@ -342,7 +342,7 @@ export function transformProjectAssociatedRegulatoryBodyIntoArrayV2(
   });
   array.push({
     type: "countySubdivision",
-    name: "County Subdivision",
+    name: "County Subdivisions",
     geoId: projectAssociatedRegulatoryBody.countySubdivisionsId ?? "",
   });
   array.push({
@@ -357,4 +357,22 @@ export function transformProjectAssociatedRegulatoryBodyIntoArrayV2(
   });
 
   return array;
+}
+
+export type ProjectAssociatedRegulatoryBody = {
+  stateId: string;
+  countyId: string | null;
+  countySubdivisionsId: string | null;
+  placeId: string | null;
+};
+
+export function getOriginProjectAssociatedRegulatoryBody(
+  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto
+): ProjectAssociatedRegulatoryBody {
+  return {
+    stateId: projectAssociatedRegulatoryBody.stateId,
+    countyId: projectAssociatedRegulatoryBody.countyId,
+    countySubdivisionsId: projectAssociatedRegulatoryBody.countySubdivisionsId,
+    placeId: projectAssociatedRegulatoryBody.placeId,
+  };
 }

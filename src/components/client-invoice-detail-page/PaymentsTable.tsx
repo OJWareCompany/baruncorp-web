@@ -72,7 +72,6 @@ export default function PaymentsTable({ clientInvoice }: Props) {
     isPatchClientCreditPaymentCancelMutationPending;
 
   const columns = useMemo(() => {
-    console.log("rerender");
     return [
       columnHelper.accessor("paymentMethod", {
         header: "Payment Method",
