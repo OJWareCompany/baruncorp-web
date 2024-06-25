@@ -48,7 +48,7 @@ const DateOfJoiningDatePicker = forwardRef<HTMLButtonElement, Props>(
               }
 
               const estDate = zonedTimeToUtc(day, "America/New_York");
-              onChange(estDate);
+              onChange(new Date(estDate));
             }}
             captionLayout="dropdown"
             fromYear={2018}

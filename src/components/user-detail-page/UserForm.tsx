@@ -435,7 +435,7 @@ export default function UserForm({ pageType, user, organization }: Props) {
           type="submit"
           className="w-full"
           isLoading={form.formState.isSubmitting}
-          disabled={!form.formState.isDirty || !form.formState.isValid}
+          disabled={!form.formState.isDirty}
         >
           Save
         </LoadingButton>
