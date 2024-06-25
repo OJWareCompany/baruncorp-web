@@ -127,3 +127,11 @@ export function isValidServerErrorCode(errorCode: string | string[]): boolean {
     return true;
   return false;
 }
+
+export function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function convertToTitleCase(str: string) {
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+}

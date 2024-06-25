@@ -45,9 +45,14 @@ import { getAhjNoteHistoriesQueryKey } from "@/queries/useAhjNoteHistoriesQuery"
 interface Props {
   ahjNote: AhjNoteResponseDto;
   geoId: string;
+  disabled?: boolean;
 }
 
-export default function AhjNoteForm({ ahjNote, geoId }: Props) {
+export default function AhjNoteForm({
+  ahjNote,
+  geoId,
+  disabled = false,
+}: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValuesFromAhjNote(
@@ -119,7 +124,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>Website</FormLabel>
                       <FormControl>
-                        <InputEditor {...field} />
+                        <InputEditor {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -136,6 +141,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -164,6 +170,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -192,6 +199,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -220,6 +228,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -247,7 +256,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>Building Codes</FormLabel>
                       <FormControl>
-                        <BasicEditor {...field} />
+                        <BasicEditor {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -259,7 +268,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>General Notes</FormLabel>
                       <FormControl>
-                        <BasicEditor {...field} />
+                        <BasicEditor {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -280,6 +289,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -308,6 +318,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -336,6 +347,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -361,7 +373,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>Derated Ampacity</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -374,7 +386,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>Fire Setback</FormLabel>
                     <FormControl>
-                      <BasicEditor {...field} />
+                      <BasicEditor {...field} disabled={disabled} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -386,7 +398,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>Utility Notes</FormLabel>
                     <FormControl>
-                      <BasicEditor {...field} />
+                      <BasicEditor {...field} disabled={disabled} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -398,7 +410,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>Design Notes</FormLabel>
                     <FormControl>
-                      <BasicEditor {...field} />
+                      <BasicEditor {...field} disabled={disabled} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -418,6 +430,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -446,6 +459,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -474,6 +488,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an digital signature type" />
@@ -506,6 +521,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an option" />
@@ -531,7 +547,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>Wind Speed Risk Cat I (mph)</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -543,7 +559,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>Wind Speed Risk Cat II (mph)</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -557,7 +573,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>Snow Load Ground (psf)</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -569,7 +585,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel>Snow Load Flat Roof (psf)</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -583,7 +599,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                     <FormItem>
                       <FormLabel># of Wet Stamps</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} disabled={disabled} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -598,6 +614,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
+                          disabled={disabled}
                         >
                           <SelectTrigger ref={field.ref}>
                             <SelectValue placeholder="Select an wet stamp size" />
@@ -624,7 +641,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>Engineering Notes</FormLabel>
                     <FormControl>
-                      <BasicEditor {...field} />
+                      <BasicEditor {...field} disabled={disabled} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -640,7 +657,7 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
                   <FormItem>
                     <FormLabel>Engineering Notes</FormLabel>
                     <FormControl>
-                      <BasicEditor {...field} />
+                      <BasicEditor {...field} disabled={disabled} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -648,14 +665,16 @@ export default function AhjNoteForm({ ahjNote, geoId }: Props) {
             </ItemsContainer>
           </CollapsibleSection>
         </div>
-        <LoadingButton
-          type="submit"
-          disabled={!form.formState.isDirty}
-          isLoading={form.formState.isSubmitting}
-          className="w-full"
-        >
-          Save
-        </LoadingButton>
+        {!disabled && (
+          <LoadingButton
+            type="submit"
+            disabled={!form.formState.isDirty}
+            isLoading={form.formState.isSubmitting}
+            className="w-full"
+          >
+            Save
+          </LoadingButton>
+        )}
       </form>
     </Form>
   );
