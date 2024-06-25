@@ -30,11 +30,11 @@ export default function GlobalSearch({
     if (event.key === "Enter") {
       const trimmedValue = value.trim();
       let searchParam = searchParamOptions.jobNameSearchParamName;
-      if (selectedOption === "JobName") {
+      if (selectedOption === "Job Name") {
         searchParam = searchParamOptions.jobNameSearchParamName;
-      } else if (selectedOption === "ProjectNumber") {
+      } else if (selectedOption === "Project Number") {
         searchParam = searchParamOptions.projectNumberSearchParamName;
-      } else if (selectedOption === "PropertyOwner") {
+      } else if (selectedOption === "Property Owner") {
         searchParam = searchParamOptions.propertyOwnerSearchParamName;
       }
 
@@ -103,11 +103,7 @@ export default function GlobalSearch({
               <span className="flex items-center justify-center w-4 h-4 mr-2">
                 {selectedOption === option && <Check className="h-4 w-4" />}
               </span>
-              {option === "Job Name"
-                ? "Job Name"
-                : option === "Project Number"
-                ? "Project Number"
-                : "Property Owner"}
+              {option}
             </div>
           ))}
         </PopoverContent>
