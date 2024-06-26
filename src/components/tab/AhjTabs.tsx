@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ProjectAssociatedRegulatoryBody,
   getOriginProjectAssociatedRegulatoryBody,
-  transformProjectAssociatedRegulatoryBodyIntoArray,
+  // transformProjectAssociatedRegulatoryBodyIntoArray,
   transformProjectAssociatedRegulatoryBodyIntoArrayV2,
 } from "@/lib/ahj";
 import AhjNoteForm from "@/components/form/AhjNoteForm";
@@ -34,10 +34,22 @@ function AhjTabsContent({
     isLoading: isAhjNoteQueryLoading,
     error: ahjNoteQueryError,
   } = useAhjNoteQuery(geoId);
+
   useNotFound(ahjNoteQueryError);
 
   if (isAhjNoteQueryLoading || ahjNote == null) {
-    return null;
+    return (
+      <TabsContent value={value} className="mt-2">
+        <AhjNoteChangeSheet
+          projectId={projectId}
+          originProjectAssociatedRegulatoryBody={
+            originProjectAssociatedRegulatoryBody
+          }
+          typeName={typeName}
+        />
+        <div className="space-y-6">{`${typeName} note not found`}</div>
+      </TabsContent>
+    );
   }
 
   return (
@@ -50,27 +62,19 @@ function AhjTabsContent({
           }
           typeName={typeName}
         />
-        {!!geoId && (
-          <OpenAhjFolderButton
-            className="w-auto mb-2"
-            geoId={geoId}
-            ahjNote={ahjNote}
-          />
-        )}
+        <OpenAhjFolderButton
+          className="w-auto mb-2"
+          geoId={geoId}
+          ahjNote={ahjNote}
+        />
       </div>
       <div className="space-y-6">
-        {!!geoId ? (
-          <>
-            <section>
-              <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />
-            </section>
-            <CollapsibleSection title="History">
-              <AhjNoteHistories geoId={geoId} />
-            </CollapsibleSection>
-          </>
-        ) : (
-          <div className="space-y-6">{`Not Found ${typeName} Note`}</div>
-        )}
+        <section>
+          <AhjNoteForm ahjNote={ahjNote} geoId={geoId} />
+        </section>
+        <CollapsibleSection title="History">
+          <AhjNoteHistories geoId={geoId} />
+        </CollapsibleSection>
       </div>
     </TabsContent>
   );
@@ -81,10 +85,10 @@ interface AhjTabsProps {
 }
 
 export default function AhjTabs({ project }: AhjTabsProps) {
-  const projectAssociatedRegulatoryBodyArray =
-    transformProjectAssociatedRegulatoryBodyIntoArray(
-      project.projectAssociatedRegulatoryBody
-    );
+  // const projectAssociatedRegulatoryBodyArray =
+  //   transformProjectAssociatedRegulatoryBodyIntoArray(
+  //     project.projectAssociatedRegulatoryBody
+  //   );
 
   const projectAssociatedRegulatoryBodyArrayV2 =
     transformProjectAssociatedRegulatoryBodyIntoArrayV2(
@@ -97,7 +101,7 @@ export default function AhjTabs({ project }: AhjTabsProps) {
     );
 
   return (
-    <Tabs defaultValue={projectAssociatedRegulatoryBodyArray[0].type}>
+    <Tabs defaultValue={projectAssociatedRegulatoryBodyArrayV2[0].type}>
       <TabsList>
         {projectAssociatedRegulatoryBodyArrayV2.map((value) => (
           <TabsTrigger key={value.type} value={value.type}>
