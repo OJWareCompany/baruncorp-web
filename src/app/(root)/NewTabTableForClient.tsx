@@ -20,17 +20,15 @@ import {
   Loader2,
   RotateCcw,
 } from "lucide-react";
-import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { CSSProperties, useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { CSS } from "@dnd-kit/utilities";
 import {
-  arrayMove,
-  useSortable,
   SortableContext,
+  arrayMove,
   horizontalListSortingStrategy,
+  useSortable,
 } from "@dnd-kit/sortable";
 import {
   DndContext,
@@ -42,13 +40,9 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { useProfileContext } from "./ProfileProvider";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useExpandContext } from "./ExpandProvider";
 import {
   ResizeTableCell,
   Table,
@@ -59,13 +53,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import useMyOrderedJobsQuery from "@/queries/useMyOrderedJobsQuery";
 import {
   FindMyOrderedJobPaginatedHttpControllerFindJobParams,
   JobPaginatedResponseDto,
-  JobResponseDto,
 } from "@/api/api-spec";
 import {
-  InTableButtonStyles,
   JobPriorityEnum,
   JobStatusEnum,
   MountingTypeEnum,
@@ -83,32 +76,22 @@ import {
   transformSortFieldTypeEnumWithEmptyStringIntoNullableSortFieldTypeEnum,
   transformYesOrNoEnumWithEmptyStringIntoNullableBoolean,
 } from "@/lib/constants";
-import EnumHeader from "@/components/table/EnumHeader";
-import SearchHeader from "@/components/table/SearchHeader";
-import { cn, formatInEST } from "@/lib/utils";
 import useOnPaginationChange from "@/hook/useOnPaginationChange";
-import { Badge } from "@/components/ui/badge";
 import useJobsColumnVisibility from "@/hook/useJobsColumnVisibility";
-import useJobsQuery, { getJobsQueryKey } from "@/queries/useJobsQuery";
-import {
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-} from "@/components/ui/alert-dialog";
-import LoadingButton from "@/components/LoadingButton";
-import usePatchJobSendMutation from "@/mutations/usePatchJobSendMutation";
-import { toast } from "@/components/ui/use-toast";
 import NewTabTableRow from "@/components/table/NewTabTableRow";
-import { InTableButton } from "@/components/ui/intablebutton";
-import OpenJobFolderOnWebButton from "@/components/job-detail-page/OpenJobFolderOnWebButton";
+import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
+import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
+import { cn, formatInEST } from "@/lib/utils";
+import SearchHeader from "@/components/table/SearchHeader";
+import EnumHeader from "@/components/table/EnumHeader";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import TextCopyButton from "@/components/ui/incopybutton";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import SortFieldSelectButton from "@/components/table/SortFieldSelectButton";
-import SortDirectionSelectButton from "@/components/table/SortDirectionSelectButton";
 import {
   Tooltip,
   TooltipContent,
@@ -121,68 +104,20 @@ import PaginationControls from "@/components/table/PaginationControls";
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
 
-const TABLE_NAME = "JobsForMember";
-const RELATIVE_PATH = "src/app/(root)/JobsTableForMember.tsx";
+const TABLE_NAME = "JobsForClient";
+const RELATIVE_PATH = "src/app/(root)/JobsTableForClient.tsx";
 
 interface Props {
   type: "All" | JobStatusEnum;
 }
 
-interface ItemTableExportData {
-  [index: string]: unknown;
-  Expedite: boolean;
-  "In ReView": boolean;
-  Priority: string;
-  Organization: string;
-  Name: string;
-  Status: string;
-  Tasks: number;
-  "Property Type": string;
-  "Mounting Type": string;
-  "Project Number": string;
-  "Property Owner": string;
-  "Date Received": string;
-  "Date Due": string;
-  "Date Completed/Canceled": string;
-  "Date Sent to Client": string;
-}
-
-export function getItemsTableExportDataFromLineItems(
-  items: JobResponseDto[]
-): ItemTableExportData[] {
-  return items.map<ItemTableExportData>((value, index) => ({
-    Expedite: value.isExpedited,
-    "In ReView": value.inReview,
-    Priority: jobPriorities[value.priority].value,
-    Organization: value.clientInfo.clientOrganizationName,
-    Name: value.jobName,
-    Status: jobStatuses[value.jobStatus].value,
-    Tasks: value.assignedTasks.length,
-    "Property Type": value.projectPropertyType,
-    "Mounting Type": value.mountingType,
-    "Project Number": value.projectNumber ?? "",
-    "Property Owner": value.propertyOwner,
-    "Date Received": formatInEST(value.receivedAt),
-    "Date Due": value.dueDate ? formatInEST(value.dueDate) : "-",
-    "Date Completed/Canceled": value.completedCancelledDate
-      ? formatInEST(value.completedCancelledDate)
-      : "-",
-    "Date Sent to Client": value.dateSentToClient
-      ? formatInEST(value.dateSentToClient)
-      : "-",
-  }));
-}
-
-export default function JobsTableForMember({ type }: Props) {
+export default function NewTabTableForClient({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const [syncedParams, setSyncedParams] =
     useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
-  const [alertDialogState, setAlertDialogState] = useState<
-    { open: false } | { open: true; jobId: string }
-  >({ open: false });
-  const [reset, setReset] = useState<boolean>(false);
+  const [reset, setReset] = useState(false);
   const COLUMN_SIZES_KEY = `${RELATIVE_PATH}_${type}_columnSizes`;
 
   const [columnSizes, setColumnSizes] = useLocalStorage<Record<string, number>>(
@@ -197,24 +132,11 @@ export default function JobsTableForMember({ type }: Props) {
     }));
   };
   const columnVisibilities = useJobsColumnVisibility();
-  const {
-    isBarunCorpMember,
-    authority: { canSendDeliverables },
-  } = useProfileContext();
-  let sendDeliverables = false;
-  if (
-    isBarunCorpMember &&
-    canSendDeliverables &&
-    (type === "Completed" || type === "Canceled (Invoice)" || type === "All")
-  ) {
-    sendDeliverables = true;
-  }
+  const { isContractor } = useProfileContext();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     ...columnVisibilities,
-    sendDeliverables:
-      canSendDeliverables &&
-      (type === "Completed" || type === "Canceled (Invoice)" || type === "All"),
   });
+
   const handleResetComplete = () => {
     setReset(false);
   };
@@ -224,11 +146,6 @@ export default function JobsTableForMember({ type }: Props) {
       table.setColumnSizing(columnSizes);
     }
   }, []);
-  const {
-    mutateAsync: patchSendDeliverablesMutationAsync,
-    isPending: isPatchSendDeliverablesMutationPending,
-  } = usePatchJobSendMutation();
-  const queryClient = useQueryClient();
 
   const jobStatusSearchParamName = `${TABLE_NAME}${type}JobStatus`;
   const jobNameSearchParamName = `${TABLE_NAME}${type}JobName`;
@@ -270,6 +187,11 @@ export default function JobsTableForMember({ type }: Props) {
   const jobStatusSearchParamParseResult = JobStatusEnum.safeParse(
     searchParams.get(encodeURIComponent(jobStatusSearchParamName))
   );
+  const jobStatusSearchParam = jobStatusSearchParamParseResult.success
+    ? jobStatusSearchParamParseResult.data
+    : type === "All"
+    ? ""
+    : type;
   const dateSentToClientStartSearchParam =
     searchParams.get(
       encodeURIComponent(dateSentToClientStartSearchParamName)
@@ -277,11 +199,6 @@ export default function JobsTableForMember({ type }: Props) {
   const dateSentToClientEndSearchParam =
     searchParams.get(encodeURIComponent(dateSentToClientEndSearchParamName)) ??
     "";
-  const jobStatusSearchParam = jobStatusSearchParamParseResult.success
-    ? jobStatusSearchParamParseResult.data
-    : type === "All"
-    ? ""
-    : type;
   const propertyTypeSearchParamParseResult = PropertyTypeEnum.safeParse(
     searchParams.get(encodeURIComponent(propertyTypeSearchParamName))
   );
@@ -423,7 +340,7 @@ export default function JobsTableForMember({ type }: Props) {
     ]
   );
 
-  const { data, isLoading, isFetching } = useJobsQuery(params, true);
+  const { data, isLoading, isFetching } = useMyOrderedJobsQuery(params, true);
 
   const DraggableTableHeader = ({
     header,
@@ -472,7 +389,6 @@ export default function JobsTableForMember({ type }: Props) {
             isDragging ? "bg-green-300" : ""
           }`}
         />
-
         <div
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
@@ -495,6 +411,7 @@ export default function JobsTableForMember({ type }: Props) {
       </TableHead>
     );
   };
+
   const DragAlongCell = ({
     cell,
   }: {
@@ -533,33 +450,23 @@ export default function JobsTableForMember({ type }: Props) {
 
   const columns = useMemo(() => {
     const baseColumns = [
-      columnHelper.accessor("jobFolderId", {
-        size: 85,
+      columnHelper.accessor("inReview", {
         header: () => (
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>GD</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Google Drive</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <EnumHeader
+            buttonText="In Review"
+            searchParamName={inReviewSearchParamName}
+            pageIndexSearchParamName={pageIndexSearchParamName}
+            zodEnum={YesOrNoEnum}
+            isLoading={
+              syncedParams != null && params.inReview !== syncedParams.inReview
+            }
+          />
         ),
-        cell: ({ row }) => {
-          const job = row.original;
-          return (
-            <div
-              className="flex justify-around"
-              onClick={(event) => {
-                event.preventDefault();
-              }}
-            >
-              <OpenJobFolderOnWebButton job={job} className="h-8 px-2" />
-            </div>
-          );
-        },
+        cell: ({ getValue }) => (
+          <div className="flex">
+            <Checkbox checked={getValue()} />
+          </div>
+        ),
       }),
       columnHelper.accessor("priority", {
         size: 130,
@@ -585,23 +492,6 @@ export default function JobsTableForMember({ type }: Props) {
           );
         },
       }),
-      columnHelper.accessor("dueDate", {
-        size: 180,
-        header: "Date Due",
-        cell: ({ getValue }) => {
-          const value = getValue();
-
-          if (value == null) {
-            return <p className="text-muted-foreground">-</p>;
-          }
-
-          return formatInEST(value);
-        },
-      }),
-      columnHelper.accessor("clientInfo.clientOrganizationName", {
-        id: "organization",
-        header: "Organization",
-      }),
       columnHelper.accessor("jobName", {
         size: 450,
         header: () => (
@@ -620,11 +510,7 @@ export default function JobsTableForMember({ type }: Props) {
         id: "copyJobId",
         cell: ({ row }) => {
           const value = row.original.jobName;
-          return (
-            <div className="ml-2">
-              <TextCopyButton JobId={value} />
-            </div>
-          );
+          return <TextCopyButton JobId={value} />;
         },
       }),
       columnHelper.accessor("jobStatus", {
@@ -645,7 +531,7 @@ export default function JobsTableForMember({ type }: Props) {
               defaultValue={type === "All" ? null : type}
             />
           ),
-        cell: ({ getValue, row }) => {
+        cell: ({ getValue }) => {
           const value = getValue();
           const status = jobStatuses[value];
 
@@ -655,39 +541,6 @@ export default function JobsTableForMember({ type }: Props) {
               <span className="whitespace-nowrap">{status.value}</span>
             </div>
           );
-        },
-      }),
-      columnHelper.display({
-        id: "sendDeliverables",
-        size: 180,
-        cell: ({ row }) => {
-          const value = row.original.jobStatus;
-          const dateSentToClient = row.original.dateSentToClient;
-          const status = jobStatuses[value];
-          if (
-            canSendDeliverables &&
-            (status.value === "Completed" ||
-              status.value === "Canceled (Invoice)")
-          ) {
-            return (
-              <InTableButton
-                size={"default"}
-                variant={"outline"}
-                className={InTableButtonStyles(dateSentToClient)}
-                onClick={() => {
-                  setAlertDialogState({ open: true, jobId: row.id });
-                }}
-              >
-                {dateSentToClient !== null ? (
-                  <>
-                    <span>Resend Deliverables</span>
-                  </>
-                ) : (
-                  <span>Send Deliverables</span>
-                )}
-              </InTableButton>
-            );
-          }
         },
       }),
       columnHelper.accessor("assignedTasks", {
@@ -751,7 +604,7 @@ export default function JobsTableForMember({ type }: Props) {
                 return (
                   <Badge
                     variant={"outline"}
-                    className="flex items-center "
+                    className="flex items-center"
                     key={task.id}
                   >
                     {status && (
@@ -890,9 +743,10 @@ export default function JobsTableForMember({ type }: Props) {
     return baseColumns;
   }, [
     type,
-    prioritySearchParamName,
+    inReviewSearchParamName,
     pageIndexSearchParamName,
     syncedParams,
+    params.inReview,
     params.priority,
     params.jobName,
     params.jobStatus,
@@ -902,9 +756,9 @@ export default function JobsTableForMember({ type }: Props) {
     params.mountingType,
     params.projectNumber,
     params.propertyOwner,
+    prioritySearchParamName,
     jobNameSearchParamName,
     jobStatusSearchParamName,
-    canSendDeliverables,
     taskNameSearchParamName,
     taskAssigneeNameSearchParamName,
     propertyTypeSearchParamName,
@@ -964,7 +818,7 @@ export default function JobsTableForMember({ type }: Props) {
     jobFolderId: "Google Drive",
     priority: "Priority",
     dueDate: "Date Due",
-    organization: "Organization",
+    "clientInfo.clientOrganizationName": "Organization",
     jobName: "Name",
     copyJobId: "Copy ID",
     jobStatus: "Status",
@@ -976,10 +830,19 @@ export default function JobsTableForMember({ type }: Props) {
     completedCancelledDate: "Date Completed/Canceled",
     dateSentToClient: "Date Sent to Client",
   };
+  const { isSelected: isExpanded } = useExpandContext();
 
   return (
     <div className="relative space-y-2">
-      <div className="absolute -top-[44px] ml-[170px] w-200">
+      <div
+        className={`absolute -top-[60px] ${
+          isExpanded
+            ? window.innerWidth <= 1600
+              ? "ml-[800px]"
+              : "ml-[1000px]"
+            : "ml-[760px]"
+        } w-200`}
+      >
         <Popover>
           <PopoverTrigger asChild>
             <Button variant={"outline"} size={"sm"}>
@@ -988,73 +851,39 @@ export default function JobsTableForMember({ type }: Props) {
           </PopoverTrigger>
           <PopoverContent className="w-56 max-h-60 overflow-auto p-1">
             <div className="p-0">
-              <div
-                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground"
-                style={{ cursor: "pointer" }}
-              >
-                <label className="flex items-center w-full cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={table.getIsAllColumnsVisible()}
-                    onChange={table.getToggleAllColumnsVisibilityHandler()}
-                    className="hidden"
-                  />
-                  <span className="flex items-center justify-center w-4 h-4 mr-2 ">
-                    {table.getIsAllColumnsVisible() && (
-                      <Check className="h-4 w-4" />
-                    )}
-                  </span>
-                  <span className="flex-1">
-                    {table.getIsAllColumnsVisible()
-                      ? "Hide All Columns"
-                      : "Show All Columns"}
-                  </span>
-                </label>
-              </div>
-              {table.getAllLeafColumns().map((column) => {
-                if (
-                  column.id === "sendDeliverables" &&
-                  !(
-                    canSendDeliverables &&
-                    (type === "Completed" ||
-                      type === "Canceled (Invoice)" ||
-                      type === "All")
-                  )
-                ) {
-                  return null;
-                }
-                return (
-                  <div
-                    key={column.id}
-                    className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <label className="flex items-center w-full cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={column.getIsVisible()}
-                        onChange={column.getToggleVisibilityHandler()}
-                        className="hidden"
-                        disabled={
-                          column.id === "sendDeliverables" &&
-                          !(
-                            canSendDeliverables &&
-                            (type === "Completed" ||
-                              type === "Canceled (Invoice)" ||
-                              type === "All")
-                          )
-                        }
-                      />
-                      <span className="flex items-center justify-center w-4 h-4 mr-2 cursor-pointer">
-                        {column.getIsVisible() && <Check className="h-4 w-4" />}
-                      </span>
-                      <span className="flex-1">
-                        {columnHeaders[column.id] || column.id}
-                      </span>
-                    </label>
-                  </div>
-                );
-              })}
+              {table
+                .getAllLeafColumns()
+                .filter(
+                  (column) =>
+                    isContractor ||
+                    (column.id !== "inReview" && column.id !== "priority")
+                )
+                .map((column) => {
+                  return (
+                    <div
+                      key={column.id}
+                      className={`relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-gray-100 focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50`}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <label className="flex items-center w-full cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={column.getIsVisible()}
+                          onChange={column.getToggleVisibilityHandler()}
+                          className="hidden"
+                        />
+                        <span className="flex items-center justify-center w-4 h-4 mr-2 cursor-pointer">
+                          {column.getIsVisible() && (
+                            <Check className="h-4 w-4" />
+                          )}
+                        </span>
+                        <span className="flex-1">
+                          {columnHeaders[column.id] || column.id}
+                        </span>
+                      </label>
+                    </div>
+                  );
+                })}
             </div>
           </PopoverContent>
         </Popover>
@@ -1110,14 +939,14 @@ export default function JobsTableForMember({ type }: Props) {
               ) : (
                 table.getRowModel().rows.map((row) => (
                   <NewTabTableRow
-                    key={row.id}
                     href={`/jobs/${row.id}`}
+                    key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     className={
                       (row.original.isExpedited ? "bg-yellow-100 " : "") +
                       (row.original.inReview ? "bg-violet-100 " : "") +
                       (row.original.isExpedited && row.original.inReview
-                        ? "bg-green-300"
+                        ? "bg-blue-100"
                         : "")
                     }
                   >
@@ -1137,7 +966,6 @@ export default function JobsTableForMember({ type }: Props) {
           </Table>
         </div>
       </DndContext>
-
       <div className="flex justify-end items-center">
         <div className="flex items-center gap-8">
           <PaginationControls table={table} data={data} type={type} />
@@ -1234,70 +1062,6 @@ export default function JobsTableForMember({ type }: Props) {
           </div>
         </div>
       </div>
-      <AlertDialog
-        open={alertDialogState.open}
-        onOpenChange={(newOpen) => {
-          if (newOpen) {
-            return;
-          }
-
-          setAlertDialogState({ open: newOpen });
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <LoadingButton
-              isLoading={isPatchSendDeliverablesMutationPending}
-              onClick={() => {
-                if (!alertDialogState.open) {
-                  return;
-                }
-                patchSendDeliverablesMutationAsync({
-                  jobId: alertDialogState.jobId,
-                })
-                  .then(() => {
-                    toast({ title: "Success" });
-                    queryClient.invalidateQueries({
-                      queryKey: getJobsQueryKey({}),
-                    });
-                    setAlertDialogState({ open: false });
-                  })
-                  .catch((error: AxiosError<ErrorResponseData>) => {
-                    switch (error.response?.status) {
-                      case 400:
-                        if (error.response.data.errorCode.includes("20809")) {
-                          toast({
-                            title: "Job is already sent to client.",
-                            variant: "destructive",
-                          });
-                          return;
-                        }
-                    }
-
-                    if (
-                      error.response &&
-                      error.response.data.errorCode.filter(
-                        (value) => value != null
-                      ).length !== 0
-                    ) {
-                      toast({
-                        title: error.response.data.message,
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                  });
-              }}
-            >
-              Continue
-            </LoadingButton>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

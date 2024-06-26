@@ -44,6 +44,7 @@ import {
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { useProfileContext } from "./ProfileProvider";
+import { useExpandContext } from "./ExpandProvider";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -173,7 +174,7 @@ export function getItemsTableExportDataFromLineItems(
   }));
 }
 
-export default function JobsTableForMember({ type }: Props) {
+export default function NewTabTableForMember({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -977,9 +978,19 @@ export default function JobsTableForMember({ type }: Props) {
     dateSentToClient: "Date Sent to Client",
   };
 
+  const { isSelected: isExpanded } = useExpandContext();
+
   return (
     <div className="relative space-y-2">
-      <div className="absolute -top-[44px] ml-[170px] w-200">
+      <div
+        className={`absolute -top-[60px] ${
+          isExpanded
+            ? window.innerWidth <= 1600
+              ? "ml-[800px]"
+              : "ml-[1000px]"
+            : "ml-[760px]"
+        } w-200`}
+      >
         <Popover>
           <PopoverTrigger asChild>
             <Button variant={"outline"} size={"sm"}>
