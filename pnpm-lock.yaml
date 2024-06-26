@@ -114,10 +114,8 @@ dependencies:
     specifier: 18.3.0
     version: 18.3.0
   '@types/uuid':
-
     specifier: ^10.0.0
     version: 10.0.0
-
   '@udecode/cn':
     specifier: ^29.0.1
     version: 29.0.1(@types/react@18.3.2)(class-variance-authority@0.7.0)(react-dom@18.3.1)(react@18.3.1)(tailwind-merge@2.2.1)
@@ -7601,6 +7599,10 @@ packages:
   /@types/uuid@10.0.0:
     resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
+    dev: false
+
+  /@types/uuid@10.0.0:
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
     dev: false
 
   /@types/validator@13.11.7:
