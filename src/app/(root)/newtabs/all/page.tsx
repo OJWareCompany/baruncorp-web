@@ -1,8 +1,8 @@
 "use client";
 
 import { useProfileContext } from "../../ProfileProvider";
-import JobsTableForMember from "../../JobsTableForMember";
-import JobsTableForClient from "../../JobsTableForClient";
+import NewTabTableForClient from "../../NewTabTableForClient";
+import NewTabTableForMember from "../../NewTabTableForMember";
 import PageHeader from "@/components/PageHeader";
 import GlobalSearch from "@/components/table/GlobalSearch";
 
@@ -28,7 +28,7 @@ export default function Page() {
           pageIndexSearchParamName={pageIndexSearchParamName}
         />
         <div className="space-y-6">
-          <JobsTableForMember type="All" />
+          <NewTabTableForMember type="All" />
         </div>
       </div>
     );
@@ -52,7 +52,7 @@ export default function Page() {
         pageIndexSearchParamName={pageIndexSearchParamName}
       />
       <div className="space-y-6">
-        <JobsTableForClient type="All" />
+        <NewTabTableForClient type="All" />
       </div>
     </div>
   );

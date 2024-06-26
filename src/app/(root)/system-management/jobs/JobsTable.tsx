@@ -45,6 +45,7 @@ import {
 } from "@dnd-kit/core";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { useProfileContext } from "../../ProfileProvider";
+import { useExpandContext } from "../../ExpandProvider";
 import {
   ResizeTableCell,
   Table,
@@ -888,6 +889,7 @@ export default function JobsTable() {
     completedCancelledDate: "Date Completed/Canceled",
     dateSentToClient: "Date Sent to Client",
   };
+  const { isSelected: isExpanded } = useExpandContext();
 
   return (
     <div className="relative space-y-2">
@@ -899,7 +901,15 @@ export default function JobsTable() {
         }}
         pageIndexSearchParamName={pageIndexSearchParamName}
       />
-      <div className="absolute -top-[1px] ml-[760px]">
+      <div
+        className={`absolute -top-[1px] ${
+          isExpanded
+            ? window.innerWidth <= 1600
+              ? "ml-[800px]"
+              : "ml-[1000px]"
+            : "ml-[760px]"
+        } w-200`}
+      >
         <Popover>
           <PopoverTrigger asChild>
             <Button variant={"outline"} size={"sm"}>
