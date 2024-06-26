@@ -179,7 +179,9 @@ export default function CostField({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription></AlertDialogDescription>
+            <AlertDialogDescription>
+              When you edit a price, the price on the invoice may be modified.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setAlertDialogOpen(false)}>
