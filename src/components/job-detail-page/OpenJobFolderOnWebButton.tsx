@@ -42,7 +42,7 @@ export default function OpenJobFolderOnWebButton({
           event.stopPropagation();
         }}
       >
-        <FolderOpen className="h-4 w-4 mr-1" />
+        <FolderOpen className="h-4 w-4" />
         <span>{title}</span>
       </Button>
     </a>
