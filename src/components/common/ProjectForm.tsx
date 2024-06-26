@@ -184,8 +184,9 @@ export default function ProjectForm({ project, pageType }: Props) {
   async function onSubmit(values: FieldValues) {
     if (values.address.fullAddress.length === 0) {
       toast({
+        title: "Please check the address and try again",
         description:
-          "Please enter address information with coordinates for the map display",
+          "The address you entered could not be matched with coordinates",
         variant: "destructive",
       });
       return;

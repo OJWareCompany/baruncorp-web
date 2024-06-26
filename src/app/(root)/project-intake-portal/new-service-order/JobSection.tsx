@@ -576,8 +576,9 @@ function JobSectionWithData({
   async function onSubmit(values: FieldValues) {
     if (isWetStampChecked && values.mailingAddress.fullAddress.length === 0) {
       toast({
+        title: "Please check the mailing address and try again",
         description:
-          "Please enter mailing address information with coordinates for the map display",
+          "The mailing address you entered could not be matched with coordinates",
         variant: "destructive",
       });
       return;
