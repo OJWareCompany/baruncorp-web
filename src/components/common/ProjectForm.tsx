@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProjectResponseDto } from "@/api/api-spec";
 import {
   Form,
@@ -30,12 +30,18 @@ import Minimap from "@/components/Minimap";
 import usePatchProjectMutation from "@/mutations/usePatchProjectMutation";
 import {
   PropertyTypeEnum,
+  capitalizedStateNames,
+  postalCodeRegExp,
   transformStringIntoNullableString,
 } from "@/lib/constants";
 import { getProjectQueryKey } from "@/queries/useProjectQuery";
 import { useToast } from "@/components/ui/use-toast";
 import UtilitiesCombobox from "@/components/combobox/UtilitiesCombobox";
 import { useProfileContext } from "@/app/(root)/ProfileProvider";
+import {
+  fetchGeocodeFeatures,
+  getMapboxPlacesQueryKey,
+} from "@/queries/useAddressSearchQuery";
 
 const formSchema = z.object({
   organization: z
@@ -45,20 +51,63 @@ const formSchema = z.object({
   propertyType: PropertyTypeEnum,
   propertyOwner: z.string().trim(),
   projectNumber: z.string().trim(),
-  address: z.object({
-    street1: z.string().trim(),
-    street2: z.string().trim(),
-    city: z.string().trim(),
-    state: z.string().trim(),
-    postalCode: z.string().trim(),
-    country: z.string().trim(),
-    fullAddress: z.string().trim(),
-    coordinates: z.array(z.number()),
-  }),
+  address: z
+    .object({
+      street1: z.string().trim(),
+      street2: z.string().trim(),
+      city: z.string().trim(),
+      state: z.string().trim(),
+      postalCode: z.string().trim(),
+      country: z.string().trim(),
+      fullAddress: z.string().trim(),
+      coordinates: z.array(z.number()),
+    })
+    .superRefine((value, ctx) => {
+      if (value.street1.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Street 1 is required",
+        });
+        return;
+      }
+      if (value.city.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "City is required",
+        });
+        return;
+      }
+      if (value.state.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "State is required",
+        });
+        return;
+      }
+      if (value.postalCode.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Postal Code is required",
+        });
+        return;
+      }
+      if (!postalCodeRegExp.test(value.postalCode)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Invalid postal code format. Postal code should be in the format XXXXX or XXXXX-XXXX",
+        });
+        return;
+      }
+    }),
   utilityId: z.string().trim(),
 });
 
 type FieldValues = z.infer<typeof formSchema>;
+type AddressTextField = Pick<
+  FieldValues["address"],
+  "street1" | "street2" | "city" | "state" | "postalCode" | "country"
+>;
 
 function getFieldValues(project: ProjectResponseDto): FieldValues {
   return {
@@ -70,6 +119,10 @@ function getFieldValues(project: ProjectResponseDto): FieldValues {
       ...project.propertyAddress,
       street2: project.propertyAddress.street2 ?? "",
       country: project.propertyAddress.country ?? "",
+      coordinates:
+        project.propertyAddress.coordinates.length === 2
+          ? project.propertyAddress.coordinates
+          : [0, 0],
     },
     utilityId: project.utilityId ?? "",
   };
@@ -96,7 +149,32 @@ export default function ProjectForm({ project, pageType }: Props) {
     defaultValues: getFieldValues(project),
   });
 
+  const initialStateOrRegion = form.getValues("address.state");
+  const statesOrRegionsRef = useRef(
+    capitalizedStateNames.includes(initialStateOrRegion)
+      ? capitalizedStateNames
+      : [initialStateOrRegion, ...capitalizedStateNames]
+  );
+
   const watchState = form.watch("address.state");
+
+  const [minimapCoordinates, setMinimapCoordinates] = useState<
+    [number, number]
+  >([0, 0]);
+
+  const [isAddressFieldFocused, setIsAddressFieldFocused] = useState(false);
+  const handleFocusAddressField = () => setIsAddressFieldFocused(true);
+  const handleBlurAddressField = async () => {
+    setIsAddressFieldFocused(false);
+    updateAddressFormCoordinatesFromGeocode();
+  };
+  const handleOnOpenChangeAddressSelect = (open: boolean) => {
+    if (open) {
+      handleFocusAddressField();
+    } else {
+      handleBlurAddressField();
+    }
+  };
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -104,6 +182,15 @@ export default function ProjectForm({ project, pageType }: Props) {
   const { mutateAsync } = usePatchProjectMutation(project.projectId);
 
   async function onSubmit(values: FieldValues) {
+    if (values.address.fullAddress.length === 0) {
+      toast({
+        description:
+          "Please enter address information with coordinates for the map display",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (
       values.propertyType !== project.propertyType ||
       values.address.fullAddress !== project.propertyAddress.fullAddress
@@ -180,15 +267,76 @@ export default function ProjectForm({ project, pageType }: Props) {
       });
   }
 
+  const updateAddressFormCoordinatesFromGeocode = async () => {
+    const geocodeFeatures = await queryClient.fetchQuery({
+      queryKey: getMapboxPlacesQueryKey(generateAddressSearchText()),
+      queryFn: fetchGeocodeFeatures,
+    });
+    if (geocodeFeatures && geocodeFeatures.length > 0) {
+      const [longitude, latitude] = geocodeFeatures[0].geometry.coordinates;
+      updateAddressCoordinates([longitude, latitude]);
+      form.setValue("address.fullAddress", geocodeFeatures[0].place_name);
+    }
+
+    if (!geocodeFeatures || geocodeFeatures.length === 0) {
+      updateAddressCoordinates([0, 0]);
+      form.setValue("address.fullAddress", "");
+    }
+  };
+
+  const updateAddressCoordinates = (
+    coordinates: [longitude: number, latitude: number]
+  ) => {
+    form.setValue("address.coordinates", coordinates);
+    setMinimapCoordinates(coordinates);
+  };
+
+  const handleFormKeyDown = async (
+    event: React.KeyboardEvent<HTMLFormElement>
+  ) => {
+    if (event.key === "Enter" && isAddressFieldFocused) {
+      event.preventDefault();
+      updateAddressFormCoordinatesFromGeocode();
+    }
+  };
+
+  const generateAddressSearchText = () => {
+    const addressFields: Array<keyof AddressTextField> = [
+      "street1",
+      "street2",
+      "city",
+      "state",
+      "postalCode",
+      "country",
+    ];
+
+    const addressSearchText = addressFields
+      .map((field) => form.getValues(`address.${field}`)?.trim())
+      .filter(Boolean)
+      .join(" ");
+
+    return addressSearchText;
+  };
+
   useEffect(() => {
     if (project) {
       form.reset(getFieldValues(project));
+      const [longitude, latitude] = project.propertyAddress.coordinates;
+      setMinimapCoordinates([longitude, latitude]);
     }
   }, [form, project]);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        // onSubmit={(event) => {
+        //   event.preventDefault();
+        //   form.handleSubmit(onSubmit)(event);
+        // }}
+        onKeyDown={handleFormKeyDown}
+        className="space-y-4"
+      >
         <FormField
           control={form.control}
           name="organization"
@@ -311,51 +459,113 @@ export default function ProjectForm({ project, pageType }: Props) {
                             },
                             { shouldValidate: true, shouldDirty: true }
                           );
+
+                          /**
+                           * 이 onSelect 이벤트 콜백이 호출되는 경우의 address.fullAddress는 AddressSearchButton 컴포넌트 내부에서 초기화 된다
+                           */
+                          const [longitude, latitude] = value.coordinates;
+                          updateAddressCoordinates([longitude, latitude]);
                         }}
                       />
                     )}
                     <Input
                       value={field.value.street1}
-                      disabled
+                      disabled={!isWorker}
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          street1: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Street 1"
                     />
                     <Input
                       value={field.value.street2}
+                      disabled={!isWorker}
                       onChange={(event) => {
                         field.onChange({
                           ...field.value,
                           street2: event.target.value,
                         });
                       }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Street 2"
-                      disabled={!isWorker}
                     />
                     <Input
                       value={field.value.city}
-                      disabled
+                      disabled={!isWorker}
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          city: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="City"
                     />
-                    <Input
+                    <Select
                       value={field.value.state}
-                      disabled
-                      placeholder="State Or Region"
-                    />
+                      disabled={!isWorker}
+                      onValueChange={(value) => {
+                        field.onChange({
+                          ...field.value,
+                          state: value,
+                        });
+                      }}
+                      onOpenChange={handleOnOpenChangeAddressSelect}
+                    >
+                      <SelectTrigger className="h-10 w-full">
+                        <SelectValue
+                          placeholder={"Select an state or region"}
+                        />
+                      </SelectTrigger>
+                      <SelectContent
+                        side="bottom"
+                        className="max-h-48 overflow-y-auto"
+                      >
+                        {statesOrRegionsRef.current.map((state) => (
+                          <SelectItem key={state} value={`${state}`}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Input
                       value={field.value.postalCode}
-                      disabled
+                      disabled={!isWorker}
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          postalCode: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Postal Code"
                     />
                     <Input
                       value={field.value.country}
-                      disabled
+                      disabled={!isWorker}
+                      onChange={(event) => {
+                        field.onChange({
+                          ...field.value,
+                          country: event.target.value,
+                        });
+                      }}
+                      onFocus={handleFocusAddressField}
+                      onBlur={handleBlurAddressField}
                       placeholder="Country"
                     />
                   </FormItem>
                 </div>
                 <div className="col-span-1">
                   <Minimap
-                    longitude={field.value.coordinates[0]}
-                    latitude={field.value.coordinates[1]}
+                    longitude={minimapCoordinates[0]}
+                    latitude={minimapCoordinates[1]}
                   />
                 </div>
               </div>
@@ -388,9 +598,11 @@ export default function ProjectForm({ project, pageType }: Props) {
             type="submit"
             className="w-full"
             isLoading={form.formState.isSubmitting}
-            disabled={!form.formState.isDirty}
+            disabled={!form.formState.isDirty || isAddressFieldFocused}
           >
-            Save
+            {isAddressFieldFocused
+              ? "Disabled when editing address field"
+              : "Save"}
           </LoadingButton>
         )}
       </form>

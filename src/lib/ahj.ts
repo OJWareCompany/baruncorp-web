@@ -27,6 +27,7 @@ export const formSchema = z.object({
   // general
   general: z.object({
     name: z.string().trim(),
+    fullAhjName: z.string().trim(),
     website: z.custom<Value>(),
     specificFormRequired: SelectOptionEnumWithEmptyString,
     structuralStampRequired: SelectOptionEnumWithEmptyString,
@@ -76,6 +77,9 @@ export function getFieldValuesFromAhjNote(
     // general
     general: {
       name: transformNullishStringIntoString.parse(ahjNote?.general.name),
+      fullAhjName: transformNullishStringIntoString.parse(
+        ahjNote?.general.fullAhjName
+      ),
       website: getEditorValue(ahjNote?.general.website),
       specificFormRequired:
         transformNullishSelectOptionIntoSelectOptionWithEmptyString.parse(
@@ -297,7 +301,7 @@ export function transformProjectAssociatedRegulatoryBodyIntoArray(
   if (projectAssociatedRegulatoryBody.countySubdivisionsId != null) {
     array.push({
       type: "countySubdivision",
-      name: "County Subdivision",
+      name: "County Subdivisions",
       geoId: projectAssociatedRegulatoryBody.countySubdivisionsId,
     });
   }
@@ -315,6 +319,60 @@ export function transformProjectAssociatedRegulatoryBodyIntoArray(
       geoId: projectAssociatedRegulatoryBody.stateId,
     });
   }
+  return array;
+}
+
+/**
+ * @TODO
+ * 함수 네이밍 적절하게 수정할 필요 있음
+ */
+export function transformProjectAssociatedRegulatoryBodyIntoArrayV2(
+  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto
+): ProjectAssociatedRegulatoryBodyArray {
+  if (projectAssociatedRegulatoryBody == null) {
+    return [];
+  }
+
+  const array: ProjectAssociatedRegulatoryBodyArray = [];
+
+  array.push({
+    type: "place",
+    name: "Place",
+    geoId: projectAssociatedRegulatoryBody.placeId ?? "",
+  });
+  array.push({
+    type: "countySubdivision",
+    name: "County Subdivisions",
+    geoId: projectAssociatedRegulatoryBody.countySubdivisionsId ?? "",
+  });
+  array.push({
+    type: "county",
+    name: "County",
+    geoId: projectAssociatedRegulatoryBody.countyId ?? "",
+  });
+  array.push({
+    type: "state",
+    name: "State",
+    geoId: projectAssociatedRegulatoryBody.stateId,
+  });
 
   return array;
+}
+
+export type ProjectAssociatedRegulatoryBody = {
+  stateId: string;
+  countyId: string | null;
+  countySubdivisionsId: string | null;
+  placeId: string | null;
+};
+
+export function getOriginProjectAssociatedRegulatoryBody(
+  projectAssociatedRegulatoryBody: ProjectAssociatedRegulatoryBodyDto
+): ProjectAssociatedRegulatoryBody {
+  return {
+    stateId: projectAssociatedRegulatoryBody.stateId,
+    countyId: projectAssociatedRegulatoryBody.countyId,
+    countySubdivisionsId: projectAssociatedRegulatoryBody.countySubdivisionsId,
+    placeId: projectAssociatedRegulatoryBody.placeId,
+  };
 }
