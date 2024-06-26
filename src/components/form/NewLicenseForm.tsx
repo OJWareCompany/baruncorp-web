@@ -66,16 +66,43 @@ export default function NewLicenseForm({
   });
 
   async function onSubmit(values: FieldValues) {
+    const expiryDateString = values.expiryDate;
+
+    if (!expiryDateString) {
+      await mutateAsync({
+        userId: values.userId,
+        abbreviation: values.abbreviation,
+        type: values.type,
+        expiryDate: null,
+      });
+      return;
+    }
+    const expiryDate = new Date(expiryDateString);
+    const isEDT = (date: Date) => {
+      const year = date.getFullYear();
+      const secondSundayMarch = new Date(
+        year,
+        2,
+        8 + ((7 - new Date(year, 2, 8).getDay()) % 7)
+      );
+      const firstSundayNovember = new Date(
+        year,
+        10,
+        1 + ((7 - new Date(year, 10, 1).getDay()) % 7)
+      );
+      return date >= secondSundayMarch && date < firstSundayNovember;
+    };
+
+    const offset = isEDT(expiryDate) ? 4 : 5;
+
     await mutateAsync({
       userId: values.userId,
       abbreviation: values.abbreviation,
       type: values.type,
-      expiryDate: values.expiryDate
-        ? zonedTimeToUtc(
-            addHours(new Date(values.expiryDate), 4),
-            "UTC"
-          ).toISOString()
-        : null,
+      expiryDate: zonedTimeToUtc(
+        addHours(expiryDate, offset),
+        "UTC"
+      ).toISOString(),
     })
       .then(() => {
         toast({ title: "Success" });
