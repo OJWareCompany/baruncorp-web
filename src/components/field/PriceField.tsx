@@ -3,8 +3,18 @@ import { Loader2, Pencil } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import LoadingButton from "../LoadingButton";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { AffixInput } from "@/components/AffixInput";
@@ -30,6 +40,7 @@ interface Props {
   orderedServiceId: string;
   price: number | null;
   jobId: string;
+  invoiceId: string | null;
 }
 
 export default function PriceField({
@@ -37,11 +48,13 @@ export default function PriceField({
   jobId,
   orderedServiceId,
   price,
+  invoiceId,
 }: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getFieldValues(price),
   });
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -64,7 +77,7 @@ export default function PriceField({
     );
   }
 
-  async function onSubmit(values: FieldValues) {
+  async function handleFormSubmit(values: FieldValues) {
     const { price } = values;
 
     if (price === "") {
@@ -116,6 +129,19 @@ export default function PriceField({
       });
   }
 
+  const onSubmit = (values: FieldValues) => {
+    if (invoiceId) {
+      setAlertDialogOpen(true);
+    } else {
+      handleFormSubmit(values);
+    }
+  };
+
+  const confirmSubmit = () => {
+    handleFormSubmit(form.getValues());
+    setAlertDialogOpen(false);
+  };
+
   return (
     <Form {...form}>
       <form
@@ -165,6 +191,28 @@ export default function PriceField({
           )}
         </Button>
       </form>
+      <AlertDialog
+        open={alertDialogOpen}
+        onOpenChange={(newOpen) => setAlertDialogOpen(newOpen)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription></AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setAlertDialogOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <LoadingButton
+              isLoading={form.formState.isSubmitting}
+              onClick={confirmSubmit}
+            >
+              Continue
+            </LoadingButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Form>
   );
 }
