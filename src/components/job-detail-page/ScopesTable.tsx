@@ -370,6 +370,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               orderedServiceId={row.id}
               price={getValue()}
               jobId={job.id}
+              invoiceId={job.invoiceId}
             />
           );
         },
@@ -393,6 +394,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               assignedTaskId={row.id}
               cost={getValue()}
               jobId={job.id}
+              invoiceId={job.invoiceId}
             />
           );
         },
