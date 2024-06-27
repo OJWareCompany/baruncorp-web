@@ -40,7 +40,7 @@ interface Props {
   assignedTaskId: string;
   cost: number | null;
   jobId: string;
-  invoiceId: string | null;
+  vendorInvoiceId: string | null;
 }
 
 export default function CostField({
@@ -48,7 +48,7 @@ export default function CostField({
   jobId,
   assignedTaskId,
   cost,
-  invoiceId,
+  vendorInvoiceId,
 }: Props) {
   const form = useForm<FieldValues>({
     resolver: zodResolver(formSchema),
@@ -111,7 +111,7 @@ export default function CostField({
   }
 
   const onSubmit = (values: FieldValues) => {
-    if (invoiceId) {
+    if (vendorInvoiceId) {
       setAlertDialogOpen(true);
     } else {
       handleFormSubmit(values);
