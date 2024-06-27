@@ -381,6 +381,9 @@ export default function ScopesTable({ job, project, pageType }: Props) {
           if (row.depth === 0) {
             return;
           }
+          const assignedTask = job.assignedTasks.find(
+            (task) => task.id === row.id
+          );
 
           if (
             row.original.assigneeOrganizationId === BARUNCORP_ORGANIZATION_ID ||
@@ -394,9 +397,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               assignedTaskId={row.id}
               cost={getValue()}
               jobId={job.id}
-              vendorInvoiceId={job.assignedTasks
-                .map((vendors) => vendors.vendorInvoiceId)
-                .join(", ")}
+              vendorInvoiceId={assignedTask?.vendorInvoiceId || null}
             />
           );
         },
