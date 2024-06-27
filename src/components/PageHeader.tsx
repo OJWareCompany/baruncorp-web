@@ -25,7 +25,6 @@ export default function PageHeader({ items, action }: Props) {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-  console.log("Last item href:", items[items.length - 1].href);
   return (
     <div
       className={`py-2 sticky top-[65px] z-40 bg-white ${
