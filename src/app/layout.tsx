@@ -13,6 +13,12 @@ export const metadata = {
   title: "Barun Management System",
 };
 
+// Unchanged code skipped for brevity
+
+if (process.env.NODE_ENV === "development") {
+  metadata.title = "[Development] " + metadata.title;
+}
+
 export default function RootLayout({
   children,
 }: {
