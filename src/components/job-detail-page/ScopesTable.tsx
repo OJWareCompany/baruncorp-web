@@ -394,7 +394,9 @@ export default function ScopesTable({ job, project, pageType }: Props) {
               assignedTaskId={row.id}
               cost={getValue()}
               jobId={job.id}
-              invoiceId={job.invoiceId}
+              vendorInvoiceId={job.assignedTasks
+                .map((vendors) => vendors.vendorInvoiceId)
+                .join(", ")}
             />
           );
         },
