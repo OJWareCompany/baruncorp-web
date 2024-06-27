@@ -142,6 +142,11 @@ export default function PriceField({
     setAlertDialogOpen(false);
   };
 
+  const cancelSubmit = () => {
+    form.reset(getFieldValues(price));
+    setAlertDialogOpen(false);
+  };
+
   return (
     <Form {...form}>
       <form
@@ -203,9 +208,7 @@ export default function PriceField({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setAlertDialogOpen(false)}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={cancelSubmit}>Cancel</AlertDialogCancel>
             <LoadingButton
               isLoading={form.formState.isSubmitting}
               onClick={confirmSubmit}

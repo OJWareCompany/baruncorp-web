@@ -123,6 +123,11 @@ export default function CostField({
     setAlertDialogOpen(false);
   };
 
+  const cancelSubmit = () => {
+    form.reset(getFieldValues(cost));
+    setAlertDialogOpen(false);
+  };
+
   return (
     <Form {...form}>
       <form
@@ -180,13 +185,12 @@ export default function CostField({
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              When you edit a price, the price on the invoice may be modified.
+              When you edit a price, the price on the vendor invoice may be
+              modified.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setAlertDialogOpen(false)}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={cancelSubmit}>Cancel</AlertDialogCancel>
             <LoadingButton
               isLoading={form.formState.isSubmitting}
               onClick={confirmSubmit}
