@@ -42,6 +42,7 @@ import {
   fetchGeocodeFeatures,
   getMapboxPlacesQueryKey,
 } from "@/queries/useAddressSearchQuery";
+import { getFullAddressByAddressFields } from "@/lib/utils";
 
 const formSchema = z.object({
   organization: z
@@ -219,6 +220,16 @@ export default function ProjectForm({ project, pageType }: Props) {
         street2: transformStringIntoNullableString.parse(
           values.address.street2
         ),
+        fullAddress:
+          values.address.fullAddress === ""
+            ? getFullAddressByAddressFields({
+                street1: values.address.street1,
+                city: values.address.city,
+                state: values.address.state,
+                postalCode: values.address.postalCode,
+                country: values.address.country,
+              })
+            : values.address.fullAddress,
       },
       utilityId: values.utilityId === "" ? undefined : values.utilityId,
     })
