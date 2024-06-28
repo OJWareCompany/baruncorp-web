@@ -135,3 +135,22 @@ export function delay(ms: number) {
 export function convertToTitleCase(str: string) {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+export function getFullAddressByAddressFields({
+  street1,
+  city,
+  state,
+  postalCode,
+  country,
+}: {
+  street1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country?: string;
+}): string {
+  if (!country || country === "") {
+    return `${street1}, ${city}, ${state} ${postalCode}`;
+  }
+  return `${street1}, ${city}, ${state} ${postalCode}, ${country}`;
+}
