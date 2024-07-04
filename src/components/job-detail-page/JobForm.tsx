@@ -684,7 +684,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                     <FormLabel>Date Due</FormLabel>
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger onClick={(e) => e.preventDefault()}>
                           <Info className="h-4 w-4 cursor-pointer" />
                         </TooltipTrigger>
                         <TooltipContent side="left">
@@ -723,7 +723,7 @@ export default function JobForm({ project, job, pageType }: Props) {
                       <FormLabel>Priority</FormLabel>
                       <TooltipProvider delayDuration={0}>
                         <Tooltip>
-                          <TooltipTrigger>
+                          <TooltipTrigger onClick={(e) => e.preventDefault()}>
                             <Info className="h-4 w-4 cursor-pointer" />
                           </TooltipTrigger>
                           <TooltipContent side="right">
