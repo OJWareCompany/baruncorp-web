@@ -37,7 +37,7 @@ let defaultValues: DefaultValues<FieldValues> = {
   email: "",
   password: "",
 };
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "production") {
   defaultValues = {
     email: "admin-test@baruncorp.com",
     password: "Dhsmfdmfekseksgkrp12!@",
