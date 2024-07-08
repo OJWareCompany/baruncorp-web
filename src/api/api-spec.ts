@@ -231,6 +231,11 @@ export interface JoinOrganizationRequestDto {
   dateOfJoining?: string | null;
 }
 
+export interface ChangePasswordRequestDto {
+  targetUserId: string;
+  newPassword: string;
+}
+
 export interface AddressDto {
   /** @default "3480 Northwest 33rd Court" */
   street1: string;
@@ -2817,33 +2822,7 @@ export interface CreateGoogleAhjNoteFolderRequestDto {
   geoId: string;
 }
 
-export interface JobFolderPaginatedResponseFields {
-  /** @example "1-1Fk8UI8sz0yh-LV1QCCZ04K40ZHJK05" */
-  id: string | null;
-  /** @example "93b7-40db58e-d8c42-b391-1af41a7b6b63" */
-  jobId: string | null;
-  /** @example "0AN-3RUk9PVA7ZK0JGs" */
-  sharedDriveId: string | null;
-}
-
-export interface JobFolderPaginatedResponseDto {
-  /** @default 1 */
-  page: number;
-  /** @default 20 */
-  pageSize: number;
-  /** @example 10000 */
-  totalCount: number;
-  /** @example 500 */
-  totalPage: number;
-  items: JobFolderPaginatedResponseFields[];
-}
-
-export interface UpdateGoogleSharedDriveCountRequestDto {
-  /** @default "" */
-  jobFolderId: string;
-  /** @default "" */
-  count: number;
-}
+export type UpgradeGoogleSharedDriveVersionRequestDto = object;
 
 export interface CreateCouriersRequestDto {
   /** @default "USP" */
@@ -4196,25 +4175,6 @@ export interface FindClientNotePaginatedHttpControllerGetParams {
   page?: number;
 }
 
-export interface FindNonCountedJobFoldersHttpControllerFindNonCountedJobFoldersParams {
-  /** @format date-time */
-  fromDate: string;
-  /** @format date-time */
-  toDate: string;
-  /**
-   * Specifies a limit of returned records
-   * @default 20
-   * @example 20
-   */
-  limit?: number;
-  /**
-   * Page number
-   * @default 1
-   * @example 1
-   */
-  page?: number;
-}
-
 export interface FindCouriersPaginatedHttpControllerGetParams {
   /**
    * Specifies a limit of returned records
@@ -4385,6 +4345,9 @@ export class HttpClient<SecurityDataType = unknown> {
   }
 
   protected createFormData(input: Record<string, unknown>): FormData {
+    if (input instanceof FormData) {
+      return input;
+    }
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key];
       const propertyContent: any[] =
@@ -4900,6 +4863,24 @@ export class Api<
     ) =>
       this.request<void, any>({
         path: `/users/${userId}/organizations/${organizationId}/join`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ChangePasswordHttpControllerPostChangePassword
+     * @request POST:/users/password
+     */
+    changePasswordHttpControllerPostChangePassword: (
+      data: ChangePasswordRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/users/password`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -8095,40 +8076,20 @@ export class Api<
         ...params,
       }),
   };
-  nonCountedJobFolder = {
+  upgradeGoogleSharedDriveVersion = {
     /**
      * No description
      *
-     * @name FindNonCountedJobFoldersHttpControllerFindNonCountedJobFolders
-     * @summary Find non-counted-job-folder
-     * @request GET:/non-counted-job-folder
+     * @name UpgradeGoogleSharedDriveVersionHttpControllerPatch
+     * @request POST:/upgrade-google-shared-drive-version
      */
-    findNonCountedJobFoldersHttpControllerFindNonCountedJobFolders: (
-      query: FindNonCountedJobFoldersHttpControllerFindNonCountedJobFoldersParams,
-      params: RequestParams = {}
-    ) =>
-      this.request<JobFolderPaginatedResponseDto, any>({
-        path: `/non-counted-job-folder`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-  };
-  googleSharedDriveCount = {
-    /**
-     * No description
-     *
-     * @name UpdateGoogleSharedDriveCountHttpControllerPatch
-     * @request PATCH:/google-shared-drive-count
-     */
-    updateGoogleSharedDriveCountHttpControllerPatch: (
-      data: UpdateGoogleSharedDriveCountRequestDto,
+    upgradeGoogleSharedDriveVersionHttpControllerPatch: (
+      data: UpgradeGoogleSharedDriveVersionRequestDto,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
-        path: `/google-shared-drive-count`,
-        method: "PATCH",
+        path: `/upgrade-google-shared-drive-version`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         ...params,

@@ -9,6 +9,7 @@ import PositionForm from "./PositionForm";
 import StatusSectionHeaderAction from "./StatusSectionHeaderAction";
 import DepartmentForm from "./DepartmentForm";
 import RoleForm from "./RoleForm";
+import PasswordChangeForm from "./PasswordChangeForm";
 import PageHeader from "@/components/PageHeader";
 import useUserQuery from "@/queries/useUserQuery";
 import PageLoading from "@/components/PageLoading";
@@ -76,6 +77,7 @@ export default function UserDetailPage({ userId, pageType }: Props) {
   useNotFound(organizationQueryError);
 
   const {
+    isAdmin,
     isBarunCorpMember: isSignedInUserBarunCorpMember,
     authority: { canEditPosition, canEditLicense, canEditTask },
   } = useProfileContext();
@@ -124,6 +126,11 @@ export default function UserDetailPage({ userId, pageType }: Props) {
             pageType={pageType}
           />
         </section>
+        {isAdmin && (
+          <CollapsibleSection title="Password Change">
+            <PasswordChangeForm userId={user.id} />
+          </CollapsibleSection>
+        )}
         <CollapsibleSection
           title="Status"
           action={
