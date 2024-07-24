@@ -76,6 +76,7 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
         {isClientCompanyMember && (
           <OpenDeliverablesFolderOnWebButton job={job} />
         )}
+        {/* <OpenDeliverablesFolderOnWebButton job={job} /> */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size={"sm"} variant={"outline"}>

@@ -1,4 +1,5 @@
 import React from "react";
+import { FolderOpen } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { JobResponseDto } from "@/api/api-spec";
@@ -14,11 +15,8 @@ export default function OpenDeliverablesFolderOnWebButton({ job }: Props) {
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger>
-          <Button
-            variant={"outline"}
-            disabled
-            // className="border-none w-full justify-start pl-4"
-          >
+          <Button size={"sm"} variant={"outline"} disabled>
+            <FolderOpen className="mr-2 h-4 w-4" />
             <span>Open Deliverables Folder</span>
           </Button>
         </TooltipTrigger>
@@ -36,12 +34,13 @@ export default function OpenDeliverablesFolderOnWebButton({ job }: Props) {
       rel="noopener noreferrer"
     >
       <Button
+        size={"sm"}
         variant={"outline"}
-        // className="border-none w-full justify-start pl-4"
         onClick={(event) => {
           event.stopPropagation();
         }}
       >
+        <FolderOpen className="mr-2 h-4 w-4" />
         <span>Open Deliverables Folder</span>
       </Button>
     </a>
