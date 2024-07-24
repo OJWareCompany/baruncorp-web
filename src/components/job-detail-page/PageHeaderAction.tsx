@@ -42,14 +42,6 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
   const { isBarunCorpMember, isClientCompanyMember } = useProfileContext();
   const isHome = pageType === "HOME";
 
-  if (isClientCompanyMember) {
-    return (
-      <div className="flex gap-2">
-        <OpenDeliverablesFolderOnWebButton job={job} />
-      </div>
-    );
-  }
-
   /**
    * 바른코프 멤버 ✅
    * 바른코프 멤버아닌데, 홈 ❌
@@ -80,6 +72,10 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        {/* Worker + ClientCompanyMember ✅ */}
+        {isClientCompanyMember && (
+          <OpenDeliverablesFolderOnWebButton job={job} />
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size={"sm"} variant={"outline"}>
@@ -123,6 +119,14 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+    );
+  }
+
+  if (isClientCompanyMember) {
+    return (
+      <div className="flex gap-2">
+        <OpenDeliverablesFolderOnWebButton job={job} />
       </div>
     );
   }
