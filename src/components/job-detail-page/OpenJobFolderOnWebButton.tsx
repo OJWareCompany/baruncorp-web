@@ -1,5 +1,4 @@
 import React from "react";
-import { FolderOpen } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { JobResponseDto } from "@/api/api-spec";
@@ -20,9 +19,8 @@ export default function OpenJobFolderOnWebButton({
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger>
-          <Button size={"sm"} variant={"outline"} disabled>
-            <FolderOpen className="mr-2 h-4 w-4" />
-            <span>Open Folder on Web</span>
+          <Button variant={"outline"} disabled className={(cn(), className)}>
+            <span>{title}</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -35,14 +33,12 @@ export default function OpenJobFolderOnWebButton({
   return (
     <a href={job.shareLink} target="_blank" rel="noopener noreferrer">
       <Button
-        size={"sm"}
         variant={"outline"}
-        className={(cn(""), className)}
+        className={(cn(), className)}
         onClick={(event) => {
           event.stopPropagation();
         }}
       >
-        <FolderOpen className="h-4 w-4" />
         <span>{title}</span>
       </Button>
     </a>

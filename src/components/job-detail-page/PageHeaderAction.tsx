@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ScrollText } from "lucide-react";
+import { FolderOpen, ScrollText } from "lucide-react";
 import OpenJobFolderOnWebButton from "./OpenJobFolderOnWebButton";
+import OpenDeliverablesFolderOnWebButton from "./OpenDeliverablesFolderOnWebButton";
 import { Button } from "@/components/ui/button";
 import { JobResponseDto, ProjectResponseDto } from "@/api/api-spec";
 import OpenJobFolderOnDesktopButton from "@/components/job-detail-page/OpenJobFolderOnDesktopButton";
@@ -38,8 +39,16 @@ interface Props {
 }
 
 export default function PageHeaderAction({ job, project, pageType }: Props) {
-  const { isBarunCorpMember } = useProfileContext();
+  const { isBarunCorpMember, isClientCompanyMember } = useProfileContext();
   const isHome = pageType === "HOME";
+
+  if (isClientCompanyMember) {
+    return (
+      <div className="flex gap-2">
+        <OpenDeliverablesFolderOnWebButton job={job} />
+      </div>
+    );
+  }
 
   /**
    * 바른코프 멤버 ✅
@@ -51,8 +60,26 @@ export default function PageHeaderAction({ job, project, pageType }: Props) {
   if (isWorker) {
     return (
       <div className="flex gap-2">
-        <OpenJobFolderOnWebButton job={job} title="Open Folder on Web" />
-        <OpenJobFolderOnDesktopButton job={job} project={project} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size={"sm"} variant={"outline"}>
+              <FolderOpen className="mr-2 h-4 w-4" />
+              Open Job Folder
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <OpenJobFolderOnWebButton
+                job={job}
+                title="Web"
+                className="border-none w-full justify-start pl-4"
+              />
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <OpenJobFolderOnDesktopButton job={job} project={project} />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size={"sm"} variant={"outline"}>

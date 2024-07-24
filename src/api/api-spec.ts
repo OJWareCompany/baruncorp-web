@@ -588,6 +588,8 @@ export interface JobResponseDto {
   jobFolderId: string | null;
   /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
   shareLink: string | null;
+  /** @example "https://drive.google.com/drive/folders/Qzjm63Ja6SAezk1QT0kUcC1x7Oo3gn8WL" */
+  deliverablesFolderShareLink?: string | null;
   /** @example false */
   parentlessFolder?: boolean;
   /** @example "002" */

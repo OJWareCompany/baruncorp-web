@@ -1,5 +1,4 @@
 import React from "react";
-import { FolderOpen } from "lucide-react";
 import { Button } from "../ui/button";
 import { ProjectResponseDto } from "@/api/api-spec";
 import { openProjectFolder } from "@/lib/deeplink";
@@ -13,6 +12,7 @@ export default function OpenProjectFolderOnDesktopButton({ project }: Props) {
     <Button
       size={"sm"}
       variant={"outline"}
+      className="border-none w-full justify-start"
       onClick={() => {
         openProjectFolder({
           organization: project.clientOrganization,
@@ -25,8 +25,7 @@ export default function OpenProjectFolderOnDesktopButton({ project }: Props) {
         });
       }}
     >
-      <FolderOpen className="mr-2 h-4 w-4" />
-      <span>Open Folder on Desktop</span>
+      <span className="ml-1">Desktop</span>
     </Button>
   );
 }

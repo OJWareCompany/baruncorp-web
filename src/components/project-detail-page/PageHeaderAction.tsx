@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ScrollText } from "lucide-react";
+import { FolderOpen, ScrollText } from "lucide-react";
 import OpenProjectFolderOnDesktopButton from "./OpenProjectFolderOnDesktopButton";
 import OpenProjectFolderOnWebButton from "./OpenProjectFolderOnWebButton";
 import { Button } from "@/components/ui/button";
@@ -50,8 +50,22 @@ export default function PageHeaderAction({ project, pageType }: Props) {
   if (isWorker) {
     return (
       <div className="flex gap-2">
-        <OpenProjectFolderOnWebButton project={project} />
-        <OpenProjectFolderOnDesktopButton project={project} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size={"sm"} variant={"outline"}>
+              <FolderOpen className="mr-2 h-4 w-4" />
+              Open Project Folder
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem asChild>
+              <OpenProjectFolderOnWebButton project={project} />
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <OpenProjectFolderOnDesktopButton project={project} />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size={"sm"} variant={"outline"}>

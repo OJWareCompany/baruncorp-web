@@ -1,26 +1,28 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { ProjectResponseDto } from "@/api/api-spec";
+import { JobResponseDto } from "@/api/api-spec";
 
 interface Props {
-  project: ProjectResponseDto;
+  job: JobResponseDto;
+  title?: string;
+  className?: string;
 }
 
-export default function OpenProjectFolderOnWebButton({ project }: Props) {
-  if (project.shareLink == null) {
+export default function OpenDeliverablesFolderOnWebButton({ job }: Props) {
+  if (job.deliverablesFolderShareLink == null) {
     return (
       <Tooltip delayDuration={0}>
         <TooltipTrigger>
           <Button
             variant={"outline"}
             disabled
-            className={`border-none w-full justify-start`}
+            // className="border-none w-full justify-start pl-4"
           >
-            <span>Web</span>
+            <span>Open Deliverables Folder</span>
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side="bottom">
           Some error occurred and the link is missing
         </TooltipContent>
       </Tooltip>
@@ -28,15 +30,19 @@ export default function OpenProjectFolderOnWebButton({ project }: Props) {
   }
 
   return (
-    <a href={project.shareLink} target="_blank" rel="noopener noreferrer">
+    <a
+      href={job.deliverablesFolderShareLink}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <Button
         variant={"outline"}
-        className={`border-none w-full justify-start`}
+        // className="border-none w-full justify-start pl-4"
         onClick={(event) => {
           event.stopPropagation();
         }}
       >
-        <span>Web</span>
+        <span>Open Deliverables Folder</span>
       </Button>
     </a>
   );

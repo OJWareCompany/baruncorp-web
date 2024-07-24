@@ -10,6 +10,8 @@ export interface ProfileData {
   isBarunCorpMember: boolean;
   isContractor: boolean;
   isClientCompanyManager: boolean;
+  isClientCompanyEmployee: boolean;
+  isClientCompanyMember: boolean;
   authority: {
     canViewClientInvoice: boolean;
     canViewVendorInvoice: boolean;
@@ -31,6 +33,8 @@ const ProfileContext = createContext<ProfileData>({
   isBarunCorpMember: false,
   isContractor: false,
   isClientCompanyManager: false,
+  isClientCompanyEmployee: false,
+  isClientCompanyMember: false,
   authority: {
     canViewClientInvoice: false,
     canViewVendorInvoice: false,
@@ -66,6 +70,8 @@ export default function ProfileProvider({ children }: Props) {
         isBarunCorpMember: false,
         isContractor: false,
         isClientCompanyManager: false,
+        isClientCompanyEmployee: false,
+        isClientCompanyMember: false,
         authority: {
           canViewClientInvoice: false,
           canViewVendorInvoice: false,
@@ -92,6 +98,10 @@ export default function ProfileProvider({ children }: Props) {
     const isContractor = profile.isVendor;
     const isClientCompanyManager =
       profile.role.toUpperCase() === "CLIENT COMPANY MANAGER";
+    const isClientCompanyEmployee =
+      profile.role.toUpperCase() === "CLIENT COMPANY EMPLOYEE";
+    const isClientCompanyMember =
+      isClientCompanyManager || isClientCompanyEmployee;
 
     // profile 받아왔는데, 소속된 department 없는 경우
     // 혹은 소속된 department가 있는데 department 받아오는 중
@@ -101,6 +111,8 @@ export default function ProfileProvider({ children }: Props) {
         isBarunCorpMember,
         isContractor,
         isClientCompanyManager,
+        isClientCompanyEmployee,
+        isClientCompanyMember,
         authority: {
           canViewClientInvoice: false,
           canViewVendorInvoice: false,
@@ -124,6 +136,8 @@ export default function ProfileProvider({ children }: Props) {
       isBarunCorpMember,
       isContractor,
       isClientCompanyManager,
+      isClientCompanyEmployee,
+      isClientCompanyMember,
       authority: {
         canViewClientInvoice: department.viewClientInvoice,
         canViewVendorInvoice: department.viewVendorInvoice,
