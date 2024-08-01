@@ -99,6 +99,7 @@ import {
 } from "@/components/ui/tooltip";
 import SearchDateHeader from "@/components/table/SearchDateHeader";
 import PaginationControls from "@/components/table/PaginationControls";
+import useProfileQuery from "@/queries/useProfileQuery";
 
 const columnHelper =
   createColumnHelper<JobPaginatedResponseDto["items"][number]>();
@@ -114,6 +115,7 @@ export default function JobsTableForClient({ type }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { data: profile } = useProfileQuery();
   const [syncedParams, setSyncedParams] =
     useState<FindMyOrderedJobPaginatedHttpControllerFindJobParams>();
   const [reset, setReset] = useState(false);
@@ -600,23 +602,45 @@ export default function JobsTableForClient({ type }: Props) {
               {tasks.map((task) => {
                 const status = jobStatuses[task.status];
 
-                return (
-                  <Badge
-                    variant={"outline"}
-                    className="flex items-center mx-2"
-                    key={task.id}
-                  >
-                    {status && (
-                      <status.Icon
-                        className={`w-4 h-4 mr-2 flex-shrink-0 ${status.color}`}
-                      />
-                    )}
-                    <div className="flex flex-col py-2">
-                      <p className="font-medium">{task.taskName}</p>
-                      <p className="text-xs text-muted-foreground"></p>
-                    </div>
-                  </Badge>
-                );
+                if (profile?.isVendor) {
+                  return (
+                    <Badge
+                      variant={"outline"}
+                      className="flex items-center"
+                      key={task.id}
+                    >
+                      {status && (
+                        <status.Icon
+                          className={`w-4 h-4 mr-2 flex-shrink-0 ${status.color}`}
+                        />
+                      )}
+                      <div className="flex flex-col">
+                        <p className="font-medium">{task.taskName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {task.assigneeName ?? "-"}
+                        </p>
+                      </div>
+                    </Badge>
+                  );
+                } else {
+                  return (
+                    <Badge
+                      variant={"outline"}
+                      className="flex items-center mx-2"
+                      key={task.id}
+                    >
+                      {status && (
+                        <status.Icon
+                          className={`w-4 h-4 mr-2 flex-shrink-0 ${status.color}`}
+                        />
+                      )}
+                      <div className="flex flex-col py-2">
+                        <p className="font-medium">{task.taskName}</p>
+                        <p className="text-xs text-muted-foreground"></p>
+                      </div>
+                    </Badge>
+                  );
+                }
               })}
             </div>
           );
