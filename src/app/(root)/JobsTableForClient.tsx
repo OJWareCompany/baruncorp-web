@@ -603,7 +603,7 @@ export default function JobsTableForClient({ type }: Props) {
                 return (
                   <Badge
                     variant={"outline"}
-                    className="flex items-center"
+                    className="flex items-center mx-2"
                     key={task.id}
                   >
                     {status && (
@@ -611,11 +611,9 @@ export default function JobsTableForClient({ type }: Props) {
                         className={`w-4 h-4 mr-2 flex-shrink-0 ${status.color}`}
                       />
                     )}
-                    <div className="flex flex-col">
+                    <div className="flex flex-col py-2">
                       <p className="font-medium">{task.taskName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {task.assigneeName ?? "-"}
-                      </p>
+                      <p className="text-xs text-muted-foreground"></p>
                     </div>
                   </Badge>
                 );
