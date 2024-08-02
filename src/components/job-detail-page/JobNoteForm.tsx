@@ -104,7 +104,7 @@ export default function JobNoteForm({ job }: Props) {
 
   async function onSubmit(values: FieldValues) {
     const trimmedContent = trimValue(values.content);
-    const fullUrl = `https://baruncorp-webs.vercel.app${pathname}`;
+    const fullUrl = `${process.env.NEXT_PUBLIC_JOB_NOTE_LINK}${pathname}`;
     const emails = findAllEmails(trimmedContent);
     const hasMention = emails.length !== 0;
     let emailBody: string | undefined = undefined;

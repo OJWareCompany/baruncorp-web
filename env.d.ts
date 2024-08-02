@@ -7,5 +7,8 @@ namespace NodeJS {
     NEXT_PUBLIC_MAP_API_KEY: string;
     NEXT_PUBLIC_FILE_API_URL: string;
     NEXT_PUBLIC_INSTALLER_URL: string;
+    NEXT_PUBLIC_JOB_NOTE_LINK: string;
+    NEXT_PUBLIC_PORTPOLIO_EMAIL: string;
+    NEXT_PUBLIC_PORTPOLIO_PASSWORD: string;
   }
 }
