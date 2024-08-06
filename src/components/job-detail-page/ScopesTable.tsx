@@ -139,7 +139,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
                 return cur.duration;
               }
 
-              return Number((prev + cur.duration).toFixed(3));
+              return Number((prev + cur.duration).toFixed(2));
             }
 
             return prev;
@@ -192,8 +192,12 @@ export default function ScopesTable({ job, project, pageType }: Props) {
     [job.assignedTasks, job.orderedServices, project.propertyType]
   );
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const showSizeForRevisionColumn =
+      project.propertyType === "Residential" ||
+      data.some((row) => row.isRevision);
+
+    const baseColumns = [
       columnHelper.display({
         id: "expand or information",
         header: ({ table }) => (
@@ -288,34 +292,38 @@ export default function ScopesTable({ job, project, pageType }: Props) {
           );
         },
       }),
-      columnHelper.accessor("sizeForRevision", {
-        header: "Major / Minor",
-        cell: ({ row, getValue }) => {
-          if (row.depth > 0) {
-            return;
-          }
+      // 조건에 따라 sizeForRevision 컬럼 추가
+      ...(showSizeForRevisionColumn
+        ? [
+            columnHelper.accessor("sizeForRevision", {
+              header: "Major / Minor",
+              cell: ({ row, getValue }) => {
+                if (row.depth > 0) {
+                  return;
+                }
 
-          if (
-            !row.original.isRevision ||
-            row.original.pricingType === "Base Fixed Price" ||
-            row.original.pricingType === "Custom Fixed Price"
-          ) {
-            return <p className="text-muted-foreground">-</p>;
-          }
+                if (
+                  !row.original.isRevision ||
+                  row.original.pricingType === "Base Fixed Price" ||
+                  row.original.pricingType === "Custom Fixed Price" ||
+                  (project.propertyType === "Commercial" &&
+                    row.original.sizeForRevision == null)
+                ) {
+                  return <p className="text-muted-foreground">-</p>;
+                }
 
-          return row.original.isRevision &&
-            row.original.sizeForRevision === null ? (
-            <p className="text-muted-foreground">-</p>
-          ) : (
-            <SizeForRevisionField
-              sizeForRevision={getValue()}
-              jobId={job.id}
-              orderedServiceId={row.id}
-              disabled={project.propertyType === "Commercial"}
-            />
-          );
-        },
-      }),
+                return (
+                  <SizeForRevisionField
+                    sizeForRevision={getValue()}
+                    jobId={job.id}
+                    orderedServiceId={row.id}
+                    disabled={project.propertyType === "Commercial"}
+                  />
+                );
+              },
+            }),
+          ]
+        : []),
       columnHelper.accessor("duration", {
         header: "Duration",
         cell: ({ row, getValue }) => {
@@ -460,17 +468,20 @@ export default function ScopesTable({ job, project, pageType }: Props) {
           );
         },
       }),
-    ],
-    [
-      project.propertyType,
-      project.projectId,
-      job.id,
-      job.projectId,
-      isBarunCorpMember,
-      pageType,
-      openReasonDialog,
-    ]
-  );
+    ];
+
+    return baseColumns;
+  }, [
+    data,
+    job.id,
+    job.invoiceId,
+    job.assignedTasks,
+    project.propertyType,
+    project.projectId,
+    isBarunCorpMember,
+    pageType,
+    openReasonDialog,
+  ]);
 
   const table = useReactTable({
     data,
