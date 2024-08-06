@@ -11,7 +11,7 @@ import { AffixInput } from "@/components/AffixInput";
 import usePatchAssignedTaskDurationMutation from "@/mutations/usePatchAssignedTaskDurationMutation";
 import { useToast } from "@/components/ui/use-toast";
 import { getJobQueryKey } from "@/queries/useJobQuery";
-import { toThreeDecimalRegExp } from "@/lib/constants";
+import { formatToThreeDecimals, toThreeDecimalRegExp } from "@/lib/constants";
 
 const formSchema = z.object({
   duration: z.string().trim(),
@@ -55,7 +55,7 @@ export default function DurationField({
     return (
       <AffixInput
         suffixElement={<span className="text-muted-foreground">hour</span>}
-        value={duration ? String(duration) : ""}
+        value={duration !== null ? formatToThreeDecimals(duration) : ""}
         className="-ml-[9px] w-[150px]"
         size="sm"
         disabled

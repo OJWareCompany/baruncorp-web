@@ -760,6 +760,10 @@ export const toTwoDecimalRegExp = new RegExp(/^\d+(\.\d{0,2})?$/);
 
 export const toThreeDecimalRegExp = new RegExp(/^\d+(\.\d{0,3})?$/);
 
+export const formatToThreeDecimals = (value: number): string => {
+  return value.toFixed(3);
+};
+
 /**
  * 1 ✅
  * 11 ✅

@@ -140,7 +140,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
                 return cur.duration;
               }
 
-              return Number((prev + cur.duration).toFixed(2));
+              return Number((prev + cur.duration).toFixed(3));
             }
 
             return prev;
@@ -289,68 +289,68 @@ export default function ScopesTable({ job, project, pageType }: Props) {
           );
         },
       }),
-      project.propertyType === "Residential"
-        ? columnHelper.accessor("sizeForRevision", {
-            header: "Major / Minor",
-            cell: ({ row, getValue }) => {
-              if (row.depth > 0) {
-                return;
-              }
+      columnHelper.accessor("sizeForRevision", {
+        header: "Major / Minor",
+        cell: ({ row, getValue }) => {
+          if (row.depth > 0) {
+            return;
+          }
 
-              if (
-                !row.original.isRevision ||
-                row.original.pricingType === "Base Fixed Price" ||
-                row.original.pricingType === "Custom Fixed Price"
-              ) {
-                return <p className="text-muted-foreground">-</p>;
-              }
+          if (
+            !row.original.isRevision ||
+            row.original.pricingType === "Base Fixed Price" ||
+            row.original.pricingType === "Custom Fixed Price"
+          ) {
+            return <p className="text-muted-foreground">-</p>;
+          }
 
-              return (
-                <SizeForRevisionField
-                  sizeForRevision={getValue()}
-                  jobId={job.id}
-                  orderedServiceId={row.id}
-                />
-              );
-            },
-          })
-        : columnHelper.accessor("duration", {
-            header: "Duration",
-            cell: ({ row, getValue }) => {
-              if (!row.original.isRevision) {
-                return;
-              }
+          return (
+            <SizeForRevisionField
+              sizeForRevision={getValue()}
+              jobId={job.id}
+              orderedServiceId={row.id}
+              disabled={project.propertyType === "Commercial"}
+            />
+          );
+        },
+      }),
+      columnHelper.accessor("duration", {
+        header: "Duration",
+        cell: ({ row, getValue }) => {
+          if (!row.original.isRevision) {
+            return;
+          }
 
-              if (
-                !row.original.isRevision ||
-                row.original.pricingType === "Base Fixed Price" ||
-                row.original.pricingType === "Custom Fixed Price"
-              ) {
-                return <p className="text-muted-foreground">-</p>;
-              }
+          if (
+            !row.original.isRevision ||
+            row.original.pricingType === "Base Fixed Price" ||
+            row.original.pricingType === "Custom Fixed Price"
+          ) {
+            return <p className="text-muted-foreground">-</p>;
+          }
 
-              const duration = getValue();
+          const duration = getValue();
 
-              if (row.depth === 0) {
-                return (
-                  <DurationField
-                    assignedTaskId={row.id}
-                    duration={duration}
-                    disabled
-                    jobId={job.id}
-                  />
-                );
-              }
+          if (row.depth === 0) {
+            return (
+              <DurationField
+                assignedTaskId={row.id}
+                duration={duration}
+                disabled
+                jobId={job.id}
+              />
+            );
+          }
 
-              return (
-                <DurationField
-                  assignedTaskId={row.id}
-                  duration={duration}
-                  jobId={job.id}
-                />
-              );
-            },
-          }),
+          return (
+            <DurationField
+              assignedTaskId={row.id}
+              duration={duration}
+              jobId={job.id}
+            />
+          );
+        },
+      }),
       columnHelper.accessor("price", {
         header: "Price",
         cell: ({ row, getValue }) => {
@@ -479,7 +479,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
         sizeForRevision: isBarunCorpMember,
         price: isBarunCorpMember && canViewScopePrice,
         cost: isBarunCorpMember && canViewTaskCost,
-        duration: isWorker,
+        duration: isWorker && project.propertyType === "Commercial",
       },
     },
     onExpandedChange: setExpanded,
