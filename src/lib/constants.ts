@@ -757,6 +757,9 @@ export const LoadCalcOriginEnum = z.enum(["By Barun Corp", "Client Provided"], {
  * .11 ❌
  */
 export const toTwoDecimalRegExp = new RegExp(/^\d+(\.\d{0,2})?$/);
+
+export const toThreeDecimalRegExp = new RegExp(/^\d+(\.\d{0,3})?$/);
+
 /**
  * 1 ✅
  * 11 ✅

@@ -11,7 +11,7 @@ import { AffixInput } from "@/components/AffixInput";
 import usePatchAssignedTaskDurationMutation from "@/mutations/usePatchAssignedTaskDurationMutation";
 import { useToast } from "@/components/ui/use-toast";
 import { getJobQueryKey } from "@/queries/useJobQuery";
-import { toTwoDecimalRegExp } from "@/lib/constants";
+import { toThreeDecimalRegExp } from "@/lib/constants";
 
 const formSchema = z.object({
   duration: z.string().trim(),
@@ -136,7 +136,7 @@ export default function DurationField({
                   {...field}
                   onChange={(event) => {
                     const { value } = event.target;
-                    if (value === "" || toTwoDecimalRegExp.test(value)) {
+                    if (value === "" || toThreeDecimalRegExp.test(value)) {
                       field.onChange(event);
                     }
                   }}
