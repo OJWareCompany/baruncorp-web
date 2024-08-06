@@ -139,7 +139,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
                 return cur.duration;
               }
 
-              return Number((prev + cur.duration).toFixed(2));
+              return Number((prev + cur.duration).toFixed(3));
             }
 
             return prev;
