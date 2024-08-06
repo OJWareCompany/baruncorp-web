@@ -303,7 +303,10 @@ export default function ScopesTable({ job, project, pageType }: Props) {
             return <p className="text-muted-foreground">-</p>;
           }
 
-          return (
+          return row.original.isRevision &&
+            row.original.sizeForRevision === null ? (
+            <p className="text-muted-foreground">-</p>
+          ) : (
             <SizeForRevisionField
               sizeForRevision={getValue()}
               jobId={job.id}
