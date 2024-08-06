@@ -132,8 +132,7 @@ export default function ScopesTable({ job, project, pageType }: Props) {
           name: serviceName,
           price,
           cost: null,
-          sizeForRevision:
-            project.propertyType === "Residential" ? sizeForRevision : null,
+          sizeForRevision: sizeForRevision,
           duration: filteredAssignedTasks.reduce<number | null>((prev, cur) => {
             if (cur.duration != null) {
               if (prev == null) {
