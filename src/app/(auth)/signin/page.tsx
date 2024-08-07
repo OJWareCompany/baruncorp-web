@@ -44,12 +44,12 @@ if (process.env.NODE_ENV === "development") {
   };
 }
 
-if (process.env.NODE_ENV === "production") {
-  defaultValues = {
-    email: `${process.env.NEXT_PUBLIC_PORTPOLIO_EMAIL}`,
-    password: `${process.env.NEXT_PUBLIC_PORTPOLIO_PASSWORD}`,
-  };
-}
+// if (process.env.NODE_ENV === "production") {
+//   defaultValues = {
+//     email: `${process.env.NEXT_PUBLIC_PORTPOLIO_EMAIL}`,
+//     password: `${process.env.NEXT_PUBLIC_PORTPOLIO_PASSWORD}`,
+//   };
+// }
 
 export default function Page() {
   const router = useRouter();
